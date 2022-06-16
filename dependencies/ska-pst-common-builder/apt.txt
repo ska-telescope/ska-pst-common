@@ -1,13 +1,13 @@
-git
-cmake
+git=1:2.25.1-1ubuntu3.4
+cmake=3.16.3-1ubuntu1
 build-essential
-gnupg2
-software-properties-common
-jq
-moreutils
-pybind11-dev
-python3-pybind11
-python3-pip
+gnupg2=2.2.19-3ubuntu2.1
+software-properties-common=0.99.9.8
+jq=1.6-1ubuntu0.20.04.1
+moreutils=0.63-1
+pybind11-dev=2.4.3-2build2
+python3-pybind11=2.4.3-2build2
+python3-pip=20.0.2-5ubuntu1.6
 clang=1:10.0-50~exp1
 clang-tidy=1:10.0-50~exp1
 clang-tools=1:10.0-50~exp1
@@ -24,3 +24,4 @@ libxrender-dev=1:0.9.10-1
 libxrandr-dev=2:1.5.2-0ubuntu1
 libglm-dev=0.9.9.7+ds-1
 libhwloc-dev=2.1.0+dfsg-4
+libgomp1=10.3.0-1ubuntu1~20.04

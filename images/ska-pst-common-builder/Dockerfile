@@ -2,29 +2,35 @@ FROM ubuntu:20.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-ARG IMG_NAME=ska-pst-common-builder
-ARG APT_PAYLOAD=apt.txt
-ARG PSRDADA=psrdada-code
+ARG DEPENDENCIES_PATH=dependencies/ska-pst-common-builder
 
 # Copy installation payloads
-COPY ./dependencies/${IMG_NAME} /mnt
+COPY . /mnt
 WORKDIR /mnt
 
-# Install apt dependencies
-RUN stat ${APT_PAYLOAD} \
-    && apt-get update -y \ 
-    && apt-get install --no-install-recommends -y \
-    $(cat ${APT_PAYLOAD})
+# Prepare environment
+RUN apt-get update -y \
+    && apt-get install -y make=4.2.1-1.2
 
-# Copy psrdada submodule
-COPY ./resources/${PSRDADA} /mnt/${PSRDADA}
+# Install common apt dependencies
+ARG PKG_CLI_PAYLOAD=${DEPENDENCIES_PATH}/apt.txt
+ARG PKG_CLI_CMD=apt-get
+ARG PKG_CLI_PARAMETERS='install --no-install-recommends -y'
+RUN stat ${PKG_CLI_PAYLOAD} \
+    && PKG_CLI_PAYLOAD=${PKG_CLI_PAYLOAD} PKG_CLI_PARAMETERS=${PKG_CLI_PARAMETERS} make local-pkg-install
+
+# Install common pip dependencies
+ARG PIP_CLI_PAYLOAD=${DEPENDENCIES_PATH}/pip.txt
+RUN stat ${PIP_CLI_PAYLOAD} \
+    && PIP_CLI_PAYLOAD=${PIP_CLI_PAYLOAD} PIP_CLI_PARAMETERS=${PIP_CLI_PARAMETERS} make local-pkg-install
+
+# Prepare environment for PSRDADA
+ENV LD_LIBRARY_PATH=/usr/local/lib/
+ARG PSRDADA=psrdada-code
 WORKDIR /mnt/${PSRDADA}-build
 
-# SET COMPILE TIME ENV VARS
-ENV LD_LIBRARY_PATH=/usr/local/lib/
-
 # Compile PSRDADA
-RUN cmake /mnt/${PSRDADA} -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF \
+RUN cmake /mnt/resources/${PSRDADA} -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF \
     && make && make install
 
 # Test and Cleanup
