@@ -40,7 +40,9 @@ RUN curl -L -O ${PROTOBUF_RELEASE_URL}/${PROTOBUF_RELEASE_FILE} \
 # https://github.com/protocolbuffers/protobuf/blob/main/src/README.md#c-installation---unix
 WORKDIR /mnt/${PROTOBUF}/${PROTOBUF_RELEASE_FILE_FOLDER}
 RUN ./configure --prefix=/opt/protobuf \
-    && make && make install -j$(nproc)
+    && make && make install -j$(nproc) \
+    && ln -s ln -s /opt/protobuf/bin/protoc /usr/local/bin/protoc \
+    && protoc --version
 
 # Prepare environment for PSRDADA
 ARG PSRDADA=psrdada-code
