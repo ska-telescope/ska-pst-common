@@ -23,7 +23,7 @@ RUN stat ${PKG_CLI_PAYLOAD} \
 # Install common pip dependencies
 ARG PIP_CLI_PAYLOAD=${DEPENDENCIES_PATH}/pip.txt
 RUN stat ${PIP_CLI_PAYLOAD} \
-    && PIP_CLI_PAYLOAD=${PIP_CLI_PAYLOAD} PIP_CLI_PARAMETERS=${PIP_CLI_PARAMETERS} make local-pkg-install
+    && PIP_CLI_PAYLOAD=${PIP_CLI_PAYLOAD} make local-pip-install
 
 # Prepare environment for PROTOBUF
 ARG PROTOBUF_RELEASE_URL=https://github.com/protocolbuffers/protobuf/releases/download/v21.1
