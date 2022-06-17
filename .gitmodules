@@ -4,3 +4,6 @@
 [submodule "resources/psrdada-code"]
 	path = resources/psrdada-code
 	url = https://git.code.sf.net/p/psrdada/code
+[submodule "resources/grpc"]
+	path = resources/grpc
+	url = https://github.com/grpc/grpc.git
