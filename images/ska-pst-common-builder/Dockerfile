@@ -42,7 +42,7 @@ RUN curl -L -O ${PROTOBUF_RELEASE_URL}/${PROTOBUF_RELEASE_FILE} \
 WORKDIR /mnt/${PROTOBUF}/${PROTOBUF_RELEASE_FILE_FOLDER}
 RUN ./configure --prefix=/opt/protobuf \
     && make && make install -j$(nproc) \
-    && ln -s ln -s /opt/protobuf/bin/protoc /usr/local/bin/protoc \
+    && ln -s /opt/protobuf/bin/protoc /usr/local/bin/protoc \
     && protoc --version
 
 # Prepare environment for PSRDADA
