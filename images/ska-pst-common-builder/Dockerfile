@@ -1,7 +1,6 @@
 FROM ubuntu:20.04
 
 ENV DEBIAN_FRONTEND=noninteractive
-ENV LD_LIBRARY_PATH=/usr/local/lib/
 
 ARG DEPENDENCIES_PATH=dependencies/ska-pst-common-builder
 
@@ -32,15 +31,16 @@ ARG PROTOBUF_RELEASE_FILE_FOLDER=protobuf-3.21.1
 ARG PROTOBUF=protobuf
 WORKDIR /mnt/${PROTOBUF}
 
-# Download protobuf source code
+# Download PROTOBUF source code
 RUN curl -L -O ${PROTOBUF_RELEASE_URL}/${PROTOBUF_RELEASE_FILE} \
     && tar -xzvf ${PROTOBUF_RELEASE_FILE} \
     && stat /mnt/${PROTOBUF}/${PROTOBUF_RELEASE_FILE_FOLDER}
 
-# Compile protobuf source code
-WORKDIR /mnt/${PROTOBUF}-build
-RUN cmake /mnt/${PROTOBUF}/${PROTOBUF_RELEASE_FILE_FOLDER} -DCMAKE_BUILD_TYPE=Release \
-    && make && make install
+# Compile PROTOBUF source code
+# https://github.com/protocolbuffers/protobuf/blob/main/src/README.md#c-installation---unix
+WORKDIR /mnt/${PROTOBUF}/${PROTOBUF_RELEASE_FILE_FOLDER}
+RUN ./configure --prefix=/opt/protobuf \
+    && make && make install -j$(nproc)
 
 # Prepare environment for PSRDADA
 ARG PSRDADA=psrdada-code
@@ -48,7 +48,7 @@ WORKDIR /mnt/${PSRDADA}-build
 
 # Compile PSRDADA
 RUN cmake /mnt/ska-pst-common-builder/resources/${PSRDADA} -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF \
-    && make && make install
+    && make && make install -j$(nproc)
 
 # Test and Cleanup
 RUN dada_db -h \
