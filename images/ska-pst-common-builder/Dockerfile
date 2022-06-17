@@ -1,6 +1,7 @@
 FROM ubuntu:20.04
 
 ENV DEBIAN_FRONTEND=noninteractive
+ENV LD_LIBRARY_PATH=/usr/local/lib/
 
 ARG DEPENDENCIES_PATH=dependencies/ska-pst-common-builder
 
