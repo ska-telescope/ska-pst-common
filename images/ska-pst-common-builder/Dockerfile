@@ -40,10 +40,8 @@ RUN curl -L -O ${PROTOBUF_RELEASE_URL}/${PROTOBUF_RELEASE_FILE} \
 # Compile PROTOBUF source code
 # https://github.com/protocolbuffers/protobuf/blob/main/src/README.md#c-installation---unix
 WORKDIR /mnt/${PROTOBUF}/${PROTOBUF_RELEASE_FILE_FOLDER}
-RUN ./configure --prefix=/opt/protobuf \
-    && make && make install -j$(nproc) \
-    && ln -s /opt/protobuf/bin/protoc /usr/local/bin/protoc \
-    && protoc --version
+RUN ./configure --prefix=/usr/local \
+    && make -j$(nproc) && make install -j$(nproc)
 
 # Prepare environment for PSRDADA
 ARG PSRDADA=psrdada-code
@@ -51,10 +49,10 @@ WORKDIR /mnt/${PSRDADA}-build
 
 # Compile PSRDADA
 RUN cmake /mnt/ska-pst-common-builder/resources/${PSRDADA} -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF \
-    && make && make install -j$(nproc)
+    && make -j$(nproc) && make install -j$(nproc)
 
 # Test and Cleanup
-RUN dada_db -h \
+RUN dada_db -h; protoc --version \
     && rm -rf /mnt/*
 
 WORKDIR /usr/local/bin
