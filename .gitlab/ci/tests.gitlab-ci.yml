@@ -5,7 +5,7 @@ test_proto:
   stage: test
   needs:
     - "oci-image-build"
-  image: "$OCI_IMAGE:$OCI_TEST_TAG"
+  image: "$OCI_TEST_IMAGE:$OCI_TEST_TAG"
   script:
     - protoc --version
     - pwd
