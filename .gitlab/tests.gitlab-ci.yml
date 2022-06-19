@@ -1,0 +1,10 @@
+# Test OCI
+test_proto:
+  stage: test
+  needs:
+    - "oci-image-build"
+  image: "registry.gitlab.com/ska-telescope/pst/ska-pst-recv/ska-pst-common:`grep -o '[0-9].*' .release`-dev.c$CI_COMMIT_SHORT_SHA"
+  script:
+    - protoc --version
+    - pwd
+    - ls
