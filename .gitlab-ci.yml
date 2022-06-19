@@ -19,7 +19,7 @@ variables:
   GIT_SUBMODULE_STRATEGY: recursive
   SKA_CPP_DOCKER_BUILDER_IMAGE: artefact.skao.int/ska-cicd-cpp-build-base:0.2.10
   OCI_IMAGE_BUILD_CONTEXT: $(PWD)variables:
-  OCI_TEST_TAG: (grep -o '[0-9].*' .release)-dev.c$CI_COMMIT_SHORT_SHA
+  OCI_TEST_TAG: $(grep -o '[0-9].*' .release)-dev.c$CI_COMMIT_SHORT_SHA
 
 stages:
   - build
