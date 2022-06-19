@@ -1,5 +1,7 @@
 # Test OCI
 test_proto:
+  variables:
+    OCI_TEST_IMAGE: "registry.gitlab.com/ska-telescope/pst/ska-pst-recv/ska-pst-common"
   stage: test
   needs:
     - "oci-image-build"
