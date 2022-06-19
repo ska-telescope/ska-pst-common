@@ -1,9 +1,12 @@
 # Test OCI
 test_proto:
+  variables:
+    OCI_IMAGE: "registry.gitlab.com/ska-telescope/pst/ska-pst-recv/ska-pst-common"
+    OCI_TAG: "$(grep -o '[0-9].*' .release)-dev.c$CI_COMMIT_SHORT_SHA"
   stage: test
   needs:
     - "oci-image-build"
-  image: "registry.gitlab.com/ska-telescope/pst/ska-pst-recv/ska-pst-common:`grep -o '[0-9].*' .release`-dev.c$CI_COMMIT_SHORT_SHA"
+  image: "$OCI_IMAGE:$OCI_TAG"
   script:
     - protoc --version
     - pwd
