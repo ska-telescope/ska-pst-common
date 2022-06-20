@@ -66,7 +66,7 @@ local-grpc-pre-installation:
 	@rm -rf $(GRPC_BUILD_PATH) && mkdir -p $(GRPC_BUILD_PATH)
 local-grpc-do-installation:
 	@echo "gRPC installation"
-	@cd $(GRPC_BUILD_PATH) && cmake -DgRPC_INSTALL=ON \
+	@cd $(GRPC_BUILD_PATH) && cmake -DgRPC_INSTALL=ON -DgRPC_PROTOBUF_PROVIDER=package  \
       -DgRPC_BUILD_TESTS=OFF \
       -DCMAKE_INSTALL_PREFIX=/usr/local \
       $(GRPC_BASE_PATH)
