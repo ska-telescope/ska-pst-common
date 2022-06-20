@@ -25,6 +25,18 @@ ARG PIP_CLI_PAYLOAD=${DEPENDENCIES_PATH}/pip.txt
 RUN stat ${PIP_CLI_PAYLOAD} \
     && PIP_CLI_PAYLOAD=${PIP_CLI_PAYLOAD} make local-pip-install
 
+# Install cmake
+# https://cmake.org/install/
+ARG CMAKE_SOURCE=https://github.com/Kitware/CMake/releases/download/v3.24.0-rc1/cmake-3.24.0-rc1.tar.gz
+ARG CMAKE_FILE=cmake-3.24.0-rc1.tar.gz
+ARG CMAKE_PATH=cmake-3.24.0-rc1
+WORKDIR /mnt/cmake
+RUN curl -L -O ${CMAKE_SOURCE} \
+    && tar -xvf ${CMAKE_FILE} \
+    && cd ${CMAKE_PATH} \
+    && ./bootstrap \
+    && make -j$(nproc) && make install -j$(nproc)
+
 # Prepare environment for PROTOBUF
 ARG PROTOBUF_RELEASE_URL=https://github.com/protocolbuffers/protobuf/releases/download/v21.1
 ARG PROTOBUF_RELEASE_FILE=protobuf-cpp-3.21.1.tar.gz

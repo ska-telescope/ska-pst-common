@@ -1,6 +1,7 @@
 git=1:2.25.1-1ubuntu3.4
 curl=7.68.0-1ubuntu2.11
-cmake=3.16.3-1ubuntu1
+openssl=1.1.1f-1ubuntu2.13
+libssl-dev=1.1.1f-1ubuntu2.13
 build-essential
 gnupg2=2.2.19-3ubuntu2.1
 software-properties-common=0.99.9.8
