@@ -1,4 +1,4 @@
-FROM ubuntu:20.04
+FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV LD_LIBRARY_PATH=/usr/local/lib/
@@ -11,7 +11,7 @@ WORKDIR /mnt/ska-pst-common-builder
 
 # Prepare environment
 RUN apt-get update -y \
-    && apt-get install -y make=4.2.1-1.2
+    && apt-get install -y make
 
 # Install common apt dependencies
 ARG PKG_CLI_PAYLOAD=${DEPENDENCIES_PATH}/apt.txt
@@ -45,6 +45,7 @@ RUN ./configure --prefix=/usr/local \
     && protoc --version
 
 # Compile gRPC
+ARG GRPC_INSTALL=local-grpc-installation
 WORKDIR /mnt/ska-pst-common-builder
 RUN make local-grpc-installation
 
