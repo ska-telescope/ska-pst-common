@@ -2,6 +2,7 @@
 test_proto:
   variables:
     OCI_TEST_IMAGE: "registry.gitlab.com/ska-telescope/pst/ska-pst-common/ska-pst-common-builder"
+    GIT_SUBMODULE_STRATEGY: normal
   stage: test
   needs:
     - "oci-image-build"
