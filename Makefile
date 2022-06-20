@@ -66,10 +66,10 @@ local-grpc-pre-installation:
 	@rm -rf $(GRPC_BUILD_PATH) && mkdir -p $(GRPC_BUILD_PATH)
 local-grpc-do-installation:
 	@echo "gRPC installation"
-	@cmake -DgRPC_INSTALL=ON \
+	@cd $(GRPC_BUILD_PATH) && cmake -DgRPC_INSTALL=ON \
       -DgRPC_BUILD_TESTS=OFF \
       -DCMAKE_INSTALL_PREFIX=/usr/local \
-      ../..
+      $(GRPC_BASE_PATH)
 	make -j$(NPROC) && make install -j$(NPROC)
 local-grpc-post-installation:
 	echo $(NPROC)
