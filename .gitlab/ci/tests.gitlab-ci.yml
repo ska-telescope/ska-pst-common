@@ -10,3 +10,15 @@ test_proto:
   script:
     - protoc --version
     - make local-proto-test
+
+test_dada:
+  variables:
+    OCI_TEST_IMAGE: "registry.gitlab.com/ska-telescope/pst/ska-pst-common/ska-pst-common-builder"
+    GIT_SUBMODULE_STRATEGY: normal
+  stage: test
+  needs:
+    - "oci-image-build"
+  image: "$OCI_TEST_IMAGE:$OCI_TEST_TAG"
+  script:
+    - dada_db
+    - dada_db -d

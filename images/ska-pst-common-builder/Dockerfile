@@ -1,4 +1,4 @@
-FROM library/ubuntu:20.04
+FROM library/ubuntu:20.04 as base
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV LD_LIBRARY_PATH=/usr/local/lib/
@@ -69,9 +69,15 @@ WORKDIR /mnt/${PSRDADA}-build
 RUN cmake /mnt/ska-pst-common-builder/resources/${PSRDADA} -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF \
     && make -j$(nproc) && make install -j$(nproc)
 
-# Test and Cleanup
-RUN dada_db -h\
-    && rm -rf /mnt/*
+# Copy only required libraries and binaries
+FROM ubuntu:20.04
+COPY --from=base /lib /lib
+COPY --from=base /lib32 /lib32
+COPY --from=base /lib64 /lib64
+COPY --from=base /usr /usr
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV LD_LIBRARY_PATH=/usr/local/lib/
 
 WORKDIR /usr/local/bin
 CMD ["/bin/bash"]
