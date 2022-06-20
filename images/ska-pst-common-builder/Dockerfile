@@ -10,7 +10,7 @@ COPY . /mnt/ska-pst-common-builder
 WORKDIR /mnt/ska-pst-common-builder
 
 # Prepare environment
-RUN apt-get update -y \
+RUN apt-get update \
     && apt-get install -y make
 
 # Install common apt dependencies
