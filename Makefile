@@ -30,7 +30,7 @@ local-pkg-install:
 .PHONY: local-pip-install
 PIP_CLI_CMD ?=pip3				# Package manager executable
 PIP_CLI_PAYLOAD ?= 				# Payload file
-PIP_CLI_PARAMETERS ?=install -r	# Package manager installation parameters
+PIP_CLI_PARAMETERS ?=install --ignore-installed -r	# Package manager installation parameters
 
 local-pip-install:
 	$(PIP_CLI_CMD) install --upgrade pip
