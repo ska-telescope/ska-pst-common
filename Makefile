@@ -72,5 +72,4 @@ local-grpc-do-installation:
       $(GRPC_BASE_PATH)
 	make -j$(NPROC) && make install -j$(NPROC)
 local-grpc-post-installation:
-	echo $(NPROC)
-local-grpc-installation: local-grpc-pre-installation local-grpc-do-installation
+local-grpc-installation: local-grpc-pre-installation local-grpc-do-installation local-grpc-post-installation
