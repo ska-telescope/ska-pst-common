@@ -45,7 +45,7 @@ RUN ./configure --prefix=/usr/local \
     && protoc --version
 
 # Compile gRPC
-WORKDIR /mnt/ska-pst-common-builder/resources/grpc/cmake/build
+WORKDIR /mnt/ska-pst-common-builder
 RUN make local-grpc-installation
 
 # Prepare environment for PSRDADA
