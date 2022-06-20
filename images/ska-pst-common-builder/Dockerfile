@@ -67,7 +67,7 @@ WORKDIR /mnt/${PSRDADA}-build
 
 # Compile PSRDADA
 RUN cmake /mnt/ska-pst-common-builder/resources/${PSRDADA} -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF \
-    && make -j$(nproc) && make install -j$(nproc)
+    && make -j$(nproc) && make install && cp $(pwd)/Management/psrdada.pc ${LD_LIBRARY_PATH}/pkgconfig/
 
 # Copy only required libraries and binaries
 FROM ubuntu:20.04
