@@ -14,7 +14,7 @@ OCI_IMAGE_BUILD_CONTEXT=$(PWD)
 local-dev-env:
 	@echo 'OCI_IMAGE: $(OCI_IMAGE)'
 	@echo 'OCI_TAG: $(OCI_TAG)'
-	@$(OCI_BUILDER) run -ti -v $(PWD):/mnt/$(OCI_IMAGE) -w /mnt/$(OCI_IMAGE) $(OCI_IMAGE):$(OCI_TAG) bash
+	@$(OCI_BUILDER) run --rm -ti -v $(PWD):/mnt/$(OCI_IMAGE) -w /mnt/$(OCI_IMAGE) $(OCI_IMAGE):$(OCI_TAG) bash
 
 # OS package installation
 .PHONY: local-pkg-install
@@ -34,8 +34,24 @@ PIP_CLI_PARAMETERS ?=install -r	# Package manager installation parameters
 local-pip-install:
 	$(PIP_CLI_CMD) $(PIP_CLI_PARAMETERS) $(PIP_CLI_PAYLOAD)
 
-
+PROTOBUF_BASE_PATH=$(PWD)/tests/protobuf
+PROTOBUF_BUILD_PATH=$(PROTOBUF_BASE_PATH)/build
+PROTOBUF_BUILD_COMMAND=protoc --proto_path=$(PROTOBUF_BASE_PATH) --cpp_out=$(PROTOBUF_BUILD_PATH) $$(find $(PROTOBUF_PROTO_PATH) -iname "*.proto")
 .PHONY: local-proto-test local-proto-pre-test local-proto-do-test local-proto-post-test
-
-
+local-proto-pre-test:
+	@rm -rf $(PROTOBUF_BUILD_PATH) && mkdir -p $(PROTOBUF_BUILD_PATH)
+local-proto-do-test:
+	@echo "Execute cmake"
+	@echo "Command: cd $(PROTOBUF_BUILD_PATH) && cmake $(PROTOBUF_BASE_PATH)"
+	@bash -c "cd $(PROTOBUF_BUILD_PATH) && cmake $(PROTOBUF_BASE_PATH)"
+	@echo ""
+	@echo ""
+	@echo "Compile hello world"
+	@echo "Command: cd $(PROTOBUF_BUILD_PATH) && make"
+	@bash -c "cd $(PROTOBUF_BUILD_PATH) && make"
+	@echo ""
+	@echo "Execute hello world"
+	@echo "Command: cd $(PROTOBUF_BUILD_PATH) && ./test_proto"
+	@bash -c "cd $(PROTOBUF_BUILD_PATH) && ./test_proto"
+local-proto-post-test:
 local-proto-test: local-proto-pre-test local-proto-do-test local-proto-post-test

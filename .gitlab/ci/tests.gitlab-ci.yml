@@ -8,5 +8,4 @@ test_proto:
   image: "$OCI_TEST_IMAGE:$OCI_TEST_TAG"
   script:
     - protoc --version
-    - pwd
-    - ls
+    - make local-proto-test
