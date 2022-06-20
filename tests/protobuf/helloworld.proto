@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package ska_pst_grpc.proto;
+package test.proto;
 
 message HelloWorldRequest {
     string name = 1;
