@@ -70,6 +70,6 @@ local-grpc-do-installation:
       -DgRPC_BUILD_TESTS=OFF \
       -DCMAKE_INSTALL_PREFIX=/usr/local \
       $(GRPC_BASE_PATH)
-	make -j$(NPROC) && make install -j$(NPROC)
+	cd $(GRPC_BUILD_PATH) && make -j$(NPROC) && make install -j$(NPROC)
 local-grpc-post-installation:
 local-grpc-installation: local-grpc-pre-installation local-grpc-do-installation local-grpc-post-installation
