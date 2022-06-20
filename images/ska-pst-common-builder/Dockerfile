@@ -44,6 +44,10 @@ RUN ./configure --prefix=/usr/local \
     && make -j$(nproc) && make install -j$(nproc) \
     && protoc --version
 
+# Compile gRPC
+WORKDIR /mnt/ska-pst-common-builder/resources/grpc/cmake/build
+RUN make local-grpc-installation
+
 # Prepare environment for PSRDADA
 ARG PSRDADA=psrdada-code
 WORKDIR /mnt/${PSRDADA}-build

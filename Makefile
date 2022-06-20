@@ -8,6 +8,7 @@ include .make/oci.mk
 # include your own private variables for custom deployment configuration
 -include PrivateRules.mak
 
+NPROC=`nproc`
 OCI_IMAGE_BUILD_CONTEXT=$(PWD)
 # OCI_IMAGE=? # Declare in PrivateRules.mak for invoking local development environment local-dev-env
 # OCI_TAG=`grep -m 1 -o "[0-9].*" .release` # Declare in PrivateRules.mak for invoking local development environment local-dev-env
@@ -34,6 +35,7 @@ PIP_CLI_PARAMETERS ?=install -r	# Package manager installation parameters
 local-pip-install:
 	$(PIP_CLI_CMD) $(PIP_CLI_PARAMETERS) $(PIP_CLI_PAYLOAD)
 
+# Protobuf compilation and execution test
 PROTOBUF_BASE_PATH=$(PWD)/tests/protobuf
 PROTOBUF_BUILD_PATH=$(PROTOBUF_BASE_PATH)/build
 PROTOBUF_BUILD_COMMAND=protoc --proto_path=$(PROTOBUF_BASE_PATH) --cpp_out=$(PROTOBUF_BUILD_PATH) $$(find $(PROTOBUF_PROTO_PATH) -iname "*.proto")
@@ -55,3 +57,20 @@ local-proto-do-test:
 	@bash -c "cd $(PROTOBUF_BUILD_PATH) && ./test_proto"
 local-proto-post-test:
 local-proto-test: local-proto-pre-test local-proto-do-test local-proto-post-test
+
+# gRPC build and installation
+GRPC_BASE_PATH=$(PWD)/resources/grpc
+GRPC_BUILD_PATH=$(GRPC_BASE_PATH)/cmake/build
+.PHONY: local-grpc-installation local-grpc-pre-installation local-grpc-do-installation 
+local-grpc-pre-installation:
+	@rm -rf $(GRPC_BUILD_PATH) && mkdir -p $(GRPC_BUILD_PATH)
+local-grpc-do-installation:
+	@echo "gRPC installation"
+	@cmake -DgRPC_INSTALL=ON \
+      -DgRPC_BUILD_TESTS=OFF \
+      -DCMAKE_INSTALL_PREFIX=/usr/local \
+      ../..
+	make -j$(NPROC) && make install -j$(NPROC)
+local-grpc-post-installation:
+	echo $(NPROC)
+local-grpc-installation: local-grpc-pre-installation local-grpc-do-installation
