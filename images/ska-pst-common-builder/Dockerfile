@@ -1,4 +1,4 @@
-FROM library/ubuntu:22.04
+FROM library/ubuntu:20.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV LD_LIBRARY_PATH=/usr/local/lib/
@@ -10,7 +10,7 @@ COPY . /mnt/ska-pst-common-builder
 WORKDIR /mnt/ska-pst-common-builder
 
 # Prepare environment
-RUN apt-get update \
+RUN apt-get update -y \
     && apt-get install -y make
 
 # Install common apt dependencies
