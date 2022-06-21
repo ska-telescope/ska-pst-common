@@ -69,6 +69,9 @@ WORKDIR /mnt/${PSRDADA}-build
 RUN cmake /mnt/ska-pst-common-builder/resources/${PSRDADA} -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF \
     && make -j$(nproc) && make install && cp $(pwd)/Management/psrdada.pc ${LD_LIBRARY_PATH}/pkgconfig/
 
+# Remove cached pyyaml info file
+RUN rm /usr/lib/python3/dist-packages/PyYAML-5.3.1.egg-info
+
 # Copy only required libraries and binaries
 FROM ubuntu:20.04
 COPY --from=base /lib /lib

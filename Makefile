@@ -33,7 +33,7 @@ PIP_CLI_PAYLOAD ?= 				# Payload file
 PIP_CLI_PARAMETERS ?=install --ignore-installed -r	# Package manager installation parameters
 
 local-pip-install:
-	$(PIP_CLI_CMD) install --upgrade pip
+	$(PIP_CLI_CMD) install --ignore-installed --upgrade pip
 	$(PIP_CLI_CMD) $(PIP_CLI_PARAMETERS) $(PIP_CLI_PAYLOAD)
 
 # Protobuf compilation and execution test
