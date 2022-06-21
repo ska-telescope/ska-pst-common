@@ -59,8 +59,8 @@ include:
     file: 'gitlab-ci/includes/finaliser.gitlab-ci.yml'
   
   # Umbrella include for all Raw life cycle stages
-  # - project: 'ska-telescope/templates-repository'
-  #   file: gitlab-ci/includes/release.gitlab-ci.yml
+  - project: 'ska-telescope/templates-repository'
+    file: gitlab-ci/includes/release.gitlab-ci.yml
   
   # Override for branch based builds
   # - local: '.gitlab/ci/branch.gitlab-ci.yml'
