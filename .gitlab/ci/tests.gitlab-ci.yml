@@ -1,4 +1,12 @@
 # Test OCI
+dynamic_vars:
+  stage: test
+  script:
+    - echo "OCI_TEST_TAG=$(cat grep -m 1 -o "[0-9].*" .release)-dev.${CI_COMMIT_SHORT_SHA}" >> build.env
+  artifacts:
+    reports:
+      dotenv: build.env
+
 test_proto:
   variables:
     OCI_TEST_IMAGE: "registry.gitlab.com/ska-telescope/pst/ska-pst-common/ska-pst-common-builder"

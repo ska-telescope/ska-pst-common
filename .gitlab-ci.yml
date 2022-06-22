@@ -21,12 +21,6 @@ variables:
   OCI_IMAGE_BUILD_CONTEXT: $(PWD)
   OCI_TEST_TAG: ""
 
-dynamic_vars:
-  script:
-    - echo "BUILD_VERSION=$(cat grep -m 1 -o "[0-9].*" .release)-dev.${CI_COMMIT_SHORT_SHA}" >> build.env
-  artifacts:
-    reports:
-      dotenv: build.env
 
 stages:
   - build
