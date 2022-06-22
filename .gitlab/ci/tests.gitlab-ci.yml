@@ -2,7 +2,7 @@
 dynamic_vars:
   stage: test
   script:
-    - echo "OCI_TEST_TAG=$(cat grep -m 1 -o "[0-9].*" .release)-dev.${CI_COMMIT_SHORT_SHA}" >> build.env
+    - echo "OCI_TEST_TAG=$(grep -m 1 -o '[0-9].*' .release)-dev.${CI_COMMIT_SHORT_SHA}" > build.env
   artifacts:
     reports:
       dotenv: build.env
@@ -13,8 +13,8 @@ test_proto:
     GIT_SUBMODULE_STRATEGY: normal
   stage: test
   needs:
-    - "oci-image-build"
-    - "dynamic_vars"
+    - oci-image-build
+    - dynamic_vars
   image: "$OCI_TEST_IMAGE:$OCI_TEST_TAG"
   script:
     - protoc --version
@@ -26,8 +26,8 @@ test_dada:
     GIT_SUBMODULE_STRATEGY: normal
   stage: test
   needs:
-    - "oci-image-build"
-    - "dynamic_vars"
+    - oci-image-build
+    - dynamic_vars
   image: "$OCI_TEST_IMAGE:$OCI_TEST_TAG"
   script:
     - dada_db
