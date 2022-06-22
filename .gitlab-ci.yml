@@ -18,9 +18,8 @@ variables:
   # For details see https://docs.gitlab.com/ee/ci/yaml/README.html#git-submodule-strategy
   GIT_SUBMODULE_STRATEGY: recursive
   SKA_CPP_DOCKER_BUILDER_IMAGE: artefact.skao.int/ska-cicd-cpp-build-base:0.2.10
-  OCI_IMAGE_BUILD_CONTEXT: $(PWD)
-  # TODO: make tag dynamic
-  OCI_TEST_TAG: 0.0.0-dev.c$CI_COMMIT_SHORT_SHA
+  OCI_IMAGE_BUILD_CONTEXT: $(PWD)  
+  OCI_TEST_TAG: ""
 
 stages:
   - build
