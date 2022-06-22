@@ -2,7 +2,7 @@
 dynamic_vars:
   stage: test
   script:
-    - echo "OCI_TEST_TAG=$(grep -m 1 -o '[0-9].*' .release)-dev.${CI_COMMIT_SHORT_SHA}" > build.env
+    - echo "OCI_TEST_TAG=$(grep -m 1 -o '[0-9].*' .release)-dev.c${CI_COMMIT_SHORT_SHA}" > build.env
   artifacts:
     reports:
       dotenv: build.env
