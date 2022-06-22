@@ -1,0 +1,9 @@
+[submodule ".make"]
+	path = .make
+	url = https://gitlab.com/ska-telescope/sdi/ska-cicd-makefile.git
+[submodule "resources/psrdada-code"]
+	path = resources/psrdada-code
+	url = https://git.code.sf.net/p/psrdada/code
+[submodule "resources/grpc"]
+	path = resources/grpc
+	url = https://github.com/grpc/grpc.git

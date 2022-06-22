@@ -1,0 +1,68 @@
+# This file is a template, and might need editing before it works on your project.
+# use the official gcc image, based on debian
+# can use verions as well, like gcc:5.2
+# see https://hub.docker.com/_/gcc/
+#
+# This base image is based on debian:buster-slim and contains:
+#  * gcc 8.3.0
+#  * clang 7.0.1
+#  * cmake 3.13.4
+#  * and more
+#
+# For details see https://github.com/ska-telescope/cpp_build_base
+#
+image: $SKA_CPP_DOCKER_BUILDER_IMAGE
+
+variables:
+  # Needed if you want automatic submodule checkout 
+  # For details see https://docs.gitlab.com/ee/ci/yaml/README.html#git-submodule-strategy
+  GIT_SUBMODULE_STRATEGY: recursive
+  SKA_CPP_DOCKER_BUILDER_IMAGE: artefact.skao.int/ska-cicd-cpp-build-base:0.2.10
+  OCI_IMAGE_BUILD_CONTEXT: $(PWD)
+  # TODO: make tag dynamic
+  OCI_TEST_TAG: 0.0.0-dev.c$CI_COMMIT_SHORT_SHA
+
+stages:
+  - build
+  - lint
+  - test
+  - publish
+  - scan
+  - pages
+
+include:
+  # OCI
+  - project: 'ska-telescope/templates-repository'
+    file: 'gitlab-ci/includes/oci-image.gitlab-ci.yml'
+
+  # Conan
+  # - project: 'ska-telescope/templates-repository'
+  #   file: 'gitlab-ci/includes/conan.gitlab-ci.yml'
+
+  # Helm
+  # - project: 'ska-telescope/templates-repository'
+  #   file: 'gitlab-ci/includes/helm-chart.gitlab-ci.yml'
+
+  # K8s
+  # - project: 'ska-telescope/templates-repository'
+  #   file: 'gitlab-ci/includes/k8s.gitlab-ci.yml'
+
+  # Docs pages
+  # - project: 'ska-telescope/templates-repository'
+  #   file: 'gitlab-ci/includes/docs.gitlab-ci.yml'
+
+  # Common runtime tests
+  - local: '.gitlab/ci/tests.gitlab-ci.yml'
+
+  # Create Gitlab CI badges from CI metrics
+  - project: 'ska-telescope/templates-repository'
+    file: 'gitlab-ci/includes/finaliser.gitlab-ci.yml'
+  
+  # Umbrella include for all Raw life cycle stages
+  - project: 'ska-telescope/templates-repository'
+    file: gitlab-ci/includes/release.gitlab-ci.yml
+  
+  # Override for branch based builds
+  # - local: '.gitlab/ci/branch.gitlab-ci.yml'
+  #   rules:
+  #     - if: $CI_COMMIT_BRANCH =~ /at3.*/
