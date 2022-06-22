@@ -6,6 +6,7 @@ test_proto:
   stage: test
   needs:
     - "oci-image-build"
+    - "dynamic_vars"
   image: "$OCI_TEST_IMAGE:$OCI_TEST_TAG"
   script:
     - protoc --version
@@ -18,6 +19,7 @@ test_dada:
   stage: test
   needs:
     - "oci-image-build"
+    - "dynamic_vars"
   image: "$OCI_TEST_IMAGE:$OCI_TEST_TAG"
   script:
     - dada_db
