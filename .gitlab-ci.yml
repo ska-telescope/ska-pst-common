@@ -19,6 +19,7 @@ variables:
   GIT_SUBMODULE_STRATEGY: recursive
   SKA_CPP_DOCKER_BUILDER_IMAGE: artefact.skao.int/ska-cicd-cpp-build-base:0.2.10
   OCI_IMAGE_BUILD_CONTEXT: $(PWD)  
+  OCI_IMAGES: "ska-pst-common-builder ska-pst-common-proto"
   OCI_TEST_TAG: ""
 
 stages:
