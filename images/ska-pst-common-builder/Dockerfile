@@ -79,6 +79,9 @@ COPY --from=base /lib32 /lib32
 COPY --from=base /lib64 /lib64
 COPY --from=base /usr /usr
 
+WORKDIR /app
+COPY --from=base /mnt/ska-pst-common-builder/protobuf/ /app/protobuf/
+
 ENV DEBIAN_FRONTEND=noninteractive
 ENV LD_LIBRARY_PATH=/usr/local/lib/
 
