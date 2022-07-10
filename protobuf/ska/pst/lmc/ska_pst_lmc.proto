@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package ska.pst.lmc;
+
+message ConnectionRequest {
+    string client_id = 1;
+}
+
+message ConnectionResponse {
+}
+
+service PstLmcService {
+    rpc connect(ConnectionRequest) returns (ConnectionResponse);
+}
