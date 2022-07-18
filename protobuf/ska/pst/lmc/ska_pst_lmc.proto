@@ -91,12 +91,12 @@ message AssignResourcesResponse {
 
 // An empty message used in requesting the release
 // of resources.
-message ReleaseResourceRequest {
+message ReleaseResourcesRequest {
 }
 
 // An empty respinse message that is used in
 // releasing resources
-message ReleaseResourceResponse {
+message ReleaseResourcesResponse {
 }
 
 // An empty message used to request the assigned
@@ -137,7 +137,7 @@ service PstLmcService {
     /**
      * Used by a client to release the resources assigned by a component.
      */
-    rpc release_resource(ReleaseResourceRequest) returns (ReleaseResourceResponse);
+    rpc release_resources(ReleaseResourcesRequest) returns (ReleaseResourcesResponse);
     /**
      * Used by a client to get the currently assigned resource details of a component.
      */
