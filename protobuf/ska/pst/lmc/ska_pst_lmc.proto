@@ -1,14 +1,145 @@
+/*
+ * Copyright 2022 Square Kilometre Array Observatory
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ *
+ * 3. Neither the name of the copyright holder nor the names of its
+ * contributors may be used to endorse or promote products derived from this
+ * software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
 syntax = "proto3";
 
 package ska.pst.lmc;
 
+// Enum representing particular error code that might
+// happen during processing.
+enum ErrorCode {
+    // Not used but to avoid the default value
+    OK                          = 0;
+    // Used if the request sent to the service is invalid, such as a Oneof value is not
+    // set when it should have been.
+    INVALID_REQUEST             = 1;
+    // There was an internal server error raised.
+    INTERNAL_ERROR              = 2;
+    // The resources of the component already assigned. Should have released resources beforehand.
+    RESOURCES_ALREADY_ASSIGNED  = 3;
+    // There are no resources assigned to this component.
+    RESOURCES_NOT_ASSIGNED      = 4;
+}
+
+// A status message that will be returned by the services
+// Only valid if there is an error
+message Status {
+    // The error code for which this status relates to.
+    ErrorCode code      = 1;
+    // Optional error message to be provided when the error occurs.
+    string    message   = 2;
+}
+
+// Represents the resource configuration for a share memory ring buffer (SMRB)
+message SmrbResources {
+    // The key for the data buffer
+    string  data_key    = 1;
+    // The key for the weights buffer
+    string  weights_key = 2;
+    // The number of header buffers
+    uint64  hb_nbufs    = 3;
+    // The size in bytes of the header buffers
+    uint64  hb_bufsz    = 4;
+    // The number of data buffers
+    uint64  db_nbufs    = 5;
+    // The size in bytes of the data buffers
+    uint64  db_bufsz    = 6;
+    // The number of weights bufffers
+    uint64  wb_nbufs    = 7;
+    // The size of the weights buffers
+    uint64  wb_bufsz    = 8;
+}
+
+// Assign resources is used by the LMC to assign
+// resources that may be later used during a scan.
+message AssignResourcesRequest {
+    oneof resources {
+        SmrbResources smrb = 1;
+    }
+}
+
+// An empty response message that is used to define
+// successfully assigned resources.
+message AssignResourcesResponse {
+}
+
+// An empty message used in requesting the release
+// of resources.
+message ReleaseResourcesRequest {
+}
+
+// An empty respinse message that is used in
+// releasing resources
+message ReleaseResourcesResponse {
+}
+
+// An empty message used to request the assigned
+// resources.
+message GetAssignedResourcesRequest {}
+
+// The response message for getting the assigned
+// resources of the component.
+message GetAssignedResourcesResponse {
+    oneof resources {
+        SmrbResources smrb = 1;
+    }
+}
+
+// A request message to be sent to the service to
+// identify which client is connecting.
 message ConnectionRequest {
     string client_id = 1;
 }
 
+// An empty response message for the connection request.
 message ConnectionResponse {
 }
 
+/**
+ Service to expose the local monitoring and control functionality
+ of a process.
+*/
 service PstLmcService {
+    /**
+     * Used by a client to try to connect to the remote service.
+     */
     rpc connect(ConnectionRequest) returns (ConnectionResponse);
+    /**
+     * Used by a client to assign resources of the component.
+     */
+    rpc assign_resources(AssignResourcesRequest) returns (AssignResourcesResponse);
+    /**
+     * Used by a client to release the resources assigned by a component.
+     */
+    rpc release_resources(ReleaseResourcesRequest) returns (ReleaseResourcesResponse);
+    /**
+     * Used by a client to get the currently assigned resource details of a component.
+     */
+    rpc get_assigned_resources(GetAssignedResourcesRequest) returns (GetAssignedResourcesResponse);
 }
