@@ -45,6 +45,10 @@ enum ErrorCode {
     RESOURCES_ALREADY_ASSIGNED  = 3;
     // There are no resources assigned to this component.
     RESOURCES_NOT_ASSIGNED      = 4;
+    // The service is already performing a scann
+    ALREADY_SCANNING            = 5;
+    // The service is not scanning
+    NOT_SCANNING                = 6;
 }
 
 // A status message that will be returned by the services
@@ -111,6 +115,88 @@ message GetAssignedResourcesResponse {
     }
 }
 
+// Request that the component initiates a scan
+message ScanRequest {}
+
+// Response for the scan request.
+message ScanResponse {}
+
+// Request that the component stops scanning
+message EndScanRequest {}
+
+// Response for the end scan request.
+message EndScanResponse {}
+
+// Request from the server to find out what state it is in.
+message GetStateRequest {}
+
+// This is a protobuf representation of the SKA Obs State
+// model enum. This is used by the LMC client to check
+// the state of the service. Not all states will be valid
+// for the system but are provided to map one-to-one with
+// the SKA specific model
+enum ObsState {
+    // The sub-array is ready to observe, but is in an undefined
+    // configuration and has no resources allocated.
+    EMPTY = 0;
+
+    // The system is allocating resources to, or deallocating resources
+    // from, the subarray. This may be a complete de/allocation, or it may
+    // be incremental. In both cases it is a transient state and will
+    // automatically transition to IDLE when complete. For some subsystems
+    // this may be a very brief state if resourcing is a quick activity.
+    RESOURCING = 1;
+
+    // The subarray has resources allocated and is ready to be used for
+    // observing. In normal science operations these will be the resources
+    // required for the upcoming SBI execution.
+    IDLE = 2;
+
+    // The subarray is being configured ready to scan. On entry to the
+    // state no assumptions can be made about the previous conditions. It
+    // is a transient state and will automatically transition to READY when
+    // it completes normally.
+    CONFIGURING = 3;
+
+    // The subarray is fully prepared to scan, but is not actually taking
+    // data or moving in the observed coordinate system (it may be
+    // tracking, but not moving relative to the coordinate system).
+    READY = 4;
+
+    // The subarray is taking data and, if needed, all components are
+    // synchronously moving in the observed coordinate system. Any changes
+    // to the sub-systems are happening automatically (this allows for a
+    // scan to cover the case where the phase centre is moved in a
+    // pre-defined pattern).
+    SCANNING = 5;
+
+    // The subarray is trying to abort what it was doing due to having been
+    // interrupted by the controller.
+    ABORTING = 6;
+
+    // The subarray has had its previous state interrupted by the
+    // controller, and is now in an aborted state.
+    ABORTED = 7;
+
+    // """
+    // The subarray device is resetting to the IDLE state.
+    // """
+    RESETTING = 8;
+
+    // The subarray has detected an error in its observing state making it
+    // impossible to remain in the previous state.
+    FAULT = 9;
+
+    // The subarray device is restarting, as the last known stable state is
+    // where no resources were allocated and the configuration undefined.
+    RESTARTING = 10;
+}
+
+// Response from the server for what state it is in.
+message GetStateResponse {
+    ObsState state = 1;
+}
+
 // A request message to be sent to the service to
 // identify which client is connecting.
 message ConnectionRequest {
@@ -142,4 +228,16 @@ service PstLmcService {
      * Used by a client to get the currently assigned resource details of a component.
      */
     rpc get_assigned_resources(GetAssignedResourcesRequest) returns (GetAssignedResourcesResponse);
+    /**
+     * Used by a client to start a scan of the component.
+     */
+    rpc scan(ScanRequest) returns (ScanResponse);
+    /**
+     * Used by a client to end a scan of the component.
+     */
+    rpc end_scan(EndScanRequest) returns (EndScanResponse);
+    /**
+     * Used by a client to verify the state of the component.
+     */
+    rpc get_state(GetStateRequest) returns (GetStateResponse);
 }
