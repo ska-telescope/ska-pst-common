@@ -45,6 +45,10 @@ enum ErrorCode {
     RESOURCES_ALREADY_ASSIGNED  = 3;
     // There are no resources assigned to this component.
     RESOURCES_NOT_ASSIGNED      = 4;
+    // The service is already performing a scann
+    ALREADY_SCANNING            = 5;
+    // The service is not scanning
+    NOT_SCANNING                = 6;
 }
 
 // A status message that will be returned by the services
