@@ -229,7 +229,16 @@ message SmrbMonitorData {
 }
 
 // Request from the server to stream monitoring telemetry.
-message MonitorRequest {}
+message MonitorRequest {
+    // rate in milliseconds to stream data back. The
+    // rate should be in the order of seconds but instead
+    // of using a float using a long int to represent
+    // that time.
+    //
+    // If the server does not respond in 2 * this rate
+    // then the client should raise an alert.
+    uint64 polling_rate = 1;
+}
 
 // Response message from the server that is an envelope
 // for a specific type of monitoring data, such at SMRB
