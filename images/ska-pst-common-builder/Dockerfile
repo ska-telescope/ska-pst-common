@@ -25,6 +25,10 @@ ARG PIP_CLI_PAYLOAD=${DEPENDENCIES_PATH}/pip.txt
 RUN stat ${PIP_CLI_PAYLOAD} \
     && PIP_CLI_PAYLOAD=${PIP_CLI_PAYLOAD} make local-pip-install
 
+# Copy ctest2junit helper scripts
+COPY ./images/ska-pst-common-builder/ctest2junit.xsl /usr/local/share/ctest2junit/
+COPY ./images/ska-pst-common-builder/ctest2junit /usr/local/bin/
+
 # Install cmake
 # https://cmake.org/install/
 ARG CMAKE_SOURCE=https://github.com/Kitware/CMake/releases/download/v3.24.0-rc1/cmake-3.24.0-rc1.tar.gz
