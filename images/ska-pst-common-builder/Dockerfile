@@ -84,6 +84,10 @@ COPY --from=base /lib32 /lib32
 COPY --from=base /lib64 /lib64
 COPY --from=base /usr /usr
 
+# Copy ctest2junit helper scripts
+COPY ctest2junit.xsl /usr/local/share/ctest2junit/
+COPY ctest2junit /usr/local/bin/
+
 WORKDIR /app
 COPY --from=base /mnt/ska-pst-common-builder/protobuf/ /app/protobuf/
 
