@@ -197,6 +197,59 @@ message GetStateResponse {
     ObsState state = 1;
 }
 
+// Message for the statistics of a subband ring buffer
+message SmrbStatitics {
+    // total number of buffers
+    uint64 nbufs = 1;
+
+    // size of each buffer in bytes
+    uint64 bufsz = 2;
+
+    // total number of buffers written to the ring
+    uint64 written = 3;
+
+    // total number of buffers read from the ring
+    uint64 read = 4;
+
+    // number of filled buffers in the ring
+    uint64 full = 5;
+
+    // number of cleared buffers in the ring
+    uint64 clear = 6;
+
+    // number of free buffers in the ring
+    uint64 available = 7;
+}
+
+// Message for the monitor results of a subband.
+// This includes the data and weights statistics
+message SmrbMonitorData {
+    SmrbStatitics data = 1;
+    SmrbStatitics weights = 2;
+}
+
+// Request from the server to stream monitoring telemetry.
+message MonitorRequest {
+    // rate in milliseconds to stream data back. The
+    // rate should be in the order of seconds but instead
+    // of using a float using a long int to represent
+    // that time.
+    //
+    // If the server does not respond in 2 * this rate
+    // then the client should raise an alert.
+    uint64 polling_rate = 1;
+}
+
+// Response message from the server that is an envelope
+// for a specific type of monitoring data, such at SMRB
+// to populate SmrbMonitorData messages and put them
+// into the smrb field of this message.
+message MonitorResponse {
+    oneof monitor_data {
+        SmrbMonitorData smrb = 1;
+    }
+}
+
 // A request message to be sent to the service to
 // identify which client is connecting.
 message ConnectionRequest {
@@ -240,4 +293,11 @@ service PstLmcService {
      * Used by a client to verify the state of the component.
      */
     rpc get_state(GetStateRequest) returns (GetStateResponse);
+    /**
+     * Used to monitor a service. The service is expected to
+     * stream results back and putting the monitor data specific
+     * to itself in a given sub-message, i.e. SMRB to return
+     * data in an SmrbMonitorData wrapped in a MonitorResponse.
+     */
+    rpc monitor(MonitorRequest) returns (stream MonitorResponse);
 }
