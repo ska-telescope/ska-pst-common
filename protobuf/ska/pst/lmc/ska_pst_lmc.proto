@@ -250,6 +250,14 @@ message MonitorResponse {
     }
 }
 
+// Have the server abort its current process. This can
+// happen IDLE, CONFIGURING, READY, SCANNING, or
+// RESETTING states.
+message AbortRequest {}
+
+// The Response message for the abort command.
+message AbortResponse {}
+
 // A request message to be sent to the service to
 // identify which client is connecting.
 message ConnectionRequest {
@@ -300,4 +308,12 @@ service PstLmcService {
      * data in an SmrbMonitorData wrapped in a MonitorResponse.
      */
     rpc monitor(MonitorRequest) returns (stream MonitorResponse);
+    /**
+     * Used by a client to put the server into the ABORTED state.
+     * This can affect the configuring and scanning stages and
+     * the service must end those stages. If monitoring is happening
+     * due to be in a scanning state then the monitoring should also
+     * stop as that is only valid for scanning states.
+     */
+    rpc abort(AbortRequest) returns (AbortResponse); 
 }
