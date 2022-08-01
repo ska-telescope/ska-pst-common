@@ -258,6 +258,18 @@ message AbortRequest {}
 // The Response message for the abort command.
 message AbortResponse {}
 
+// Request message to reset the state of a server. Based
+// on the SKA Obs State model this should put the server
+// in a deconfigured state but still have resources assigned.
+message ResetRequest {
+    // Release the resources as part of this request. This
+    // can be used for the LMC's restart process.
+    bool release_resources = 1;
+}
+
+// The response message for the reset command.
+message ResetResponse {}
+
 // A request message to be sent to the service to
 // identify which client is connecting.
 message ConnectionRequest {
@@ -315,5 +327,10 @@ service PstLmcService {
      * due to be in a scanning state then the monitoring should also
      * stop as that is only valid for scanning states.
      */
-    rpc abort(AbortRequest) returns (AbortResponse); 
+    rpc abort(AbortRequest) returns (AbortResponse);
+    /**
+     * Used by a client to reset the device from ABORTED or FAULT state
+     * into an IDLE / deconfigured state.
+     */
+     rpc reset(ResetRequest) returns (ResetResponse);
 }
