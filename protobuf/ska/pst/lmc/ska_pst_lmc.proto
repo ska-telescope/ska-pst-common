@@ -260,15 +260,24 @@ message AbortResponse {}
 
 // Request message to reset the state of a server. Based
 // on the SKA Obs State model this should put the server
-// in a deconfigured state but still have resources assigned.
+// in an IDLE (i.e. deconfigured/unconfigured) state but
+// still have resources assigned.
 message ResetRequest {
-    // Release the resources as part of this request. This
-    // can be used for the LMC's restart process.
-    bool release_resources = 1;
 }
 
 // The response message for the reset command.
 message ResetResponse {}
+
+// Request message to restart the state of a server. Based
+// on the SKA Obs State model this should put the server
+// back to an EMPTY (i.e. no resources assigned) state.
+// The implementation of this may do a logical restart
+// rather than restarting the process.
+message RestartRequest {
+}
+
+// The response message for the reset command.
+message RestartResponse {}
 
 // A request message to be sent to the service to
 // identify which client is connecting.
@@ -333,4 +342,11 @@ service PstLmcService {
      * into an IDLE / deconfigured state.
      */
      rpc reset(ResetRequest) returns (ResetResponse);
+    /**
+     * Used by a client to reset the device from ABORTED or FAULT state
+     * into an EMPTY, no resources assigned, state. Implementations of
+     * this can do a logical restart, i.e. make sure the the system is
+     * deconfigured first and then release all the resources.
+     */
+     rpc restart(RestartRequest) returns (RestartResponse);
 }
