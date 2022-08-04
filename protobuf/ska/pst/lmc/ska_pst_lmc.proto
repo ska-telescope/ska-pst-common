@@ -183,30 +183,6 @@ message ReceiveSubbandResources {
     repeated uint32 ports           = 15;
 }
 
-// Enum reprsenting the feed polarisation of the beam
-enum FeedPolarisation {
-    // Linear polarisation
-    LIN     = 0;
-    // Circular polarisation
-    CIRC    = 1;
-}
-
-// Enum representing the traking mode for the feed of a beam
-enum FeedMode {
-    // constant feed angle and that the feed stays fixed with respect to the telescope’s reference frame.
-    FA      = 0;
-    // the feed rotates to maintain a constant phase angle (i.e. it tracks the variation of the parallactic
-    // angle.). When the cordinate mode is GALATIC, PA is with respect to Galactic north and similarly for
-    // coordinate mode ECLIPTIC then PA is with respect to ecliptic north.
-    CPA     = 1;
-    // the feed angle is held fixed at an angle such that the requested PA is obtained at the mid-point of
-    // the observation.
-    SPA     = 2;
-    // is only relevant for scan observations - the feed is rotated to maintain a constant angle with respect
-    // to the scan direction.
-    TPA     = 3;
-}
-
 // Message to represent configuration for the RECV.CORE of PST
 message ReceiveResources {
     // Number of time samples per packet
@@ -224,7 +200,7 @@ message ReceiveResources {
     // The timig beam identifier
     string frontend             = 7;
     // native polarisation of feed
-    FeedPolarisation fd_poln    = 8;
+    string fd_poln              = 8;
     // handedness of feed
     // valid values are +1 or -1
     // For value of +1 for XYZ forming RH set with Z in the
@@ -234,7 +210,7 @@ message ReceiveResources {
     // feed angle
     float fn_sang               = 10;
     // feed tracking mode
-    FeedMode fd_mode            = 11;
+    string fd_mode              = 11;
     // feed position angle
     // this is For feed_mode = ‘FA’ this is respect to the telescope’s
     // reference frame (feed_angle = 0), and for feed_mode = ‘CPA’
