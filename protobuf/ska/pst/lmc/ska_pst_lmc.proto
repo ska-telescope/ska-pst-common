@@ -159,7 +159,7 @@ message ReceiveSubbandResources {
     uint32 cpu_core                 = 3;
     // numa node from which memory should be allocated for sub-band
     uint32 numa_node                = 4;
-    // RF bandwidht for sub-band
+    // RF bandwidth  for sub-band
     float bandwidth                 = 5;
     // number of input frequency channels for subband
     uint32 nchan                    = 6;
@@ -167,11 +167,11 @@ message ReceiveSubbandResources {
     repeated uint32 chan_range      = 7;
     // subband centre frequencey
     float frequency                 = 8;
-    // lowest and highest frequenc channel number for output of sub-band
+    // lowest and highest frequency channel number for output of sub-band
     repeated uint32 chan_out_range  = 9;
-    // number of output frequenc channels of sub-band
+    // number of output frequency channels of sub-band
     uint32 nchan_out                = 10;
-    // total output bandwidht across the frequence channgels of sub-band
+    // total output bandwidth  across the frequence channgels of sub-band
     float bandwidth_out             = 11;
     // centre RF frequency of output channels of subband
     float frequency_out             = 12;
@@ -194,10 +194,10 @@ message ReceiveResources {
     // Centre frequency of observation
     float frequency             = 4;
     // Total critical bandwidth
-    float band_width            = 5;
+    float bandwidth             = 5;
     // Total number of input channels
     uint64 nchan                = 6;
-    // The timig beam identifier
+    // The timing beam identifier
     string frontend             = 7;
     // native polarisation of feed
     string fd_poln              = 8;
@@ -318,7 +318,7 @@ message ReceiveScanConfiguration {
     // ID for the sub-array
     string subbary_id           = 7;
     // IRTF coordinates of the telescope delay centre
-    string itrf                 = 8;
+    repeated float itrf         = 8;
     // Beam major axis
     string bmaj                 = 9;
     // Beam minor axis
