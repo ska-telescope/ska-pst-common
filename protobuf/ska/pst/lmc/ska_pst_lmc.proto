@@ -136,67 +136,63 @@ message SmrbResources {
     // The key for the weights buffer
     string  weights_key = 2;
     // The number of header buffers
-    uint64  hb_nbufs    = 3;
+    uint32  hb_nbufs    = 3;
     // The size in bytes of the header buffers
     uint64  hb_bufsz    = 4;
     // The number of data buffers
-    uint64  db_nbufs    = 5;
+    uint32  db_nbufs    = 5;
     // The size in bytes of the data buffers
     uint64  db_bufsz    = 6;
     // The number of weights bufffers
-    uint64  wb_nbufs    = 7;
+    uint32  wb_nbufs    = 7;
     // The size of the weights buffers
     uint64  wb_bufsz    = 8;
 }
 
 // Message to represent subband configuration for RECV.CORE
+//
+// The detailed design document has parameters for the
+// networking interface, like IP listener address and UDP
+// port numbers.  These have not been added here due to
+// the fact that we now use Docker/Kubernetes. If they are
+// need in the future this is where they should be added.
 message ReceiveSubbandResources {
     // subband data key
     string data_key                 = 1;
     // subband weights key
     string weights_key              = 2;
-    // cpu code to bind processing
-    uint32 cpu_core                 = 3;
-    // numa node from which memory should be allocated for sub-band
-    uint32 numa_node                = 4;
     // RF bandwidth  for sub-band
-    float bandwidth                 = 5;
+    double bandwidth                = 3;
     // number of input frequency channels for subband
-    uint32 nchan                    = 6;
-    // lowest and highest frequency channel number for input of sub-band
-    repeated uint32 chan_range      = 7;
-    // subband centre frequencey
-    float frequency                 = 8;
+    uint32 nchan                    = 4;
+    // lowest and highest frequency channel number for input of sub-band (in MHz)
+    repeated uint32 chan_range      = 5;
+    // subband centre frequency (in MHz)
+    double frequency                = 6;
     // lowest and highest frequency channel number for output of sub-band
-    repeated uint32 chan_out_range  = 9;
+    repeated uint32 chan_out_range  = 7;
     // number of output frequency channels of sub-band
-    uint32 nchan_out                = 10;
-    // total output bandwidth  across the frequence channgels of sub-band
-    float bandwidth_out             = 11;
-    // centre RF frequency of output channels of subband
-    float frequency_out             = 12;
-    // IP of Ethernet interface upon which UDP packets will be received for subband
-    repeated uint32 interface       = 13;
-    // number of UDP ports upon which to accept packets for sub-band
-    uint32 nports                   = 14;
-    // list of UDP network port numbers for sub-band
-    repeated uint32 ports           = 15;
+    uint32 nchan_out                = 8;
+    // total output bandwidth across the frequency channels of sub-band (in MHz)
+    double bandwidth_out            = 9;
+    // centre RF frequency of output channels of subband (in MHz)
+    double frequency_out            = 10;
 }
 
 // Message to represent configuration for the RECV.CORE of PST
 message ReceiveResources {
     // Number of time samples per packet
-    uint64 udp_nsamp            = 1;
+    uint32 udp_nsamp            = 1;
     // Number of time samples per relative weight
-    uint64 wt_nsamp             = 2;
+    uint32 wt_nsamp             = 2;
     // Number of frequency channels per packet
-    uint64 udp_nchan            = 3;
-    // Centre frequency of observation
-    float frequency             = 4;
-    // Total critical bandwidth
-    float bandwidth             = 5;
+    uint32 udp_nchan            = 3;
+    // Centre frequency of observation (in MHz)
+    double frequency             = 4;
+    // Total critical bandwidth (in MHz)
+    double bandwidth             = 5;
     // Total number of input channels
-    uint64 nchan                = 6;
+    uint32 nchan                = 6;
     // The timing beam identifier
     string frontend             = 7;
     // native polarisation of feed
@@ -207,7 +203,7 @@ message ReceiveResources {
     // direction of propagation. Looking up into the feed of
     // a prime-focus receiver or at the sky).
     sint32 fn_hand              = 9;
-    // feed angle
+    // feed angle (in degrees)
     float fn_sang               = 10;
     // feed tracking mode
     string fd_mode              = 11;
@@ -218,22 +214,22 @@ message ReceiveResources {
     // or with respect to the Galactic north for coordinate_mode = ‘GALACTIC’.
     float fa_req                = 12;
     // number of receptors in sub-array
-    uint64 nant                 = 13;
+    uint32 nant                 = 13;
     // list of receptors
     repeated string antennnas   = 14;
     // receptor weights
     repeated float ant_weights  = 15;
     // number of polarisation
-    uint64 npol                 = 16;
+    uint32 npol                 = 16;
     // number of bits per sample - should always be 2
-    uint64 ndim                 = 17;
-    // sampling time, inferred from the bandwidth, nchan and oversample
-    float tsamp                 = 18;
-    // oversampling rate
-    repeated uint64 ovrsamp     = 19;
+    uint32 ndim                 = 17;
+    // sampling time, inferred from the bandwidth, nchan and oversample (in microseconds)
+    double tsamp                 = 18;
+    // oversampling rate - this is a fraction expressed as 2 integers.
+    repeated uint32 ovrsamp     = 19;
     // number of subbands
-    uint64 nsubband             = 20;
-    // subband configuratio
+    uint32 nsubband             = 20;
+    // subband configuration
     ReceiveSubbandResources subband_resources = 21;
 }
 
@@ -283,12 +279,15 @@ message SmrbScanConfiguration {}
 // Message representing scan calibration values
 // this is used to allow for the calibration values to
 // be null (i.e. not set) as protobuf defaults not
-// set fields to zero
+// set fields to zero.
+//
+// For now SKA will not be using calibration in PST
+// but this may change in the future.
 message ScanCalibration {
     // operation mode for the injected calibration
     string cal_mode            = 1;
-    // calibration modulation frequency
-    float cal_freq             = 2;
+    // calibration modulation frequency (in MHz)
+    double cal_freq             = 2;
     // calibration signal duty cycle
     float cal_dcyc             = 3;
     // calibration phase leading edge
@@ -303,7 +302,7 @@ message ScanCalibration {
 // the LMC is set into an OBSMODE and this would
 // be sent to DSP directly.
 message ReceiveScanConfiguration {
-    // UTC data and time to perform the requested command
+    // UTC data and time to perform the requested command (in UTC string format)
     string activation_time      = 1;
     // Unique indentifer for observation
     string observation_id       = 2;
@@ -316,24 +315,26 @@ message ReceiveScanConfiguration {
     // ID for sub-array pointing
     string pnt_id               = 6;
     // ID for the sub-array
-    string subbary_id           = 7;
-    // IRTF coordinates of the telescope delay centre
-    repeated float itrf         = 8;
+    string subarray_id           = 7;
+    // IRTF coordinates of the telescope delay centre (in metres)
+    repeated double itrf        = 8;
     // Beam major axis
-    string bmaj                 = 9;
+    float bmaj                  = 9;
     // Beam minor axis
-    string bmin                 = 10;
+    float bmin                  = 10;
     // frame of coordinates
     string coord_md             = 11;
     // coordinate epoch
     string equinox              = 12;
-    // X component of starting co-ords in COORD_MD frame
+    // X component of starting co-ords in COORD_MD frame. If equatorial
+    // coordinates this would be the RA in Hours, minutes, seconds
     string stt_crd1             = 13;
-    // Y component of starting co-ords in COORD_MD frame
+    // Y component of starting co-ords in COORD_MD frame. If equatorial
+    // coordinates this would be the Dec in degrees, minutes, seconds.
     string stt_crd2             = 14;
     // tracking mode
     string trk_mode             = 15;
-    // maximum length of observation
+    // maximum length of observation (in seconds)
     int32 scanlen_max           = 16;
     // identifier of preconfigured test-vector
     string test_vector          = 17;
@@ -377,7 +378,10 @@ message DeconfigureRequest {}
 message DeconfigureResponse {}
 
 // Request that the component initiates a scan
-message ScanRequest {}
+message ScanRequest {
+    // Expect a timestamp for when the Scan should
+    // start.  This is an open issue at the moment.
+}
 
 // Response for the scan request.
 message ScanResponse {}
@@ -389,6 +393,8 @@ message ScanResponse {}
 message EndScanRequest {
     // the time at which all the scans should stop
     // as to allow synchonisation between RECV subbands
+    // This is in milliseconds from UNIX epoch
+    // (January 1, 1970 00:00:00 UTC)
     uint64 end_time = 1;
 }
 
@@ -406,7 +412,7 @@ message GetStateResponse {
 // Message for the statistics of a subband ring buffer
 message SmrbStatitics {
     // total number of buffers
-    uint64 nbufs = 1;
+    uint32 nbufs = 1;
 
     // size of each buffer in bytes
     uint64 bufsz = 2;
@@ -418,13 +424,13 @@ message SmrbStatitics {
     uint64 read = 4;
 
     // number of filled buffers in the ring
-    uint64 full = 5;
+    uint32 full = 5;
 
     // number of cleared buffers in the ring
-    uint64 clear = 6;
+    uint32 clear = 6;
 
     // number of free buffers in the ring
-    uint64 available = 7;
+    uint32 available = 7;
 }
 
 // Message for the monitor results of a subband.
@@ -436,13 +442,15 @@ message SmrbMonitorData {
 
 // Message for the Receive monitoring results of a subband.
 message ReceiveMonitorData {
-    // UDP data received in bytes per second
+    // UDP data received in bytes per second.
+    // This is the instantaneous rate for the last second.
     float receive_rate = 1;
-    // UDP data received in the current scan in bytes
+    // UDP data received in the current scan (in bytes).
     uint64 data_received = 2;
-    // UDP data dropped in bytes per second
+    // UDP data dropped in bytes per second.
+    // This is the instantaneous rate for the last second.
     float data_drop_rate = 3;
-    // UDP data dropped in the current scan in bytes
+    // UDP data dropped in the current scan (in bytes).
     uint64 data_dropped = 4;
     // Number of out of order UDP packets received in the current scan
     uint64 misordered_packets = 5;
@@ -467,6 +475,7 @@ message MonitorRequest {
 message MonitorResponse {
     oneof monitor_data {
         SmrbMonitorData smrb = 1;
+        ReceiveMonitorData receive = 2;
     }
 }
 
