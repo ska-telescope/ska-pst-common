@@ -221,16 +221,18 @@ message ReceiveResources {
     repeated float ant_weights  = 15;
     // number of polarisation
     uint32 npol                 = 16;
-    // number of bits per sample - should always be 2
-    uint32 ndim                 = 17;
+    // number of bits per sample
+    uint32 nbits                = 17;
+    // number of dimensions - should always be 2
+    uint32 ndim                 = 18;
     // sampling time, inferred from the bandwidth, nchan and oversample (in microseconds)
-    double tsamp                 = 18;
+    double tsamp                = 19;
     // oversampling rate - this is a fraction expressed as 2 integers.
-    repeated uint32 ovrsamp     = 19;
+    repeated uint32 ovrsamp     = 20;
     // number of subbands
-    uint32 nsubband             = 20;
+    uint32 nsubband             = 21;
     // subband configuration
-    ReceiveSubbandResources subband_resources = 21;
+    ReceiveSubbandResources subband_resources = 22;
 }
 
 // Assign resources is used by the LMC to assign
