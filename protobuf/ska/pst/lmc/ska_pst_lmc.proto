@@ -31,105 +31,6 @@ syntax = "proto3";
 
 package ska.pst.lmc;
 
-// Enum representing particular error code that might
-// happen during processing.
-enum ErrorCode {
-    // Not used but to avoid the default value
-    OK                          = 0;
-    // Used if the request sent to the service is invalid, such as a Oneof value is not
-    // set when it should have been.
-    INVALID_REQUEST             = 1;
-    // There was an internal server error raised.
-    INTERNAL_ERROR              = 2;
-    // The resources of the component already assigned. Should have released resources beforehand.
-    RESOURCES_ALREADY_ASSIGNED  = 3;
-    // There are no resources assigned to this component.
-    RESOURCES_NOT_ASSIGNED      = 4;
-    // The service is already performing a scann
-    ALREADY_SCANNING            = 5;
-    // The service is not scanning
-    NOT_SCANNING                = 6;
-}
-
-// A status message that will be returned by the services
-// Only valid if there is an error
-message Status {
-    // The error code for which this status relates to.
-    ErrorCode code      = 1;
-    // Optional error message to be provided when the error occurs.
-    string    message   = 2;
-}
-
-// Represents the resource configuration for a share memory ring buffer (SMRB)
-message SmrbResources {
-    // The key for the data buffer
-    string  data_key    = 1;
-    // The key for the weights buffer
-    string  weights_key = 2;
-    // The number of header buffers
-    uint64  hb_nbufs    = 3;
-    // The size in bytes of the header buffers
-    uint64  hb_bufsz    = 4;
-    // The number of data buffers
-    uint64  db_nbufs    = 5;
-    // The size in bytes of the data buffers
-    uint64  db_bufsz    = 6;
-    // The number of weights bufffers
-    uint64  wb_nbufs    = 7;
-    // The size of the weights buffers
-    uint64  wb_bufsz    = 8;
-}
-
-// Assign resources is used by the LMC to assign
-// resources that may be later used during a scan.
-message AssignResourcesRequest {
-    oneof resources {
-        SmrbResources smrb = 1;
-    }
-}
-
-// An empty response message that is used to define
-// successfully assigned resources.
-message AssignResourcesResponse {
-}
-
-// An empty message used in requesting the release
-// of resources.
-message ReleaseResourcesRequest {
-}
-
-// An empty respinse message that is used in
-// releasing resources
-message ReleaseResourcesResponse {
-}
-
-// An empty message used to request the assigned
-// resources.
-message GetAssignedResourcesRequest {}
-
-// The response message for getting the assigned
-// resources of the component.
-message GetAssignedResourcesResponse {
-    oneof resources {
-        SmrbResources smrb = 1;
-    }
-}
-
-// Request that the component initiates a scan
-message ScanRequest {}
-
-// Response for the scan request.
-message ScanResponse {}
-
-// Request that the component stops scanning
-message EndScanRequest {}
-
-// Response for the end scan request.
-message EndScanResponse {}
-
-// Request from the server to find out what state it is in.
-message GetStateRequest {}
-
 // This is a protobuf representation of the SKA Obs State
 // model enum. This is used by the LMC client to check
 // the state of the service. Not all states will be valid
@@ -192,6 +93,319 @@ enum ObsState {
     RESTARTING = 10;
 }
 
+// Enum representing particular error code that might
+// happen during processing.
+enum ErrorCode {
+    // Not used but to avoid the default value
+    OK                          = 0;
+    // Used if the request sent to the service is invalid, such as a Oneof value is not
+    // set when it should have been.
+    INVALID_REQUEST             = 1;
+    // There was an internal server error raised.
+    INTERNAL_ERROR              = 2;
+    // The resources of the component already assigned. Should have released resources beforehand.
+    RESOURCES_ALREADY_ASSIGNED  = 3;
+    // There are no resources assigned to this component.
+    RESOURCES_NOT_ASSIGNED      = 4;
+    // The service is already performing a scann
+    ALREADY_SCANNING            = 5;
+    // The service is not scanning
+    NOT_SCANNING                = 6;
+}
+
+// Enum representing the observation mode for the scan
+enum ObservationMode {
+    PULSAR_TIMING       = 0;
+    DYNAMIC_SPECTRUM    = 1;
+    FLOW_THROUGH        = 2;
+}
+
+// A status message that will be returned by the services
+// Only valid if there is an error
+message Status {
+    // The error code for which this status relates to.
+    ErrorCode code      = 1;
+    // Optional error message to be provided when the error occurs.
+    string    message   = 2;
+}
+
+// Represents the resource configuration for a share memory ring buffer (SMRB)
+message SmrbResources {
+    // The key for the data buffer
+    string  data_key    = 1;
+    // The key for the weights buffer
+    string  weights_key = 2;
+    // The number of header buffers
+    uint32  hb_nbufs    = 3;
+    // The size in bytes of the header buffers
+    uint64  hb_bufsz    = 4;
+    // The number of data buffers
+    uint32  db_nbufs    = 5;
+    // The size in bytes of the data buffers
+    uint64  db_bufsz    = 6;
+    // The number of weights bufffers
+    uint32  wb_nbufs    = 7;
+    // The size of the weights buffers
+    uint64  wb_bufsz    = 8;
+}
+
+// Message to represent subband configuration for RECV.CORE
+//
+// The detailed design document has parameters for the
+// networking interface, like IP listener address and UDP
+// port numbers.  These have not been added here due to
+// the fact that we now use Docker/Kubernetes. If they are
+// need in the future this is where they should be added.
+message ReceiveSubbandResources {
+    // subband data key
+    string data_key                 = 1;
+    // subband weights key
+    string weights_key              = 2;
+    // RF bandwidth  for sub-band
+    double bandwidth                = 3;
+    // number of input frequency channels for subband
+    uint32 nchan                    = 4;
+    // lowest and highest frequency channel number for input of sub-band (in MHz)
+    repeated uint32 chan_range      = 5;
+    // subband centre frequency (in MHz)
+    double frequency                = 6;
+    // lowest and highest frequency channel number for output of sub-band
+    repeated uint32 chan_out_range  = 7;
+    // number of output frequency channels of sub-band
+    uint32 nchan_out                = 8;
+    // total output bandwidth across the frequency channels of sub-band (in MHz)
+    double bandwidth_out            = 9;
+    // centre RF frequency of output channels of subband (in MHz)
+    double frequency_out            = 10;
+}
+
+// Message to represent configuration for the RECV.CORE of PST
+message ReceiveResources {
+    // Number of time samples per packet
+    uint32 udp_nsamp            = 1;
+    // Number of time samples per relative weight
+    uint32 wt_nsamp             = 2;
+    // Number of frequency channels per packet
+    uint32 udp_nchan            = 3;
+    // Centre frequency of observation (in MHz)
+    double frequency             = 4;
+    // Total critical bandwidth (in MHz)
+    double bandwidth             = 5;
+    // Total number of input channels
+    uint32 nchan                = 6;
+    // The timing beam identifier
+    string frontend             = 7;
+    // native polarisation of feed
+    string fd_poln              = 8;
+    // handedness of feed
+    // valid values are +1 or -1
+    // For value of +1 for XYZ forming RH set with Z in the
+    // direction of propagation. Looking up into the feed of
+    // a prime-focus receiver or at the sky).
+    sint32 fn_hand              = 9;
+    // feed angle (in degrees)
+    float fn_sang               = 10;
+    // feed tracking mode
+    string fd_mode              = 11;
+    // feed position angle
+    // this is For feed_mode = ‘FA’ this is respect to the telescope’s
+    // reference frame (feed_angle = 0), and for feed_mode = ‘CPA’
+    // this is with respect to the celestial north (parallic angle = 0)
+    // or with respect to the Galactic north for coordinate_mode = ‘GALACTIC’.
+    float fa_req                = 12;
+    // number of receptors in sub-array
+    uint32 nant                 = 13;
+    // list of receptors
+    repeated string antennnas   = 14;
+    // receptor weights
+    repeated float ant_weights  = 15;
+    // number of polarisation
+    uint32 npol                 = 16;
+    // number of bits per sample
+    uint32 nbits                = 17;
+    // number of dimensions - should always be 2
+    uint32 ndim                 = 18;
+    // sampling time, inferred from the bandwidth, nchan and oversample (in microseconds)
+    double tsamp                = 19;
+    // oversampling rate - this is a fraction expressed as 2 integers.
+    repeated uint32 ovrsamp     = 20;
+    // number of subbands
+    uint32 nsubband             = 21;
+    // subband configuration
+    ReceiveSubbandResources subband_resources = 22;
+}
+
+// Assign resources is used by the LMC to assign
+// resources that may be later used during a scan.
+message AssignResourcesRequest {
+    oneof resources {
+        SmrbResources smrb = 1;
+        ReceiveResources receive = 2;
+    }
+}
+
+// An empty response message that is used to define
+// successfully assigned resources.
+message AssignResourcesResponse {
+}
+
+// An empty message used in requesting the release
+// of resources.
+message ReleaseResourcesRequest {
+}
+
+// An empty respinse message that is used in
+// releasing resources
+message ReleaseResourcesResponse {
+}
+
+// An empty message used to request the assigned
+// resources.
+message GetAssignedResourcesRequest {}
+
+// The response message for getting the assigned
+// resources of the component.
+message GetAssignedResourcesResponse {
+    oneof resources {
+        SmrbResources smrb = 1;
+        ReceiveResources receive = 2;
+    }
+}
+
+// Message representing scan configuration for SMRB
+// this is an empty message for SMRB as there is nothing
+// specific for the scan that needs to be configured.
+message SmrbScanConfiguration {}
+
+
+// Message representing scan calibration values
+// this is used to allow for the calibration values to
+// be null (i.e. not set) as protobuf defaults not
+// set fields to zero.
+//
+// For now SKA will not be using calibration in PST
+// but this may change in the future.
+message ScanCalibration {
+    // operation mode for the injected calibration
+    string cal_mode            = 1;
+    // calibration modulation frequency (in MHz)
+    double cal_freq             = 2;
+    // calibration signal duty cycle
+    float cal_dcyc             = 3;
+    // calibration phase leading edge
+    float cal_phs              = 4;
+    // number of states in calibration pulse
+    uint32  cal_nphs           = 5;
+}
+
+// Message representing scan configuration for RECV
+//
+// NOTE - OBSMODE is listed in detailed design but
+// the LMC is set into an OBSMODE and this would
+// be sent to DSP directly.
+message ReceiveScanConfiguration {
+    // UTC data and time to perform the requested command (in UTC string format)
+    string activation_time      = 1;
+    // Unique indentifer for observation
+    string observation_id       = 2;
+    // 64-bit scan ID
+    uint64 scan_id              = 3;
+    // The person in charge of the observation
+    string observer             = 4;
+    // Project the observations are for
+    string projid               = 5;
+    // ID for sub-array pointing
+    string pnt_id               = 6;
+    // ID for the sub-array
+    string subarray_id           = 7;
+    // IRTF coordinates of the telescope delay centre (in metres)
+    repeated double itrf        = 8;
+    // Beam major axis
+    float bmaj                  = 9;
+    // Beam minor axis
+    float bmin                  = 10;
+    // frame of coordinates
+    string coord_md             = 11;
+    // coordinate epoch
+    string equinox              = 12;
+    // X component of starting co-ords in COORD_MD frame. If equatorial
+    // coordinates this would be the RA in Hours, minutes, seconds
+    string stt_crd1             = 13;
+    // Y component of starting co-ords in COORD_MD frame. If equatorial
+    // coordinates this would be the Dec in degrees, minutes, seconds.
+    string stt_crd2             = 14;
+    // tracking mode
+    string trk_mode             = 15;
+    // maximum length of observation (in seconds)
+    int32 scanlen_max           = 16;
+    // identifier of preconfigured test-vector
+    string test_vector          = 17;
+    // calibration information for the scan
+    ScanCalibration calibration = 18;
+}
+
+// Request message to configure a server to
+// be ready for a scan request.
+message ConfigureRequest {
+    oneof configuration {
+        SmrbScanConfiguration smrb = 1;
+        ReceiveScanConfiguration receive = 2;
+    }
+}
+
+// An empty message used as a response for
+// a configure request.
+message ConfigureResponse {
+}
+
+// An empty message used to retreive the current
+// scan configuration of a component.
+message GetScanConfigurationRequest {}
+
+// A response message used to return the scan
+// configuration of the a component.
+message GetScanConfigurationResponse {
+    oneof configuration {
+        SmrbScanConfiguration smrb = 1;
+        ReceiveScanConfiguration receive = 2;
+    }
+}
+
+// An empty message used to request that a
+// server deconfigures itself.
+message DeconfigureRequest {}
+
+// An empty message used as a response for
+// a deconfigure request.
+message DeconfigureResponse {}
+
+// Request that the component initiates a scan
+message ScanRequest {
+    // Expect a timestamp for when the Scan should
+    // start.  This is an open issue at the moment.
+}
+
+// Response for the scan request.
+message ScanResponse {}
+
+// Request that the component stops scanning
+//
+// if end_time > 0 then the scan must stop
+// at that exact time.
+message EndScanRequest {
+    // the time at which all the scans should stop
+    // as to allow synchonisation between RECV subbands
+    // This is in milliseconds from UNIX epoch
+    // (January 1, 1970 00:00:00 UTC)
+    uint64 end_time = 1;
+}
+
+// Response for the end scan request.
+message EndScanResponse {}
+
+// Request from the server to find out what state it is in.
+message GetStateRequest {}
+
 // Response from the server for what state it is in.
 message GetStateResponse {
     ObsState state = 1;
@@ -200,7 +414,7 @@ message GetStateResponse {
 // Message for the statistics of a subband ring buffer
 message SmrbStatitics {
     // total number of buffers
-    uint64 nbufs = 1;
+    uint32 nbufs = 1;
 
     // size of each buffer in bytes
     uint64 bufsz = 2;
@@ -212,13 +426,13 @@ message SmrbStatitics {
     uint64 read = 4;
 
     // number of filled buffers in the ring
-    uint64 full = 5;
+    uint32 full = 5;
 
     // number of cleared buffers in the ring
-    uint64 clear = 6;
+    uint32 clear = 6;
 
     // number of free buffers in the ring
-    uint64 available = 7;
+    uint32 available = 7;
 }
 
 // Message for the monitor results of a subband.
@@ -226,6 +440,22 @@ message SmrbStatitics {
 message SmrbMonitorData {
     SmrbStatitics data = 1;
     SmrbStatitics weights = 2;
+}
+
+// Message for the Receive monitoring results of a subband.
+message ReceiveMonitorData {
+    // UDP data received in bytes per second.
+    // This is the instantaneous rate for the last second.
+    float receive_rate = 1;
+    // UDP data received in the current scan (in bytes).
+    uint64 data_received = 2;
+    // UDP data dropped in bytes per second.
+    // This is the instantaneous rate for the last second.
+    float data_drop_rate = 3;
+    // UDP data dropped in the current scan (in bytes).
+    uint64 data_dropped = 4;
+    // Number of out of order UDP packets received in the current scan
+    uint64 misordered_packets = 5;
 }
 
 // Request from the server to stream monitoring telemetry.
@@ -247,6 +477,7 @@ message MonitorRequest {
 message MonitorResponse {
     oneof monitor_data {
         SmrbMonitorData smrb = 1;
+        ReceiveMonitorData receive = 2;
     }
 }
 
@@ -289,47 +520,65 @@ message ConnectionRequest {
 message ConnectionResponse {
 }
 
-/**
+/*
  Service to expose the local monitoring and control functionality
  of a process.
 */
 service PstLmcService {
-    /**
+    /*
      * Used by a client to try to connect to the remote service.
      */
     rpc connect(ConnectionRequest) returns (ConnectionResponse);
-    /**
+    /*
      * Used by a client to assign resources of the component.
      */
     rpc assign_resources(AssignResourcesRequest) returns (AssignResourcesResponse);
-    /**
+    /*
      * Used by a client to release the resources assigned by a component.
      */
     rpc release_resources(ReleaseResourcesRequest) returns (ReleaseResourcesResponse);
-    /**
+    /*
      * Used by a client to get the currently assigned resource details of a component.
      */
     rpc get_assigned_resources(GetAssignedResourcesRequest) returns (GetAssignedResourcesResponse);
-    /**
+    /*
+     * Used by a client to configure a server to be ready for a scan request
+     * putting the server in a READY state.
+     */
+    rpc configure(ConfigureRequest) returns (ConfigureResponse);
+    /*
+     * Used by a client to deconfigure a server and put it back to an IDLE state.
+     */
+    rpc deconfigure(DeconfigureRequest) returns (DeconfigureResponse);
+    /*
+     * Utility method that can be used to get the current scan configuration for a component.
+     */
+    rpc get_scan_configuration(GetScanConfigurationRequest) returns (GetScanConfigurationResponse);
+    /*
      * Used by a client to start a scan of the component.
      */
     rpc scan(ScanRequest) returns (ScanResponse);
-    /**
+    /*
      * Used by a client to end a scan of the component.
+     *
+     * The EndScanRequest has an end_time parameter that if set
+     * the service must stop the scan at that exact time. This
+     * method should block until that time has been reached as
+     * to allow the LMC to know that scanning has stopped.
      */
     rpc end_scan(EndScanRequest) returns (EndScanResponse);
-    /**
+    /*
      * Used by a client to verify the state of the component.
      */
     rpc get_state(GetStateRequest) returns (GetStateResponse);
-    /**
+    /*
      * Used to monitor a service. The service is expected to
      * stream results back and putting the monitor data specific
      * to itself in a given sub-message, i.e. SMRB to return
      * data in an SmrbMonitorData wrapped in a MonitorResponse.
      */
     rpc monitor(MonitorRequest) returns (stream MonitorResponse);
-    /**
+    /*
      * Used by a client to put the server into the ABORTED state.
      * This can affect the configuring and scanning stages and
      * the service must end those stages. If monitoring is happening
@@ -337,12 +586,12 @@ service PstLmcService {
      * stop as that is only valid for scanning states.
      */
     rpc abort(AbortRequest) returns (AbortResponse);
-    /**
+    /*
      * Used by a client to reset the device from ABORTED or FAULT state
      * into an IDLE / deconfigured state.
      */
      rpc reset(ResetRequest) returns (ResetResponse);
-    /**
+    /*
      * Used by a client to reset the device from ABORTED or FAULT state
      * into an EMPTY, no resources assigned, state. Implementations of
      * this can do a logical restart, i.e. make sure the the system is
