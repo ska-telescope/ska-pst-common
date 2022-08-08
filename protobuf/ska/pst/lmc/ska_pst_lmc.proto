@@ -237,6 +237,8 @@ message ReceiveResources {
     uint32 nsubband             = 21;
     // subband configuration
     ReceiveSubbandResources subband_resources = 22;
+    // udp format for scan
+    string udp_format           = 23;
 }
 
 // Assign resources is used by the LMC to assign
