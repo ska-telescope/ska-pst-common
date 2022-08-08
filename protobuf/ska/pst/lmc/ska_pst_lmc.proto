@@ -161,7 +161,7 @@ message ReceiveSubbandResources {
     string data_key                 = 1;
     // subband weights key
     string weights_key              = 2;
-    // RF bandwidth  for sub-band
+    // RF bandwidth  for sub-band (in MHz)
     double bandwidth                = 3;
     // number of input frequency channels for subband
     uint32 nchan                    = 4;
@@ -188,9 +188,9 @@ message ReceiveResources {
     // Number of frequency channels per packet
     uint32 udp_nchan            = 3;
     // Centre frequency of observation (in MHz)
-    double frequency             = 4;
+    double frequency            = 4;
     // Total critical bandwidth (in MHz)
-    double bandwidth             = 5;
+    double bandwidth            = 5;
     // Total number of input channels
     uint32 nchan                = 6;
     // The timing beam identifier
@@ -216,7 +216,7 @@ message ReceiveResources {
     // number of receptors in sub-array
     uint32 nant                 = 13;
     // list of receptors
-    repeated string antennnas   = 14;
+    repeated string antennas   = 14;
     // receptor weights
     repeated float ant_weights  = 15;
     // number of polarisation
