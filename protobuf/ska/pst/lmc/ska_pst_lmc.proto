@@ -165,18 +165,22 @@ message ReceiveSubbandResources {
     double bandwidth                = 3;
     // number of input frequency channels for subband
     uint32 nchan                    = 4;
-    // lowest and highest frequency channel number for input of sub-band (in MHz)
-    repeated uint32 chan_range      = 5;
+    // lowest channel number for input of sub-band (in MHz)
+    uint32 start_channel            = 5;
+    // highest channel number for input of sub-band (in MHz)
+    uint32 end_channel              = 6;
     // subband centre frequency (in MHz)
-    double frequency                = 6;
-    // lowest and highest frequency channel number for output of sub-band
-    repeated uint32 chan_out_range  = 7;
+    double frequency                = 7;
+    // lowest frequency channel number for output of sub-band
+    uint32 start_channel_out        = 8;
+    // highest channel number for input of sub-band (in MHz)
+    uint32 end_channel_out          = 9;
     // number of output frequency channels of sub-band
-    uint32 nchan_out                = 8;
+    uint32 nchan_out                = 10;
     // total output bandwidth across the frequency channels of sub-band (in MHz)
-    double bandwidth_out            = 9;
+    double bandwidth_out            = 11;
     // centre RF frequency of output channels of subband (in MHz)
-    double frequency_out            = 10;
+    double frequency_out            = 12;
 }
 
 // Message to represent configuration for the RECV.CORE of PST
@@ -215,10 +219,10 @@ message ReceiveResources {
     float fa_req                = 12;
     // number of receptors in sub-array
     uint32 nant                 = 13;
-    // list of receptors
-    repeated string antennas   = 14;
-    // receptor weights
-    repeated float ant_weights  = 15;
+    // comma separated list of anntenna names.
+    string antennas   = 14;
+    // comma separated list of receptor weights (which are floats)
+    string ant_weights  = 15;
     // number of polarisation
     uint32 npol                 = 16;
     // number of bits per sample
@@ -227,12 +231,14 @@ message ReceiveResources {
     uint32 ndim                 = 18;
     // sampling time, inferred from the bandwidth, nchan and oversample (in microseconds)
     double tsamp                = 19;
-    // oversampling rate - this is a fraction expressed as 2 integers.
-    repeated uint32 ovrsamp     = 20;
+    // oversampling rate - this is a fraction expressed as numerator/denominator
+    string ovrsamp     = 20;
     // number of subbands
     uint32 nsubband             = 21;
     // subband configuration
     ReceiveSubbandResources subband_resources = 22;
+    // udp format for scan
+    string udp_format           = 23;
 }
 
 // Assign resources is used by the LMC to assign
@@ -318,8 +324,8 @@ message ReceiveScanConfiguration {
     string pnt_id               = 6;
     // ID for the sub-array
     string subarray_id           = 7;
-    // IRTF coordinates of the telescope delay centre (in metres)
-    repeated double itrf        = 8;
+    // Comma separated string of IRTF coordinates of the telescope delay centre (in metres)
+    string itrf        = 8;
     // Beam major axis
     float bmaj                  = 9;
     // Beam minor axis
