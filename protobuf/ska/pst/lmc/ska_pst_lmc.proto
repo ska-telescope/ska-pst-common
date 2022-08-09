@@ -206,9 +206,9 @@ message ReceiveResources {
     // For value of +1 for XYZ forming RH set with Z in the
     // direction of propagation. Looking up into the feed of
     // a prime-focus receiver or at the sky).
-    sint32 fn_hand              = 9;
+    sint32 fd_hand              = 9;
     // feed angle (in degrees)
-    float fn_sang               = 10;
+    float fd_sang               = 10;
     // feed tracking mode
     string fd_mode              = 11;
     // feed position angle
