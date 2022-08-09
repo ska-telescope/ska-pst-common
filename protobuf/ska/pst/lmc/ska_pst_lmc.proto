@@ -239,6 +239,8 @@ message ReceiveResources {
     ReceiveSubbandResources subband_resources = 22;
     // udp format for scan
     string udp_format           = 23;
+    // calculated bytes_per_second
+    double bytes_per_second     = 24;
 }
 
 // Assign resources is used by the LMC to assign
