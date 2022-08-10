@@ -181,6 +181,10 @@ message ReceiveSubbandResources {
     double bandwidth_out            = 11;
     // centre RF frequency of output channels of subband (in MHz)
     double frequency_out            = 12;
+    // interface to listen on
+    string data_host                = 13;
+    // udp port to listen on
+    uint32 data_port                = 14;
 }
 
 // Message to represent configuration for the RECV.CORE of PST
