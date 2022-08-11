@@ -111,6 +111,10 @@ enum ErrorCode {
     ALREADY_SCANNING            = 5;
     // The service is not scanning
     NOT_SCANNING                = 6;
+    // The resources of the component already configured for scan. Should have deconfigured beforehand.
+    SCAN_CONFIGURED_ALREADY     = 7;
+    // There is no scan configuration for the server.
+    NOT_CONFIGURED_FOR_SCAN     = 8;
 }
 
 // Enum representing the observation mode for the scan
