@@ -111,6 +111,10 @@ enum ErrorCode {
     ALREADY_SCANNING            = 5;
     // The service is not scanning
     NOT_SCANNING                = 6;
+    // The resources of the component already configured for scan. Should have deconfigured beforehand.
+    SCAN_CONFIGURED_ALREADY     = 7;
+    // There is no scan configuration for the server.
+    NOT_CONFIGURED_FOR_SCAN     = 8;
 }
 
 // Enum representing the observation mode for the scan
@@ -329,31 +333,34 @@ message ReceiveScanConfiguration {
     // ID for sub-array pointing
     string pnt_id               = 6;
     // ID for the sub-array
-    string subarray_id           = 7;
+    string subarray_id          = 7;
+    // The name/id of the source
+    string source               = 8;
     // Comma separated string of IRTF coordinates of the telescope delay centre (in metres)
-    string itrf        = 8;
+    string itrf                 = 9;
     // Beam major axis
-    float bmaj                  = 9;
+    float bmaj                  = 10;
     // Beam minor axis
-    float bmin                  = 10;
+    float bmin                  = 11;
     // frame of coordinates
-    string coord_md             = 11;
+    string coord_md             = 12;
     // coordinate epoch
-    string equinox              = 12;
+    string equinox              = 13;
     // X component of starting co-ords in COORD_MD frame. If equatorial
     // coordinates this would be the RA in Hours, minutes, seconds
-    string stt_crd1             = 13;
+    string stt_crd1             = 14;
     // Y component of starting co-ords in COORD_MD frame. If equatorial
     // coordinates this would be the Dec in degrees, minutes, seconds.
-    string stt_crd2             = 14;
+    string stt_crd2             = 15;
     // tracking mode
-    string trk_mode             = 15;
+    string trk_mode             = 16;
     // maximum length of observation (in seconds)
-    int32 scanlen_max           = 16;
+    int32 scanlen_max           = 17;
     // identifier of preconfigured test-vector
-    string test_vector          = 17;
+    string test_vector          = 18;
     // calibration information for the scan
-    ScanCalibration calibration = 18;
+    ScanCalibration calibration = 19;
+
 }
 
 // Request message to configure a server to
