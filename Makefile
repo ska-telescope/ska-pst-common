@@ -6,7 +6,7 @@ include .make/base.mk
 include .make/oci.mk
 
 # include pst common local make targets
-include ./makefiles/base.mk
+include $(PWD)/makefiles/base.mk
 
 # include your own private variables for custom deployment configuration
 -include PrivateRules.mak
