@@ -12,7 +12,6 @@ local-cpp-clean-buildpath:
 local-cpp-build-debug:
 	$(call fn_msg_start,local-cpp-build-debug)
 	$(call fn_cmake,\
-	local-cpp-build-debug,\
 	$(BUILD_PATH),\
 	$(SOURCE_PATH) -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTING=ON -DCMAKE_CXX_FLAGS="-coverage" -DCMAKE_EXE_LINKER_FLAGS="-coverage",\
 	$(PROCESSOR_COUNT))
@@ -129,9 +128,9 @@ local-cpp-ci-simulation-lint: local-cpp-clean-buildpath local-cpp-build-export-c
 
 local-cpp-ci-simulation-test: local-cpp-clean-buildpath
 	$(call fn_msg_start,local-cpp-ci-simulation-test)
-	$(MAKE) build_debug
-	$(MAKE) test
-	$(MAKE) test_memcheck
+	$(MAKE) local-cpp-build-debug
+	$(MAKE) local-cpp-test-ctest
+	$(MAKE) local-cpp-test-ctest-memcheck
 	@echo "CHECK: ci_simulation_test artefacts"
 	stat $(BUILD_PATH)/Testing/Temporary/MemoryChecker.*.log
 	$(call fn_msg_end,local-cpp-ci-simulation-test)
