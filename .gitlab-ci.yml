@@ -20,6 +20,7 @@ variables:
   SKA_CPP_DOCKER_BUILDER_IMAGE: artefact.skao.int/ska-cicd-cpp-build-base:0.2.10
   OCI_IMAGE_BUILD_CONTEXT: $(PWD)  
   OCI_IMAGES: "ska-pst-common-builder ska-pst-common-proto"
+  K8S_TEST_CLUSTER_TAG: k8srunner-psi-low
   OCI_TEST_TAG: ""
 
 stages:
