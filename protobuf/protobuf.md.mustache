@@ -1,0 +1,158 @@
+# gRPC + Protobuf API
+
+## Table of Contents
+{{range .Files}}
+{{if .HasServices}}
+- Services
+  {{range .Services}}  - [{{.Name}}](#{{.FullName | lower | replace "." ""}})
+  {{end}}
+{{end}}
+{{if .HasMessages}}
+- Messages
+  {{range .Messages}}  - [{{.LongName}}](#{{.LongName | lower | replace "." ""}})
+  {{end}}
+{{end}}
+{{if .HasEnums}}
+- Enums
+  {{range .Enums}}  - [{{.LongName}}](#{{.LongName | lower | replace "." ""}})
+  {{end}}
+{{end}}
+{{end}}
+
+{{range .Files}}
+
+---
+
+## Overview
+
+**File:** [{{.Name}}](http://gitlab.com/ska-telescope/pst/ska-pst-common/-/blob/main/protobuf/{{.Name -}})<br>
+**Python Package:** {{.Package | replace "." "_" }}<br>
+**C++ Package:** {{.Package | replace "." "::" }}<br>
+
+<p>{{ .Description | replace "\n\n" "</p><p>" | replace "\n" " " }}</p>
+
+{{if .HasServices}}
+---
+## Services
+The following rpc services are defined within the protobuf file.
+{{range .Services -}}
+### {{.Name}}
+{{ .Description }}
+
+{{range .Methods -}}
+<table border="1" class="docutils protobuf-table">
+  <thead>
+    <tr>
+      <th colspan="2">{{.Name}}</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Signature:</strong></td>
+      <td><strong>rpc</strong> {{.Name}}(<a href="#{{.RequestLongType | lower | replace "." ""}}">{{if .RequestStreaming}}stream {{end}}{{.RequestLongType}}</a>) returns ({{if .ResponseStreaming}}stream {{end}}<a href="#{{.ResponseLongType | lower | replace "." ""}}">{{.ResponseLongType}}</a>)</td>
+    </tr>
+    <tr>
+      <td><strong>Description:</strong></td>
+      <td>{{.Description}}</td>
+    </tr>
+  </tbody>
+</table>
+{{end}} <!-- end methods -->
+
+{{end}} <!-- end services -->
+{{end}} <!-- end has services -->
+
+{{if .HasMessages}}
+---
+
+## Messages
+The following Protobuf messages are defined in the protobuf file.
+{{range .Messages}}
+
+### {{.LongName}}
+<p>{{ .Description | replace "\n\n" "</p><p>" | replace "\n" " " }}</p>
+
+{{if .HasFields}}
+<table border="1" class="docutils protobuf-table">
+  <thead>
+    <tr>
+      <th>Field</th>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+{{range .Fields -}}
+    <tr>
+      <td>{{if .IsOneof}}<strong>oneof</strong> {{.OneofDecl}}.{{end}}{{.Name}}</td>
+      <td><a href="#{{.LongType | lower | replace "." ""}}">{{if .IsMap}}map {{else}}{{.Label}} {{end}}{{.LongType}}</a></td>
+      <td>{{.Description}}</td>
+    </tr>
+{{end}} <!-- end fields -->
+  </tbody>
+</table>
+{{end}} <!-- end HasFields -->
+{{if not .HasFields}}
+*This is an empty message without any fields.*
+{{end}}
+{{end}} <!-- end messages -->
+{{end}} <!-- end has messages -->
+
+{{if .HasMessages}}
+---
+## Enums
+The following enums are defined within the protobuf file.
+
+{{range .Enums}}
+
+### {{.LongName}}
+<p>{{ .Description | replace "\n\n" "</p><p>" | replace "\n" " " }}</p>
+
+<table border="1" class="docutils protobuf-table">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Number</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+{{range .Values -}}
+    <tr>
+      <td>{{.Name}}</td>
+      <td>{{.Number}}</td>
+      <td>{{if .Description}}{{.Description}}{{else}}none{{end}}</td>
+    </tr>
+{{end}} <!-- end values -->
+  </tbody>
+</table>
+{{end}} <!-- end Enums -->
+{{end}} <!-- end has enums -->
+
+{{end}} <!-- end Files -->
+
+---
+## Protobuf Scalar Value Types
+
+The following value types are standard Protobuf types and documented for reference
+
+<table border="1" class="docutils">
+  <thead>
+    <tr>
+      <th>.proto Type</th>
+      <th>C++ Type</th>
+      <th>Python Type</th>
+      <th>Notes</th>
+    </tr>
+  </thead>
+  <tbody>
+{{range .Scalars -}}
+    <tr>
+      <td><a name="{{.ProtoType}}" /> {{.ProtoType}}</td>
+      <td>{{.CppType}}</td>
+      <td>{{.PythonType}}</td>
+      <td>{{.Notes}}</td>
+    </tr>
+{{end}} <!-- end scalars -->
+  </tbody>
+</table>

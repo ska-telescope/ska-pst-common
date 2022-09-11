@@ -27,6 +27,23 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+
+ /*
+  * The protobuf definitions for the PST Local Monitoring and Controle (LMC)
+  * used within the PST infrastructure. The interface between the PyTango
+  * devices and the the core PST applications is provided by gRPC which uses
+  * protobuf messages to define the exchange of data and request messages.
+  *
+  * Messages are in general made map what is needed by the core applications
+  * and not the SKA Telmodel JSON schema. The LMC devices will need to map
+  * values from a JSON request to send to a remote implementaion.
+  *
+  * C++ bindings are generated as part of the ska-pst-common build pipeline
+  * but the Python bindings are not generated to allow for the ska-pst-lmc
+  * project to use the correct version of protobuf/protoc to generate the
+  * bindings. Access to the C++ bindings are available in the ska-pst-common-builder
+  * Docker image in /usr/local/include/ska/pst/lmc
+  */
 syntax = "proto3";
 
 package ska.pst.lmc;
@@ -79,9 +96,7 @@ enum ObsState {
     // controller, and is now in an aborted state.
     ABORTED = 7;
 
-    // """
     // The subarray device is resetting to the IDLE state.
-    // """
     RESETTING = 8;
 
     // The subarray has detected an error in its observing state making it
@@ -119,8 +134,15 @@ enum ErrorCode {
 
 // Enum representing the observation mode for the scan
 enum ObservationMode {
+    // The default observation mode is Pulsar timing
+    // which is used to time a known pulsar.
     PULSAR_TIMING       = 0;
+    // Dynamic spectrum is used on a target, such as a
+    // candidate pulsar, to determine more details about
+    // it before doing a pulsar timing scanning.
     DYNAMIC_SPECTRUM    = 1;
+    // The observation mode that just records the data
+    // without processing the data.
     FLOW_THROUGH        = 2;
 }
 
@@ -209,8 +231,7 @@ message ReceiveResources {
     string frontend             = 7;
     // native polarisation of feed
     string fd_poln              = 8;
-    // handedness of feed
-    // valid values are +1 or -1
+    // handedness of feed, having valid values are +1 or -1.
     // For value of +1 for XYZ forming RH set with Z in the
     // direction of propagation. Looking up into the feed of
     // a prime-focus receiver or at the sky).
@@ -219,8 +240,7 @@ message ReceiveResources {
     float fd_sang               = 10;
     // feed tracking mode
     string fd_mode              = 11;
-    // feed position angle
-    // this is For feed_mode = ‘FA’ this is respect to the telescope’s
+    // feed position angle. If the feed_mode = ‘FA’ this is respect to the telescope’s
     // reference frame (feed_angle = 0), and for feed_mode = ‘CPA’
     // this is with respect to the celestial north (parallic angle = 0)
     // or with respect to the Galactic north for coordinate_mode = ‘GALACTIC’.
@@ -255,25 +275,28 @@ message ReceiveResources {
 // resources that may be later used during a scan.
 message AssignResourcesRequest {
     oneof resources {
+        // The resources to assign for SMRB.CORE.
+        // It is invalid to send Smrb resources to
+        // any other system.
         SmrbResources smrb = 1;
+        // The resources to assign for RECV.CORE.
+        // It is invalid to send Receive resources to
+        // any other system.
         ReceiveResources receive = 2;
     }
 }
 
 // An empty response message that is used to define
 // successfully assigned resources.
-message AssignResourcesResponse {
-}
+message AssignResourcesResponse {}
 
 // An empty message used in requesting the release
 // of resources.
-message ReleaseResourcesRequest {
-}
+message ReleaseResourcesRequest {}
 
-// An empty respinse message that is used in
+// An empty response message that is used in
 // releasing resources
-message ReleaseResourcesResponse {
-}
+message ReleaseResourcesResponse {}
 
 // An empty message used to request the assigned
 // resources.
@@ -283,7 +306,9 @@ message GetAssignedResourcesRequest {}
 // resources of the component.
 message GetAssignedResourcesResponse {
     oneof resources {
+        // The resources to assigned to SMRB.CORE.
         SmrbResources smrb = 1;
+        // The resources to assigned to RECV.CORE.
         ReceiveResources receive = 2;
     }
 }
@@ -367,15 +392,20 @@ message ReceiveScanConfiguration {
 // be ready for a scan request.
 message ConfigureRequest {
     oneof configuration {
+        // The scan configuration for SMRB.CORE. It
+        // is invalid to send this message to anywhere
+        // else other than SMRB.CORE during a configure request.
         SmrbScanConfiguration smrb = 1;
+        // The scan configuration for RECV.CORE. It
+        // is invalid to send this message to anywhere
+        // else other than RECV.CORE during a configure request.
         ReceiveScanConfiguration receive = 2;
     }
 }
 
 // An empty message used as a response for
 // a configure request.
-message ConfigureResponse {
-}
+message ConfigureResponse {}
 
 // An empty message used to retreive the current
 // scan configuration of a component.
@@ -385,7 +415,9 @@ message GetScanConfigurationRequest {}
 // configuration of the a component.
 message GetScanConfigurationResponse {
     oneof configuration {
+        // The current scan configuration for SMRB.CORE.
         SmrbScanConfiguration smrb = 1;
+        // The current scan configuration for RECV.CORE.
         ReceiveScanConfiguration receive = 2;
     }
 }
@@ -427,6 +459,7 @@ message GetStateRequest {}
 
 // Response from the server for what state it is in.
 message GetStateResponse {
+    // The current ObsState of the managed service.
     ObsState state = 1;
 }
 
@@ -455,9 +488,13 @@ message SmrbStatitics {
 }
 
 // Message for the monitor results of a subband.
-// This includes the data and weights statistics
+// This includes the data and weights statistics.
+// It is up to the client of this to aggregate the
+// data and weights statistics.
 message SmrbMonitorData {
+    // The data ring buffer statistics.
     SmrbStatitics data = 1;
+    // The weights ring buffer statistics.
     SmrbStatitics weights = 2;
 }
 
@@ -494,8 +531,11 @@ message MonitorRequest {
 // to populate SmrbMonitorData messages and put them
 // into the smrb field of this message.
 message MonitorResponse {
+    // At most one monitoring data value is allowed.
     oneof monitor_data {
+        // The monitoring data for SMRB.CORE.
         SmrbMonitorData smrb = 1;
+        // The monitoring data for RECV.CORE.
         ReceiveMonitorData receive = 2;
     }
 }
@@ -512,8 +552,7 @@ message AbortResponse {}
 // on the SKA Obs State model this should put the server
 // in an IDLE (i.e. deconfigured/unconfigured) state but
 // still have resources assigned.
-message ResetRequest {
-}
+message ResetRequest {}
 
 // The response message for the reset command.
 message ResetResponse {}
@@ -523,8 +562,7 @@ message ResetResponse {}
 // back to an EMPTY (i.e. no resources assigned) state.
 // The implementation of this may do a logical restart
 // rather than restarting the process.
-message RestartRequest {
-}
+message RestartRequest {}
 
 // The response message for the reset command.
 message RestartResponse {}
@@ -532,12 +570,13 @@ message RestartResponse {}
 // A request message to be sent to the service to
 // identify which client is connecting.
 message ConnectionRequest {
+    // The ID of the client. For the TANGO devices this should
+    // be the full-qualified domain name of the device.
     string client_id = 1;
 }
 
 // An empty response message for the connection request.
-message ConnectionResponse {
-}
+message ConnectionResponse {}
 
 /*
  Service to expose the local monitoring and control functionality

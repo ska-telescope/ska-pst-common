@@ -74,3 +74,19 @@ local-grpc-do-installation:
 	cd $(GRPC_BUILD_PATH) && make -j$(NPROC) && make install -j$(NPROC)
 local-grpc-post-installation:
 local-grpc-installation: local-grpc-pre-installation local-grpc-do-installation local-grpc-post-installation
+
+DOCS_DOCKER_UID ?= `id -u`
+DOCS_DOCKER_GID ?= `id -g`
+protobuf-docs:
+	@echo 'Generating protobuf docs'
+	@docker run --rm -u $(DOCS_DOCKER_UID):$(DOCS_DOCKER_GID) \
+	  -v $(PWD)/protobuf:/protobuf:ro \
+	  -v $(PWD)/docs/src/api:/out:rw \
+	  pseudomuto/protoc-gen-doc:1.5 \
+	  -I=protobuf \
+	  --doc_opt=protobuf/protobuf.md.mustache,protobuf.md \
+	  protobuf/ska/pst/lmc/ska_pst_lmc.proto
+
+docs-pre-build: protobuf-docs
+
+.PHONY: protobuf-docs
