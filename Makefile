@@ -79,11 +79,14 @@ DOCS_DOCKER_UID ?= `id -u`
 DOCS_DOCKER_GID ?= `id -g`
 protobuf-docs:
 	@echo 'Generating protobuf docs'
+	@echo 'Current directory is: $(PWD)'
+	@echo 'Current user/group is: $(DOCS_DOCKER_UID):$(DOCS_DOCKER_GID)'
+	@ls -l $(PWD)
 	@docker run --rm -u $(DOCS_DOCKER_UID):$(DOCS_DOCKER_GID) \
 	  -v $(PWD)/protobuf:/protobuf:ro \
 	  -v $(PWD)/docs/src/api:/out:rw \
 	  pseudomuto/protoc-gen-doc:1.5 \
-	  -I=protobuf \
+	  -Iprotobuf \
 	  --doc_opt=protobuf/protobuf.md.mustache,protobuf.md \
 	  protobuf/ska/pst/lmc/ska_pst_lmc.proto
 
