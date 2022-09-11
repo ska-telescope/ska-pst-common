@@ -81,14 +81,14 @@ protobuf-docs:
 	@echo 'Generating protobuf docs'
 	@echo 'Current directory is: $(PWD)'
 	@echo 'Current user/group is: $(DOCS_DOCKER_UID):$(DOCS_DOCKER_GID)'
+	@find $(PWD)/protobuf
 	@ls -l $(PWD)
 	@docker run --rm -u $(DOCS_DOCKER_UID):$(DOCS_DOCKER_GID) \
-	  -v $(PWD)/protobuf:/protobuf:ro \
-	  -v $(PWD)/docs/src/api:/out:rw \
+	  -v "$(PWD)/protobuf":/protos:ro \
+	  -v "$(PWD)/docs/src/api":/out:rw \
+	  --entrypoint=/bin/sh \
 	  pseudomuto/protoc-gen-doc:1.5 \
-	  -Iprotobuf \
-	  --doc_opt=protobuf/protobuf.md.mustache,protobuf.md \
-	  protobuf/ska/pst/lmc/ska_pst_lmc.proto
+	  -c 'find /protos'
 
 docs-pre-build: protobuf-docs
 
