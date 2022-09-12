@@ -75,20 +75,12 @@ local-grpc-do-installation:
 local-grpc-post-installation:
 local-grpc-installation: local-grpc-pre-installation local-grpc-do-installation local-grpc-post-installation
 
-DOCS_DOCKER_UID ?= `id -u`
-DOCS_DOCKER_GID ?= `id -g`
 protobuf-docs:
 	@echo 'Generating protobuf docs'
-	@echo 'Current directory is: $(PWD)'
-	@echo 'Current user/group is: $(DOCS_DOCKER_UID):$(DOCS_DOCKER_GID)'
-	@find $(PWD)/protobuf
-	@ls -l $(PWD)
-	@docker run --rm -u $(DOCS_DOCKER_UID):$(DOCS_DOCKER_GID) \
-	  -v "$(PWD)/protobuf":/protos:ro \
-	  -v "$(PWD)/docs/src/api":/out:rw \
-	  --entrypoint=/bin/sh \
-	  pseudomuto/protoc-gen-doc:1.5 \
-	  -c 'find /protos'
+	@protoc -I=$(PWD)/protobuf \
+		--doc_out=$(PWD)/docs/src/api \
+		--doc_opt=$(PWD)/protobuf/ska/pst/lmc/ska_pst_lmc.proto,protobuf.md \
+		$(PWD)/protobuf/ska/pst/lmc/ska_pst_lmc.proto
 
 docs-pre-build: protobuf-docs
 
