@@ -22,10 +22,15 @@ build:
   jobs:
     post_system_dependencies:
       - curl -L -O https://go.dev/dl/go1.19.1.linux-amd64.tar.gz
-      - tar -C /usr/local -xzf go1.19.1.linux-amd64.tar.gz
-      - GOBIN=/usr/local/bin /usr/local/go/bin/go install -v github.com/pseudomuto/protoc-gen-doc/cmd/protoc-gen-doc@v1.5.1
+      - tar -xzf go1.19.1.linux-amd64.tar.gz
+      - ./go/bin/go install -v github.com/pseudomuto/protoc-gen-doc/cmd/protoc-gen-doc@v1.5.1
     pre_build:
-      - protoc -I=$(pwd)/protobuf --doc_out=$(pwd)/docs/src/api --doc_opt=$(pwd)/protobuf/ska/pst/lmc/ska_pst_lmc.proto,protobuf.md $(pwd)/protobuf/ska/pst/lmc/ska_pst_lmc.proto
+      - |
+        protoc -I=$(pwd)/protobuf \
+          --plugin=protoc-gen-doc=./go/bin/protoc-gen-doc \
+          --doc_out=$(pwd)/docs/src/api \
+          --doc_opt=$(pwd)/protobuf/protobuf.md.mustache,protobuf.md \
+          $(pwd)/protobuf/ska/pst/lmc/ska_pst_lmc.proto
 
 # Build documentation in the docs/ directory with Sphinx
 sphinx:
