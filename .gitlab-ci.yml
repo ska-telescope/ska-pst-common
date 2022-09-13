@@ -32,13 +32,13 @@ stages:
 
 docs-build:
   stage: build
-  image: registry.gitlab.com/ska-telescope/pst/ska-pst-common/ska-pst-common-builder:0.2.0
+  image: registry.gitlab.com/ska-telescope/pst/ska-pst-common/ska-pst-common-builder:0.2.0-dev.c541c22cc
   needs:
   - oci-image-build
 
 docs-pages:
   stage: pages
-  image: registry.gitlab.com/ska-telescope/pst/ska-pst-common/ska-pst-common-builder:0.2.0
+  image: registry.gitlab.com/ska-telescope/pst/ska-pst-common/ska-pst-common-builder:0.2.0-dev.c541c22cc
   needs:
   - oci-image-build
 

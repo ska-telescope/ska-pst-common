@@ -82,7 +82,8 @@ WORKDIR /mnt/${PROTOC_GEN_DOC}
 RUN curl -L -O ${PROTOC_GEN_DOC_RELEASE_URL}/${PROTOC_GEN_DOC_RELEASE_FILE} \
     && tar -xvf ${PROTOC_GEN_DOC_RELEASE_FILE} \
     && cd ${PROTOC_GEN_DOC_FILE_FOLDER} \
-    && go install ./cmd/protoc-gen-doc
+    && go install ./cmd/protoc-gen-doc \
+    && /usr/local/bin/protoc-gen-doc -version
 
 # Compile gRPC
 ARG GRPC_INSTALL=local-grpc-installation
