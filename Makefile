@@ -13,11 +13,6 @@ include .pst/devenv.mk
 
 NPROC=`nproc`
 OCI_IMAGE_BUILD_CONTEXT=$(PWD)
-# local-dev-env:
-# 	@echo 'OCI_IMAGE: $(OCI_IMAGE)'
-# 	@echo 'OCI_TAG: $(OCI_TAG)'
-# 	@$(OCI_BUILDER) run --rm -ti -v $(PWD):/mnt/$(OCI_IMAGE) -w /mnt/$(OCI_IMAGE) $(OCI_IMAGE):$(OCI_TAG) bash
-
 # OS package installation
 .PHONY: local-pkg-install
 PKG_CLI_CMD ?=			# Package manager executable
