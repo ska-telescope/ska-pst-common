@@ -60,6 +60,31 @@ RUN ./configure --prefix=/usr/local \
     && make -j$(nproc) && make install -j$(nproc) \
     && protoc --version
 
+ARG GOLANG=golang-go
+ARG GOLANG_VERSION=1.19.1
+ARG GOLANG_FILE=go${GOLANG_VERSION}.linux-amd64.tar.gz
+ARG GOLANG_RELEASE_FILE=https://go.dev/dl/${GOLANG_FILE}
+WORKDIR /mnt/${GOLANG}-${GOLANG_VERSION}
+RUN rm -rf /usr/local/go && \
+    curl -L -O  ${GOLANG_RELEASE_FILE} && \
+    tar -C /usr/local -xzf go${GOLANG_VERSION}.linux-amd64.tar.gz
+
+ENV PATH $PATH:/usr/local/go/bin
+ENV GOBIN /usr/local/bin
+
+ARG PROTOC_GEN_DOC_VERSION=1.5.1
+ARG PROTOC_GEN_DOC_RELEASE_URL=https://github.com/pseudomuto/protoc-gen-doc/archive/refs/tags/v${PROTOC_GEN_DOC_VERSION}
+ARG PROTOC_GEN_DOC_RELEASE_FILE=v${PROTOC_GEN_DOC_VERSION}.tar.gz
+ARG PROTOC_GEN_DOC_FILE_FOLDER=protoc-gen-doc-${PROTOC_GEN_DOC_VERSION}
+ARG PROTOC_GEN_DOC=protoc-gen-doc
+
+WORKDIR /mnt/${PROTOC_GEN_DOC}
+RUN curl -L -O ${PROTOC_GEN_DOC_RELEASE_URL}/${PROTOC_GEN_DOC_RELEASE_FILE} \
+    && tar -xvf ${PROTOC_GEN_DOC_RELEASE_FILE} \
+    && cd ${PROTOC_GEN_DOC_FILE_FOLDER} \
+    && go install ./cmd/protoc-gen-doc \
+    && /usr/local/bin/protoc-gen-doc -version
+
 # Compile gRPC
 ARG GRPC_INSTALL=local-grpc-installation
 WORKDIR /mnt/ska-pst-common-builder
@@ -87,6 +112,8 @@ COPY --from=base /lib /lib
 COPY --from=base /lib32 /lib32
 COPY --from=base /lib64 /lib64
 COPY --from=base /usr /usr
+
+ENV PATH $PATH:/usr/local/go/bin
 
 WORKDIR /app
 COPY --from=base /mnt/ska-pst-common-builder/protobuf/ /app/protobuf/

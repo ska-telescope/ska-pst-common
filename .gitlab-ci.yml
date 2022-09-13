@@ -30,6 +30,18 @@ stages:
   - scan
   - pages
 
+docs-build:
+  stage: build
+  image: registry.gitlab.com/ska-telescope/pst/ska-pst-common/ska-pst-common-builder:0.2.0-dev.c541c22cc
+  needs:
+  - oci-image-build
+
+docs-pages:
+  stage: pages
+  image: registry.gitlab.com/ska-telescope/pst/ska-pst-common/ska-pst-common-builder:0.2.0-dev.c541c22cc
+  needs:
+  - oci-image-build
+
 include:
   # OCI
   - project: 'ska-telescope/templates-repository'
@@ -48,8 +60,8 @@ include:
   #   file: 'gitlab-ci/includes/k8s.gitlab-ci.yml'
 
   # Docs pages
-  # - project: 'ska-telescope/templates-repository'
-  #   file: 'gitlab-ci/includes/docs.gitlab-ci.yml'
+  - project: 'ska-telescope/templates-repository'
+    file: 'gitlab-ci/includes/docs.gitlab-ci.yml'
 
   # Common runtime tests
   - local: '.gitlab/ci/tests.gitlab-ci.yml'

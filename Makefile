@@ -74,3 +74,14 @@ local-grpc-do-installation:
 	cd $(GRPC_BUILD_PATH) && make -j$(NPROC) && make install -j$(NPROC)
 local-grpc-post-installation:
 local-grpc-installation: local-grpc-pre-installation local-grpc-do-installation local-grpc-post-installation
+
+protobuf-docs:
+	@echo 'Generating protobuf docs'
+	@protoc -I=$(PWD)/protobuf \
+		--doc_out=$(PWD)/docs/src/api \
+		--doc_opt=$(PWD)/protobuf/ska/pst/lmc/ska_pst_lmc.proto,protobuf.md \
+		$(PWD)/protobuf/ska/pst/lmc/ska_pst_lmc.proto
+
+docs-pre-build: protobuf-docs
+
+.PHONY: protobuf-docs
