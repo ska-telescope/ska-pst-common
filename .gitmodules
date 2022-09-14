@@ -11,3 +11,12 @@
 [submodule "resources/grpc"]
 	path = resources/grpc
 	url = https://github.com/grpc/grpc.git
+[submodule "resources/spdlog"]
+	path = resources/spdlog
+	url = https://github.com/gabime/spdlog.git
+[submodule "resources/googletest"]
+	path = resources/googletest
+	url = https://github.com/google/googletest.git
+[submodule "resources/cmake-modules"]
+	path = resources/cmake-modules
+	url = https://gitlab.com/ska-telescope/cmake-modules.git
