@@ -5,18 +5,14 @@ include .make/base.mk
 # include oci makefile targets for oci management
 include .make/oci.mk
 
+# include pst common local make targets
+include .pst/devenv.mk
+
 # include your own private variables for custom deployment configuration
 -include PrivateRules.mak
 
 NPROC=`nproc`
 OCI_IMAGE_BUILD_CONTEXT=$(PWD)
-# OCI_IMAGE=? # Declare in PrivateRules.mak for invoking local development environment local-dev-env
-# OCI_TAG=`grep -m 1 -o "[0-9].*" .release` # Declare in PrivateRules.mak for invoking local development environment local-dev-env
-local-dev-env:
-	@echo 'OCI_IMAGE: $(OCI_IMAGE)'
-	@echo 'OCI_TAG: $(OCI_TAG)'
-	@$(OCI_BUILDER) run --rm -ti -v $(PWD):/mnt/$(OCI_IMAGE) -w /mnt/$(OCI_IMAGE) $(OCI_IMAGE):$(OCI_TAG) bash
-
 # OS package installation
 .PHONY: local-pkg-install
 PKG_CLI_CMD ?=			# Package manager executable

@@ -1,6 +1,10 @@
 [submodule ".make"]
 	path = .make
 	url = https://gitlab.com/ska-telescope/sdi/ska-cicd-makefile.git
+[submodule ".pst"]
+	path = .pst
+	url = https://gitlab.com/ska-telescope/pst/ska-pst-makefiles.git
+	branch = main
 [submodule "resources/psrdada-code"]
 	path = resources/psrdada-code
 	url = https://git.code.sf.net/p/psrdada/code
