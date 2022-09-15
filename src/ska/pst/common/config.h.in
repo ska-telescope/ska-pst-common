@@ -1,0 +1,4 @@
+// the configured options and settings for SkaPstCommon
+#define SkaPstCommon_VERSION_MAJOR @SkaPstCommon_VERSION_MAJOR@
+#define SkaPstCommon_VERSION_MINOR @SkaPstCommon_VERSION_MINOR@
+#define SkaPstCommon_VERSION_PATCH @SkaPstCommon_VERSION_PATCH@

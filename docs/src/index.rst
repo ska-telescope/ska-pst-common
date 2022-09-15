@@ -25,4 +25,5 @@ components.
   :caption: API
   :hidden:
 
-  api/protobuf
+  Common API<api/library_root>
+  gRPC + Protobuf<api/protobuf>

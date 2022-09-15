@@ -6,7 +6,7 @@ include .make/base.mk
 include .make/oci.mk
 
 # include pst common local make targets
-include .pst/devenv.mk
+include .pst/base.mk
 
 # include your own private variables for custom deployment configuration
 -include PrivateRules.mak
@@ -75,7 +75,7 @@ protobuf-docs:
 	@echo 'Generating protobuf docs'
 	@protoc -I=$(PWD)/protobuf \
 		--doc_out=$(PWD)/docs/src/api \
-		--doc_opt=$(PWD)/protobuf/ska/pst/lmc/ska_pst_lmc.proto,protobuf.md \
+		--doc_opt=$(PWD)/protobuf/protobuf.md.mustache,protobuf.md \
 		$(PWD)/protobuf/ska/pst/lmc/ska_pst_lmc.proto
 
 docs-pre-build: protobuf-docs
