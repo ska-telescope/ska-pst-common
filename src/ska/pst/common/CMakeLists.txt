@@ -1,16 +1,15 @@
 
 configure_file(config.h.in config.h)
 
+add_subdirectory(lmc)
+
 set(public_headers
   version.h
   ${CMAKE_CURRENT_BINARY_DIR}/config.h
-  LmcService.h
-  LmcServiceHandler.h
 )
 
 set(sources
   src/version.cpp
-  src/LmcService.cpp
 )
 
 set(private_headers
@@ -45,10 +44,6 @@ target_link_libraries(
   gRPC::grpc++
   ${PSRDADA_LIBRARIES}
 )
-
-if (BUILD_TESTING)
-  add_subdirectory(tests)
-endif()
 
 install(
   TARGETS

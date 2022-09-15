@@ -32,8 +32,8 @@
 #include <grpc++/grpc++.h>
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
-#include "ska/pst/common/LmcService.h"
-#include "ska/pst/common/LmcServiceHandler.h"
+#include "ska/pst/common/lmc/LmcService.h"
+#include "ska/pst/common/lmc/LmcServiceHandler.h"
 #include "ska/pst/lmc/ska_pst_lmc.grpc.pb.h"
 
 #ifndef SKA_PST_SMRB_TESTS_LmcServiceTest_h

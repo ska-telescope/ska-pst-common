@@ -32,8 +32,8 @@
 #include <sstream>
 #include <thread>
 #include <chrono>
-#include "ska/pst/common/LmcService.h"
-#include "ska/pst/common/LmcServiceHandler.h"
+#include "ska/pst/common/lmc/LmcService.h"
+#include "ska/pst/common/lmc/LmcServiceHandler.h"
 #include <spdlog/spdlog.h>
 
 void ska::pst::common::LmcService::start() {

@@ -33,7 +33,7 @@
 #include <grpc/grpc.h>
 #include <grpc++/grpc++.h>
 
-#include "ska/pst/common/tests/LmcServiceTest.h"
+#include "ska/pst/common/lmc/tests/LmcServiceTest.h"
 #include "ska/pst/common/testutils/GtestMain.h"
 
 auto main(int argc, char* argv[]) -> int

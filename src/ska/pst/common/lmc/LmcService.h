@@ -39,7 +39,7 @@
 
 #include "absl/memory/memory.h"
 
-#include "ska/pst/common/LmcServiceHandler.h"
+#include "ska/pst/common/lmc/LmcServiceHandler.h"
 #include "ska/pst/lmc/ska_pst_lmc.grpc.pb.h"
 
 namespace ska {
