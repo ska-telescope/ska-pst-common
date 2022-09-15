@@ -1,10 +1,12 @@
 set(public_headers
   LmcService.h
   LmcServiceHandler.h
+  LmcServiceException.h
 )
 
 set(sources
   src/LmcService.cpp
+  src/LmcServiceException.cpp
 )
 
 set(private_headers
