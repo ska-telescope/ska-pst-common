@@ -20,6 +20,7 @@ if (BUILD_TESTING)
 endif()
 
 add_library(ska_pst_common
+    SHARED
     ${sources} ${optional_sources}
     ${private_headers} ${optional_private_headers}
     ${public_headers}
@@ -37,11 +38,7 @@ target_include_directories(
 target_link_libraries(
   ska_pst_common
   PUBLIC
-  ska_pst_lmc
   spdlog
-  protobuf::libprotobuf
-  gRPC::grpc
-  gRPC::grpc++
   ${PSRDADA_LIBRARIES}
 )
 

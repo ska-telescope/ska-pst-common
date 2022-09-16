@@ -19,11 +19,6 @@ include(dependencies)
 include(lint)
 include(CTest)
 
-if (BUILD_TESTING)
-  add_subdirectory(tests/protobuf)
-endif()
-add_subdirectory(protobuf)
-
 # External projects
 if (BUILD_TESTING)
   add_subdirectory(resources/googletest googletest EXCLUDE_FROM_ALL)
@@ -39,3 +34,8 @@ find_package(gRPC)
 find_dependencies()
 add_subdirectory(resources/spdlog)
 add_subdirectory(src/ska/pst/common)
+
+if (BUILD_TESTING)
+  add_subdirectory(tests/protobuf)
+endif()
+add_subdirectory(protobuf)
