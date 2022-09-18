@@ -62,17 +62,34 @@ void ska::pst::common::LmcService::serve() {
     server_address.append(std::to_string(_port));
     spdlog::trace("ska::pst::common::LmcService::serve setting up listen on port {}", _port);
 
-    grpc::ServerBuilder builder;
-    builder.AddListeningPort(server_address, grpc::InsecureServerCredentials(), &_port);
-    builder.RegisterService(this);
+    try
+    {
+        grpc::ServerBuilder builder;
+        spdlog::trace("ska::pst::common::LmcService::serve adding TCP listener {} to service", server_address);
 
-    spdlog::trace("ska::pst::common::LmcService::serve starting server");
-    server = builder.BuildAndStart();
-    spdlog::trace("ska::pst::common::LmcService::serve listening on port {}", _port);
+        spdlog::trace("ska::pst::common::LmcService::serve creating listener credentials");
+        auto credentials = grpc::InsecureServerCredentials();
+        spdlog::trace("ska::pst::common::LmcService::serve created credentials");
 
-    grpc::internal::MutexLock lock(&_mu);
-    _server_ready = true;
-    _cond.Signal();
+        spdlog::trace("ska::pst::common::LmcService::serve creating listener");
+        builder.AddListeningPort(server_address, credentials, &_port);
+        spdlog::trace("ska::pst::common::LmcService::serve listener created");
+
+        spdlog::trace("ska::pst::common::LmcService::serve registering service.");
+        builder.RegisterService(this);
+
+        spdlog::trace("ska::pst::common::LmcService::serve starting server");
+        server = builder.BuildAndStart();
+        spdlog::trace("ska::pst::common::LmcService::serve listening on port {}", _port);
+
+        grpc::internal::MutexLock lock(&_mu);
+        _server_ready = true;
+        _cond.Signal();
+    } catch (std::exception& ex) {
+        spdlog::error("Error {} raised during startin up of gRPC service", ex.what());
+        exit(1);
+    }
+
 }
 
 void ska::pst::common::LmcService::stop() {
@@ -107,7 +124,7 @@ auto ska::pst::common::LmcService::connect(
 {
     spdlog::trace("ska::pst::common::LmcService::connect()");
     spdlog::info("gRPC LMC connection received from {}", request->client_id());
-    
+
     return grpc::Status::OK;
 }
 

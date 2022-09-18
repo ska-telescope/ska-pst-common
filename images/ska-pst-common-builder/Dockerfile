@@ -42,9 +42,9 @@ RUN curl -L -O ${CMAKE_SOURCE} \
     && make -j$(nproc) && make install -j$(nproc)
 
 # Prepare environment for PROTOBUF
-ARG PROTOBUF_RELEASE_URL=https://github.com/protocolbuffers/protobuf/releases/download/v21.1
-ARG PROTOBUF_RELEASE_FILE=protobuf-cpp-3.21.1.tar.gz
-ARG PROTOBUF_RELEASE_FILE_FOLDER=protobuf-3.21.1
+ARG PROTOBUF_RELEASE_URL=https://github.com/protocolbuffers/protobuf/releases/download/v21.6
+ARG PROTOBUF_RELEASE_FILE=protobuf-cpp-3.21.6.tar.gz
+ARG PROTOBUF_RELEASE_FILE_FOLDER=protobuf-3.21.6
 ARG PROTOBUF=protobuf
 WORKDIR /mnt/${PROTOBUF}
 
