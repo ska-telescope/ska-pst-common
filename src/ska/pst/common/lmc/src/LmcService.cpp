@@ -38,6 +38,7 @@
 
 void ska::pst::common::LmcService::start() {
     spdlog::trace("ska::pst::common::LmcService::start()");
+    spdlog::info("Starting gRPC LMC server '{}'", _service_name);
     grpc::internal::MutexLock lock(&_mu);
     if (_started) {
       return;
@@ -52,7 +53,7 @@ void ska::pst::common::LmcService::start() {
       _cond.Wait(&_mu);
     }
     _server_ready = false;
-    spdlog::info("gRPC LMC server started on port {}", _port);
+    spdlog::info("Started gRPC LMC server '{}' on port {}", _service_name, _port);
 }
 
 void ska::pst::common::LmcService::serve() {
@@ -94,6 +95,7 @@ void ska::pst::common::LmcService::serve() {
 
 void ska::pst::common::LmcService::stop() {
     spdlog::trace("ska::pst::common::LmcService::stop()");
+    spdlog::info("Stopping gRPC LMC server '{}'", _service_name);
     grpc::internal::MutexLock lock(&_mu);
     if (!_started) {
       return;
