@@ -18,6 +18,7 @@ set(HDRS
 add_library(
     ska_pst_lmc_generated
 )
+target_include_directories(ska_pst_lmc_generated PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
 
 get_target_property(protoc_location protobuf::protoc LOCATION)
 get_target_property(grpc_cpp_plugin_location gRPC::grpc_cpp_plugin LOCATION)
