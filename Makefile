@@ -58,12 +58,13 @@ local-proto-test: local-proto-pre-test local-proto-do-test local-proto-post-test
 # gRPC build and installation
 GRPC_BASE_PATH=$(PWD)/resources/grpc
 GRPC_BUILD_PATH=$(GRPC_BASE_PATH)/cmake/build
-.PHONY: local-grpc-installation local-grpc-pre-installation local-grpc-do-installation 
+.PHONY: local-grpc-installation local-grpc-pre-installation local-grpc-do-installation
 local-grpc-pre-installation:
 	@rm -rf $(GRPC_BUILD_PATH) && mkdir -p $(GRPC_BUILD_PATH)
 local-grpc-do-installation:
 	@echo "gRPC installation"
 	@cd $(GRPC_BUILD_PATH) && cmake -DgRPC_INSTALL=ON -DgRPC_PROTOBUF_PROVIDER=package  \
+	  -DBUILD_SHARED_LIBS=ON \
       -DgRPC_BUILD_TESTS=OFF \
       -DCMAKE_INSTALL_PREFIX=/usr/local \
       $(GRPC_BASE_PATH)
