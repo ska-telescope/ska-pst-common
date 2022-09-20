@@ -14,7 +14,24 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 
+set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/resources/cmake-modules ${PROJECT_SOURCE_DIR}/cmake)
+include(dependencies)
+include(lint)
+include(CTest)
+
+# External projects
 if (BUILD_TESTING)
-  add_subdirectory(tests/protobuf)
+  add_subdirectory(resources/googletest googletest EXCLUDE_FROM_ALL)
+# installed as git submodule - if this is your first clone you need to
+# git submodule init
+# git submodule update
+# This is a cmake module and needs no further input from you
 endif()
+
+find_package(Protobuf)
+find_package(gRPC)
+
+find_dependencies()
+add_subdirectory(resources/spdlog)
+add_subdirectory(src/ska/pst/common)
 add_subdirectory(protobuf)

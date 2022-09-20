@@ -16,6 +16,15 @@
 
 
 # -- Doxygen Generate --------------------------------------------------------
+def configureDoxyfile(input_dir: str, output_dir: str):
+    with open('../Doxyfile', 'r') as file:
+        file_data = file.read()
+
+    file_data = file_data.replace('@DOXYGEN_INPUT_DIR@', input_dir)
+    file_data = file_data.replace('@DOXYGEN_OUTPUT_DIR@', output_dir)
+
+    with open('../Doxyfile', 'w') as file:
+        file.write(file_data)
 
 import os
 import sys
@@ -57,23 +66,20 @@ source_dir = "../../src"
 #if read_the_docs_build:
 # build doxygen in docs folder
 input_dir = '../src'
-# output_dir = 'build/doxygen'
-# configureDoxyfile(input_dir, output_dir)
-# subprocess.call('mkdir -p ' + output_dir, cwd="..", shell=True)
-# subprocess.call('doxygen', cwd="..", shell=True)
-# breathe_projects['SkaPstRecv'] = '../' + output_dir + '/xml'
-# doxygen_xml = '../' + output_dir + '/xml'
-#else:
-#    doxygen_xml = "...some/path..."
-#    breathe_projects['SkaPstRecv'] = doxygen_xml
+output_dir = 'build/doxygen'
+configureDoxyfile(input_dir, output_dir)
+subprocess.call('mkdir -p ' + output_dir, cwd="..", shell=True)
+subprocess.call('doxygen', cwd="..", shell=True)
+breathe_projects['SkaPstCommon'] = '../' + output_dir + '/xml'
+doxygen_xml = '../' + output_dir + '/xml'
 
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    # 'breathe',
-    # 'exhale',
+    'breathe',
+    'exhale',
     'recommonmark',
 ]
 
@@ -92,50 +98,49 @@ cpp_id_attributes = ["__host__", "__device__", "EIGEN_DEVICE_FUNC"]
 
 # Breathe Config
 
-# breathe_default_project = "SkaPstCommon"
-# breathe_default_members = ("members", "undoc-members")
-# breathe_separate_member_pages = True
+breathe_default_project = "SkaPstCommon"
+breathe_default_members = ("members", "undoc-members")
+breathe_separate_member_pages = True
 
 
-# breathe_projects_source = {
-#     "SkaPstCommon": (source_dir, [
-#         "apps",
-#         "ska"
-#     ])
-# }
+breathe_projects_source = {
+    "SkaPstCommon": (source_dir, [
+        "ska"
+    ])
+}
 
-# # breathe_doxygen_config_options = { }
+# breathe_doxygen_config_options = { }
 
-# breathe_domain_extension = {
-#     "h": "cpp",
-#     "cc": "cpp",
-#     "cu": "cpp"
-# }
+breathe_domain_extension = {
+    "h": "cpp",
+    "cc": "cpp",
+    "cu": "cpp"
+}
 
-# # Exhale Config
+# Exhale Config
 
-# exhale_args = {
-#     "containmentFolder":     "./api",
-#     "rootFileName":          "library_root.rst",
-#     "rootFileTitle":         "Application Programming Interface",
-#     "afterTitleDescription": textwrap.dedent('''
-#     The ska-pst-recv library provides and API that is used by the applications. This API is described below.
-#     '''),
-#     "doxygenStripFromPath":  "../", #"/home/calgray/Code/icrar/leap-accelerate/src", # use src dir
-#     # Suggested optional arguments
-#     "createTreeView":        True,
-#     # TIP: if using the sphinx-bootstrap-theme, you need
-#     # "treeViewIsBootstrap": True,
-#     "exhaleExecutesDoxygen": False,
-#     #"exhaleDoxygenStdin":    "INPUT = ../../src",
-#     "lexerMapping": {
-#         r".*\.h": "cpp",
-#         r".*\.cc": "cpp",
-#         r".*\.txt": "cmake"
-#     },
-#     #"verboseBuild": True,
-#     "generateBreatheFileDirectives": False
-# }
+exhale_args = {
+    "containmentFolder":     "./api",
+    "rootFileName":          "library_root.rst",
+    "rootFileTitle":         "Application Programming Interface",
+    "afterTitleDescription": textwrap.dedent('''
+    The ska-pst-recv library provides and API that is used by the applications. This API is described below.
+    '''),
+    "doxygenStripFromPath":  "../", #"/home/calgray/Code/icrar/leap-accelerate/src", # use src dir
+    # Suggested optional arguments
+    "createTreeView":        True,
+    # TIP: if using the sphinx-bootstrap-theme, you need
+    # "treeViewIsBootstrap": True,
+    "exhaleExecutesDoxygen": False,
+    #"exhaleDoxygenStdin":    "INPUT = ../../src",
+    "lexerMapping": {
+        r".*\.h": "cpp",
+        r".*\.cc": "cpp",
+        r".*\.txt": "cmake"
+    },
+    #"verboseBuild": True,
+    "generateBreatheFileDirectives": False
+}
 
 # primary_domain = 'cpp'
 

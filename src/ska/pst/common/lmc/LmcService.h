@@ -1,0 +1,342 @@
+/*
+ * Copyright 2022 Square Kilometre Array Observatory
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice,
+ * this list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ *
+ * 3. Neither the name of the copyright holder nor the names of its
+ * contributors may be used to endorse or promote products derived from this
+ * software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#ifndef __SKA_PST_COMMON_LmcService_h
+#define __SKA_PST_COMMON_LmcService_h
+
+#include <memory>
+#include <thread>
+#include <condition_variable>
+#include <mutex>
+#include <grpc++/grpc++.h>
+
+#include "absl/memory/memory.h"
+
+#include "ska/pst/common/lmc/LmcServiceHandler.h"
+#include "ska/pst/lmc/ska_pst_lmc.grpc.pb.h"
+
+namespace ska {
+namespace pst {
+namespace common {
+
+    /**
+     * @brief Class to handle the local monitoring and control of PST Services.
+     *
+     * This is a gRPC service implementation that can be used by remote clients,
+     * such as the SMRB.LMC and RECV.LMC, to manage a PST signal processing
+     * application. Applications are expected to not extend this class, or
+     * implement their own version of the ska::pst::lmc::PstLmcService::Service
+     * interface. This will allow for a common interface that the PST.LMC can
+     * use and expect the same behaviour no matter what.
+     *
+     * Services are expected to provide an implementation of the
+     * ska::pst::common::LmcServiceHandler which provides a bridge pattern
+     * between instances of this service and what is specific to the
+     * signal processing application.
+     */
+    class LmcService final : public ska::pst::lmc::PstLmcService::Service {
+        private:
+            /**
+             * @brief The name of the service.
+             *
+             * This is used in reporting error messages back to the client.
+             */
+            std::string _service_name;
+
+            /**
+             * @brief The TCP port used by the gRPC server.
+             *
+             */
+            int _port;
+
+            /**
+             * @brief The instance of the gRPC server for this service.
+             *
+             * The instance of this service will be registered with the server
+             * when the start() command is called.
+             */
+            std::unique_ptr<grpc::Server> server{nullptr};
+
+            /**
+             * @brief A pointer to the handler that used by this service.
+             *
+             * Commands that this service responds too will be proxied to
+             * the handler which will provide the specific implementation
+             * for the command, such as handling the resource allocation
+             * or configuring a scan.
+             */
+            std::shared_ptr<ska::pst::common::LmcServiceHandler> handler;
+
+            /**
+             * @brief The background thread used for the running of the service.
+             *
+             * To make sure that the gRPC Server is run in the background, a thread
+             * is used to start it. This field is a pointer to that thread.
+             */
+            std::unique_ptr<std::thread> _background_thread{nullptr};
+
+            /**
+             * @brief A gRPC specific mutex used in th starting/stopping of the gRPC server.
+             *
+             */
+            grpc::internal::Mutex _mu;
+
+            /**
+             * @brief A gRPC specific conditiona variable used in th starting/stopping of the gRPC server.
+             *
+             */
+            grpc::internal::CondVar _cond;
+
+            /**
+             * @brief A guarded variable used to notify when the gRPC server is ready to serve requests.
+             *
+             */
+            bool _server_ready ABSL_GUARDED_BY(_mu) = false;
+
+            /**
+             * @brief A guarded variable used as a simple state machine of the service.
+             *
+             * If false, then the service hasn't been started.  If true the service has been started and
+             * the start() method can't be called again.
+             */
+            bool _started ABSL_GUARDED_BY(_mu) = false;
+
+            /**
+             * @brief The method called in the background thread for running the gRPC server.
+             *
+             */
+            void serve();
+
+            /**
+             * @brief The SKA Observation State of the LMC service.
+             *
+             * Used to keep track of the state of this service. This is used to guard against having
+             * the methods called in the wrong order.
+             */
+            ska::pst::lmc::ObsState _state{ska::pst::lmc::ObsState::EMPTY};
+
+            /**
+             * @brief A utitlity method to set the current state.
+             *
+             * This will use a mutex and a condition variable to update the _state and allow for
+             * background threads, like monitoring, to be notified of a state change.
+             */
+            void set_state(ska::pst::lmc::ObsState);
+
+            /**
+             * @brief A mutex used by guard the read/write of the state value.
+             *
+             * This mutex is used to guard updating of the state variable to the monitoring
+             * thread can use a condition variable to be awoken when the state has changed.
+             */
+            std::mutex _monitor_mutex;
+
+            /**
+             * @brief A threading primative that use by the monitoring thread to know when
+             * the state has change.
+             *
+             */
+            std::condition_variable _monitor_condition;
+
+        public:
+            /**
+             * @brief Constructor for the LMC service.
+             *
+             * @param service_name the name of this service, used within error reporting back to client.
+             * @param handler a handler instance that brigdes this service to the application.
+             * @param port the TCP port that this service is exposed on.
+             */
+            LmcService(std::string service_name, std::shared_ptr<ska::pst::common::LmcServiceHandler> handler, int port) : _service_name(service_name), handler(std::move(handler)), _port(port) {}
+
+            /**
+             * @brief Default deconstructor of service.
+             */
+            virtual ~LmcService() = default;
+
+            std::string service_name() { return _service_name; }
+
+            /**
+             * @brief Start the gRPC process in the background.
+             *
+             */
+            void start();
+
+            /**
+             * @brief Stops the gRPC service is it is running.
+             *
+             */
+            void stop();
+
+            /**
+             * @brief Check if the service is running.
+             *
+             */
+            bool is_running() { return _started; }
+
+            /**
+             * @brief Retrieve port server is running on.
+             *
+             */
+            int port() { return _port; }
+
+            /**
+             * @brief Implements the connect method for the LMC gRPC service.
+             *
+             * This method is used by clients to see if they can connect to the service,
+             * and is otherwise a no-op method.
+             */
+            grpc::Status connect(grpc::ServerContext* context, const ska::pst::lmc::ConnectionRequest* request, ska::pst::lmc::ConnectionResponse* response) override;
+
+            /**
+             * @brief Implements the assign resources of the LMC gRPC service.
+             *
+             * This expects a request message that is specific for the COMMON resources. If resources have
+             * already been assigned then this will set the status to being FAILED_PRECONDITION and provide
+             * details within a serialised version of a ska::pst::lmc::Status message.
+             */
+            grpc::Status assign_resources(grpc::ServerContext* context, const ska::pst::lmc::AssignResourcesRequest* request, ska::pst::lmc::AssignResourcesResponse* response) override;
+
+            /**
+             * @brief Implements releasing the assigned resources of the LMC gRPC service.
+             *
+             * This method will release any assigned resources only if the state of the service
+             * is in an IDLE state, meaning it can't be scanning, configured for a scan or an an
+             * aborted state. Failure to meet the required precondition will result in a gRPC status
+             * of FAILED_PRECONDITION and provide details within a serialised version of a
+             * ska:pst::lmc::Status message.
+             */
+            grpc::Status release_resources(grpc::ServerContext* context, const ska::pst::lmc::ReleaseResourcesRequest* request, ska::pst::lmc::ReleaseResourcesResponse* response) override;
+
+            /**
+             * @brief Implements getting the assigned resources of the LMC gRPC service.
+             *
+             * Returns the configuration of the currently assigned resources for the COMMON. If the resources
+             * have not been assigned then this will return a status with FAILED_PRECONDITION and provide
+             * details within the serialised version of a ska::pst::lmc::Status message.
+             */
+            grpc::Status get_assigned_resources(grpc::ServerContext* context, const ska::pst::lmc::GetAssignedResourcesRequest* request, ska::pst::lmc::GetAssignedResourcesResponse* response) override;
+
+            /**
+             * @brief Implements configuring the service for in preparation for a scan.
+             *
+             * This will configure the service in ready for a scan. For COMMON this is effectively a
+             * no-op method, though it does assert that the service is in IDLE state (i.e. has had
+             * resources assigned) and afterwards will put the state into READY.
+             */
+            grpc::Status configure(grpc::ServerContext* context, const ska::pst::lmc::ConfigureRequest* request, ska::pst::lmc::ConfigureResponse* response) override;
+
+            /**
+             * @brief Implements deconfiguring the service so that its not ready for scanning.
+             *
+             * This will deconfigure the service in ready for a scan. For COMMON this is effectively a
+             * no-op method, though it asserts the service is in a READY state (i.e. is ready for
+             * scanning but is not actually scanning). This method would put the service back into
+             * and IDLE state (i.e. has resources assigned but not ready for scanning).
+             */
+            grpc::Status deconfigure(grpc::ServerContext* context, const ska::pst::lmc::DeconfigureRequest* request, ska::pst::lmc::DeconfigureResponse* response) override;
+
+            /**
+             * @brief Implements getting the current scan configuration.
+             *
+             * This is a no-op operation for COMMON. It is only valid to call this when the state is
+             * either READY or SCANNING.
+             */
+            grpc::Status get_scan_configuration(grpc::ServerContext* context, const ska::pst::lmc::GetScanConfigurationRequest* request, ska::pst::lmc::GetScanConfigurationResponse* response) override;
+
+            /**
+             * @brief Implements start scanning of the gRPC service.
+             *
+             * This will put the service into the SCANNING state. This is only valid if the current
+             * state of the service is a READY (i.e. it has resources assigned and has been configured
+             * for a scan). If the service is already SCANNING or not in a READY state will result in
+             * a gRPC status of FAILED_PRECONDITION and provide details within a serialised version of a
+             * ska:pst::lmc::Status message.
+             */
+            grpc::Status scan(grpc::ServerContext* context, const ska::pst::lmc::ScanRequest* request, ska::pst::lmc::ScanResponse* response) override;
+
+            /**
+             * @brief Implements end scanning of the LMC gRPC service.
+             *
+             * This will stop a currently running scan and notify any background monitoring to stop.
+             * If this completes successfully the state of the service is put back into READY to be
+             * able to perform another scan.
+             */
+            grpc::Status end_scan(grpc::ServerContext* context, const ska::pst::lmc::EndScanRequest* request, ska::pst::lmc::EndScanResponse* response) override;
+
+            /**
+             * @brief Implements get the current observation state of the LMC gRPC serivce.
+             *
+             */
+            grpc::Status get_state(grpc::ServerContext* context, const ska::pst::lmc::GetStateRequest* request, ska::pst::lmc::GetStateResponse* response) override;
+
+            /**
+             * @brief Implements the monitoring of data for the COMMON service.
+             *
+             * Statitics of the service during the scanning, such as the read/write statistics for
+             * ring buffers (SMRB) or the amount of data received (RECV).
+             *
+             * This can only be called if service is in a scanning state. If the client drops
+             * the request then this method will shut down gracefully.
+             */
+            grpc::Status monitor(grpc::ServerContext* context, const ska::pst::lmc::MonitorRequest* request, grpc::ServerWriter< ska::pst::lmc::MonitorResponse>* writer) override;
+
+            /**
+             * @brief Implements the aborting of processes for the COMMON service.
+             *
+             * For COMMON the only process that needs to be aborted monitoring, as all the other
+             * commands are short lived commands.  This implementation will update the state
+             * of this service to be ABORTED which means other commands can't do anything until
+             * as reset and or restart is sent.
+             */
+            grpc::Status abort(grpc::ServerContext* context, const ska::pst::lmc::AbortRequest* request, ska::pst::lmc::AbortResponse* response) override;
+
+            /**
+             * @brief Implements the resetting of the service.
+             *
+             * This method will move the COMMON service from an aborted/fault state back to IDLE
+             * That it is has resources assigned but isn't configured for a scan.
+             */
+            grpc::Status reset(grpc::ServerContext* context, const ska::pst::lmc::ResetRequest* request, ska::pst::lmc::ResetResponse* response) override;
+
+            /**
+             * @brief Implements the restarting of the service.
+             *
+             * This method will move the COMMON service from an aborted/fault state back to EMPTY.
+             * This will make sure that the service is deconfigured and has released the resources.
+             * If no resources are assigned already then this will just move to EMPTY.
+             */
+            grpc::Status restart(grpc::ServerContext* context, const ska::pst::lmc::RestartRequest* request, ska::pst::lmc::RestartResponse* response) override;
+    };
+
+} // common
+} // pst
+} // ska
+
+#endif // __SKA_PST_COMMON_LmcService_h
