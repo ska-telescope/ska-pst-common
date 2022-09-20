@@ -291,7 +291,7 @@ namespace common {
             grpc::Status end_scan(grpc::ServerContext* context, const ska::pst::lmc::EndScanRequest* request, ska::pst::lmc::EndScanResponse* response) override;
 
             /**
-             * @brief Implements get the current observatory state of the LMC gRPC serivce.
+             * @brief Implements get the current observation state of the LMC gRPC serivce.
              *
              */
             grpc::Status get_state(grpc::ServerContext* context, const ska::pst::lmc::GetStateRequest* request, ska::pst::lmc::GetStateResponse* response) override;
@@ -299,7 +299,9 @@ namespace common {
             /**
              * @brief Implements the monitoring of data for the COMMON service.
              *
-             * Statitics of the data and weights ring buffers are streamed back to the client.
+             * Statitics of the service during the scanning, such as the read/write statistics for
+             * ring buffers (SMRB) or the amount of data received (RECV).
+             *
              * This can only be called if service is in a scanning state. If the client drops
              * the request then this method will shut down gracefully.
              */
@@ -309,7 +311,7 @@ namespace common {
              * @brief Implements the aborting of processes for the COMMON service.
              *
              * For COMMON the only process that needs to be aborted monitoring, as all the other
-             * commands are short lived commands.  This implemenetation will update the state
+             * commands are short lived commands.  This implementation will update the state
              * of this service to be ABORTED which means other commands can't do anything until
              * as reset and or restart is sent.
              */
@@ -319,7 +321,7 @@ namespace common {
              * @brief Implements the resetting of the service.
              *
              * This method will move the COMMON service from an aborted/fault state back to IDLE
-             * Thas it is has resources assigned but isn't configured for a scan.
+             * That it is has resources assigned but isn't configured for a scan.
              */
             grpc::Status reset(grpc::ServerContext* context, const ska::pst::lmc::ResetRequest* request, ska::pst::lmc::ResetResponse* response) override;
 

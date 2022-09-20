@@ -41,7 +41,7 @@ namespace common {
 
     /**
      * @brief A purely abstract class that is used as a bridge between gRPC service and PST applications.
-     * 
+     *
      * The @see ska::pst::common::LmcService class uses a pointer to an instance of this abstract class
      * to act as a bridge between the common expected Local Monitoring and Control functionality and
      * the specific implementation for a PST signal processing application.
@@ -133,7 +133,7 @@ namespace common {
              * The implementation should check its own state model but the service calling this method
              * has been configured for a scan and in a READY ObsState.
              *
-             * @throw std::exception if there is a validation issue or problem with assigning resources.
+             * @throw std::exception if there is a validation issue or problem with releasing resources.
              */
             virtual void deconfigure() = 0;
 
@@ -149,7 +149,7 @@ namespace common {
              *
              * @param configuration Pointer to the protobuf message to return. Implementations should get
              *      mutable references to the sub-field they are responding to and update that message.
-             * @throw std::exception if there is a validation issue or problem with assigning resources.
+             * @throw std::exception if there is a validation issue or problem with getting the scan configuration.
              */
             virtual void get_scan_configuration(ska::pst::lmc::ScanConfiguration *configuration) = 0;
 

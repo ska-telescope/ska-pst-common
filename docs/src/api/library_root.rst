@@ -4,7 +4,7 @@ Application Programming Interface
 
 
 
-The ska-pst-common library provides and API that is used by the applications. This API is described below.
+The ska-pst-common library provides an API that is used by the applications. This API is described below.
 
 
 .. include:: class_view_hierarchy.rst.include
