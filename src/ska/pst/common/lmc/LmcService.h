@@ -333,6 +333,19 @@ namespace common {
              * If no resources are assigned already then this will just move to EMPTY.
              */
             grpc::Status restart(grpc::ServerContext* context, const ska::pst::lmc::RestartRequest* request, ska::pst::lmc::RestartResponse* response) override;
+
+            /**
+             * @brief Implements putting the service in the FAULT state.
+             *
+             * Used by a client to set the service into a FAULT state. This
+             * can be due to another part of the logical BEAM being faulty
+             * and a call to this method from a client it advising the service
+             * to move to the FAULT state.
+             *
+             * By moving to the FAULT state the service can be reset or
+             * restarted.
+             */
+            grpc::Status go_to_fault(grpc::ServerContext* context, const ska::pst::lmc::GoToFaultRequest* request, ska::pst::lmc::GoToFaultResponse* response) override;
     };
 
 } // common

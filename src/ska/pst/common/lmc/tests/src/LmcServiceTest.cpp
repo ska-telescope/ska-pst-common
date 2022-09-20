@@ -198,6 +198,15 @@ auto LmcServiceTest::restart() -> grpc::Status
     return _stub->restart(&context, request, &response);
 }
 
+auto LmcServiceTest::go_to_fault() -> grpc::Status
+{
+    grpc::ClientContext context;
+    ska::pst::lmc::GoToFaultRequest request;
+    ska::pst::lmc::GoToFaultResponse response;
+
+    return _stub->go_to_fault(&context, request, &response);
+}
+
 auto LmcServiceTest::get_state(
     ska::pst::lmc::GetStateResponse* response
 ) -> grpc::Status
@@ -1189,6 +1198,122 @@ TEST_F(LmcServiceTest, monitor_should_stop_when_scanning_stops) // NOLINT
     EXPECT_FALSE(monitor_response_reader->Read(&monitor_response)); // NOLINT
     const auto &monitor_response_status = monitor_response_reader->Finish();
     EXPECT_TRUE(monitor_response_status.ok()); // NOLINT
+}
+
+TEST_F(LmcServiceTest, go_to_fault_when_not_scanning) // NOLINT
+{
+    EXPECT_CALL(*_handler, assign_resources);
+    EXPECT_CALL(*_handler, configure);
+    EXPECT_CALL(*_handler, end_scan).Times(0);
+
+    _service->start();
+    EXPECT_TRUE(_service->is_running()); // NOLINT
+    assert_state(ska::pst::lmc::ObsState::EMPTY);
+
+    spdlog::trace("LmcServiceTest::go_to_fault_when_not_scanning - assigning resources");
+    auto status = assign_resources();
+
+    EXPECT_TRUE(status.ok()); // NOLINT
+    EXPECT_TRUE(_handler->are_resources_assigned()); // NOLINT
+    assert_state(ska::pst::lmc::ObsState::IDLE);
+    spdlog::trace("LmcServiceTest::go_to_fault_when_not_scanning - resources assigned");
+
+    spdlog::trace("LmcServiceTest::go_to_fault_when_not_scanning - configuring");
+    status = configure();
+    EXPECT_TRUE(_handler->is_configured()); // NOLINT
+    EXPECT_TRUE(status.ok()); // NOLINT
+    assert_state(ska::pst::lmc::ObsState::READY);
+    spdlog::trace("LmcServiceTest::go_to_fault_when_not_scanning - configured");
+
+    spdlog::trace("LmcServiceTest::go_to_fault_when_not_scanning - starting scan");
+    EXPECT_FALSE(_handler->is_scanning()); // NOLINT
+    status = go_to_fault();
+    EXPECT_TRUE(status.ok()); // NOLINT
+    assert_state(ska::pst::lmc::ObsState::FAULT);
+}
+
+TEST_F(LmcServiceTest, go_to_fault_when_scanning) // NOLINT
+{
+    EXPECT_CALL(*_handler, assign_resources);
+    EXPECT_CALL(*_handler, configure);
+    EXPECT_CALL(*_handler, scan);
+    EXPECT_CALL(*_handler, end_scan);
+
+    _service->start();
+    EXPECT_TRUE(_service->is_running()); // NOLINT
+    assert_state(ska::pst::lmc::ObsState::EMPTY);
+
+    spdlog::trace("LmcServiceTest::go_to_fault_when_scanning - assigning resources");
+    auto status = assign_resources();
+
+    EXPECT_TRUE(status.ok()); // NOLINT
+    EXPECT_TRUE(_handler->are_resources_assigned()); // NOLINT
+    assert_state(ska::pst::lmc::ObsState::IDLE);
+    spdlog::trace("LmcServiceTest::go_to_fault_when_scanning - resources assigned");
+
+    spdlog::trace("LmcServiceTest::go_to_fault_when_scanning - configuring");
+    status = configure();
+    EXPECT_TRUE(_handler->is_configured()); // NOLINT
+    EXPECT_TRUE(status.ok()); // NOLINT
+    assert_state(ska::pst::lmc::ObsState::READY);
+    spdlog::trace("LmcServiceTest::go_to_fault_when_scanning - configured");
+
+    spdlog::trace("LmcServiceTest::go_to_fault_when_scanning - starting scan");
+    EXPECT_FALSE(_handler->is_scanning()); // NOLINT
+    status = scan();
+    EXPECT_TRUE(status.ok()); // NOLINT
+    EXPECT_TRUE(_handler->is_scanning()); // NOLINT
+    assert_state(ska::pst::lmc::ObsState::SCANNING);
+    spdlog::trace("LmcServiceTest::go_to_fault_when_scanning - scanning");
+
+    spdlog::trace("LmcServiceTest::go_to_fault_when_scanning - go to fault");
+    status = go_to_fault();
+    EXPECT_FALSE(_handler->is_scanning()); // NOLINT
+    EXPECT_TRUE(status.ok()); // NOLINT
+    assert_state(ska::pst::lmc::ObsState::FAULT);
+}
+
+TEST_F(LmcServiceTest, go_to_fault_when_scanning_throws_exception) // NOLINT
+{
+    EXPECT_CALL(*_handler, assign_resources);
+    EXPECT_CALL(*_handler, configure);
+    EXPECT_CALL(*_handler, scan);
+    EXPECT_CALL(*_handler, end_scan)
+        .Times(1)
+        .WillRepeatedly(testing::Throw(std::exception()));
+
+    _service->start();
+    EXPECT_TRUE(_service->is_running()); // NOLINT
+    assert_state(ska::pst::lmc::ObsState::EMPTY);
+
+    spdlog::trace("LmcServiceTest::go_to_fault_when_scanning_throws_exception - assigning resources");
+    auto status = assign_resources();
+
+    EXPECT_TRUE(status.ok()); // NOLINT
+    EXPECT_TRUE(_handler->are_resources_assigned()); // NOLINT
+    assert_state(ska::pst::lmc::ObsState::IDLE);
+    spdlog::trace("LmcServiceTest::go_to_fault_when_scanning_throws_exception - resources assigned");
+
+    spdlog::trace("LmcServiceTest::go_to_fault_when_scanning_throws_exception - configuring");
+    status = configure();
+    EXPECT_TRUE(_handler->is_configured()); // NOLINT
+    EXPECT_TRUE(status.ok()); // NOLINT
+    assert_state(ska::pst::lmc::ObsState::READY);
+    spdlog::trace("LmcServiceTest::go_to_fault_when_scanning_throws_exception - configured");
+
+    spdlog::trace("LmcServiceTest::go_to_fault_when_scanning_throws_exception - starting scan");
+    EXPECT_FALSE(_handler->is_scanning()); // NOLINT
+    status = scan();
+    EXPECT_TRUE(status.ok()); // NOLINT
+    EXPECT_TRUE(_handler->is_scanning()); // NOLINT
+    assert_state(ska::pst::lmc::ObsState::SCANNING);
+    spdlog::trace("LmcServiceTest::go_to_fault_when_scanning_throws_exception - scanning");
+
+    spdlog::trace("LmcServiceTest::go_to_fault_when_scanning_throws_exception - go to fault");
+    status = go_to_fault();
+    EXPECT_TRUE(_handler->is_scanning()); // NOLINT
+    EXPECT_TRUE(status.ok()); // NOLINT
+    assert_state(ska::pst::lmc::ObsState::FAULT);
 }
 
 } // namespace test

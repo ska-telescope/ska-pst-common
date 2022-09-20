@@ -149,9 +149,11 @@ class LmcServiceTest : public ::testing::Test
         grpc::Status scan();
         grpc::Status end_scan();
 
+        // error handling methods
         grpc::Status abort();
         grpc::Status reset();
         grpc::Status restart();
+        grpc::Status go_to_fault();
 
         grpc::Status get_state(ska::pst::lmc::GetStateResponse*);
         void assert_state(ska::pst::lmc::ObsState);
