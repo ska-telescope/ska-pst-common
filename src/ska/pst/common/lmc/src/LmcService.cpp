@@ -611,3 +611,22 @@ auto ska::pst::common::LmcService::restart(
         return grpc::Status(grpc::StatusCode::INTERNAL, status.message(), status.SerializeAsString());
     }
 }
+
+auto ska::pst::common::LmcService::go_to_fault(
+    grpc::ServerContext* context,
+    const ska::pst::lmc::GoToFaultRequest* /*request*/,
+    ska::pst::lmc::GoToFaultResponse* /*response*/
+) -> grpc::Status
+{
+    try {
+        // Try to stop scanning
+        if (handler->is_scanning())
+        {
+            handler->end_scan();
+        }
+    } catch (std::exception& ex) {
+        spdlog::warn("{} gRPC service tried to stop scanning but exception {} occurred.", _service_name, ex.what());
+    }
+    set_state(ska::pst::lmc::ObsState::FAULT);
+    return grpc::Status::OK;
+}

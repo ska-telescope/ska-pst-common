@@ -645,7 +645,7 @@ message MonitorRequest {
 }
 
 // A message to represent the current monitoring data
-// for the different services used within PST. 
+// for the different services used within PST.
 //
 // It is only valid to only one field set, such as smrb,
 // receive, or the test field.
@@ -710,6 +710,12 @@ message RestartRequest {}
 
 // The response message for the reset command.
 message RestartResponse {}
+
+// An empty request message for the go_to_fault command.
+message GoToFaultRequest {}
+
+// An emptry response message for the go_to_fault command.
+message GoToFaultResponse {}
 
 // A request message to be sent to the service to
 // identify which client is connecting.
@@ -800,4 +806,18 @@ service PstLmcService {
      * deconfigured first and then release all the resources.
      */
      rpc restart(RestartRequest) returns (RestartResponse);
+
+    /*
+     * Used by a client to set the service into a FAULT state. This
+     * can be due to another part of the logical BEAM being faulty
+     * and a call to this method from a client it advising the service
+     * to move to the FAULT state.
+     *
+     * By moving to the FAULT state the service can be reset or
+     * restarted.
+     *
+     * Implementations of this should stop scanning if there it is
+     * in a scanning state.
+     */
+     rpc go_to_fault(GoToFaultRequest) returns (GoToFaultResponse);
 }
