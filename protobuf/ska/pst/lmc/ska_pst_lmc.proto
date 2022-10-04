@@ -271,6 +271,16 @@ message ReceiveResources {
     double bytes_per_second     = 24;
 }
 
+// Message to represent configuration for the DSP of PST
+message DspResources {
+    // The key for the data buffer to read from
+    string  data_key    = 1;
+    // The key for the weights buffer to read from
+    string  weights_key = 2;
+    // The calculated bytes per second for the beam
+    double bytes_per_second = 3;
+}
+
 // Message used in unit testing to stub
 // out the need for ska-pst-common to
 // know about the structure of the core
@@ -300,6 +310,10 @@ message ResourceConfiguration {
         // can only be used for sending to/from the
         // RECV services.
         ReceiveResources receive = 2;
+        // The resources ot assign for DSP.DISK
+        // It is invalid to send Dsp resources to
+        // any other system.
+        DspResources dsp = 3;
         // The resources used within testing. This
         // field should only be used with unit testing
         // in the ska-pst-common project.
@@ -310,22 +324,6 @@ message ResourceConfiguration {
 // Assign resources is used by the LMC to assign
 // resources that may be later used during a scan.
 message AssignResourcesRequest {
-    oneof resources {
-        // The resources to assign for SMRB.CORE.
-        // It is invalid to send Smrb resources to
-        // any other system.
-        //
-        // Deprecated - use the smrb sub-field in the
-        // resource_configuration field.
-        SmrbResources smrb = 1 [deprecated = true];
-        // The resources to assign for RECV.CORE.
-        // It is invalid to send Receive resources to
-        // any other system.
-        //
-        // Deprecated - use the receive sub-field in the
-        // resource_configuration field.
-        ReceiveResources receive = 2 [deprecated = true];
-    }
     // The resources to configure for the service. This
     // uses a ResourceConfiguration message that has
     // specific fields for the difference services.
@@ -351,18 +349,6 @@ message GetAssignedResourcesRequest {}
 // The response message for getting the assigned
 // resources of the component.
 message GetAssignedResourcesResponse {
-    oneof resources {
-        // The resources to assigned to SMRB.CORE.
-        //
-        // Deprecated - use the smrb sub-field in the
-        // resource_configuration field.
-        SmrbResources smrb = 1 [deprecated = true];
-        // The resources to assigned to RECV.CORE.
-        //
-        // Deprecated - use the receive sub-field in the
-        // resource_configuration field.
-        ReceiveResources receive = 2 [deprecated = true];
-    }
     // The resources that are configured for the service. This
     // uses a ResourceConfiguration message that has
     // specific fields for the difference services.
@@ -444,6 +430,12 @@ message ReceiveScanConfiguration {
 
 }
 
+// Message used for the DSP scan configuration.
+message DspScanConfiguration {
+    // maximum length of observation (in seconds)
+    int32 scanlen_max           = 1;
+}
+
 // Message used in unit testing to stub
 // out the need for ska-pst-common to
 // know about the structure of the core
@@ -473,6 +465,10 @@ message ScanConfiguration {
         // can only be used for sending to/from the
         // RECV services.
         ReceiveScanConfiguration receive = 2;
+        // The scan configuration for DSP. This message
+        // can only be used for sending to/from the DSP
+        // services.
+        DspScanConfiguration dsp = 3;
 
         // The scan configuration used within testing. This
         // field should only be used with unit testing
@@ -484,22 +480,6 @@ message ScanConfiguration {
 // Request message to configure a server to
 // be ready for a scan request.
 message ConfigureRequest {
-    oneof configuration {
-        // The scan configuration for SMRB.CORE. It
-        // is invalid to send this message to anywhere
-        // else other than SMRB.CORE during a configure request.
-        //
-        // Deprecated - use the smrb sub-field in the
-        // scan_configuration field.
-        SmrbScanConfiguration smrb = 1 [deprecated = true];
-        // The scan configuration for RECV.CORE. It
-        // is invalid to send this message to anywhere
-        // else other than RECV.CORE during a configure request.
-        //
-        // Deprecated - use the receive sub-field in the
-        // scan_configuration field.
-        ReceiveScanConfiguration receive = 2 [deprecated = true];
-    }
     ScanConfiguration scan_configuration = 3;
 }
 
@@ -514,18 +494,6 @@ message GetScanConfigurationRequest {}
 // A response message used to return the scan
 // configuration of the a component.
 message GetScanConfigurationResponse {
-    oneof configuration {
-        // The current scan configuration for SMRB.CORE.
-        //
-        // Deprecated - use the smrb sub-field in the
-        // scan_configuration field.
-        SmrbScanConfiguration smrb = 1 [deprecated = true];
-        // The current scan configuration for RECV.CORE.
-        //
-        // Deprecated - use the receive sub-field in the
-        // scan_configuration field.
-        ReceiveScanConfiguration receive = 2 [deprecated = true];
-    }
     ScanConfiguration scan_configuration = 3;
 }
 
@@ -621,6 +589,18 @@ message ReceiveMonitorData {
     uint64 misordered_packets = 5;
 }
 
+// Message for the DSP monitoring results of a subband.
+message DspMonitorData {
+    // Disk size (in bytes)
+    uint64 disk_capacity = 1;
+    // Available disk space left
+    uint64 disk_available_bytes = 2;
+    // Amount of data written during current scan
+    uint64 bytes_written = 3;
+    // Current write rate, in bytes / second
+    double write_rate = 4;
+}
+
 // Message used in unit testing to stub
 // out the need for ska-pst-common for
 // monitoring.
@@ -656,7 +636,8 @@ message MonitorData {
         SmrbMonitorData smrb = 1;
         // The monitoring data for RECV.CORE.
         ReceiveMonitorData receive = 2;
-
+        // The monitoring data for DSP.CORE.
+        DspMonitorData dsp = 3;
         // Only used for testing
         TestMonitorData test = 99;
     }
@@ -665,21 +646,8 @@ message MonitorData {
 // Response message from the server that is an envelope
 // for a specific type of monitoring data, such at SMRB
 // to populate SmrbMonitorData messages and put them
-// into the smrb field of this message.
+// into the smrb field of the monitore_data sub-message field.
 message MonitorResponse {
-    // At most one monitoring data value is allowed.
-    oneof monitor_data_ {
-        // The monitoring data for SMRB.CORE.
-        //
-        // Deprecated - use the smrb sub-field in the
-        // monitor_data field.
-        SmrbMonitorData smrb = 1 [deprecated = true];
-        // The monitoring data for RECV.CORE.
-        //
-        // Deprecated - use the smrb sub-field in the
-        // monitor_data field.
-        ReceiveMonitorData receive = 2 [deprecated = true];
-    }
     // The current monitor data to be returned for the service.
     MonitorData monitor_data = 3;
 }
