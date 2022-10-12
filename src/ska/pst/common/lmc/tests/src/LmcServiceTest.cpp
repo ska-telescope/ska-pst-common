@@ -911,6 +911,30 @@ TEST_F(LmcServiceTest, reset_when_aborted_and_scan_configured) // NOLINT
     spdlog::trace("LmcServiceTest::reset_when_aborted_and_scan_configured - reset");
 }
 
+TEST_F(LmcServiceTest, reset_when_idle) // NOLINT
+{
+    spdlog::trace("LmcServiceTest::reset_when_idle");
+    _service->start();
+    EXPECT_TRUE(_service->is_running()); // NOLINT
+    assert_state(ska::pst::lmc::ObsState::EMPTY);
+
+    spdlog::trace("LmcServiceTest::reset_when_idle - assigning resources");
+    auto status = assign_resources();
+
+    EXPECT_TRUE(status.ok()); // NOLINT
+    EXPECT_TRUE(_handler->are_resources_assigned()); // NOLINT
+    assert_state(ska::pst::lmc::ObsState::IDLE);
+    spdlog::trace("LmcServiceTest::reset_when_idle - resources assigned");
+
+
+    spdlog::trace("LmcServiceTest::reset_when_idle - resetting");
+    status = reset();
+    EXPECT_TRUE(_handler->are_resources_assigned());
+    EXPECT_TRUE(status.ok()); // NOLINT
+    assert_state(ska::pst::lmc::ObsState::IDLE);
+    spdlog::trace("LmcServiceTest::restart_when_empty - service reset");
+}
+
 TEST_F(LmcServiceTest, reset_when_not_aborted_or_fault) // NOLINT
 {
     spdlog::trace("LmcServiceTest::reset_when_not_aborted_or_fault");
@@ -1005,19 +1029,43 @@ TEST_F(LmcServiceTest, restart_when_aborted_and_scan_configured) // NOLINT
     spdlog::trace("LmcServiceTest::restart_when_aborted_and_scan_configured - restarted");
 }
 
+TEST_F(LmcServiceTest, restart_when_empty) // NOLINT
+{
+    spdlog::trace("LmcServiceTest::restart_when_empty");
+    _service->start();
+    EXPECT_TRUE(_service->is_running()); // NOLINT
+    assert_state(ska::pst::lmc::ObsState::EMPTY);
+
+    spdlog::trace("LmcServiceTest::restart_when_empty - restarting");
+    auto status = restart();
+    EXPECT_TRUE(status.ok()); // NOLINT
+    assert_state(ska::pst::lmc::ObsState::EMPTY);
+    spdlog::trace("LmcServiceTest::restart_when_empty - restarted");
+}
+
 TEST_F(LmcServiceTest, restart_when_not_aborted_or_fault) // NOLINT
 {
+    EXPECT_CALL(*_handler, assign_resources);
+
     spdlog::trace("LmcServiceTest::restart_when_not_aborted_or_fault");
     _service->start();
     EXPECT_TRUE(_service->is_running()); // NOLINT
     assert_state(ska::pst::lmc::ObsState::EMPTY);
 
+    spdlog::trace("LmcServiceTest::restart_when_not_aborted_or_fault - assigning resources");
+    auto status = assign_resources();
+
+    EXPECT_TRUE(status.ok()); // NOLINT
+    EXPECT_TRUE(_handler->are_resources_assigned()); // NOLINT
+    assert_state(ska::pst::lmc::ObsState::IDLE);
+    spdlog::trace("LmcServiceTest::restart_when_not_aborted_or_fault - resources assigned");
+
     spdlog::trace("LmcServiceTest::restart_when_not_aborted_or_fault - restarting");
-    auto status = restart();
+    status = restart();
     EXPECT_FALSE(status.ok()); // NOLINT
 
     EXPECT_EQ(grpc::StatusCode::FAILED_PRECONDITION, status.error_code()); // NOLINT
-    EXPECT_EQ(_service->service_name() + " is not in ABORTED or FAULT state. Currently in EMPTY state.",
+    EXPECT_EQ(_service->service_name() + " is not in ABORTED or FAULT state. Currently in IDLE state.",
         status.error_message()); // NOLINT
 
     ska::pst::lmc::Status lmc_status;
