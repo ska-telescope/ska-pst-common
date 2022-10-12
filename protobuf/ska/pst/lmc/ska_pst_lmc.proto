@@ -277,8 +277,6 @@ message DspResources {
     string  data_key    = 1;
     // The key for the weights buffer to read from
     string  weights_key = 2;
-    // The calculated bytes per second for the beam
-    double bytes_per_second = 3;
 }
 
 // Message used in unit testing to stub
@@ -433,7 +431,9 @@ message ReceiveScanConfiguration {
 // Message used for the DSP scan configuration.
 message DspScanConfiguration {
     // maximum length of observation (in seconds)
-    int32 scanlen_max           = 1;
+    double scanlen_max               = 1;
+    // The calculated bytes per second for the beam data
+    double bytes_per_second          = 2;
 }
 
 // Message used in unit testing to stub
