@@ -540,6 +540,11 @@ auto ska::pst::common::LmcService::reset(
     ska::pst::lmc::ResetResponse* /*response*/
 ) -> grpc::Status
 {
+    if (_state == ska::pst::lmc::ObsState::IDLE)
+    {
+        spdlog::warn("Received reset request but in IDLE state. Ignoring request.");
+        return grpc::Status::OK;
+    }
     if (!(_state == ska::pst::lmc::ObsState::ABORTED or _state == ska::pst::lmc::ObsState::FAULT)) {
         // LMC is the source of truth, but we should have been moved to an ABORTED or FAULT state
         // before this could have been called.
@@ -578,6 +583,11 @@ auto ska::pst::common::LmcService::restart(
     ska::pst::lmc::RestartResponse* /*response*/
 ) -> grpc::Status
 {
+    if (_state == ska::pst::lmc::ObsState::EMPTY)
+    {
+        spdlog::warn("Received restart request but already in EMPTY state. Ignoring request.");
+        return grpc::Status::OK;
+    }
     if (!(_state == ska::pst::lmc::ObsState::ABORTED or _state == ska::pst::lmc::ObsState::FAULT)) {
         auto curr_state_name = ska::pst::lmc::ObsState_Name(_state);
         spdlog::warn("Received reset request but not ABORTED or FAULT state. Currently in {} state.",
