@@ -14,11 +14,11 @@
 image: $SKA_CPP_DOCKER_BUILDER_IMAGE
 
 variables:
-  # Needed if you want automatic submodule checkout 
+  # Needed if you want automatic submodule checkout
   # For details see https://docs.gitlab.com/ee/ci/yaml/README.html#git-submodule-strategy
   GIT_SUBMODULE_STRATEGY: recursive
   SKA_CPP_DOCKER_BUILDER_IMAGE: artefact.skao.int/ska-cicd-cpp-build-base:0.2.10
-  OCI_IMAGE_BUILD_CONTEXT: $(PWD)  
+  OCI_IMAGE_BUILD_CONTEXT: $(PWD)
   OCI_IMAGES: "ska-pst-common-builder ska-pst-common-proto"
   K8S_TEST_CLUSTER_TAG: k8srunner-psi-low
   OCI_TEST_TAG: ""
@@ -33,13 +33,13 @@ stages:
 
 docs-build:
   stage: build
-  image: registry.gitlab.com/ska-telescope/pst/ska-pst-common/ska-pst-common-builder:0.2.0-dev.c541c22cc
+  image: registry.gitlab.com/ska-telescope/pst/ska-pst-common/ska-pst-common-builder:0.3.0
   needs:
   - oci-image-build
 
 docs-pages:
   stage: pages
-  image: registry.gitlab.com/ska-telescope/pst/ska-pst-common/ska-pst-common-builder:0.2.0-dev.c541c22cc
+  image: registry.gitlab.com/ska-telescope/pst/ska-pst-common/ska-pst-common-builder:0.3.0
   needs:
   - oci-image-build
 
@@ -70,11 +70,11 @@ include:
   # Create Gitlab CI badges from CI metrics
   - project: 'ska-telescope/templates-repository'
     file: 'gitlab-ci/includes/finaliser.gitlab-ci.yml'
-  
+
   # Umbrella include for all Raw life cycle stages
   - project: 'ska-telescope/templates-repository'
     file: gitlab-ci/includes/release.gitlab-ci.yml
-  
+
   # Override for branch based builds
   # - local: '.gitlab/ci/branch.gitlab-ci.yml'
   #   rules:
