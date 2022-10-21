@@ -221,7 +221,7 @@ namespace common {
              * already been assigned then this will set the status to being FAILED_PRECONDITION and provide
              * details within a serialised version of a ska::pst::lmc::Status message.
              */
-            grpc::Status assign_resources(grpc::ServerContext* context, const ska::pst::lmc::AssignResourcesRequest* request, ska::pst::lmc::AssignResourcesResponse* response) override;
+            grpc::Status configure_beam(grpc::ServerContext* context, const ska::pst::lmc::ConfigureBeamRequest* request, ska::pst::lmc::ConfigureBeamResponse* response) override;
 
             /**
              * @brief Implements releasing the assigned resources of the LMC gRPC service.
@@ -232,7 +232,7 @@ namespace common {
              * of FAILED_PRECONDITION and provide details within a serialised version of a
              * ska:pst::lmc::Status message.
              */
-            grpc::Status release_resources(grpc::ServerContext* context, const ska::pst::lmc::ReleaseResourcesRequest* request, ska::pst::lmc::ReleaseResourcesResponse* response) override;
+            grpc::Status deconfigure_beam(grpc::ServerContext* context, const ska::pst::lmc::DeconfigureBeamRequest* request, ska::pst::lmc::DeconfigureBeamResponse* response) override;
 
             /**
              * @brief Implements getting the assigned resources of the LMC gRPC service.
@@ -241,7 +241,7 @@ namespace common {
              * have not been assigned then this will return a status with FAILED_PRECONDITION and provide
              * details within the serialised version of a ska::pst::lmc::Status message.
              */
-            grpc::Status get_assigned_resources(grpc::ServerContext* context, const ska::pst::lmc::GetAssignedResourcesRequest* request, ska::pst::lmc::GetAssignedResourcesResponse* response) override;
+            grpc::Status get_beam_configuration(grpc::ServerContext* context, const ska::pst::lmc::GetBeamConfigurationRequest* request, ska::pst::lmc::GetBeamConfigurationResponse* response) override;
 
             /**
              * @brief Implements configuring the service for in preparation for a scan.
@@ -250,7 +250,7 @@ namespace common {
              * no-op method, though it does assert that the service is in IDLE state (i.e. has had
              * resources assigned) and afterwards will put the state into READY.
              */
-            grpc::Status configure(grpc::ServerContext* context, const ska::pst::lmc::ConfigureRequest* request, ska::pst::lmc::ConfigureResponse* response) override;
+            grpc::Status configure_scan(grpc::ServerContext* context, const ska::pst::lmc::ConfigureScanRequest* request, ska::pst::lmc::ConfigureScanResponse* response) override;
 
             /**
              * @brief Implements deconfiguring the service so that its not ready for scanning.
@@ -260,7 +260,7 @@ namespace common {
              * scanning but is not actually scanning). This method would put the service back into
              * and IDLE state (i.e. has resources assigned but not ready for scanning).
              */
-            grpc::Status deconfigure(grpc::ServerContext* context, const ska::pst::lmc::DeconfigureRequest* request, ska::pst::lmc::DeconfigureResponse* response) override;
+            grpc::Status deconfigure_scan(grpc::ServerContext* context, const ska::pst::lmc::DeconfigureScanRequest* request, ska::pst::lmc::DeconfigureScanResponse* response) override;
 
             /**
              * @brief Implements getting the current scan configuration.
@@ -279,7 +279,7 @@ namespace common {
              * a gRPC status of FAILED_PRECONDITION and provide details within a serialised version of a
              * ska:pst::lmc::Status message.
              */
-            grpc::Status scan(grpc::ServerContext* context, const ska::pst::lmc::ScanRequest* request, ska::pst::lmc::ScanResponse* response) override;
+            grpc::Status start_scan(grpc::ServerContext* context, const ska::pst::lmc::StartScanRequest* request, ska::pst::lmc::StartScanResponse* response) override;
 
             /**
              * @brief Implements end scanning of the LMC gRPC service.
@@ -288,7 +288,7 @@ namespace common {
              * If this completes successfully the state of the service is put back into READY to be
              * able to perform another scan.
              */
-            grpc::Status end_scan(grpc::ServerContext* context, const ska::pst::lmc::EndScanRequest* request, ska::pst::lmc::EndScanResponse* response) override;
+            grpc::Status stop_scan(grpc::ServerContext* context, const ska::pst::lmc::StopScanRequest* request, ska::pst::lmc::StopScanResponse* response) override;
 
             /**
              * @brief Implements get the current observation state of the LMC gRPC serivce.

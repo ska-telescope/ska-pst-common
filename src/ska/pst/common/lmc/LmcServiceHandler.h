@@ -57,7 +57,7 @@ namespace common {
              * @brief Handle assigning of resources for the service.
              *
              * Implementations of this method should enforce check and enforce that the correct
-             * sub-field in the ska::pst::lmc::ResourceConfiguration message is set, (e.g. that
+             * sub-field in the ska::pst::lmc::BeamConfiguration message is set, (e.g. that
              * for SMRB the smrb field is set, and similarly for RECV the receive field is set.)
              *
              * The implementation should check its own state model but the service calling this
@@ -68,7 +68,7 @@ namespace common {
              *      match that of the service.
              * @throw std::exception if there is a validation issue or problem with assigning resources.
              */
-            virtual void assign_resources(const ska::pst::lmc::ResourceConfiguration &resources) = 0;
+            virtual void configure_beam(const ska::pst::lmc::BeamConfiguration &resources) = 0;
 
             /**
              * @brief Handle releasing of assigned resources.
@@ -79,7 +79,7 @@ namespace common {
              *
              * @throw std::exception if there is a validation issue or problem with assigning resources.
              */
-            virtual void release_resources() = 0;
+            virtual void deconfigure_beam() = 0;
 
             /**
              * @brief Handle getting the currently assigned resources for the service.
@@ -95,7 +95,7 @@ namespace common {
              *      mutable references to the sub-field they are responding to and update that message.
              * @throw std::exception if there is a validation issue or problem with assigning resources.
              */
-            virtual void get_assigned_resources(ska::pst::lmc::ResourceConfiguration* resources) = 0;
+            virtual void get_beam_configuration(ska::pst::lmc::BeamConfiguration* resources) = 0;
 
             /**
              * @brief Check if resources are assigned to this service.
@@ -103,7 +103,7 @@ namespace common {
              * Implementations of this method are required to return true if resources have been
              * assigned, else false. Also implementations of this should not throw an exception.
              */
-            virtual bool are_resources_assigned() const noexcept = 0;
+            virtual bool is_beam_configured() const noexcept = 0;
 
             // scan configuration methods
             /**
@@ -121,21 +121,21 @@ namespace common {
              *      match that of the service.
              * @throw std::exception if there is a validation issue or problem with configuring a scan.
              */
-            virtual void configure(const ska::pst::lmc::ScanConfiguration &configuration) = 0;
+            virtual void configure_scan(const ska::pst::lmc::ScanConfiguration &configuration) = 0;
 
             /**
              * @brief Handle deconfiguring service for a scan.
              *
              * Implementations of this method should reset any scan configuration parameters that it
              * currently has set. It should not release any resources that have been set from a call
-             * to assign_resources.
+             * to configure_beam.
              *
              * The implementation should check its own state model but the service calling this method
              * has been configured for a scan and in a READY ObsState.
              *
              * @throw std::exception if there is a validation issue or problem with releasing resources.
              */
-            virtual void deconfigure() = 0;
+            virtual void deconfigure_scan() = 0;
 
             /**
              * @brief Handle getting the current scan configuration for the service.
@@ -159,9 +159,9 @@ namespace common {
              * Implementations of this method are required to return true if has been configured for a scan,
              * else false. Also implementations of this should not throw an exception.
              */
-            virtual bool is_configured() const noexcept = 0;
+            virtual bool is_scan_configured() const noexcept = 0;
 
-            // scan method
+            // scan methods
             /**
              * @brief Handle initiating a scan.
              *
@@ -177,7 +177,7 @@ namespace common {
              *      is empty but this may change in the future such as the time offset to when to start.
              * @throw std::exception if there is a validation issue or problem starting a scan.
              */
-            virtual void scan(const ska::pst::lmc::ScanRequest &request) = 0;
+            virtual void start_scan(const ska::pst::lmc::StartScanRequest &request) = 0;
 
             /**
              * @brief Handle ending a scan.
@@ -194,7 +194,7 @@ namespace common {
              *
              * @throw std::exception if there is a validation issue or problem stopping a scan.
              */
-            virtual void end_scan() = 0;
+            virtual void stop_scan() = 0;
 
             /**
              * @brief Check if the service is currenting performing a scan.

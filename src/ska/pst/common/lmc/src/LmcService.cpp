@@ -130,19 +130,19 @@ auto ska::pst::common::LmcService::connect(
     return grpc::Status::OK;
 }
 
-auto ska::pst::common::LmcService::assign_resources(
+auto ska::pst::common::LmcService::configure_beam(
     grpc::ServerContext* context,
-    const ska::pst::lmc::AssignResourcesRequest* request,
-    ska::pst::lmc::AssignResourcesResponse* /*response*/
+    const ska::pst::lmc::ConfigureBeamRequest* request,
+    ska::pst::lmc::ConfigureBeamResponse* /*response*/
 ) -> grpc::Status
 {
-    spdlog::trace("ska::pst::common::LmcService::assign_resources()");
+    spdlog::trace("ska::pst::common::LmcService::configure_beam()");
 
     // check if handler has already have had resources assigned
-    if (handler->are_resources_assigned()) {
+    if (handler->is_beam_configured()) {
         spdlog::warn("Received assign resources request but resources already assigned.");
         ska::pst::lmc::Status status;
-        status.set_code(ska::pst::lmc::ErrorCode::RESOURCES_ALREADY_ASSIGNED);
+        status.set_code(ska::pst::lmc::ErrorCode::CONFIGURED_FOR_BEAM_ALREADY);
         status.set_message(_service_name + " resources already assigned. Resources need to be released before reassigning.");
         return grpc::Status(grpc::StatusCode::FAILED_PRECONDITION, status.message(), status.SerializeAsString());
     }
@@ -163,7 +163,7 @@ auto ska::pst::common::LmcService::assign_resources(
 
     try {
         set_state(ska::pst::lmc::ObsState::RESOURCING);
-        handler->assign_resources(request->resource_configuration());
+        handler->configure_beam(request->beam_configuration());
         set_state(ska::pst::lmc::ObsState::IDLE);
 
         return grpc::Status::OK;
@@ -176,26 +176,26 @@ auto ska::pst::common::LmcService::assign_resources(
     }
 }
 
-auto ska::pst::common::LmcService::release_resources(
+auto ska::pst::common::LmcService::deconfigure_beam(
     grpc::ServerContext* context,
-    const ska::pst::lmc::ReleaseResourcesRequest* /*request*/,
-    ska::pst::lmc::ReleaseResourcesResponse* /*response*/
+    const ska::pst::lmc::DeconfigureBeamRequest* /*request*/,
+    ska::pst::lmc::DeconfigureBeamResponse* /*response*/
 ) -> grpc::Status
 {
-    spdlog::trace("ska::pst::common::LmcService::release_resources()");
+    spdlog::trace("ska::pst::common::LmcService::deconfigure_beam()");
 
     // check if data manager has already have had resources assigned
-    if (!handler->are_resources_assigned()) {
+    if (!handler->is_beam_configured()) {
         spdlog::warn("Received request to release resources when no resources are assigned.");
 
         ska::pst::lmc::Status status;
-        status.set_code(ska::pst::lmc::ErrorCode::RESOURCES_NOT_ASSIGNED);
+        status.set_code(ska::pst::lmc::ErrorCode::NOT_CONFIGURED_FOR_BEAM);
         status.set_message("No " + _service_name + " resources assigned.");
         return grpc::Status(grpc::StatusCode::FAILED_PRECONDITION, status.message(), status.SerializeAsString());
     }
 
     try {
-        handler->release_resources();
+        handler->deconfigure_beam();
         set_state(ska::pst::lmc::ObsState::EMPTY);
         return grpc::Status::OK;
     } catch (std::exception& exc) {
@@ -207,25 +207,25 @@ auto ska::pst::common::LmcService::release_resources(
     }
 }
 
-auto ska::pst::common::LmcService::get_assigned_resources(
+auto ska::pst::common::LmcService::get_beam_configuration(
     grpc::ServerContext* context,
-    const ska::pst::lmc::GetAssignedResourcesRequest* /*request*/,
-    ska::pst::lmc::GetAssignedResourcesResponse* response
+    const ska::pst::lmc::GetBeamConfigurationRequest* /*request*/,
+    ska::pst::lmc::GetBeamConfigurationResponse* response
 ) -> grpc::Status
 {
-    spdlog::trace("ska::pst::common::LmcService::get_assigned_resources()");
-    if (!handler->are_resources_assigned())
+    spdlog::trace("ska::pst::common::LmcService::get_beam_configuration()");
+    if (!handler->is_beam_configured())
     {
         spdlog::warn("Received request to get assigned resources when no resources are assigned.");
         ska::pst::lmc::Status status;
-        status.set_code(ska::pst::lmc::ErrorCode::RESOURCES_NOT_ASSIGNED);
+        status.set_code(ska::pst::lmc::ErrorCode::NOT_CONFIGURED_FOR_BEAM);
         status.set_message("No " + _service_name + " resources assigned.");
         return grpc::Status(grpc::StatusCode::FAILED_PRECONDITION, status.message(), status.SerializeAsString());
     }
 
     try {
-        auto *resource_configuration = response->mutable_resource_configuration();
-        handler->get_assigned_resources(resource_configuration);
+        auto *beam_configuration = response->mutable_beam_configuration();
+        handler->get_beam_configuration(beam_configuration);
 
         return grpc::Status::OK;
     } catch (std::exception& exc) {
@@ -237,17 +237,17 @@ auto ska::pst::common::LmcService::get_assigned_resources(
     }
 }
 
-auto ska::pst::common::LmcService::configure(
+auto ska::pst::common::LmcService::configure_scan(
     grpc::ServerContext* context,
-    const ska::pst::lmc::ConfigureRequest* request,
-    ska::pst::lmc::ConfigureResponse* /*response*/
+    const ska::pst::lmc::ConfigureScanRequest* request,
+    ska::pst::lmc::ConfigureScanResponse* /*response*/
 ) -> grpc::Status
 {
     // check if handler has already been configured
-    if (handler->is_configured()) {
+    if (handler->is_scan_configured()) {
         spdlog::warn("Received configure scan request but handler already has scan configured.");
         ska::pst::lmc::Status status;
-        status.set_code(ska::pst::lmc::ErrorCode::SCAN_CONFIGURED_ALREADY);
+        status.set_code(ska::pst::lmc::ErrorCode::CONFIGURED_FOR_SCAN_ALREADY);
         status.set_message(_service_name + " already configured for scan. Scan needs to be deconfigured before reconfiguring.");
         return grpc::Status(grpc::StatusCode::FAILED_PRECONDITION, status.message(), status.SerializeAsString());
     }
@@ -267,7 +267,7 @@ auto ska::pst::common::LmcService::configure(
     }
 
     try {
-        handler->configure(request->scan_configuration());
+        handler->configure_scan(request->scan_configuration());
     } catch (std::exception& exc) {
         // handle exception
         ska::pst::lmc::Status status;
@@ -280,10 +280,10 @@ auto ska::pst::common::LmcService::configure(
     return grpc::Status::OK;
 }
 
-auto ska::pst::common::LmcService::deconfigure(
+auto ska::pst::common::LmcService::deconfigure_scan(
     grpc::ServerContext* context,
-    const ska::pst::lmc::DeconfigureRequest* /*request*/,
-    ska::pst::lmc::DeconfigureResponse* /*response*/
+    const ska::pst::lmc::DeconfigureScanRequest* /*request*/,
+    ska::pst::lmc::DeconfigureScanResponse* /*response*/
 ) -> grpc::Status
 {
     // ensure in READY state
@@ -301,7 +301,7 @@ auto ska::pst::common::LmcService::deconfigure(
     }
 
     try {
-        handler->deconfigure();
+        handler->deconfigure_scan();
         set_state(ska::pst::lmc::ObsState::IDLE);
         return grpc::Status::OK;
     } catch (std::exception& exc) {
@@ -348,10 +348,10 @@ auto ska::pst::common::LmcService::get_scan_configuration(
     return grpc::Status::OK;
 }
 
-auto ska::pst::common::LmcService::scan(
+auto ska::pst::common::LmcService::start_scan(
     grpc::ServerContext* context,
-    const ska::pst::lmc::ScanRequest* request,
-    ska::pst::lmc::ScanResponse* /*response*/
+    const ska::pst::lmc::StartScanRequest* request,
+    ska::pst::lmc::StartScanResponse* /*response*/
 ) -> grpc::Status
 {
     spdlog::trace("ska::pst::common::LmcService::scan()");
@@ -377,7 +377,7 @@ auto ska::pst::common::LmcService::scan(
     }
 
     try {
-        handler->scan(*request);
+        handler->start_scan(*request);
         set_state(ska::pst::lmc::ObsState::SCANNING);
         return grpc::Status::OK;
     } catch (std::exception& exc) {
@@ -389,13 +389,13 @@ auto ska::pst::common::LmcService::scan(
     }
 }
 
-auto ska::pst::common::LmcService::end_scan(
+auto ska::pst::common::LmcService::stop_scan(
     grpc::ServerContext* context,
-    const ska::pst::lmc::EndScanRequest* /*request*/,
-    ska::pst::lmc::EndScanResponse* /*response*/
+    const ska::pst::lmc::StopScanRequest* /*request*/,
+    ska::pst::lmc::StopScanResponse* /*response*/
 ) -> grpc::Status
 {
-    spdlog::trace("ska::pst::common::LmcService::end_scan()");
+    spdlog::trace("ska::pst::common::LmcService::stop_scan()");
     if (_state != ska::pst::lmc::ObsState::SCANNING) {
         auto curr_state_name = ska::pst::lmc::ObsState_Name(_state);
         spdlog::warn("Received end scan request but not in SCANNING state. Currently in {} state.", curr_state_name);
@@ -410,7 +410,7 @@ auto ska::pst::common::LmcService::end_scan(
     }
 
     try {
-        handler->end_scan();
+        handler->stop_scan();
         set_state(ska::pst::lmc::ObsState::READY);
         return grpc::Status::OK;
     } catch (std::exception& exc) {
@@ -521,7 +521,7 @@ auto ska::pst::common::LmcService::abort(
     try {
         if (_state == ska::pst::lmc::ObsState::SCANNING)
         {
-            handler->end_scan();
+            handler->stop_scan();
         }
         set_state(ska::pst::lmc::ObsState::ABORTED);
         return grpc::Status::OK;
@@ -562,9 +562,9 @@ auto ska::pst::common::LmcService::reset(
     }
 
     try {
-        if (handler->is_configured())
+        if (handler->is_scan_configured())
         {
-            handler->deconfigure();
+            handler->deconfigure_scan();
         }
         set_state(ska::pst::lmc::ObsState::IDLE);
         return grpc::Status::OK;
@@ -603,13 +603,13 @@ auto ska::pst::common::LmcService::restart(
     }
 
     try {
-        if (handler->is_configured())
+        if (handler->is_scan_configured())
         {
-            handler->deconfigure();
+            handler->deconfigure_scan();
         }
-        if (handler->are_resources_assigned())
+        if (handler->is_beam_configured())
         {
-            handler->release_resources();
+            handler->deconfigure_beam();
         }
         set_state(ska::pst::lmc::ObsState::EMPTY);
         return grpc::Status::OK;
@@ -632,7 +632,7 @@ auto ska::pst::common::LmcService::go_to_fault(
         // Try to stop scanning
         if (handler->is_scanning())
         {
-            handler->end_scan();
+            handler->stop_scan();
         }
     } catch (std::exception& ex) {
         spdlog::warn("{} gRPC service tried to stop scanning but exception {} occurred.", _service_name, ex.what());

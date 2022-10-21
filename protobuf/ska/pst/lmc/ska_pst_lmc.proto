@@ -118,16 +118,16 @@ enum ErrorCode {
     INVALID_REQUEST             = 1;
     // There was an internal server error raised.
     INTERNAL_ERROR              = 2;
-    // The resources of the component already assigned. Should have released resources beforehand.
-    RESOURCES_ALREADY_ASSIGNED  = 3;
-    // There are no resources assigned to this component.
-    RESOURCES_NOT_ASSIGNED      = 4;
+    // The component has already been configured for the beam. Should have been deconfigured for beam beforehand.
+    CONFIGURED_FOR_BEAM_ALREADY = 3;
+    // The component is not configured for beam.
+    NOT_CONFIGURED_FOR_BEAM     = 4;
     // The service is already performing a scann
     ALREADY_SCANNING            = 5;
     // The service is not scanning
     NOT_SCANNING                = 6;
-    // The resources of the component already configured for scan. Should have deconfigured beforehand.
-    SCAN_CONFIGURED_ALREADY     = 7;
+    // The resources of the component already configured for scan. Should have deconfigured for scan beforehand.
+    CONFIGURED_FOR_SCAN_ALREADY = 7;
     // There is no scan configuration for the server.
     NOT_CONFIGURED_FOR_SCAN     = 8;
 }
@@ -156,7 +156,7 @@ message Status {
 }
 
 // Represents the resource configuration for a share memory ring buffer (SMRB)
-message SmrbResources {
+message SmrbBeamConfiguration {
     // The key for the data buffer
     string  data_key    = 1;
     // The key for the weights buffer
@@ -214,7 +214,7 @@ message ReceiveSubbandResources {
 }
 
 // Message to represent configuration for the RECV.CORE of PST
-message ReceiveResources {
+message ReceiveBeamConfiguration {
     // Number of time samples per packet
     uint32 udp_nsamp            = 1;
     // Number of time samples per relative weight
@@ -272,7 +272,7 @@ message ReceiveResources {
 }
 
 // Message to represent configuration for the DSP of PST
-message DspResources {
+message DspBeamConfiguration {
     // The key for the data buffer to read from
     string  data_key    = 1;
     // The key for the weights buffer to read from
@@ -286,71 +286,71 @@ message DspResources {
 //
 // This should only be used internally
 // of the ska-pst-common project.
-message TestResources {
+message TestBeamConfiguration {
     // A map to put any data into.
     map<string, string> resources = 1;
 }
 
 // A message to represent the resource configuration
 // for the different services used within PST. This
-// message is used as a field within the assign_resources
-// and get_assigned_resources service methods.
+// message is used as a field within the configure_beam
+// and get_beam_configuration service methods.
 //
 // It is only valid to only one field set, such as smrb,
 // receive, or the test field.
-message ResourceConfiguration {
+message BeamConfiguration {
     oneof resources {
         // The resources for SMRB.  This message
         // can only be used for sending to/from the
         // SMRB services.
-        SmrbResources smrb = 1;
+        SmrbBeamConfiguration smrb = 1;
         // The resources for RECV.  This message
         // can only be used for sending to/from the
         // RECV services.
-        ReceiveResources receive = 2;
+        ReceiveBeamConfiguration receive = 2;
         // The resources ot assign for DSP.DISK
         // It is invalid to send Dsp resources to
         // any other system.
-        DspResources dsp = 3;
+        DspBeamConfiguration dsp = 3;
         // The resources used within testing. This
         // field should only be used with unit testing
         // in the ska-pst-common project.
-        TestResources test = 99;
+        TestBeamConfiguration test = 99;
     }
 }
 
 // Assign resources is used by the LMC to assign
 // resources that may be later used during a scan.
-message AssignResourcesRequest {
+message ConfigureBeamRequest {
     // The resources to configure for the service. This
-    // uses a ResourceConfiguration message that has
+    // uses a BeamConfiguration message that has
     // specific fields for the difference services.
-    ResourceConfiguration resource_configuration = 3;
+    BeamConfiguration beam_configuration = 3;
 }
 
 // An empty response message that is used to define
 // successfully assigned resources.
-message AssignResourcesResponse {}
+message ConfigureBeamResponse {}
 
 // An empty message used in requesting the release
 // of resources.
-message ReleaseResourcesRequest {}
+message DeconfigureBeamRequest {}
 
 // An empty response message that is used in
 // releasing resources
-message ReleaseResourcesResponse {}
+message DeconfigureBeamResponse {}
 
 // An empty message used to request the assigned
 // resources.
-message GetAssignedResourcesRequest {}
+message GetBeamConfigurationRequest {}
 
 // The response message for getting the assigned
 // resources of the component.
-message GetAssignedResourcesResponse {
+message GetBeamConfigurationResponse {
     // The resources that are configured for the service. This
-    // uses a ResourceConfiguration message that has
+    // uses a BeamConfiguration message that has
     // specific fields for the difference services.
-    ResourceConfiguration resource_configuration = 3;
+    BeamConfiguration beam_configuration = 3;
 }
 
 // Message representing scan configuration for SMRB
@@ -479,13 +479,13 @@ message ScanConfiguration {
 
 // Request message to configure a server to
 // be ready for a scan request.
-message ConfigureRequest {
+message ConfigureScanRequest {
     ScanConfiguration scan_configuration = 3;
 }
 
 // An empty message used as a response for
 // a configure request.
-message ConfigureResponse {}
+message ConfigureScanResponse {}
 
 // An empty message used to retreive the current
 // scan configuration of a component.
@@ -499,26 +499,26 @@ message GetScanConfigurationResponse {
 
 // An empty message used to request that a
 // server deconfigures itself.
-message DeconfigureRequest {}
+message DeconfigureScanRequest {}
 
 // An empty message used as a response for
 // a deconfigure request.
-message DeconfigureResponse {}
+message DeconfigureScanResponse {}
 
 // Request that the component initiates a scan
-message ScanRequest {
+message StartScanRequest {
     // Expect a timestamp for when the Scan should
     // start.  This is an open issue at the moment.
 }
 
 // Response for the scan request.
-message ScanResponse {}
+message StartScanResponse {}
 
 // Request that the component stops scanning
 //
 // if end_time > 0 then the scan must stop
 // at that exact time.
-message EndScanRequest {
+message StopScanRequest {
     // the time at which all the scans should stop
     // as to allow synchonisation between RECV subbands
     // This is in milliseconds from UNIX epoch
@@ -527,7 +527,7 @@ message EndScanRequest {
 }
 
 // Response for the end scan request.
-message EndScanResponse {}
+message StopScanResponse {}
 
 // Request from the server to find out what state it is in.
 message GetStateRequest {}
@@ -708,24 +708,24 @@ service PstLmcService {
     /*
      * Used by a client to assign resources of the component.
      */
-    rpc assign_resources(AssignResourcesRequest) returns (AssignResourcesResponse);
+    rpc configure_beam(ConfigureBeamRequest) returns (ConfigureBeamResponse);
     /*
      * Used by a client to release the resources assigned by a component.
      */
-    rpc release_resources(ReleaseResourcesRequest) returns (ReleaseResourcesResponse);
+    rpc deconfigure_beam(DeconfigureBeamRequest) returns (DeconfigureBeamResponse);
     /*
      * Used by a client to get the currently assigned resource details of a component.
      */
-    rpc get_assigned_resources(GetAssignedResourcesRequest) returns (GetAssignedResourcesResponse);
+    rpc get_beam_configuration(GetBeamConfigurationRequest) returns (GetBeamConfigurationResponse);
     /*
      * Used by a client to configure a server to be ready for a scan request
      * putting the server in a READY state.
      */
-    rpc configure(ConfigureRequest) returns (ConfigureResponse);
+    rpc configure_scan(ConfigureScanRequest) returns (ConfigureScanResponse);
     /*
      * Used by a client to deconfigure a server and put it back to an IDLE state.
      */
-    rpc deconfigure(DeconfigureRequest) returns (DeconfigureResponse);
+    rpc deconfigure_scan(DeconfigureScanRequest) returns (DeconfigureScanResponse);
     /*
      * Utility method that can be used to get the current scan configuration for a component.
      */
@@ -733,16 +733,16 @@ service PstLmcService {
     /*
      * Used by a client to start a scan of the component.
      */
-    rpc scan(ScanRequest) returns (ScanResponse);
+    rpc start_scan(StartScanRequest) returns (StartScanResponse);
     /*
      * Used by a client to end a scan of the component.
      *
-     * The EndScanRequest has an end_time parameter that if set
+     * The StopScanRequest has an end_time parameter that if set
      * the service must stop the scan at that exact time. This
      * method should block until that time has been reached as
      * to allow the LMC to know that scanning has stopped.
      */
-    rpc end_scan(EndScanRequest) returns (EndScanResponse);
+    rpc stop_scan(StopScanRequest) returns (StopScanResponse);
     /*
      * Used by a client to verify the state of the component.
      */
