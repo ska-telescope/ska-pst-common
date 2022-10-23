@@ -68,6 +68,9 @@ enum ObsState {
     // The subarray has resources allocated and is ready to be used for
     // observing. In normal science operations these will be the resources
     // required for the upcoming SBI execution.
+    //
+    // For PST this means that the component has beam configuration and
+    // connected to the appropriate ring buffers.
     IDLE = 2;
 
     // The subarray is being configured ready to scan. On entry to the
@@ -118,7 +121,8 @@ enum ErrorCode {
     INVALID_REQUEST             = 1;
     // There was an internal server error raised.
     INTERNAL_ERROR              = 2;
-    // The component has already been configured for the beam. Should have been deconfigured for beam beforehand.
+    // The component has already been configured for the beam.
+    // Should have been deconfigured for beam before the request was made.
     CONFIGURED_FOR_BEAM_ALREADY = 3;
     // The component is not configured for beam.
     NOT_CONFIGURED_FOR_BEAM     = 4;
@@ -126,7 +130,8 @@ enum ErrorCode {
     ALREADY_SCANNING            = 5;
     // The service is not scanning
     NOT_SCANNING                = 6;
-    // The resources of the component already configured for scan. Should have deconfigured for scan beforehand.
+    // The component has already been configured for scan.
+    // Should have deconfigured for scan before the request had been made.
     CONFIGURED_FOR_SCAN_ALREADY = 7;
     // There is no scan configuration for the server.
     NOT_CONFIGURED_FOR_SCAN     = 8;
@@ -155,7 +160,7 @@ message Status {
     string    message   = 2;
 }
 
-// Represents the resource configuration for a share memory ring buffer (SMRB)
+// Represents the beam configuration for a share memory ring buffer (SMRB)
 message SmrbBeamConfiguration {
     // The key for the data buffer
     string  data_key    = 1;
@@ -282,7 +287,7 @@ message DspBeamConfiguration {
 // Message used in unit testing to stub
 // out the need for ska-pst-common to
 // know about the structure of the core
-// PST resource configurations.
+// PST beam configurations.
 //
 // This should only be used internally
 // of the ska-pst-common project.
@@ -291,7 +296,7 @@ message TestBeamConfiguration {
     map<string, string> resources = 1;
 }
 
-// A message to represent the resource configuration
+// A message to represent the beam configuration
 // for the different services used within PST. This
 // message is used as a field within the configure_beam
 // and get_beam_configuration service methods.
@@ -299,58 +304,63 @@ message TestBeamConfiguration {
 // It is only valid to only one field set, such as smrb,
 // receive, or the test field.
 message BeamConfiguration {
-    oneof resources {
-        // The resources for SMRB.  This message
+    oneof configuration {
+        // The beam configuration for SMRB.  This message
         // can only be used for sending to/from the
         // SMRB services.
         SmrbBeamConfiguration smrb = 1;
-        // The resources for RECV.  This message
+        // The beam configuration for RECV.  This message
         // can only be used for sending to/from the
         // RECV services.
         ReceiveBeamConfiguration receive = 2;
-        // The resources ot assign for DSP.DISK
-        // It is invalid to send Dsp resources to
+        // The beam configuration for DSP.DISK
+        // It is invalid to send Dsp configuration to
         // any other system.
         DspBeamConfiguration dsp = 3;
-        // The resources used within testing. This
+        // The beam configuration used within testing. This
         // field should only be used with unit testing
         // in the ska-pst-common project.
         TestBeamConfiguration test = 99;
     }
 }
 
-// Assign resources is used by the LMC to assign
-// resources that may be later used during a scan.
+// Configure beam is by the LMC to setup the PST
+// system ready to then be used for configuring scans.
+// The main purpose of this is setting up the ring buffers
+// and the subbands that may not change between scans but
+// can change between different types of observations at
+// different frequency bands and different number of channels.
 message ConfigureBeamRequest {
-    // The resources to configure for the service. This
+    // The beam configuration for the service. This
     // uses a BeamConfiguration message that has
     // specific fields for the difference services.
-    BeamConfiguration beam_configuration = 3;
+    BeamConfiguration beam_configuration = 1;
 }
 
 // An empty response message that is used to define
-// successfully assigned resources.
+// successfully doing beam configuration.
 message ConfigureBeamResponse {}
 
-// An empty message used in requesting the release
-// of resources.
+// An empty message used in requesting the service
+// to deconfigure itself of the beam configuration,
+// such as disconnecting from ring buffers.
 message DeconfigureBeamRequest {}
 
-// An empty response message that is used in
-// releasing resources
+// An empty response message that is used for
+// successful response of deconfiguring beam.
 message DeconfigureBeamResponse {}
 
-// An empty message used to request the assigned
-// resources.
+// An empty message used to request the current beam
+// configuration.
 message GetBeamConfigurationRequest {}
 
-// The response message for getting the assigned
-// resources of the component.
+// The response message for getting the current beam
+// configuration for the the component.
 message GetBeamConfigurationResponse {
-    // The resources that are configured for the service. This
+    // The beam configuration for the service. This
     // uses a BeamConfiguration message that has
     // specific fields for the difference services.
-    BeamConfiguration beam_configuration = 3;
+    BeamConfiguration beam_configuration = 1;
 }
 
 // Message representing scan configuration for SMRB
@@ -663,7 +673,7 @@ message AbortResponse {}
 // Request message to reset the state of a server. Based
 // on the SKA Obs State model this should put the server
 // in an IDLE (i.e. deconfigured/unconfigured) state but
-// still have resources assigned.
+// still have the beam configuration still set.
 message ResetRequest {}
 
 // The response message for the reset command.
@@ -671,7 +681,7 @@ message ResetResponse {}
 
 // Request message to restart the state of a server. Based
 // on the SKA Obs State model this should put the server
-// back to an EMPTY (i.e. no resources assigned) state.
+// back to an EMPTY (i.e. no beam configuration set) state.
 // The implementation of this may do a logical restart
 // rather than restarting the process.
 message RestartRequest {}
@@ -706,15 +716,22 @@ service PstLmcService {
      */
     rpc connect(ConnectionRequest) returns (ConnectionResponse);
     /*
-     * Used by a client to assign resources of the component.
+     * Used by a client to configure the component with given beam configuration.
+     *
+     * Beam configuration is different to scan configuration as it relates to
+     * how the beam is configured for bandwidth, number of channels, and calculated
+     * subbands. Between scans the same beam configuration may be used and this
+     * allows the system to be reconfigured without the need of tearing down
+     * the shared memory ringbuffers.
      */
     rpc configure_beam(ConfigureBeamRequest) returns (ConfigureBeamResponse);
     /*
-     * Used by a client to release the resources assigned by a component.
+     * Used by a client to release a beam and put the component in an state that
+     * is not even connected to ring buffers.
      */
     rpc deconfigure_beam(DeconfigureBeamRequest) returns (DeconfigureBeamResponse);
     /*
-     * Used by a client to get the currently assigned resource details of a component.
+     * Used by a client to get the current beam configuration for the component.
      */
     rpc get_beam_configuration(GetBeamConfigurationRequest) returns (GetBeamConfigurationResponse);
     /*
@@ -769,9 +786,10 @@ service PstLmcService {
      rpc reset(ResetRequest) returns (ResetResponse);
     /*
      * Used by a client to reset the device from ABORTED or FAULT state
-     * into an EMPTY, no resources assigned, state. Implementations of
-     * this can do a logical restart, i.e. make sure the the system is
-     * deconfigured first and then release all the resources.
+     * into an EMPTY state (i.e. not having any beam configuration).
+     * Implementations of this can do a logical restart, i.e. make sure
+     * the the system is deconfigured for scan and then deconfigure it
+     * for beam, resulting in all resources have been released.
      */
      rpc restart(RestartRequest) returns (RestartResponse);
 

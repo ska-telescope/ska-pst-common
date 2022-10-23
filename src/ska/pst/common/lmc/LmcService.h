@@ -215,19 +215,22 @@ namespace common {
             grpc::Status connect(grpc::ServerContext* context, const ska::pst::lmc::ConnectionRequest* request, ska::pst::lmc::ConnectionResponse* response) override;
 
             /**
-             * @brief Implements the assign resources of the LMC gRPC service.
+             * @brief Implements the configure beam functionality of the LMC gRPC service.
              *
-             * This expects a request message that is specific for the COMMON resources. If resources have
-             * already been assigned then this will set the status to being FAILED_PRECONDITION and provide
+             * The implemenation of this does not check that the method is directed at the right service, this is
+             * delegated to the @see LmcServiceHandler implemenation which should assert the method is for the right service.
+             *
+             * If the service has already been configured for beam then this will set the status to being FAILED_PRECONDITION and provide
              * details within a serialised version of a ska::pst::lmc::Status message.
              */
             grpc::Status configure_beam(grpc::ServerContext* context, const ska::pst::lmc::ConfigureBeamRequest* request, ska::pst::lmc::ConfigureBeamResponse* response) override;
 
             /**
-             * @brief Implements releasing the assigned resources of the LMC gRPC service.
+             * @brief Implements releasing the beam resources of the LMC gRPC service.
              *
-             * This method will release any assigned resources only if the state of the service
-             * is in an IDLE state, meaning it can't be scanning, configured for a scan or an an
+             * This method will ensure that the service is no long using beam resources, such as
+             * being connected to ring buffers. It is only valid to call this method if the state of the service
+             * is in an IDLE state, meaning it can't be scanning, configured for a scan or in an
              * aborted state. Failure to meet the required precondition will result in a gRPC status
              * of FAILED_PRECONDITION and provide details within a serialised version of a
              * ska:pst::lmc::Status message.
@@ -235,10 +238,10 @@ namespace common {
             grpc::Status deconfigure_beam(grpc::ServerContext* context, const ska::pst::lmc::DeconfigureBeamRequest* request, ska::pst::lmc::DeconfigureBeamResponse* response) override;
 
             /**
-             * @brief Implements getting the assigned resources of the LMC gRPC service.
+             * @brief Implements getting the current beam configuration of the LMC gRPC service.
              *
-             * Returns the configuration of the currently assigned resources for the COMMON. If the resources
-             * have not been assigned then this will return a status with FAILED_PRECONDITION and provide
+             * Returns the current beam configuration for the service. If the service is not configured for beam
+             * then this will return a status with FAILED_PRECONDITION and provide
              * details within the serialised version of a ska::pst::lmc::Status message.
              */
             grpc::Status get_beam_configuration(grpc::ServerContext* context, const ska::pst::lmc::GetBeamConfigurationRequest* request, ska::pst::lmc::GetBeamConfigurationResponse* response) override;
@@ -247,8 +250,8 @@ namespace common {
              * @brief Implements configuring the service for in preparation for a scan.
              *
              * This will configure the service in ready for a scan. For COMMON this is effectively a
-             * no-op method, though it does assert that the service is in IDLE state (i.e. has had
-             * resources assigned) and afterwards will put the state into READY.
+             * no-op method, though it does assert that the service is in IDLE state (i.e. has been
+             * configured for a beam) and afterwards will put the state into READY.
              */
             grpc::Status configure_scan(grpc::ServerContext* context, const ska::pst::lmc::ConfigureScanRequest* request, ska::pst::lmc::ConfigureScanResponse* response) override;
 
@@ -258,7 +261,7 @@ namespace common {
              * This will deconfigure the service in ready for a scan. For COMMON this is effectively a
              * no-op method, though it asserts the service is in a READY state (i.e. is ready for
              * scanning but is not actually scanning). This method would put the service back into
-             * and IDLE state (i.e. has resources assigned but not ready for scanning).
+             * and IDLE state (i.e. is still configured for a beam but is not ready for scanning).
              */
             grpc::Status deconfigure_scan(grpc::ServerContext* context, const ska::pst::lmc::DeconfigureScanRequest* request, ska::pst::lmc::DeconfigureScanResponse* response) override;
 
@@ -274,7 +277,7 @@ namespace common {
              * @brief Implements start scanning of the gRPC service.
              *
              * This will put the service into the SCANNING state. This is only valid if the current
-             * state of the service is a READY (i.e. it has resources assigned and has been configured
+             * state of the service is a READY (i.e. it is configured for a beam and has been configured
              * for a scan). If the service is already SCANNING or not in a READY state will result in
              * a gRPC status of FAILED_PRECONDITION and provide details within a serialised version of a
              * ska:pst::lmc::Status message.
@@ -321,7 +324,7 @@ namespace common {
              * @brief Implements the resetting of the service.
              *
              * This method will move the COMMON service from an aborted/fault state back to IDLE
-             * That it is has resources assigned but isn't configured for a scan.
+             * That it is has been put into a configured for a beam state, but is not configured for a scan.
              */
             grpc::Status reset(grpc::ServerContext* context, const ska::pst::lmc::ResetRequest* request, ska::pst::lmc::ResetResponse* response) override;
 
@@ -329,8 +332,8 @@ namespace common {
              * @brief Implements the restarting of the service.
              *
              * This method will move the COMMON service from an aborted/fault state back to EMPTY.
-             * This will make sure that the service is deconfigured and has released the resources.
-             * If no resources are assigned already then this will just move to EMPTY.
+             * This will make sure that the service is deconfigure completely, including releasing ring buffers.
+             * If not configured for a beam then this will just move to EMPTY.
              */
             grpc::Status restart(grpc::ServerContext* context, const ska::pst::lmc::RestartRequest* request, ska::pst::lmc::RestartResponse* response) override;
 

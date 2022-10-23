@@ -54,54 +54,56 @@ namespace common {
         public:
             // beam resourcing methods
             /**
-             * @brief Handle assigning of resources for the service.
+             * @brief Handle configuring the service to be a part of a beam.
              *
              * Implementations of this method should enforce check and enforce that the correct
              * sub-field in the ska::pst::lmc::BeamConfiguration message is set, (e.g. that
              * for SMRB the smrb field is set, and similarly for RECV the receive field is set.)
              *
              * The implementation should check its own state model but the service calling this
-             * methods has asserted that no resources have been assigned and the server is in
+             * methods has asserted that the service has not been configured for a beam and the server is in
              * the EMPTY ObsState.
              *
-             * @param resources the resources to assign. This message has oneof field and should
+             * @param configuration the configuration for the beam. This message has oneof field and should
              *      match that of the service.
-             * @throw std::exception if there is a validation issue or problem with assigning resources.
+             * @throw std::exception if there is a validation issue or problem with configuring the service to a beam.
              */
-            virtual void configure_beam(const ska::pst::lmc::BeamConfiguration &resources) = 0;
+            virtual void configure_beam(const ska::pst::lmc::BeamConfiguration &configuration) = 0;
 
             /**
-             * @brief Handle releasing of assigned resources.
+             * @brief Handle deconfiguring the service from a beam.
              *
-             * Implementations of this method should release the assigned resources for the service.
+             * Implementations of this method should release the beam resources for the service, including
+             * disconnecting from any ring buffers.
+             *
              * The implementation should check its own state model but the service calling this method
-             * has asserted that resources are assigned and in an IDLE ObsState.
+             * has asserted that the service is configured for a beam and in an IDLE ObsState.
              *
-             * @throw std::exception if there is a validation issue or problem with assigning resources.
+             * @throw std::exception if there is a validation issue or problem with deconfiguring service from a beam.
              */
             virtual void deconfigure_beam() = 0;
 
             /**
-             * @brief Handle getting the currently assigned resources for the service.
+             * @brief Handle getting the current beam configuration for the service.
              *
-             * Implementations of this method should return the resources in the sub-field message
+             * Implementations of this method should return the beam configuration in the sub-field message
              * that relates to the service implementation. That is, for SMRB the implementation should
              * set the smrb field, likewise for RECV setting the receive field, etc.
              *
-             * The implementation should check its own state model that resources are set, but the service
-             * calling this method that resources have been assigned and not in EMPTY ObState.
+             * The implementation should check its own state model that beam configuration is set, but the service
+             * calling this method has checked that there is beam configurat and is not in EMPTY ObState.
              *
-             * @param resources Pointer to the protobuf message to return. Implementations should get
+             * @param configuration Pointer to the protobuf message to return. Implementations should get
              *      mutable references to the sub-field they are responding to and update that message.
-             * @throw std::exception if there is a validation issue or problem with assigning resources.
+             * @throw std::exception if there is a validation issue or problem with getting beam configuration.
              */
-            virtual void get_beam_configuration(ska::pst::lmc::BeamConfiguration* resources) = 0;
+            virtual void get_beam_configuration(ska::pst::lmc::BeamConfiguration* configuration) = 0;
 
             /**
-             * @brief Check if resources are assigned to this service.
+             * @brief Check if this service is configured for a beam.
              *
-             * Implementations of this method are required to return true if resources have been
-             * assigned, else false. Also implementations of this should not throw an exception.
+             * Implementations of this method are required to return true if the service has been configured
+             * for a beam, else false. Also implementations of this should not throw an exception.
              */
             virtual bool is_beam_configured() const noexcept = 0;
 
@@ -117,7 +119,7 @@ namespace common {
              * methods has asserted that no scan is currently configured and the server is in
              * the IDLE ObsState.
              *
-             * @param resources the scan configuration to use. This message has oneof field and should
+             * @param configuration the scan configuration to use. This message has oneof field and should
              *      match that of the service.
              * @throw std::exception if there is a validation issue or problem with configuring a scan.
              */
@@ -127,13 +129,13 @@ namespace common {
              * @brief Handle deconfiguring service for a scan.
              *
              * Implementations of this method should reset any scan configuration parameters that it
-             * currently has set. It should not release any resources that have been set from a call
+             * currently has set. It should not deconfigure any beam resources that have been set from a call
              * to configure_beam.
              *
              * The implementation should check its own state model but the service calling this method
              * has been configured for a scan and in a READY ObsState.
              *
-             * @throw std::exception if there is a validation issue or problem with releasing resources.
+             * @throw std::exception if there is a validation issue or problem with deconfiguring the scan.
              */
             virtual void deconfigure_scan() = 0;
 
@@ -144,7 +146,7 @@ namespace common {
              * sub-field message that relates to the service implementation. That is, for SMRB the
              * implementation should set the smrb field, likewise for RECV setting the receive field, etc.
              *
-             * The implementation should check its own state model that resources are set, but the service
+             * The implementation should check its own state model that there is a scan configuration set, but the service
              * calling this method that has been configured for a scan and in either READY or SCANNING ObState.
              *
              * @param configuration Pointer to the protobuf message to return. Implementations should get
@@ -220,7 +222,7 @@ namespace common {
              *
              * @param data Pointer to the protobuf message to return. Implementations should get
              *      mutable references to the sub-field they are responding to and update that message.
-             * @throw std::exception if there is a validation issue or problem with assigning resources.
+             * @throw std::exception if there is a validation issue or problem during monitoring.
              */
             virtual void get_monitor_data(ska::pst::lmc::MonitorData *data) = 0;
     };
