@@ -276,7 +276,7 @@ message ReceiveBeamConfiguration {
     double bytes_per_second     = 24;
 }
 
-// Message to represent configuration for the DSP of PST
+// Message to represent configuration for the DSP.DISK of PST
 message DspDiskBeamConfiguration {
     // The key for the data buffer to read from
     string  data_key    = 1;
@@ -314,7 +314,7 @@ message BeamConfiguration {
         // RECV services.
         ReceiveBeamConfiguration receive = 2;
         // The beam configuration for DSP.DISK
-        // It is invalid to send Dsp configuration to
+        // It is invalid to send DSP.DISK configuration to
         // any other system.
         DspDiskBeamConfiguration dsp_disk = 3;
         // The beam configuration used within testing. This
@@ -438,8 +438,8 @@ message ReceiveScanConfiguration {
 
 }
 
-// Message used for the DSP scan configuration.
-message DspScanConfiguration {
+// Message used for the DSP.DISK scan configuration.
+message DspDiskScanConfiguration {
     // maximum length of observation (in seconds)
     double scanlen_max               = 1;
     // The calculated bytes per second for the beam data
@@ -475,10 +475,10 @@ message ScanConfiguration {
         // can only be used for sending to/from the
         // RECV services.
         ReceiveScanConfiguration receive = 2;
-        // The scan configuration for DSP. This message
+        // The scan configuration for DSP.DISK. This message
         // can only be used for sending to/from the DSP
         // services.
-        DspScanConfiguration dsp = 3;
+        DspDiskScanConfiguration dsp_disk = 3;
 
         // The scan configuration used within testing. This
         // field should only be used with unit testing
@@ -599,7 +599,7 @@ message ReceiveMonitorData {
     uint64 misordered_packets = 5;
 }
 
-// Message for the DSP monitoring results of a subband.
+// Message for the DSP.DISK monitoring results of a subband.
 message DspMonitorData {
     // Disk size (in bytes)
     uint64 disk_capacity = 1;
@@ -647,7 +647,7 @@ message MonitorData {
         // The monitoring data for RECV.CORE.
         ReceiveMonitorData receive = 2;
         // The monitoring data for DSP.CORE.
-        DspMonitorData dsp = 3;
+        DspMonitorData dsp_disk = 3;
         // Only used for testing
         TestMonitorData test = 99;
     }
