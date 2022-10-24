@@ -54,19 +54,19 @@ namespace common {
         public:
             // beam resourcing methods
             /**
-             * @brief Handle configuring the service to be a part of a beam.
+             * @brief Handle the beam configuration for the service.
              *
-             * Implementations of this method should enforce check and enforce that the correct
+             * Implementations of this method should enforce that the correct
              * sub-field in the ska::pst::lmc::BeamConfiguration message is set, (e.g. that
              * for SMRB the smrb field is set, and similarly for RECV the receive field is set.)
              *
              * The implementation should check its own state model but the service calling this
-             * methods has asserted that the service has not been configured for a beam and the server is in
+             * method has asserted that the service has not been configured for a beam and the service is in
              * the EMPTY ObsState.
              *
              * @param configuration the configuration for the beam. This message has oneof field and should
              *      match that of the service.
-             * @throw std::exception if there is a validation issue or problem with configuring the service to a beam.
+             * @throw std::exception if there is a validation issue or problem with the beam configuration of the service.
              */
             virtual void configure_beam(const ska::pst::lmc::BeamConfiguration &configuration) = 0;
 
@@ -79,7 +79,7 @@ namespace common {
              * The implementation should check its own state model but the service calling this method
              * has asserted that the service is configured for a beam and in an IDLE ObsState.
              *
-             * @throw std::exception if there is a validation issue or problem with deconfiguring service from a beam.
+             * @throw std::exception if there is a validation issue or problem with beam deconfiguration of the service.
              */
             virtual void deconfigure_beam() = 0;
 
@@ -91,7 +91,7 @@ namespace common {
              * set the smrb field, likewise for RECV setting the receive field, etc.
              *
              * The implementation should check its own state model that beam configuration is set, but the service
-             * calling this method has checked that there is beam configurat and is not in EMPTY ObState.
+             * calling this method has checked that there is beam configuration and is not in EMPTY ObState.
              *
              * @param configuration Pointer to the protobuf message to return. Implementations should get
              *      mutable references to the sub-field they are responding to and update that message.

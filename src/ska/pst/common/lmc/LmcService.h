@@ -217,8 +217,8 @@ namespace common {
             /**
              * @brief Implements the configure beam functionality of the LMC gRPC service.
              *
-             * The implemenation of this does not check that the method is directed at the right service, this is
-             * delegated to the @see LmcServiceHandler implemenation which should assert the method is for the right service.
+             * The implementation of this does not check that the method is directed at the right service, this is
+             * delegated to the @see LmcServiceHandler implementation which should assert the method is for the right service.
              *
              * If the service has already been configured for beam then this will set the status to being FAILED_PRECONDITION and provide
              * details within a serialised version of a ska::pst::lmc::Status message.
@@ -332,7 +332,7 @@ namespace common {
              * @brief Implements the restarting of the service.
              *
              * This method will move the COMMON service from an aborted/fault state back to EMPTY.
-             * This will make sure that the service is deconfigure completely, including releasing ring buffers.
+             * This will make sure that the service is deconfigured completely, including releasing ring buffers.
              * If not configured for a beam then this will just move to EMPTY.
              */
             grpc::Status restart(grpc::ServerContext* context, const ska::pst::lmc::RestartRequest* request, ska::pst::lmc::RestartResponse* response) override;

@@ -264,16 +264,16 @@ TEST_F(LmcServiceTest, configure_beam) // NOLINT
     EXPECT_TRUE(_service->is_running());
     assert_state(ska::pst::lmc::ObsState::EMPTY);
 
-    spdlog::trace("LmcServiceTest::configure_beam - assigning resources");
+    spdlog::trace("LmcServiceTest::configure_beam - configuring beam");
     EXPECT_FALSE(_handler->is_beam_configured()); // NOLINT
     auto status = configure_beam();
 
     EXPECT_TRUE(status.ok()); // NOLINT
     EXPECT_TRUE(_handler->is_beam_configured()); // NOLINT
     assert_state(ska::pst::lmc::ObsState::IDLE);
-    spdlog::trace("LmcServiceTest::configure_beam - resources assigned");
+    spdlog::trace("LmcServiceTest::configure_beam - beam configured");
 
-    spdlog::trace("LmcServiceTest::configure_beam - getting assigned resources");
+    spdlog::trace("LmcServiceTest::configure_beam - getting beam configuration");
     ska::pst::lmc::GetBeamConfigurationResponse get_response;
 
     status = get_beam_configuration(&get_response);
@@ -306,7 +306,7 @@ TEST_F(LmcServiceTest, configure_beam_when_already_assigned) // NOLINT
 
     EXPECT_FALSE(status.ok()); // NOLINT
     EXPECT_EQ(grpc::StatusCode::FAILED_PRECONDITION, status.error_code()); // NOLINT
-    EXPECT_EQ(_service->service_name() + " resources already assigned. Resources need to be released before reassigning.",
+    EXPECT_EQ(_service->service_name() + " beam configured already. Beam configuation needs to be deconfigured before reconfiguring.",
         status.error_message());  // NOLINT
 
     ska::pst::lmc::Status lmc_status;
@@ -315,7 +315,7 @@ TEST_F(LmcServiceTest, configure_beam_when_already_assigned) // NOLINT
     EXPECT_EQ(status.error_message(), lmc_status.message()); // NOLINT
 }
 
-TEST_F(LmcServiceTest, get_beam_configuration_when_no_resources_assigned) // NOLINT
+TEST_F(LmcServiceTest, get_beam_configuration_when_not_beam_configured) // NOLINT
 {
     EXPECT_CALL(*_handler, get_beam_configuration).Times(0);
 
@@ -328,7 +328,7 @@ TEST_F(LmcServiceTest, get_beam_configuration_when_no_resources_assigned) // NOL
 
     EXPECT_FALSE(status.ok()); // NOLINT
     EXPECT_EQ(grpc::StatusCode::FAILED_PRECONDITION, status.error_code()); // NOLINT
-    EXPECT_EQ("No " + _service->service_name() + " resources assigned.", status.error_message()); // NOLINT
+    EXPECT_EQ("No " + _service->service_name() + " beam configured.", status.error_message()); // NOLINT
 
     ska::pst::lmc::Status lmc_status;
     lmc_status.ParseFromString(status.error_details());
@@ -336,7 +336,7 @@ TEST_F(LmcServiceTest, get_beam_configuration_when_no_resources_assigned) // NOL
     EXPECT_EQ(status.error_message(), lmc_status.message()); // NOLINT
 }
 
-TEST_F(LmcServiceTest, release_assigned_resources_when_no_resources_assigned) // NOLINT
+TEST_F(LmcServiceTest, release_assigned_resources_when_not_beam_configured) // NOLINT
 {
     _service->start();
     EXPECT_TRUE(_service->is_running());
@@ -346,7 +346,7 @@ TEST_F(LmcServiceTest, release_assigned_resources_when_no_resources_assigned) //
 
     EXPECT_FALSE(status.ok()); // NOLINT
     EXPECT_EQ(grpc::StatusCode::FAILED_PRECONDITION, status.error_code()); // NOLINT
-    EXPECT_EQ("No " + _service->service_name() + " resources assigned.", status.error_message()); // NOLINT
+    EXPECT_EQ("No " + _service->service_name() + " beam configured.", status.error_message()); // NOLINT
 
     ska::pst::lmc::Status lmc_status;
     lmc_status.ParseFromString(status.error_details());
@@ -366,19 +366,19 @@ TEST_F(LmcServiceTest, configure_deconfigure) // NOLINT
     EXPECT_TRUE(_service->is_running());
     assert_state(ska::pst::lmc::ObsState::EMPTY);
 
-    spdlog::trace("LmcServiceTest::configure_deconfigure - assigning resources");
+    spdlog::trace("LmcServiceTest::configure_deconfigure - configuring beam");
     auto status = configure_beam();
     EXPECT_TRUE(status.ok()); // NOLINT
     assert_state(ska::pst::lmc::ObsState::IDLE);
-    spdlog::trace("LmcServiceTest::configure_deconfigure - resources assigned");
+    spdlog::trace("LmcServiceTest::configure_deconfigure - beam configured");
 
-    spdlog::trace("LmcServiceTest::configure_deconfigure - configuring");
+    spdlog::trace("LmcServiceTest::configure_deconfigure - configuring scan");
     EXPECT_FALSE(_handler->is_scan_configured()); // NOLINT
     status = configure_scan();
     EXPECT_TRUE(status.ok()); // NOLINT
     EXPECT_TRUE(_handler->is_scan_configured()); // NOLINT
     assert_state(ska::pst::lmc::ObsState::READY);
-    spdlog::trace("LmcServiceTest::configure_deconfigure - configured");
+    spdlog::trace("LmcServiceTest::configure_deconfigure - scan configured");
 
     spdlog::trace("LmcServiceTest::configure_deconfigure - getting configuration");
     ska::pst::lmc::GetScanConfigurationResponse get_response;
@@ -390,19 +390,19 @@ TEST_F(LmcServiceTest, configure_deconfigure) // NOLINT
     EXPECT_TRUE(get_response.scan_configuration().has_test()); // NOLINT
     spdlog::trace("LmcServiceTest::configure_deconfigure - checked configuration");
 
-    spdlog::trace("LmcServiceTest::configure_deconfigure - deconfiguring");
+    spdlog::trace("LmcServiceTest::configure_deconfigure - deconfiguring scan");
     status = deconfigure_scan();
     EXPECT_TRUE(status.ok()); // NOLINT
     EXPECT_FALSE(_handler->is_scan_configured()); // NOLINT
     assert_state(ska::pst::lmc::ObsState::IDLE);
-    spdlog::trace("LmcServiceTest::configure_deconfigure - deconfigured");
+    spdlog::trace("LmcServiceTest::configure_deconfigure - scan deconfigured");
 
-    spdlog::trace("LmcServiceTest::configure_deconfigure - releasing resources");
+    spdlog::trace("LmcServiceTest::configure_deconfigure - deconfiguring beam");
     status = deconfigure_beam();
     EXPECT_TRUE(status.ok()); // NOLINT
     EXPECT_FALSE(_handler->is_beam_configured()); // NOLINT
     assert_state(ska::pst::lmc::ObsState::EMPTY);
-    spdlog::trace("LmcServiceTest::configure_deconfigure - resources released");
+    spdlog::trace("LmcServiceTest::configure_deconfigure - beam deconfigured");
 }
 
 // TODO - handle the error states of scan configuration methods.
@@ -416,7 +416,7 @@ TEST_F(LmcServiceTest, configure_when_not_idle) // NOLINT
     EXPECT_TRUE(_service->is_running());
     assert_state(ska::pst::lmc::ObsState::EMPTY);
 
-    spdlog::trace("LmcServiceTest::configure_when_not_idle - configuring");
+    spdlog::trace("LmcServiceTest::configure_when_not_idle - configuring scan");
     EXPECT_FALSE(_handler->is_scan_configured()); // NOLINT
     auto status = configure_scan();
     EXPECT_FALSE(status.ok()); // NOLINT
@@ -443,21 +443,21 @@ TEST_F(LmcServiceTest, configure_when_already_configured) // NOLINT
     EXPECT_TRUE(_service->is_running());
     assert_state(ska::pst::lmc::ObsState::EMPTY);
 
-    spdlog::trace("LmcServiceTest::configure_when_already_configured - assigning resources");
+    spdlog::trace("LmcServiceTest::configure_when_already_configured - configuring beam");
     auto status = configure_beam();
     EXPECT_TRUE(status.ok()); // NOLINT
     assert_state(ska::pst::lmc::ObsState::IDLE);
-    spdlog::trace("LmcServiceTest::configure_when_already_configured - resources assigned");
+    spdlog::trace("LmcServiceTest::configure_when_already_configured - beam configured");
 
-    spdlog::trace("LmcServiceTest::configure_when_already_configured - configuring");
+    spdlog::trace("LmcServiceTest::configure_when_already_configured - configuring scan");
     EXPECT_FALSE(_handler->is_scan_configured()); // NOLINT
     status = configure_scan();
     EXPECT_TRUE(status.ok()); // NOLINT
     EXPECT_TRUE(_handler->is_scan_configured()); // NOLINT
     assert_state(ska::pst::lmc::ObsState::READY);
-    spdlog::trace("LmcServiceTest::configure_when_already_configured - configured");
+    spdlog::trace("LmcServiceTest::configure_when_already_configured - scan configured");
 
-    spdlog::trace("LmcServiceTest::configure_when_already_configured - configuring");
+    spdlog::trace("LmcServiceTest::configure_when_already_configured - configuring scan");
     status = configure_scan();
     EXPECT_FALSE(status.ok()); // NOLINT
     EXPECT_TRUE(_handler->is_scan_configured()); // NOLINT
@@ -505,7 +505,7 @@ TEST_F(LmcServiceTest, deconfigure_when_not_ready_state) // NOLINT
     EXPECT_TRUE(_service->is_running());
     assert_state(ska::pst::lmc::ObsState::EMPTY);
 
-    spdlog::trace("LmcServiceTest::deconfigure_when_not_ready_state - configuring");
+    spdlog::trace("LmcServiceTest::deconfigure_when_not_ready_state - configuring scan");
     EXPECT_FALSE(_handler->is_scan_configured()); // NOLINT
     auto status = deconfigure_scan();
     EXPECT_FALSE(status.ok()); // NOLINT
@@ -533,20 +533,20 @@ TEST_F(LmcServiceTest, scan_endscan) // NOLINT
     EXPECT_TRUE(_service->is_running()); // NOLINT
     assert_state(ska::pst::lmc::ObsState::EMPTY);
 
-    spdlog::trace("LmcServiceTest::scan_endscan - assigning resources");
+    spdlog::trace("LmcServiceTest::scan_endscan - configuring beam");
     auto status = configure_beam();
 
     EXPECT_TRUE(status.ok()); // NOLINT
     EXPECT_TRUE(_handler->is_beam_configured()); // NOLINT
     assert_state(ska::pst::lmc::ObsState::IDLE);
-    spdlog::trace("LmcServiceTest::scan_endscan - resources assigned");
+    spdlog::trace("LmcServiceTest::scan_endscan - beam configured");
 
-    spdlog::trace("LmcServiceTest::scan_endscan - configuring");
+    spdlog::trace("LmcServiceTest::scan_endscan - configuring scan");
     status = configure_scan();
     EXPECT_TRUE(_handler->is_scan_configured()); // NOLINT
     EXPECT_TRUE(status.ok()); // NOLINT
     assert_state(ska::pst::lmc::ObsState::READY);
-    spdlog::trace("LmcServiceTest::scan_endscan - configured");
+    spdlog::trace("LmcServiceTest::scan_endscan - scan configured");
 
     spdlog::trace("LmcServiceTest::scan_endscan - starting scan");
     EXPECT_FALSE(_handler->is_scanning()); // NOLINT
@@ -574,20 +574,20 @@ TEST_F(LmcServiceTest, get_scan_configuration_while_scanning) // NOLINT
     EXPECT_TRUE(_service->is_running()); // NOLINT
     assert_state(ska::pst::lmc::ObsState::EMPTY);
 
-    spdlog::trace("LmcServiceTest::get_scan_configuration_while_scanning - assigning resources");
+    spdlog::trace("LmcServiceTest::get_scan_configuration_while_scanning - configuring beam");
     auto status = configure_beam();
 
     EXPECT_TRUE(status.ok()); // NOLINT
     EXPECT_TRUE(_handler->is_beam_configured()); // NOLINT
     assert_state(ska::pst::lmc::ObsState::IDLE);
-    spdlog::trace("LmcServiceTest::get_scan_configuration_while_scanning - resources assigned");
+    spdlog::trace("LmcServiceTest::get_scan_configuration_while_scanning - beam configured");
 
-    spdlog::trace("LmcServiceTest::get_scan_configuration_while_scanning - configuring");
+    spdlog::trace("LmcServiceTest::get_scan_configuration_while_scanning - configuring scan");
     status = configure_scan();
     EXPECT_TRUE(_handler->is_scan_configured()); // NOLINT
     EXPECT_TRUE(status.ok()); // NOLINT
     assert_state(ska::pst::lmc::ObsState::READY);
-    spdlog::trace("LmcServiceTest::scan_endscan - configured");
+    spdlog::trace("LmcServiceTest::scan_endscan - scan configured");
 
     spdlog::trace("LmcServiceTest::get_scan_configuration_while_scanning - starting scan");
     EXPECT_FALSE(_handler->is_scanning()); // NOLINT
@@ -618,20 +618,20 @@ TEST_F(LmcServiceTest, scan_when_already_scanning) // NOLINT
     EXPECT_TRUE(_service->is_running()); // NOLINT
     assert_state(ska::pst::lmc::ObsState::EMPTY);
 
-    spdlog::trace("LmcServiceTest::scan_when_already_scanning - assigning resources");
+    spdlog::trace("LmcServiceTest::scan_when_already_scanning - configuring beam");
     auto status = configure_beam();
 
     EXPECT_TRUE(status.ok()); // NOLINT
     EXPECT_TRUE(_handler->is_beam_configured()); // NOLINT
     assert_state(ska::pst::lmc::ObsState::IDLE);
-    spdlog::trace("LmcServiceTest::scan_when_already_scanning - resources assigned");
+    spdlog::trace("LmcServiceTest::scan_when_already_scanning - beam configured");
 
-    spdlog::trace("LmcServiceTest::scan_when_already_scanning - configuring");
+    spdlog::trace("LmcServiceTest::scan_when_already_scanning - configuring scan");
     status = configure_scan();
     EXPECT_TRUE(_handler->is_scan_configured()); // NOLINT
     EXPECT_TRUE(status.ok()); // NOLINT
     assert_state(ska::pst::lmc::ObsState::READY);
-    spdlog::trace("LmcServiceTest::scan_when_already_scanning - configured");
+    spdlog::trace("LmcServiceTest::scan_when_already_scanning - scan configured");
 
     spdlog::trace("LmcServiceTest::scan_when_already_scanning - starting scan");
     status = start_scan();
@@ -704,13 +704,13 @@ TEST_F(LmcServiceTest, abort_when_in_idle_state) // NOLINT
     EXPECT_TRUE(_service->is_running()); // NOLINT
     assert_state(ska::pst::lmc::ObsState::EMPTY);
 
-    spdlog::trace("LmcServiceTest::abort_when_in_ready_state - assigning resources");
+    spdlog::trace("LmcServiceTest::abort_when_in_ready_state - configuring beam");
     auto status = configure_beam();
 
     EXPECT_TRUE(status.ok()); // NOLINT
     EXPECT_TRUE(_handler->is_beam_configured()); // NOLINT
     assert_state(ska::pst::lmc::ObsState::IDLE);
-    spdlog::trace("LmcServiceTest::abort_when_in_ready_state - resources assigned");
+    spdlog::trace("LmcServiceTest::abort_when_in_ready_state - beam configured");
 
     spdlog::trace("LmcServiceTest::abort_when_in_ready_state - aborting");
     status = abort();
@@ -728,20 +728,20 @@ TEST_F(LmcServiceTest, abort_when_in_ready_state) // NOLINT
     EXPECT_TRUE(_service->is_running()); // NOLINT
     assert_state(ska::pst::lmc::ObsState::EMPTY);
 
-    spdlog::trace("LmcServiceTest::abort_when_in_ready_state - assigning resources");
+    spdlog::trace("LmcServiceTest::abort_when_in_ready_state - configuring beam");
     auto status = configure_beam();
 
     EXPECT_TRUE(status.ok()); // NOLINT
     EXPECT_TRUE(_handler->is_beam_configured()); // NOLINT
     assert_state(ska::pst::lmc::ObsState::IDLE);
-    spdlog::trace("LmcServiceTest::abort_when_in_ready_state - resources assigned");
+    spdlog::trace("LmcServiceTest::abort_when_in_ready_state - beam configured");
 
-    spdlog::trace("LmcServiceTest::abort_when_in_ready_state - configuring");
+    spdlog::trace("LmcServiceTest::abort_when_in_ready_state - configuring scan");
     status = configure_scan();
     EXPECT_TRUE(status.ok()); // NOLINT
     EXPECT_TRUE(_handler->is_scan_configured()); // NOLINT
     assert_state(ska::pst::lmc::ObsState::READY);
-    spdlog::trace("LmcServiceTest::abort_when_in_ready_state - configured");
+    spdlog::trace("LmcServiceTest::abort_when_in_ready_state - scan configured");
 
     spdlog::trace("LmcServiceTest::abort_when_in_ready_state - aborting");
     status = abort();
@@ -761,20 +761,20 @@ TEST_F(LmcServiceTest, abort_when_scanning) // NOLINT
     EXPECT_TRUE(_service->is_running()); // NOLINT
     assert_state(ska::pst::lmc::ObsState::EMPTY);
 
-    spdlog::trace("LmcServiceTest::abort_when_scanning - assigning resources");
+    spdlog::trace("LmcServiceTest::abort_when_scanning - configuring beam");
     auto status = configure_beam();
 
     EXPECT_TRUE(status.ok()); // NOLINT
     EXPECT_TRUE(_handler->is_beam_configured()); // NOLINT
     assert_state(ska::pst::lmc::ObsState::IDLE);
-    spdlog::trace("LmcServiceTest::abort_when_scanning - resources assigned");
+    spdlog::trace("LmcServiceTest::abort_when_scanning - beam configured");
 
-    spdlog::trace("LmcServiceTest::abort_when_scanning - configuring");
+    spdlog::trace("LmcServiceTest::abort_when_scanning - configuring scan");
     status = configure_scan();
     EXPECT_TRUE(status.ok()); // NOLINT
     EXPECT_TRUE(_handler->is_scan_configured()); // NOLINT
     assert_state(ska::pst::lmc::ObsState::READY);
-    spdlog::trace("LmcServiceTest::abort_when_scanning - configured");
+    spdlog::trace("LmcServiceTest::abort_when_scanning - scan configured");
 
     spdlog::trace("LmcServiceTest::abort_when_scanning - starting scan");
     status = start_scan();
@@ -823,13 +823,13 @@ TEST_F(LmcServiceTest, abort_when_already_in_aborted_state) // NOLINT
     EXPECT_TRUE(_service->is_running()); // NOLINT
     assert_state(ska::pst::lmc::ObsState::EMPTY);
 
-    spdlog::trace("LmcServiceTest::abort_when_already_in_aborted_state - assigning resources");
+    spdlog::trace("LmcServiceTest::abort_when_already_in_aborted_state - configuring beam");
     auto status = configure_beam();
 
     EXPECT_TRUE(status.ok()); // NOLINT
     EXPECT_TRUE(_handler->is_beam_configured()); // NOLINT
     assert_state(ska::pst::lmc::ObsState::IDLE);
-    spdlog::trace("LmcServiceTest::abort_when_already_in_aborted_state - resources assigned");
+    spdlog::trace("LmcServiceTest::abort_when_already_in_aborted_state - beam configured");
 
     spdlog::trace("LmcServiceTest::abort_when_already_in_aborted_state - aborting");
     status = abort();
@@ -850,13 +850,13 @@ TEST_F(LmcServiceTest, reset_when_aborted) // NOLINT
     EXPECT_TRUE(_service->is_running()); // NOLINT
     assert_state(ska::pst::lmc::ObsState::EMPTY);
 
-    spdlog::trace("LmcServiceTest::reset_when_aborted - assigning resources");
+    spdlog::trace("LmcServiceTest::reset_when_aborted - configuring beam");
     auto status = configure_beam();
 
     EXPECT_TRUE(status.ok()); // NOLINT
     EXPECT_TRUE(_handler->is_beam_configured()); // NOLINT
     assert_state(ska::pst::lmc::ObsState::IDLE);
-    spdlog::trace("LmcServiceTest::reset_when_aborted - resources assigned");
+    spdlog::trace("LmcServiceTest::reset_when_aborted - beam configured");
 
     spdlog::trace("LmcServiceTest::reset_when_aborted - aborting");
     status = abort();
@@ -881,13 +881,13 @@ TEST_F(LmcServiceTest, reset_when_aborted_and_scan_configured) // NOLINT
     EXPECT_TRUE(_service->is_running()); // NOLINT
     assert_state(ska::pst::lmc::ObsState::EMPTY);
 
-    spdlog::trace("LmcServiceTest::reset_when_aborted_and_scan_configured - assigning resources");
+    spdlog::trace("LmcServiceTest::reset_when_aborted_and_scan_configured - configuring beam");
     auto status = configure_beam();
 
     EXPECT_TRUE(status.ok()); // NOLINT
     EXPECT_TRUE(_handler->is_beam_configured()); // NOLINT
     assert_state(ska::pst::lmc::ObsState::IDLE);
-    spdlog::trace("LmcServiceTest::reset_when_aborted_and_scan_configured - resources assigned");
+    spdlog::trace("LmcServiceTest::reset_when_aborted_and_scan_configured - beam configured");
 
     spdlog::trace("LmcServiceTest::reset_when_aborted_and_scan_configured - configuring scan");
     status = configure_scan();
@@ -918,13 +918,13 @@ TEST_F(LmcServiceTest, reset_when_idle) // NOLINT
     EXPECT_TRUE(_service->is_running()); // NOLINT
     assert_state(ska::pst::lmc::ObsState::EMPTY);
 
-    spdlog::trace("LmcServiceTest::reset_when_idle - assigning resources");
+    spdlog::trace("LmcServiceTest::reset_when_idle - configuring beam");
     auto status = configure_beam();
 
     EXPECT_TRUE(status.ok()); // NOLINT
     EXPECT_TRUE(_handler->is_beam_configured()); // NOLINT
     assert_state(ska::pst::lmc::ObsState::IDLE);
-    spdlog::trace("LmcServiceTest::reset_when_idle - resources assigned");
+    spdlog::trace("LmcServiceTest::reset_when_idle - beam configured");
 
 
     spdlog::trace("LmcServiceTest::reset_when_idle - resetting");
@@ -932,7 +932,7 @@ TEST_F(LmcServiceTest, reset_when_idle) // NOLINT
     EXPECT_TRUE(_handler->is_beam_configured());
     EXPECT_TRUE(status.ok()); // NOLINT
     assert_state(ska::pst::lmc::ObsState::IDLE);
-    spdlog::trace("LmcServiceTest::restart_when_empty - service reset");
+    spdlog::trace("LmcServiceTest::reset_when_idle - service reset");
 }
 
 TEST_F(LmcServiceTest, reset_when_not_aborted_or_fault) // NOLINT
@@ -966,13 +966,13 @@ TEST_F(LmcServiceTest, restart_when_aborted) // NOLINT
     EXPECT_TRUE(_service->is_running()); // NOLINT
     assert_state(ska::pst::lmc::ObsState::EMPTY);
 
-    spdlog::trace("LmcServiceTest::restart_when_aborted - assigning resources");
+    spdlog::trace("LmcServiceTest::restart_when_aborted - configuring beam");
     auto status = configure_beam();
 
     EXPECT_TRUE(status.ok()); // NOLINT
     EXPECT_TRUE(_handler->is_beam_configured()); // NOLINT
     assert_state(ska::pst::lmc::ObsState::IDLE);
-    spdlog::trace("LmcServiceTest::restart_when_aborted - resources assigned");
+    spdlog::trace("LmcServiceTest::restart_when_aborted - beam configured");
 
     spdlog::trace("LmcServiceTest::restart_when_aborted - aborting");
     status = abort();
@@ -998,13 +998,13 @@ TEST_F(LmcServiceTest, restart_when_aborted_and_scan_configured) // NOLINT
     EXPECT_TRUE(_service->is_running()); // NOLINT
     assert_state(ska::pst::lmc::ObsState::EMPTY);
 
-    spdlog::trace("LmcServiceTest::restart_when_aborted_and_scan_configured - assigning resources");
+    spdlog::trace("LmcServiceTest::restart_when_aborted_and_scan_configured - configuring beam");
     auto status = configure_beam();
 
     EXPECT_TRUE(status.ok()); // NOLINT
     EXPECT_TRUE(_handler->is_beam_configured()); // NOLINT
     assert_state(ska::pst::lmc::ObsState::IDLE);
-    spdlog::trace("LmcServiceTest::restart_when_aborted_and_scan_configured - resources assigned");
+    spdlog::trace("LmcServiceTest::restart_when_aborted_and_scan_configured - beam configured");
 
     spdlog::trace("LmcServiceTest::restart_when_aborted_and_scan_configured - configuring scan");
     status = configure_scan();
@@ -1052,13 +1052,13 @@ TEST_F(LmcServiceTest, restart_when_not_aborted_or_fault) // NOLINT
     EXPECT_TRUE(_service->is_running()); // NOLINT
     assert_state(ska::pst::lmc::ObsState::EMPTY);
 
-    spdlog::trace("LmcServiceTest::restart_when_not_aborted_or_fault - assigning resources");
+    spdlog::trace("LmcServiceTest::restart_when_not_aborted_or_fault - configuring beam");
     auto status = configure_beam();
 
     EXPECT_TRUE(status.ok()); // NOLINT
     EXPECT_TRUE(_handler->is_beam_configured()); // NOLINT
     assert_state(ska::pst::lmc::ObsState::IDLE);
-    spdlog::trace("LmcServiceTest::restart_when_not_aborted_or_fault - resources assigned");
+    spdlog::trace("LmcServiceTest::restart_when_not_aborted_or_fault - beam configured");
 
     spdlog::trace("LmcServiceTest::restart_when_not_aborted_or_fault - restarting");
     status = restart();
@@ -1112,13 +1112,13 @@ TEST_F(LmcServiceTest, monitor_only_when_scanning) // NOLINT
     EXPECT_EQ(ska::pst::lmc::ErrorCode::NOT_SCANNING, lmc_status.code()); // NOLINT
     EXPECT_EQ(monitor_response_status.error_message(), lmc_status.message()); // NOLINT
 
-    // assign resources
-    spdlog::trace("LmcServiceTest::monitor_only_when_scanning - assigning resources");
+    // configure beam
+    spdlog::trace("LmcServiceTest::monitor_only_when_scanning - configuring beam");
     auto status = configure_beam();
 
     EXPECT_TRUE(status.ok()); // NOLINT
     assert_state(ska::pst::lmc::ObsState::IDLE);
-    spdlog::trace("LmcServiceTest::monitor_only_when_scanning - resources assigned");
+    spdlog::trace("LmcServiceTest::monitor_only_when_scanning - beam configured");
 
     // Check monitor
     grpc::ClientContext monitor_context2;
@@ -1137,11 +1137,11 @@ TEST_F(LmcServiceTest, monitor_only_when_scanning) // NOLINT
     EXPECT_EQ(ska::pst::lmc::ErrorCode::NOT_SCANNING, lmc_status.code()); // NOLINT
     EXPECT_EQ(monitor_response_status.error_message(), lmc_status.message()); // NOLINT
 
-    spdlog::trace("LmcServiceTest::monitor_only_when_scanning - configuring");
+    spdlog::trace("LmcServiceTest::monitor_only_when_scanning - configuring scan");
     status = configure_scan();
     EXPECT_TRUE(status.ok()); // NOLINT
     assert_state(ska::pst::lmc::ObsState::READY);
-    spdlog::trace("LmcServiceTest::monitor_only_when_scanning - configured");
+    spdlog::trace("LmcServiceTest::monitor_only_when_scanning - scan configured");
 
     grpc::ClientContext monitor_context3;
     monitor_response_reader = _stub->monitor(&monitor_context3, monitor_request);
@@ -1197,19 +1197,19 @@ TEST_F(LmcServiceTest, monitor_should_stop_when_scanning_stops) // NOLINT
     EXPECT_TRUE(_service->is_running()); // NOLINT
     assert_state(ska::pst::lmc::ObsState::EMPTY);
 
-    // assign resources
-    spdlog::trace("LmcServiceTest::monitor_should_stop_when_scanning_stops - assigning resources");
+    // configure beam
+    spdlog::trace("LmcServiceTest::monitor_should_stop_when_scanning_stops - configuring beam");
     auto status = configure_beam();
     EXPECT_TRUE(status.ok()); // NOLINT
     assert_state(ska::pst::lmc::ObsState::IDLE);
     spdlog::trace("LmcServiceTest::monitor_should_stop_when_scanning_stops - resources allocated");
 
     // configure
-    spdlog::trace("LmcServiceTest::monitor_should_stop_when_scanning_stops - configuring");
+    spdlog::trace("LmcServiceTest::monitor_should_stop_when_scanning_stops - configuring scan");
     status = configure_scan();
     EXPECT_TRUE(status.ok()); // NOLINT
     assert_state(ska::pst::lmc::ObsState::READY);
-    spdlog::trace("LmcServiceTest::monitor_should_stop_when_scanning_stops - configured");
+    spdlog::trace("LmcServiceTest::monitor_should_stop_when_scanning_stops - scan configured");
 
     // scan
     spdlog::trace("LmcServiceTest::monitor_should_stop_when_scanning_stops - starting scan");
@@ -1258,20 +1258,20 @@ TEST_F(LmcServiceTest, go_to_fault_when_not_scanning) // NOLINT
     EXPECT_TRUE(_service->is_running()); // NOLINT
     assert_state(ska::pst::lmc::ObsState::EMPTY);
 
-    spdlog::trace("LmcServiceTest::go_to_fault_when_not_scanning - assigning resources");
+    spdlog::trace("LmcServiceTest::go_to_fault_when_not_scanning - configuring beam");
     auto status = configure_beam();
 
     EXPECT_TRUE(status.ok()); // NOLINT
     EXPECT_TRUE(_handler->is_beam_configured()); // NOLINT
     assert_state(ska::pst::lmc::ObsState::IDLE);
-    spdlog::trace("LmcServiceTest::go_to_fault_when_not_scanning - resources assigned");
+    spdlog::trace("LmcServiceTest::go_to_fault_when_not_scanning - beam configured");
 
-    spdlog::trace("LmcServiceTest::go_to_fault_when_not_scanning - configuring");
+    spdlog::trace("LmcServiceTest::go_to_fault_when_not_scanning - configuring scan");
     status = configure_scan();
     EXPECT_TRUE(_handler->is_scan_configured()); // NOLINT
     EXPECT_TRUE(status.ok()); // NOLINT
     assert_state(ska::pst::lmc::ObsState::READY);
-    spdlog::trace("LmcServiceTest::go_to_fault_when_not_scanning - configured");
+    spdlog::trace("LmcServiceTest::go_to_fault_when_not_scanning - scan configured");
 
     spdlog::trace("LmcServiceTest::go_to_fault_when_not_scanning - starting scan");
     EXPECT_FALSE(_handler->is_scanning()); // NOLINT
@@ -1291,20 +1291,20 @@ TEST_F(LmcServiceTest, go_to_fault_when_scanning) // NOLINT
     EXPECT_TRUE(_service->is_running()); // NOLINT
     assert_state(ska::pst::lmc::ObsState::EMPTY);
 
-    spdlog::trace("LmcServiceTest::go_to_fault_when_scanning - assigning resources");
+    spdlog::trace("LmcServiceTest::go_to_fault_when_scanning - configuring beam");
     auto status = configure_beam();
 
     EXPECT_TRUE(status.ok()); // NOLINT
     EXPECT_TRUE(_handler->is_beam_configured()); // NOLINT
     assert_state(ska::pst::lmc::ObsState::IDLE);
-    spdlog::trace("LmcServiceTest::go_to_fault_when_scanning - resources assigned");
+    spdlog::trace("LmcServiceTest::go_to_fault_when_scanning - beam configured");
 
-    spdlog::trace("LmcServiceTest::go_to_fault_when_scanning - configuring");
+    spdlog::trace("LmcServiceTest::go_to_fault_when_scanning - configuring scan");
     status = configure_scan();
     EXPECT_TRUE(_handler->is_scan_configured()); // NOLINT
     EXPECT_TRUE(status.ok()); // NOLINT
     assert_state(ska::pst::lmc::ObsState::READY);
-    spdlog::trace("LmcServiceTest::go_to_fault_when_scanning - configured");
+    spdlog::trace("LmcServiceTest::go_to_fault_when_scanning - scan configured");
 
     spdlog::trace("LmcServiceTest::go_to_fault_when_scanning - starting scan");
     EXPECT_FALSE(_handler->is_scanning()); // NOLINT
@@ -1334,20 +1334,20 @@ TEST_F(LmcServiceTest, go_to_fault_when_scanning_throws_exception) // NOLINT
     EXPECT_TRUE(_service->is_running()); // NOLINT
     assert_state(ska::pst::lmc::ObsState::EMPTY);
 
-    spdlog::trace("LmcServiceTest::go_to_fault_when_scanning_throws_exception - assigning resources");
+    spdlog::trace("LmcServiceTest::go_to_fault_when_scanning_throws_exception - configuring beam");
     auto status = configure_beam();
 
     EXPECT_TRUE(status.ok()); // NOLINT
     EXPECT_TRUE(_handler->is_beam_configured()); // NOLINT
     assert_state(ska::pst::lmc::ObsState::IDLE);
-    spdlog::trace("LmcServiceTest::go_to_fault_when_scanning_throws_exception - resources assigned");
+    spdlog::trace("LmcServiceTest::go_to_fault_when_scanning_throws_exception - beam configured");
 
-    spdlog::trace("LmcServiceTest::go_to_fault_when_scanning_throws_exception - configuring");
+    spdlog::trace("LmcServiceTest::go_to_fault_when_scanning_throws_exception - configuring scan");
     status = configure_scan();
     EXPECT_TRUE(_handler->is_scan_configured()); // NOLINT
     EXPECT_TRUE(status.ok()); // NOLINT
     assert_state(ska::pst::lmc::ObsState::READY);
-    spdlog::trace("LmcServiceTest::go_to_fault_when_scanning_throws_exception - configured");
+    spdlog::trace("LmcServiceTest::go_to_fault_when_scanning_throws_exception - scan configured");
 
     spdlog::trace("LmcServiceTest::go_to_fault_when_scanning_throws_exception - starting scan");
     EXPECT_FALSE(_handler->is_scanning()); // NOLINT

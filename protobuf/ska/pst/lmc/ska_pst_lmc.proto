@@ -277,7 +277,7 @@ message ReceiveBeamConfiguration {
 }
 
 // Message to represent configuration for the DSP of PST
-message DspBeamConfiguration {
+message DspDiskBeamConfiguration {
     // The key for the data buffer to read from
     string  data_key    = 1;
     // The key for the weights buffer to read from
@@ -316,7 +316,7 @@ message BeamConfiguration {
         // The beam configuration for DSP.DISK
         // It is invalid to send Dsp configuration to
         // any other system.
-        DspBeamConfiguration dsp = 3;
+        DspDiskBeamConfiguration dsp_disk = 3;
         // The beam configuration used within testing. This
         // field should only be used with unit testing
         // in the ska-pst-common project.

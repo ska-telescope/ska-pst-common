@@ -138,18 +138,18 @@ auto ska::pst::common::LmcService::configure_beam(
 {
     spdlog::trace("ska::pst::common::LmcService::configure_beam()");
 
-    // check if handler has already have had resources assigned
+    // check if handler has already have had beam configured
     if (handler->is_beam_configured()) {
-        spdlog::warn("Received assign resources request but resources already assigned.");
+        spdlog::warn("Received configure beam request but beam configured already.");
         ska::pst::lmc::Status status;
         status.set_code(ska::pst::lmc::ErrorCode::CONFIGURED_FOR_BEAM_ALREADY);
-        status.set_message(_service_name + " resources already assigned. Resources need to be released before reassigning.");
+        status.set_message(_service_name + " beam configured already. Beam configuation needs to be deconfigured before reconfiguring.");
         return grpc::Status(grpc::StatusCode::FAILED_PRECONDITION, status.message(), status.SerializeAsString());
     }
 
     if (_state != ska::pst::lmc::ObsState::EMPTY) {
         auto curr_state_name = ska::pst::lmc::ObsState_Name(_state);
-        spdlog::warn("Received assign resources request but not in EMPTY state. Currently in {} state.", curr_state_name);
+        spdlog::warn("Received configure beam request but not in EMPTY state. Currently in {} state.", curr_state_name);
 
         ska::pst::lmc::Status status;
         status.set_code(ska::pst::lmc::ErrorCode::INVALID_REQUEST);
@@ -171,7 +171,7 @@ auto ska::pst::common::LmcService::configure_beam(
         // handle exception
         ska::pst::lmc::Status status;
         status.set_code(ska::pst::lmc::ErrorCode::INTERNAL_ERROR);
-        status.set_message("Error in assigning resources.");
+        status.set_message("Error in configuring beam.");
         return grpc::Status(grpc::StatusCode::INTERNAL, status.message(), status.SerializeAsString());
     }
 }
@@ -184,13 +184,13 @@ auto ska::pst::common::LmcService::deconfigure_beam(
 {
     spdlog::trace("ska::pst::common::LmcService::deconfigure_beam()");
 
-    // check if data manager has already have had resources assigned
+    // check if handler has already have had beam configured
     if (!handler->is_beam_configured()) {
-        spdlog::warn("Received request to release resources when no resources are assigned.");
+        spdlog::warn("Received request to deconfigure beam when no beam configured.");
 
         ska::pst::lmc::Status status;
         status.set_code(ska::pst::lmc::ErrorCode::NOT_CONFIGURED_FOR_BEAM);
-        status.set_message("No " + _service_name + " resources assigned.");
+        status.set_message("No " + _service_name + " beam configured.");
         return grpc::Status(grpc::StatusCode::FAILED_PRECONDITION, status.message(), status.SerializeAsString());
     }
 
@@ -202,7 +202,7 @@ auto ska::pst::common::LmcService::deconfigure_beam(
         // handle exception
         ska::pst::lmc::Status status;
         status.set_code(ska::pst::lmc::ErrorCode::INTERNAL_ERROR);
-        status.set_message("Error in releasing resources.");
+        status.set_message("Error in deconfiguring beam.");
         return grpc::Status(grpc::StatusCode::INTERNAL, status.message(), status.SerializeAsString());
     }
 }
@@ -216,10 +216,10 @@ auto ska::pst::common::LmcService::get_beam_configuration(
     spdlog::trace("ska::pst::common::LmcService::get_beam_configuration()");
     if (!handler->is_beam_configured())
     {
-        spdlog::warn("Received request to get assigned resources when no resources are assigned.");
+        spdlog::warn("Received request to get beam configuration when no beam configured.");
         ska::pst::lmc::Status status;
         status.set_code(ska::pst::lmc::ErrorCode::NOT_CONFIGURED_FOR_BEAM);
-        status.set_message("No " + _service_name + " resources assigned.");
+        status.set_message("No " + _service_name + " beam configured.");
         return grpc::Status(grpc::StatusCode::FAILED_PRECONDITION, status.message(), status.SerializeAsString());
     }
 
@@ -232,7 +232,7 @@ auto ska::pst::common::LmcService::get_beam_configuration(
         // handle exception
         ska::pst::lmc::Status status;
         status.set_code(ska::pst::lmc::ErrorCode::INTERNAL_ERROR);
-        status.set_message("Error in getting assigned resources.");
+        status.set_message("Error in getting beam configuration.");
         return grpc::Status(grpc::StatusCode::INTERNAL, status.message(), status.SerializeAsString());
     }
 }
@@ -272,7 +272,7 @@ auto ska::pst::common::LmcService::configure_scan(
         // handle exception
         ska::pst::lmc::Status status;
         status.set_code(ska::pst::lmc::ErrorCode::INTERNAL_ERROR);
-        status.set_message("Error in assigning resources.");
+        status.set_message("Error in configuring beam.");
         return grpc::Status(grpc::StatusCode::INTERNAL, status.message(), status.SerializeAsString());
     }
 
@@ -308,7 +308,7 @@ auto ska::pst::common::LmcService::deconfigure_scan(
         // handle exception
         ska::pst::lmc::Status status;
         status.set_code(ska::pst::lmc::ErrorCode::INTERNAL_ERROR);
-        status.set_message("Error in assigning resources.");
+        status.set_message("Error in configuring beam.");
         return grpc::Status(grpc::StatusCode::INTERNAL, status.message(), status.SerializeAsString());
     }
 }
@@ -341,7 +341,7 @@ auto ska::pst::common::LmcService::get_scan_configuration(
         // handle exception
         ska::pst::lmc::Status status;
         status.set_code(ska::pst::lmc::ErrorCode::INTERNAL_ERROR);
-        status.set_message("Error in assigning resources.");
+        status.set_message("Error in configuring beam.");
         return grpc::Status(grpc::StatusCode::INTERNAL, status.message(), status.SerializeAsString());
     }
 
