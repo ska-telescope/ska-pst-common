@@ -600,7 +600,7 @@ message ReceiveMonitorData {
 }
 
 // Message for the DSP.DISK monitoring results of a subband.
-message DspMonitorData {
+message DspDiskMonitorData {
     // Disk size (in bytes)
     uint64 disk_capacity = 1;
     // Available disk space left
@@ -647,7 +647,7 @@ message MonitorData {
         // The monitoring data for RECV.CORE.
         ReceiveMonitorData receive = 2;
         // The monitoring data for DSP.CORE.
-        DspMonitorData dsp_disk = 3;
+        DspDiskMonitorData dsp_disk = 3;
         // Only used for testing
         TestMonitorData test = 99;
     }
