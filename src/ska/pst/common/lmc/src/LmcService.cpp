@@ -398,7 +398,7 @@ auto ska::pst::common::LmcService::stop_scan(
     spdlog::trace("ska::pst::common::LmcService::stop_scan()");
     if (_state != ska::pst::lmc::ObsState::SCANNING) {
         auto curr_state_name = ska::pst::lmc::ObsState_Name(_state);
-        spdlog::warn("Received end scan request but not in SCANNING state. Currently in {} state.", curr_state_name);
+        spdlog::warn("Received stop scan request but not in SCANNING state. Currently in {} state.", curr_state_name);
         ska::pst::lmc::Status status;
         status.set_code(ska::pst::lmc::ErrorCode::NOT_SCANNING);
 

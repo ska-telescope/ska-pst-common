@@ -895,7 +895,7 @@ TEST_F(LmcServiceTest, reset_when_aborted_and_scan_configured) // NOLINT
     EXPECT_TRUE(status.ok()); // NOLINT
     EXPECT_TRUE(_handler->is_scan_configured()); // NOLINT
     assert_state(ska::pst::lmc::ObsState::READY);
-    spdlog::trace("LmcServiceTest::reset_when_aborted_and_scan_configured - configuring scan");
+    spdlog::trace("LmcServiceTest::reset_when_aborted_and_scan_configured - scan configured");
 
     spdlog::trace("LmcServiceTest::reset_when_aborted_and_scan_configured - aborting");
     status = abort();
@@ -1012,7 +1012,7 @@ TEST_F(LmcServiceTest, restart_when_aborted_and_scan_configured) // NOLINT
     EXPECT_TRUE(status.ok()); // NOLINT
     EXPECT_TRUE(_handler->is_scan_configured()); // NOLINT
     assert_state(ska::pst::lmc::ObsState::READY);
-    spdlog::trace("LmcServiceTest::restart_when_aborted_and_scan_configured - configuring scan");
+    spdlog::trace("LmcServiceTest::restart_when_aborted_and_scan_configured - scan configured");
 
     spdlog::trace("LmcServiceTest::restart_when_aborted_and_scan_configured - aborting");
     status = abort();
