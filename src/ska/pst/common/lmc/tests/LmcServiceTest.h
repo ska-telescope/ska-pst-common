@@ -47,35 +47,35 @@ namespace test {
 class TestLmcServiceHandler : public ska::pst::common::LmcServiceHandler {
     public:
         TestLmcServiceHandler() {
-            ON_CALL(*this, assign_resources).WillByDefault([this](const ska::pst::lmc::ResourceConfiguration &new_resources) {
+            ON_CALL(*this, configure_beam).WillByDefault([this](const ska::pst::lmc::BeamConfiguration &new_resources) {
                 resources.CopyFrom(new_resources);
-                resources_assigned = true;
+                beam_configured = true;
             });
-            ON_CALL(*this, release_resources).WillByDefault([this]() {
+            ON_CALL(*this, deconfigure_beam).WillByDefault([this]() {
                 resources.Clear();
-                resources_assigned = false;
+                beam_configured = false;
             });
-            ON_CALL(*this, get_assigned_resources).WillByDefault([this](ska::pst::lmc::ResourceConfiguration *response) {
+            ON_CALL(*this, get_beam_configuration).WillByDefault([this](ska::pst::lmc::BeamConfiguration *response) {
                 response->CopyFrom(resources);
             });
 
-            ON_CALL(*this, configure).WillByDefault([this](const ska::pst::lmc::ScanConfiguration &configuration) {
+            ON_CALL(*this, configure_scan).WillByDefault([this](const ska::pst::lmc::ScanConfiguration &configuration) {
                 scan_configuration.CopyFrom(configuration);
-                configured = true;
+                scan_configured = true;
             });
-            ON_CALL(*this, deconfigure).WillByDefault([this]() {
+            ON_CALL(*this, deconfigure_scan).WillByDefault([this]() {
                 scan_configuration.Clear();
-                configured = false;
+                scan_configured = false;
             });
             ON_CALL(*this, get_scan_configuration).WillByDefault([this](ska::pst::lmc::ScanConfiguration *configuration) {
                 configuration->CopyFrom(scan_configuration);
             });
 
 
-            ON_CALL(*this, scan).WillByDefault([this](const ska::pst::lmc::ScanRequest &request) {
+            ON_CALL(*this, start_scan).WillByDefault([this](const ska::pst::lmc::StartScanRequest &request) {
                 scanning = true;
             });
-            ON_CALL(*this, end_scan).WillByDefault([this]() {
+            ON_CALL(*this, stop_scan).WillByDefault([this]() {
                 scanning = false;
             });
 
@@ -88,31 +88,31 @@ class TestLmcServiceHandler : public ska::pst::common::LmcServiceHandler {
         }
 
         // testing fields
-        bool resources_assigned{false};
-        bool configured{false};
+        bool beam_configured{false};
+        bool scan_configured{false};
         bool scanning{false};
-        ska::pst::lmc::ResourceConfiguration resources{};
+        ska::pst::lmc::BeamConfiguration resources{};
         ska::pst::lmc::ScanConfiguration scan_configuration{};
 
         // Resources
-        MOCK_METHOD(void, assign_resources, (const ska::pst::lmc::ResourceConfiguration &resources), (override));
-        MOCK_METHOD(void, release_resources, (), (override));
-        MOCK_METHOD(void, get_assigned_resources, (ska::pst::lmc::ResourceConfiguration *response), (override));
-        bool are_resources_assigned() const noexcept override {
-            return resources_assigned;
+        MOCK_METHOD(void, configure_beam, (const ska::pst::lmc::BeamConfiguration &resources), (override));
+        MOCK_METHOD(void, deconfigure_beam, (), (override));
+        MOCK_METHOD(void, get_beam_configuration, (ska::pst::lmc::BeamConfiguration *response), (override));
+        bool is_beam_configured() const noexcept override {
+            return beam_configured;
         }
 
         // Scan configuration
-        MOCK_METHOD(void, configure, (const ska::pst::lmc::ScanConfiguration &configuration), (override));
-        MOCK_METHOD(void, deconfigure, (), (override));
+        MOCK_METHOD(void, configure_scan, (const ska::pst::lmc::ScanConfiguration &configuration), (override));
+        MOCK_METHOD(void, deconfigure_scan, (), (override));
         MOCK_METHOD(void, get_scan_configuration, (ska::pst::lmc::ScanConfiguration *configuration), (override));
-        bool is_configured() const noexcept override {
-            return configured;
+        bool is_scan_configured() const noexcept override {
+            return scan_configured;
         }
 
         // Scan methods
-        MOCK_METHOD(void, scan, (const ska::pst::lmc::ScanRequest &request), (override));
-        MOCK_METHOD(void, end_scan, (), (override));
+        MOCK_METHOD(void, start_scan, (const ska::pst::lmc::StartScanRequest &request), (override));
+        MOCK_METHOD(void, stop_scan, (), (override));
         bool is_scanning() const noexcept override {
             return scanning;
         }
@@ -135,19 +135,19 @@ class LmcServiceTest : public ::testing::Test
         void TearDown() override;
 
         // beam resources methods
-        grpc::Status assign_resources();
-        grpc::Status assign_resources(ska::pst::lmc::AssignResourcesRequest request);
-        grpc::Status get_assigned_resources(ska::pst::lmc::GetAssignedResourcesResponse* response);
-        grpc::Status release_resources();
+        grpc::Status configure_beam();
+        grpc::Status configure_beam(ska::pst::lmc::ConfigureBeamRequest request);
+        grpc::Status get_beam_configuration(ska::pst::lmc::GetBeamConfigurationResponse* response);
+        grpc::Status deconfigure_beam();
 
         // scan configuration methods
-        grpc::Status configure();
-        grpc::Status deconfigure();
+        grpc::Status configure_scan();
+        grpc::Status deconfigure_scan();
         grpc::Status get_scan_configuration(ska::pst::lmc::GetScanConfigurationResponse* response);
 
         // scan methods
-        grpc::Status scan();
-        grpc::Status end_scan();
+        grpc::Status start_scan();
+        grpc::Status stop_scan();
 
         // error handling methods
         grpc::Status abort();
