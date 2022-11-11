@@ -32,9 +32,12 @@
 #include <spdlog/spdlog.h>
 #include <grpc/grpc.h>
 #include <grpc++/grpc++.h>
+#include <google/protobuf/util/message_differencer.h>
 
 #include "ska/pst/common/lmc/tests/LmcServiceTest.h"
 #include "ska/pst/common/testutils/GtestMain.h"
+
+using namespace google::protobuf::util;
 
 auto main(int argc, char* argv[]) -> int
 {
@@ -215,6 +218,16 @@ auto LmcServiceTest::get_state(
     ska::pst::lmc::GetStateRequest request;
 
     return _stub->get_state(&context, request, response);
+}
+
+auto LmcServiceTest::get_env(
+    ska::pst::lmc::GetEnvironmentResponse* response
+) -> grpc::Status
+{
+    grpc::ClientContext context;
+    ska::pst::lmc::GetEnvironmentRequest request;
+
+    return _stub->get_env(&context, request, response);
 }
 
 void LmcServiceTest::assert_state(
@@ -1362,6 +1375,54 @@ TEST_F(LmcServiceTest, go_to_fault_when_scanning_throws_exception) // NOLINT
     EXPECT_TRUE(_handler->is_scanning()); // NOLINT
     EXPECT_TRUE(status.ok()); // NOLINT
     assert_state(ska::pst::lmc::ObsState::FAULT);
+}
+
+TEST_F(LmcServiceTest, get_env_with_default) // NOLINT
+{
+    EXPECT_CALL(*_handler, get_env);
+
+    _service->start();
+    EXPECT_TRUE(_service->is_running()); // NOLINT
+
+    ska::pst::lmc::GetEnvironmentResponse response;
+    auto status = get_env(&response);
+
+    EXPECT_EQ(response.values().size(), 0);
+}
+
+TEST_F(LmcServiceTest, get_env_with_implementation) // NOLINT
+{
+    auto string_value = ska::pst::lmc::EnvValue();
+    string_value.set_string_value("somestring");
+    auto float_value = ska::pst::lmc::EnvValue();
+    float_value.set_float_value(3.14);
+    auto unsigned_int_value = ska::pst::lmc::EnvValue();
+    unsigned_int_value.set_unsigned_int_value(1234);
+    auto signed_int_value = ska::pst::lmc::EnvValue();
+    signed_int_value.set_signed_int_value(-4321);
+
+    EXPECT_CALL(*_handler, get_env)
+        .WillOnce([this, string_value, float_value, unsigned_int_value, signed_int_value](ska::pst::lmc::GetEnvironmentResponse *response) {
+                auto values = response->mutable_values();
+                (*values)["string_value"] = string_value;
+                (*values)["float_value"] = float_value;
+                (*values)["unsigned_int_value"] = unsigned_int_value;
+                (*values)["signed_int_value"] = signed_int_value;
+            });
+
+    _service->start();
+    EXPECT_TRUE(_service->is_running()); // NOLINT
+
+    ska::pst::lmc::GetEnvironmentResponse response;
+    auto status = get_env(&response);
+
+    EXPECT_EQ(response.values().size(), 4);
+    auto values = response.values();
+
+    EXPECT_TRUE(MessageDifferencer::Equals(values.at("string_value"), string_value));
+    EXPECT_TRUE(MessageDifferencer::Equals(values.at("float_value"), float_value));
+    EXPECT_TRUE(MessageDifferencer::Equals(values.at("unsigned_int_value"), unsigned_int_value));
+    EXPECT_TRUE(MessageDifferencer::Equals(values.at("signed_int_value"), signed_int_value));
 }
 
 } // namespace test

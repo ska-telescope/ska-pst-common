@@ -640,3 +640,13 @@ auto ska::pst::common::LmcService::go_to_fault(
     set_state(ska::pst::lmc::ObsState::FAULT);
     return grpc::Status::OK;
 }
+
+auto ska::pst::common::LmcService::get_env(
+    grpc::ServerContext* context,
+    const ska::pst::lmc::GetEnvironmentRequest* /*request*/,
+    ska::pst::lmc::GetEnvironmentResponse* response
+) -> grpc::Status
+{
+    handler->get_env(response);
+    return grpc::Status::OK;
+}

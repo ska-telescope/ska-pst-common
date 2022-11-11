@@ -349,6 +349,14 @@ namespace common {
              * restarted.
              */
             grpc::Status go_to_fault(grpc::ServerContext* context, const ska::pst::lmc::GoToFaultRequest* request, ska::pst::lmc::GoToFaultResponse* response) override;
+
+            /**
+             * @brief Implements getting the environment values from the service.
+             *
+             * This is used by clients to get environment specific to the service, such
+             * as the IP addresses and ports that the service exposes.
+             */
+            grpc::Status get_env(grpc::ServerContext* context, const ska::pst::lmc::GetEnvironmentRequest* request, ska::pst::lmc::GetEnvironmentResponse* response) override;
     };
 
 } // common
