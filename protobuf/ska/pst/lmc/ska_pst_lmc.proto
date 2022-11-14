@@ -709,6 +709,30 @@ message ConnectionRequest {
 // An empty response message for the connection request.
 message ConnectionResponse {}
 
+// An empty request message to get the environment of the service.
+message GetEnvironmentRequest {}
+
+// Message representing value of an environment value. This
+// is done as a `oneof` field which allows for a string, float,
+// signed int/long, or a unsigned int/long.
+message EnvValue {
+    oneof value {
+        string string_value = 1;
+        float float_value = 2;
+        sint64 signed_int_value = 3;
+        uint64 unsigned_int_value = 4;
+    }
+}
+
+// The response message for the get_env command.
+message GetEnvironmentResponse {
+    // A map of values where the key is the environment variable
+    // name and the value is of type `EnvValue`.
+    //
+    // It is valid to return an empty response.
+    map<string, EnvValue> values = 1;
+}
+
 /*
  Service to expose the local monitoring and control functionality
  of a process.
@@ -809,4 +833,18 @@ service PstLmcService {
      * in a scanning state.
      */
      rpc go_to_fault(GoToFaultRequest) returns (GoToFaultResponse);
+
+     /**
+      * Used by a client to get the environmental state for the sevice.
+      *
+      * The client may call this many times as a form of monitoring.
+      * Unlike the monitor fuction, which is for monitoring a scan,
+      * this method doesn't stream results back as it is a standard
+      * request and response method.
+      *
+      * Implementations of this should document clearly what they
+      * provide in the map of values. The default implementation is
+      * to return an empty map of values.
+      */
+      rpc get_env(GetEnvironmentRequest) returns (GetEnvironmentResponse);
 }

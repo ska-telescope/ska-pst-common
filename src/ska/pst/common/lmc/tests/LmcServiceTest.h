@@ -85,6 +85,10 @@ class TestLmcServiceHandler : public ska::pst::common::LmcServiceHandler {
 
                 (*values)["hot"] = "cold";
             });
+
+            ON_CALL(*this, get_env).WillByDefault([this](ska::pst::lmc::GetEnvironmentResponse *data) {
+                ska::pst::common::LmcServiceHandler::get_env(data);
+            });
         }
 
         // testing fields
@@ -119,6 +123,7 @@ class TestLmcServiceHandler : public ska::pst::common::LmcServiceHandler {
 
         // Monitor
         MOCK_METHOD(void, get_monitor_data, (ska::pst::lmc::MonitorData *data), (override));
+        MOCK_METHOD(void, get_env, (ska::pst::lmc::GetEnvironmentResponse *data), (noexcept, override));
 };
 
 
@@ -154,6 +159,9 @@ class LmcServiceTest : public ::testing::Test
         grpc::Status reset();
         grpc::Status restart();
         grpc::Status go_to_fault();
+
+        // get environment
+        grpc::Status get_env(ska::pst::lmc::GetEnvironmentResponse* response);
 
         grpc::Status get_state(ska::pst::lmc::GetStateResponse*);
         void assert_state(ska::pst::lmc::ObsState);

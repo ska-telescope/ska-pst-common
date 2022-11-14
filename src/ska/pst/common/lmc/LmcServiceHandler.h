@@ -225,6 +225,22 @@ namespace common {
              * @throw std::exception if there is a validation issue or problem during monitoring.
              */
             virtual void get_monitor_data(ska::pst::lmc::MonitorData *data) = 0;
+
+            // get environment
+            /**
+             * @brief Return environment variables back to the client.
+             *
+             * The default implementation of this is a no-op. However, implementations that override this
+             * method should document clearly what values they are returning, including the key, a
+             * description of the value, and the value type.  This will allow the clients of gRPC service
+             * to know what to expect.
+             *
+             * Implementations must not throw exceptions calling this method, they should just return
+             * a empty response.
+             *
+             * @param data Pointer to a protobuf message message that includes the a map to populate.
+             */
+             virtual void get_env(ska::pst::lmc::GetEnvironmentResponse *data) noexcept {}
     };
 
 } // common
