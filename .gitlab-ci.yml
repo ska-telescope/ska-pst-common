@@ -75,7 +75,5 @@ include:
   - project: 'ska-telescope/templates-repository'
     file: gitlab-ci/includes/release.gitlab-ci.yml
 
-  # Override for branch based builds
-  # - local: '.gitlab/ci/branch.gitlab-ci.yml'
-  #   rules:
-  #     - if: $CI_COMMIT_BRANCH =~ /at3.*/
+  # Downstream pipeline trigger
+  - local: '.gitlab/ci/downstream.gitlab-ci.yml'
