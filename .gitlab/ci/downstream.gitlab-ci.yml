@@ -3,6 +3,3 @@ trigger-ska-pst-smrb-oci:
   trigger:
     project: ska-telescope/pst/ska-pst-smrb
     branch: at3-322-downstream-ci-trigger
-    include:
-      - artifact: .gitlab-ci.yml
-        job: oci-image-build
