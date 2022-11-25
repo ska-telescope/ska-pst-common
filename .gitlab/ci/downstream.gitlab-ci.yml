@@ -1,9 +1,9 @@
 trigger-ska-pst-smrb:
-  stage: .post
+  stage: build
   inherit:
     variables: false
   variables:
-    SKA_CPP_DOCKER_BUILDER_IMAGE: registry.gitlab.com/ska-telescope/pst/ska-pst-common/ska-pst-common-builder:`grep -o '[0-9].*' .release`-dev.c$CI_COMMIT_SHORT_SHA
+    PST_OCI_REGISTRY: registry.gitlab.com/ska-telescope/pst/ska-pst-common
   trigger:
     project: ska-telescope/pst/ska-pst-smrb
     branch: at3-322-downstream-ci-trigger
