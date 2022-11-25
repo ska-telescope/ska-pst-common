@@ -3,6 +3,7 @@ trigger-ska-pst-smrb:
   inherit:
     variables: false
   variables:
+    OCI_SKIP_PUSH: "true"
     PST_OCI_REGISTRY: registry.gitlab.com/ska-telescope/pst/ska-pst-common
   trigger:
     project: ska-telescope/pst/ska-pst-smrb
