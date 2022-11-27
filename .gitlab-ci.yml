@@ -18,10 +18,15 @@ variables:
   # For details see https://docs.gitlab.com/ee/ci/yaml/README.html#git-submodule-strategy
   GIT_SUBMODULE_STRATEGY: recursive
   SKA_CPP_DOCKER_BUILDER_IMAGE: artefact.skao.int/ska-cicd-cpp-build-base:0.2.10
+  PST_SMRB_OCI_REGISTRY: registry.gitlab.com/ska-telescope/pst/ska-pst-common
+  PST_OCI_COMMON_BUILDER: ska-pst-common-builder
+  PST_OCI_COMMON_PROTO: ska-pst-common-proto
+  PST_OCI_COMMON_TAG: ""
   OCI_IMAGE_BUILD_CONTEXT: $(PWD)
-  OCI_IMAGES: "ska-pst-common-builder ska-pst-common-proto"
+  OCI_IMAGES: "$PST_OCI_COMMON_BUILDER $PST_OCI_COMMON_PROTO"
   K8S_TEST_CLUSTER_TAG: k8srunner
-  OCI_TEST_TAG: ""
+
+image: $SKA_CPP_DOCKER_BUILDER_IMAGE
 
 stages:
   - build
@@ -77,3 +82,5 @@ include:
 
   # Downstream pipeline trigger
   - local: '.gitlab/ci/downstream.gitlab-ci.yml'
+    rules:
+      - if: $CI_COMMIT_BRANCH =~ /at3.*/

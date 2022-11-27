@@ -1,10 +1,21 @@
-trigger-ska-pst-smrb:
+dynamic_vars:
   stage: build
+  needs: ["oci-image-build"]
+  script:
+    - echo "PST_OCI_COMMON_TAG=$(grep -m 1 -o '[0-9].*' .release)-dev.c${CI_COMMIT_SHORT_SHA}" > build.env
+  artifacts:
+    reports:
+      dotenv: build.env
+
+trigger-ska-pst-smrb:
+  stage: test
+  needs: ["dynamic_vars"]
   inherit:
     variables: false
   variables:
     OCI_SKIP_PUSH: "true"
     PST_OCI_REGISTRY: registry.gitlab.com/ska-telescope/pst/ska-pst-common
+    PST_OCI_COMMON_TAG: $PST_OCI_COMMON_TAG
   trigger:
     project: ska-telescope/pst/ska-pst-smrb
-    branch: at3-322-downstream-ci-trigger
+    branch: $CI_COMMIT_BRANCH
