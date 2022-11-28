@@ -1,11 +1,14 @@
 # Test OCI
 test_dada:
   tags:
-    - $K8S_TEST_CLUSTER_TAG  
+    - $K8S_TEST_CLUSTER_TAG
+  variables:
+    OCI_TEST_IMAGE: "registry.gitlab.com/ska-telescope/pst/ska-pst-common/ska-pst-common-builder"
+    GIT_SUBMODULE_STRATEGY: normal
   stage: test
   needs:
     - dynamic_vars
-  image: "$PST_OCI_REGISTRY:$PST_OCI_COMMON_TAG"
+  image: "$OCI_TEST_IMAGE:$PST_OCI_COMMON_TAG"
   script:
     - dada_db
     - dada_db -d
