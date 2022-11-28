@@ -7,68 +7,57 @@ dynamic_vars:
     reports:
       dotenv: build.env
 
-trigger-ska-pst-smrb:
+.downstream_branch:
+  trigger:
+    branch: $CI_COMMIT_BRANCH
+    strategy: depend
+  rules:
+    - if: $CI_COMMIT_BRANCH
+
+.downstream_branch:
+  trigger:
+    branch: $CI_MERGE_REQUEST_SOURCE_BRANCH_NAME
+    strategy: depend
+  rules:
+    - if: $CI_MERGE_REQUEST_SOURCE_BRANCH_NAME
+
+.downstream_common_config:
+  extends: .downstream_branch
   stage: test
-  needs:
-    - dynamic_vars
-    - oci-image-build
+  needs: ["dynamic_vars"]
   inherit:
     variables: false
   variables:
     OCI_SKIP_PUSH: "true"
     PST_OCI_REGISTRY: registry.gitlab.com/ska-telescope/pst/ska-pst-common
     PST_OCI_COMMON_TAG: $PST_OCI_COMMON_TAG
+
+trigger-ska-pst-smrb:
+  extends: .downstream_branch
   trigger:
     project: ska-telescope/pst/ska-pst-smrb
-    branch: $CI_COMMIT_BRANCH
 
 
 trigger-ska-pst-recv:
-  stage: test
+  extends: .downstream_branch
   needs:
-    - dynamic_vars
     - trigger-ska-pst-smrb
-  inherit:
-    variables: false
-  variables:
-    OCI_SKIP_PUSH: "true"
-    PST_SMRB_OCI_REGISTRY: registry.gitlab.com/ska-telescope/pst/ska-pst-smrb
-    PST_SMRB_OCI_COMMON_TAG: $PST_SMRB_OCI_COMMON_TAG
   trigger:
     project: ska-telescope/pst/ska-pst-recv
-    branch: $CI_COMMIT_BRANCH
-    strategy: depend
 
 
 trigger-ska-pst-dsp:
-  stage: test
+  extends: .downstream_branch
   needs:
-    - dynamic_vars
     - trigger-ska-pst-smrb
-  inherit:
-    variables: false
-  variables:
-    OCI_SKIP_PUSH: "true"
-    PST_SMRB_OCI_REGISTRY: registry.gitlab.com/ska-telescope/pst/ska-pst-smrb
-    PST_SMRB_OCI_COMMON_TAG: $PST_SMRB_OCI_COMMON_TAG
   trigger:
     project: ska-telescope/pst/ska-pst-dsp
-    branch: $CI_COMMIT_BRANCH
-    strategy: depend
 
 trigger-ska-pst-integration:
-  stage: test
+  extends: .downstream_branch
   needs:
-    - dynamic_vars
+    - trigger-ska-pst-smrb
     - trigger-ska-pst-recv
     - trigger-ska-pst-dsp
-  inherit:
-    variables: false
-  variables:
-    OCI_SKIP_PUSH: "true"
-    PST_RECV_OCI_REGISTRY: registry.gitlab.com/ska-telescope/pst/ska-pst-recv
-    PST_RECV_OCI_TAG: $PST_SMRB_OCI_COMMON_TAG
   trigger:
     project: ska-telescope/pst/ska-pst-integration
-    branch: $CI_COMMIT_BRANCH
-    strategy: depend
