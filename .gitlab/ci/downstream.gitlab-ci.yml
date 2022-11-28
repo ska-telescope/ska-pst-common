@@ -9,7 +9,9 @@ dynamic_vars:
 
 trigger-ska-pst-smrb:
   stage: test
-  needs: ["dynamic_vars"]
+  needs:
+    - dynamic_vars
+    - oci-image-build
   inherit:
     variables: false
   variables:
@@ -19,3 +21,54 @@ trigger-ska-pst-smrb:
   trigger:
     project: ska-telescope/pst/ska-pst-smrb
     branch: $CI_COMMIT_BRANCH
+
+
+trigger-ska-pst-recv:
+  stage: test
+  needs:
+    - dynamic_vars
+    - trigger-ska-pst-smrb
+  inherit:
+    variables: false
+  variables:
+    OCI_SKIP_PUSH: "true"
+    PST_SMRB_OCI_REGISTRY: registry.gitlab.com/ska-telescope/pst/ska-pst-smrb
+    PST_SMRB_OCI_COMMON_TAG: $PST_SMRB_OCI_COMMON_TAG
+  trigger:
+    project: ska-telescope/pst/ska-pst-recv
+    branch: $CI_COMMIT_BRANCH
+    strategy: depend
+
+
+trigger-ska-pst-dsp:
+  stage: test
+  needs:
+    - dynamic_vars
+    - trigger-ska-pst-smrb
+  inherit:
+    variables: false
+  variables:
+    OCI_SKIP_PUSH: "true"
+    PST_SMRB_OCI_REGISTRY: registry.gitlab.com/ska-telescope/pst/ska-pst-smrb
+    PST_SMRB_OCI_COMMON_TAG: $PST_SMRB_OCI_COMMON_TAG
+  trigger:
+    project: ska-telescope/pst/ska-pst-dsp
+    branch: $CI_COMMIT_BRANCH
+    strategy: depend
+
+trigger-ska-pst-integration:
+  stage: test
+  needs:
+    - dynamic_vars
+    - trigger-ska-pst-recv
+    - trigger-ska-pst-dsp
+  inherit:
+    variables: false
+  variables:
+    OCI_SKIP_PUSH: "true"
+    PST_RECV_OCI_REGISTRY: registry.gitlab.com/ska-telescope/pst/ska-pst-recv
+    PST_RECV_OCI_TAG: $PST_SMRB_OCI_COMMON_TAG
+  trigger:
+    project: ska-telescope/pst/ska-pst-integration
+    branch: $CI_COMMIT_BRANCH
+    strategy: depend

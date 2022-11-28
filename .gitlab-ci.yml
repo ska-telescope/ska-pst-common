@@ -83,4 +83,5 @@ include:
   # Downstream pipeline trigger
   - local: '.gitlab/ci/downstream.gitlab-ci.yml'
     rules:
-      - if: $CI_COMMIT_BRANCH =~ /at3.*/
+      - if: ($CI_COMMIT_BRANCH =~ /at3.*|main/) && ($CI_PIPELINE_SOURCE != "pipeline")
+      - if: $CI_PIPELINE_SOURCE == "merge_request_event"
