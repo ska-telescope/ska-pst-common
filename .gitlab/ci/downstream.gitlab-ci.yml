@@ -20,7 +20,7 @@
     variables: false
   variables:
     OCI_SKIP_PUSH: "true"
-    PST_OCI_COMMON_REGISTRY: $PST_OCI_COMMON_REGISTRY
+    PST_OCI_COMMON_REGISTRY: "registry.gitlab.com/ska-telescope/pst/ska-pst-common"
     PST_OCI_COMMON_TAG: $PST_OCI_COMMON_TAG
 
 trigger-ska-pst-smrb:
