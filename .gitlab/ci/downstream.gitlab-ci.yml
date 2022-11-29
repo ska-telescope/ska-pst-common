@@ -33,13 +33,13 @@ dynamic_vars:
     PST_OCI_COMMON_TAG: $PST_OCI_COMMON_TAG
 
 trigger-ska-pst-smrb:
-  extends: .downstream_branch
+  extends: .downstream_common_config
   trigger:
     project: ska-telescope/pst/ska-pst-smrb
 
 
 trigger-ska-pst-recv:
-  extends: .downstream_branch
+  extends: .downstream_common_config
   needs:
     - trigger-ska-pst-smrb
   trigger:
@@ -47,14 +47,14 @@ trigger-ska-pst-recv:
 
 
 trigger-ska-pst-dsp:
-  extends: .downstream_branch
+  extends: .downstream_common_config
   needs:
     - trigger-ska-pst-smrb
   trigger:
     project: ska-telescope/pst/ska-pst-dsp
 
 trigger-ska-pst-integration:
-  extends: .downstream_branch
+  extends: .downstream_common_config
   needs:
     - trigger-ska-pst-smrb
     - trigger-ska-pst-recv
