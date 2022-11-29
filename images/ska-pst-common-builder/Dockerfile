@@ -1,4 +1,5 @@
-FROM library/ubuntu:20.04 as base
+ARG BUILD_IMAGE=""
+FROM $BUILD_IMAGE as builder
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV LD_LIBRARY_PATH=/usr/local/lib/
