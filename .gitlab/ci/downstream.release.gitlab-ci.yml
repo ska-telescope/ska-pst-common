@@ -17,14 +17,6 @@ oci-image-build:
   trigger:
     strategy: depend
 
-trigger-release-ska-pst-common:
-  extends: .downstream_common_config
-  variables:
-    PST_OCI_BUILDTOOLS_REGISTRY: $SKA_RELEASE_REGISTRY
-    PST_OCI_BUILDTOOLS_TAG: $PST_OCI_BUILDTOOLS_RELEASE
-  trigger:
-    project: ska-telescope/pst/ska-pst-common
-
 trigger-release-ska-pst-smrb:
   extends: .downstream_common_config
   variables:
@@ -33,6 +25,19 @@ trigger-release-ska-pst-smrb:
     - trigger-release-ska-pst-common
   trigger:
     project: ska-telescope/pst/ska-pst-smrb
+  rules:
+    - if: ($CI_COMMIT_BRANCH =~ /rel.*/) && ($CI_PIPELINE_SOURCE != "pipeline")
+
+trigger-release-ska-pst-smrb:
+  extends: .downstream_common_config
+  variables:
+    PST_OCI_COMMON_REGISTRY: $SKA_RELEASE_REGISTRY
+  needs:
+    - trigger-release-ska-pst-common
+  trigger:
+    project: ska-telescope/pst/ska-pst-smrb
+  rules:
+    - if: $CI_COMMIT_TAG
 
 trigger-release-ska-pst-recv:
   extends: .downstream_common_config
