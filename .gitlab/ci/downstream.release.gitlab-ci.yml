@@ -62,4 +62,4 @@ trigger-release-ska-pst-integration:
     - trigger-release-ska-pst-recv
     - trigger-release-ska-pst-dsp
   trigger:
-    project: ska-telescope/pst/ska-pst-dsp
+    project: ska-telescope/pst/ska-pst-integration

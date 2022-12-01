@@ -62,4 +62,4 @@ trigger-merge-ska-pst-integration:
     - trigger-merge-ska-pst-recv
     - trigger-merge-ska-pst-dsp
   trigger:
-    project: ska-telescope/pst/ska-pst-dsp
+    project: ska-telescope/pst/ska-pst-integration
