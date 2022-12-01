@@ -10,7 +10,6 @@ oci-image-build:
   extends: .downstream_branch
   stage: test
   needs:
-    - "oci-image-publish"
     - "dynamic_vars"
   inherit:
     variables: false
@@ -23,8 +22,7 @@ trigger-release-ska-pst-smrb:
   extends: .downstream_common_config
   variables:
     PST_OCI_COMMON_REGISTRY: registry.gitlab.com/ska-telescope/pst/ska-pst-common
-  needs:
-    - trigger-release-ska-pst-common
+    PST_OCI_COMMON_TAG: $PST_OCI_COMMON_TAG
   trigger:
     project: ska-telescope/pst/ska-pst-smrb
   rules:
@@ -34,8 +32,9 @@ trigger-release-ska-pst-smrb:
   extends: .downstream_common_config
   variables:
     PST_OCI_COMMON_REGISTRY: $SKA_RELEASE_REGISTRY
+    PST_OCI_COMMON_TAG: $PST_OCI_COMMON_RELEASE
   needs:
-    - trigger-release-ska-pst-common
+    - "oci-image-publish"
   trigger:
     project: ska-telescope/pst/ska-pst-smrb
   rules:

@@ -17,18 +17,11 @@ oci-image-build:
   trigger:
     strategy: depend
 
-trigger-development-ska-pst-common:
-  extends: .downstream_common_config
-  variables:
-    PST_OCI_BUILDTOOLS_REGISTRY: registry.gitlab.com/ska-telescope/pst/ska-pst-buildtools
-    PST_OCI_BUILDTOOLS_TAG: $PST_OCI_BUILDTOOLS_TAG
-  trigger:
-    project: ska-telescope/pst/ska-pst-common
-
 trigger-development-ska-pst-smrb:
   extends: .downstream_common_config
   variables:
     PST_OCI_COMMON_REGISTRY: registry.gitlab.com/ska-telescope/pst/ska-pst-common
+    PST_OCI_COMMON_TAG: $PST_OCI_COMMON_TAG
   needs:
     - trigger-development-ska-pst-common
   trigger:
