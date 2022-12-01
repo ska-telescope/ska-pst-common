@@ -9,7 +9,7 @@ oci-image-build:
 .downstream_common_config:
   extends: .downstream_branch
   stage: test
-  needs: ["oci-image-build"]
+  needs: ["dynamic_vars"]
   inherit:
     variables: false
   variables:

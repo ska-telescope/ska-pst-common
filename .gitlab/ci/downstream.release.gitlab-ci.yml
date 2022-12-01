@@ -9,7 +9,9 @@ oci-image-build:
 .downstream_common_config:
   extends: .downstream_branch
   stage: test
-  needs: ["oci-image-publish"]
+  needs:
+    - "oci-image-publish"
+    - "dynamic_vars"
   inherit:
     variables: false
   variables:
