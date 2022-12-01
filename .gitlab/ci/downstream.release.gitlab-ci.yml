@@ -1,0 +1,65 @@
+oci-image-build:
+  variables:
+    OCI_BUILD_ADDITIONAL_ARGS: " --build-arg BUILD_IMAGE=$SKA_RELEASE_REGISTRY/$PST_OCI_BUILDTOOLS_IMAGE:$PST_OCI_BUILDTOOLS_RELEASE"
+
+.downstream_branch:
+  trigger:
+    branch: $CI_DEFAULT_BRANCH
+
+.downstream_common_config:
+  extends: .downstream_branch
+  stage: test
+  needs: ["oci-image-publish"]
+  inherit:
+    variables: false
+  variables:
+    OCI_SKIP_PUSH: "true"
+  trigger:
+    strategy: depend
+
+trigger-release-ska-pst-common:
+  extends: .downstream_common_config
+  variables:
+    PST_OCI_BUILDTOOLS_REGISTRY: $SKA_RELEASE_REGISTRY
+    PST_OCI_BUILDTOOLS_TAG: $PST_OCI_BUILDTOOLS_RELEASE
+  trigger:
+    project: ska-telescope/pst/ska-pst-common
+
+trigger-release-ska-pst-smrb:
+  extends: .downstream_common_config
+  variables:
+    PST_OCI_COMMON_REGISTRY: registry.gitlab.com/ska-telescope/pst/ska-pst-common
+  needs:
+    - trigger-release-ska-pst-common
+  trigger:
+    project: ska-telescope/pst/ska-pst-smrb
+
+trigger-release-ska-pst-recv:
+  extends: .downstream_common_config
+  variables:
+    PST_SMRB_OCI_REGISTRY: registry.gitlab.com/ska-telescope/pst/ska-pst-smrb
+  needs:
+    - trigger-release-ska-pst-smrb
+  trigger:
+    project: ska-telescope/pst/ska-pst-recv
+
+trigger-release-ska-pst-dsp:
+  extends: .downstream_common_config
+  variables:
+    PST_SMRB_OCI_REGISTRY: registry.gitlab.com/ska-telescope/pst/ska-pst-smrb
+  needs:
+    - trigger-release-ska-pst-smrb
+  trigger:
+    project: ska-telescope/pst/ska-pst-dsp
+
+trigger-release-ska-pst-integration:
+  extends: .downstream_common_config
+  variables:
+    PST_SMRB_OCI_REGISTRY: registry.gitlab.com/ska-telescope/pst/ska-pst-smrb
+    PST_RECV_OCI_REGISTRY: registry.gitlab.com/ska-telescope/pst/ska-pst-recv
+    PST_DSP_OCI_REGISTRY: registry.gitlab.com/ska-telescope/pst/ska-pst-dsp
+  needs:
+    - trigger-release-ska-pst-recv
+    - trigger-release-ska-pst-dsp
+  trigger:
+    project: ska-telescope/pst/ska-pst-dsp
