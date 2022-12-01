@@ -22,8 +22,6 @@ trigger-development-ska-pst-smrb:
   variables:
     PST_OCI_COMMON_REGISTRY: registry.gitlab.com/ska-telescope/pst/ska-pst-common
     PST_OCI_COMMON_TAG: $PST_OCI_COMMON_TAG
-  needs:
-    - trigger-development-ska-pst-common
   trigger:
     project: ska-telescope/pst/ska-pst-smrb
 
