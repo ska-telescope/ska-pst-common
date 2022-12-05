@@ -21,17 +21,13 @@ include(CTest)
 
 # External projects
 if (BUILD_TESTING)
-  add_subdirectory(resources/googletest googletest EXCLUDE_FROM_ALL)
-# installed as git submodule - if this is your first clone you need to
-# git submodule init
-# git submodule update
-# This is a cmake module and needs no further input from you
+  find_package(GTest REQUIRED)
 endif()
 
 find_package(Protobuf)
 find_package(gRPC)
+find_package(spdlog)
 
 find_dependencies()
-add_subdirectory(resources/spdlog)
 add_subdirectory(src/ska/pst/common)
 add_subdirectory(protobuf)
