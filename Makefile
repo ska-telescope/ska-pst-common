@@ -10,14 +10,14 @@ include .pst/base.mk
 
 # Variables populated for local development and oci build.
 # 	Overriden by CI variables. See .gitlab-cy.yml#L7
-PST_OCI_BUILDTOOLS_REGISTRY=registry.gitlab.com/ska-telescope/pst/ska-pst-buildtools
-PST_OCI_BUILDTOOLS_IMAGE=ska-pst-buildtools
-PST_OCI_BUILDTOOLS_TAG=0.0.0
-PST_OCI_COMMON_REGISTRY=registry.gitlab.com/ska-telescope/pst/ska-pst-common
-PST_OCI_COMMON_BUILDER=ska-pst-common-builder
-PST_OCI_COMMON_PROTO=ska-pst-common-proto
-OCI_IMAGE="${PST_OCI_COMMON_BUILDER} ${PST_OCI_COMMON_PROTO}"
-OCI_BUILD_ADDITIONAL_ARGS=--build-arg BUILD_IMAGE=${PST_OCI_BUILDTOOLS_REGISTRY}/${PST_OCI_BUILDTOOLS_IMAGE}:${PST_OCI_BUILDTOOLS_TAG}
+PST_OCI_BUILDTOOLS_REGISTRY	?=registry.gitlab.com/ska-telescope/pst/ska-pst-buildtools
+PST_OCI_BUILDTOOLS_IMAGE	?=ska-pst-buildtools
+PST_OCI_BUILDTOOLS_TAG		?=0.0.0
+PST_OCI_COMMON_REGISTRY		?=registry.gitlab.com/ska-telescope/pst/ska-pst-common
+PST_OCI_COMMON_BUILDER		?=ska-pst-common-builder
+PST_OCI_COMMON_PROTO		?=ska-pst-common-proto
+OCI_IMAGE					?="${PST_OCI_COMMON_BUILDER} ${PST_OCI_COMMON_PROTO}"
+OCI_BUILD_ADDITIONAL_ARGS	?=--build-arg BUILD_IMAGE=${PST_OCI_BUILDTOOLS_REGISTRY}/${PST_OCI_BUILDTOOLS_IMAGE}:${PST_OCI_BUILDTOOLS_TAG}
 # include your own private variables for custom deployment configuration
 -include PrivateRules.mak
 
