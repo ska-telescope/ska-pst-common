@@ -55,7 +55,10 @@ dynamic_vars:
       dotenv: build.env
 
 oci-image-build:
-  needs: ["dynamic_vars"]
+  needs:
+    - dynamic_vars
+  dependencies:
+    - dynamic_vars
   script:
     - make oci-build-all CAR_OCI_REGISTRY_HOST=${CI_REGISTRY}/${CI_PROJECT_NAMESPACE}/${CI_PROJECT_NAME} OCI_BUILD_ADDITIONAL_ARGS=" --build-arg BUILD_IMAGE=$PST_OCI_BUILDTOOLS_REGISTRY/$PST_OCI_BUILDTOOLS_IMAGE:$PST_OCI_BUILDTOOLS_TAG"
 
