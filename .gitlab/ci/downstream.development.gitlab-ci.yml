@@ -16,7 +16,7 @@
 trigger-development-ska-pst-smrb:
   extends: .downstream_common_config
   variables:
-    PST_OCI_COMMON_REGISTRY: $GITLAB_OCI_COMMON_REGISTRY
+    PST_OCI_COMMON_REGISTRY: $PST_OCI_COMMON_REGISTRY
     PST_OCI_COMMON_TAG: $PST_OCI_COMMON_TAG
   trigger:
     project: ska-telescope/pst/ska-pst-smrb
