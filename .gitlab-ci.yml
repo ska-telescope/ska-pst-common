@@ -43,7 +43,6 @@ docs-pages:
 
 dynamic_vars:
   stage: build
-  needs: ["oci-image-build"]
   variables:
     GIT_SUBMODULE_STRATEGY: normal
   script:
