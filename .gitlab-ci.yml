@@ -48,8 +48,7 @@ dynamic_vars:
   script:
     - echo "PST_OCI_COMMON_TAG=$(grep -m 1 -o '[0-9].*' .release)-dev.c${CI_COMMIT_SHORT_SHA}" > build.env
     - echo "PST_OCI_COMMON_RELEASE=$(grep -m 1 -o '[0-9].*' .release)" >> build.env
-    # - if [[ $CI_COMMIT_BRANCH =~ "^at3*" ]]; then echo "PST_OCI_COMMON_REGISTRY=$GITLAB_OCI_COMMON_REGISTRY";  fi >> build.env
-    # - if [[ $CI_COMMIT_BRANCH =~ "^at3*" ]]; then echo "PST_OCI_BUILDTOOLS_REGISTRY=$GITLAB_OCI_BUILDTOOLS_REGISTRY";  fi >> build.env
+    - if [[ $CI_COMMIT_BRANCH =~ "^at3*" ]]; then echo "PST_OCI_COMMON_REGISTRY=$GITLAB_OCI_COMMON_REGISTRY";  fi >> build.env
   artifacts:
     reports:
       dotenv: build.env
@@ -62,10 +61,10 @@ oci-image-build:
   script:
     - make oci-build-all CAR_OCI_REGISTRY_HOST=${CI_REGISTRY}/${CI_PROJECT_NAMESPACE}/${CI_PROJECT_NAME} OCI_BUILD_ADDITIONAL_ARGS=" --build-arg BUILD_IMAGE=$PST_OCI_BUILDTOOLS_REGISTRY/$PST_OCI_BUILDTOOLS_IMAGE:$PST_OCI_BUILDTOOLS_TAG"
   rules:
-      - if: ($CI_COMMIT_BRANCH =~ /at3.*/)
-        variables:
-          PST_OCI_COMMON_REGISTRY: ${GITLAB_OCI_COMMON_REGISTRY}
-          PST_OCI_BUILDTOOLS_REGISTRY: ${PST_OCI_BUILDTOOLS_REGISTRY}
+    - if: ($CI_COMMIT_BRANCH =~ /at3.*/)
+      variables:
+        PST_OCI_COMMON_REGISTRY: ${GITLAB_OCI_COMMON_REGISTRY}
+        PST_OCI_BUILDTOOLS_REGISTRY: ${GITLAB_OCI_BUILDTOOLS_REGISTRY}
 
 
 include:
