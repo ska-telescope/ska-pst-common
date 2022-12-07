@@ -1,0 +1,62 @@
+.downstream_branch:
+  variables:
+    DOWNSTREAM_BRANCH: ""
+  trigger:
+    branch: $CI_COMMIT_BRANCH
+  rules:
+    - if: ($CI_COMMIT_BRANCH =~ /at3.*|rel.*/)
+      variables:
+        DOWNSTREAM_BRANCH: $CI_COMMIT_BRANCH
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      variables:
+        DOWNSTREAM_BRANCH: $CI_MERGE_REQUEST_SOURCE_BRANCH_NAME
+
+.downstream_common_config:
+  extends: .downstream_branch
+  stage: test
+  needs: ["oci-image-build"]
+  inherit:
+    variables: false
+  variables:
+    OCI_SKIP_PUSH: "true"
+  trigger:
+    strategy: depend
+
+trigger-ska-pst-smrb:
+  extends: .downstream_common_config
+  variables:
+    PST_OCI_COMMON_REGISTRY: $PST_OCI_COMMON_REGISTRY
+    PST_OCI_COMMON_TAG: $PST_OCI_COMMON_TAG
+  trigger:
+    project: ska-telescope/pst/ska-pst-smrb
+
+trigger-ska-pst-recv:
+  extends: .downstream_common_config
+  variables:
+    PST_SMRB_OCI_REGISTRY: registry.gitlab.com/ska-telescope/pst/ska-pst-smrb
+  needs:
+    - trigger-ska-pst-smrb
+  trigger:
+    project: ska-telescope/pst/ska-pst-recv
+
+trigger-ska-pst-dsp:
+  extends: .downstream_common_config
+  variables:
+    PST_SMRB_OCI_REGISTRY: registry.gitlab.com/ska-telescope/pst/ska-pst-smrb
+  needs:
+    - trigger-ska-pst-smrb
+  trigger:
+    project: ska-telescope/pst/ska-pst-dsp
+
+trigger-ska-pst-integration:
+  extends: .downstream_common_config
+  variables:
+    PST_SMRB_OCI_REGISTRY: registry.gitlab.com/ska-telescope/pst/ska-pst-smrb
+    PST_RECV_OCI_REGISTRY: registry.gitlab.com/ska-telescope/pst/ska-pst-recv
+    PST_DSP_OCI_REGISTRY: registry.gitlab.com/ska-telescope/pst/ska-pst-dsp
+  needs:
+    - trigger-ska-pst-recv
+    - trigger-ska-pst-dsp
+  trigger:
+    project: ska-telescope/pst/ska-pst-integration
+  when: manual
