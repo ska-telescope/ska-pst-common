@@ -1,7 +1,7 @@
 .downstream_merge_branch:
   stage: test
   trigger:
-    branch: $DOWNSTREAM_BRANCH
+    branch: $CI_MERGE_REQUEST_SOURCE_BRANCH_NAME
 
 .downstream_merge_common_config:
   extends: .downstream_merge_branch
