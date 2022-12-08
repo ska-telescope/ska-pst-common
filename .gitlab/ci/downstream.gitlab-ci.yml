@@ -1,6 +1,4 @@
 .downstream_branch:
-  variables:
-    DOWNSTREAM_BRANCH: ""
   trigger:
     branch: $DOWNSTREAM_BRANCH
   rules:
