@@ -48,6 +48,8 @@ dynamic_vars:
   script:
     - echo "PST_OCI_COMMON_TAG=$(grep -m 1 -o '[0-9].*' .release)-dev.c${CI_COMMIT_SHORT_SHA}" > build.env
     - echo "PST_OCI_COMMON_RELEASE=$(grep -m 1 -o '[0-9].*' .release)" >> build.env
+    - if [[ $CI_PIPELINE_SOURCE == "merge_request_event" ]]; then echo "DOWNSTREAM_BRANCH=$CI_MERGE_REQUEST_SOURCE_BRANCH_NAME"; fi  >> build.env
+    - if [[ -z $CI_COMMIT_BRANCH ]]; then echo "DOWNSTREAM_BRANCH=$CI_COMMIT_BRANCH"; fi  >> build.env
   artifacts:
     reports:
       dotenv: build.env

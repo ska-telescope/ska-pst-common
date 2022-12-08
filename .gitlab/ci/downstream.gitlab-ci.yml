@@ -1,13 +1,9 @@
 .downstream_branch:
+  needs: ["dynamic_vars"]
+  variables:
+    DOWNSTREAM_BRANCH: ""
   trigger:
     branch: $DOWNSTREAM_BRANCH
-  rules:
-    - if: ($CI_COMMIT_BRANCH =~ /at3.*|rel.*/)
-      variables:
-        DOWNSTREAM_BRANCH: $CI_COMMIT_BRANCH
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-      variables:
-        DOWNSTREAM_BRANCH: $CI_MERGE_REQUEST_SOURCE_BRANCH_NAME
 
 .downstream_common_config:
   extends: .downstream_branch
