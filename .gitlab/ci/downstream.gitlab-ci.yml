@@ -2,7 +2,7 @@
   variables:
     DOWNSTREAM_BRANCH: ""
   trigger:
-    branch: $CI_COMMIT_BRANCH
+    branch: $DOWNSTREAM_BRANCH
   rules:
     - if: ($CI_COMMIT_BRANCH =~ /at3.*|rel.*/)
       variables:
