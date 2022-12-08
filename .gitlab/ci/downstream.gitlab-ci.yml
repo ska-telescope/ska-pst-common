@@ -1,14 +1,13 @@
 .downstream_branch:
-  needs: ["dynamic_vars"]
-  variables:
-    DOWNSTREAM_BRANCH: ""
+  needs:
+   - dynamic_vars
+   - oci-image-build
+  stage: test
   trigger:
     branch: $DOWNSTREAM_BRANCH
 
 .downstream_common_config:
   extends: .downstream_branch
-  stage: test
-  needs: ["oci-image-build"]
   inherit:
     variables: false
   variables:
