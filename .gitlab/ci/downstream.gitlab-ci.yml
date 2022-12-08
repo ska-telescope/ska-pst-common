@@ -1,7 +1,4 @@
 .downstream_branch:
-  needs:
-   - dynamic_vars
-   - oci-image-build
   stage: test
   trigger:
     branch: $DOWNSTREAM_BRANCH
