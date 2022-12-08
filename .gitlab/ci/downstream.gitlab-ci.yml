@@ -29,6 +29,7 @@ trigger-ska-pst-smrb:
     PST_OCI_COMMON_TAG: $PST_OCI_COMMON_TAG
   trigger:
     project: ska-telescope/pst/ska-pst-smrb
+  when: manual
 
 trigger-ska-pst-recv:
   extends: .downstream_common_config
@@ -38,6 +39,7 @@ trigger-ska-pst-recv:
     - trigger-ska-pst-smrb
   trigger:
     project: ska-telescope/pst/ska-pst-recv
+  when: manual
 
 trigger-ska-pst-dsp:
   extends: .downstream_common_config
@@ -47,6 +49,7 @@ trigger-ska-pst-dsp:
     - trigger-ska-pst-smrb
   trigger:
     project: ska-telescope/pst/ska-pst-dsp
+  when: manual
 
 trigger-ska-pst-integration:
   extends: .downstream_common_config
