@@ -18,7 +18,6 @@ variables:
   PST_OCI_COMMON_TAG: ""
   OCI_IMAGE_BUILD_CONTEXT: $(PWD)
   OCI_IMAGE: "$PST_OCI_COMMON_BUILDER $PST_OCI_COMMON_PROTO"
-  DOWNSTREAM_BRANCH: $CI_DEFAULT_BRANCH
 
 image: $SKA_CPP_DOCKER_BUILDER_IMAGE
 
@@ -104,18 +103,18 @@ include:
   - project: 'ska-telescope/templates-repository'
     file: gitlab-ci/includes/release.gitlab-ci.yml
   
-  # Downstream builds - downstream integration test
-  - local: '.gitlab/ci/downstream.gitlab-ci.yml'
-      # - if: $CI_COMMIT_TAG
-      #   variables:
-      #     DOWNSTREAM_BRANCH: $CI_COMMIT_BRANCH
+    # Development based builds - downstream integration test
+  - local: '.gitlab/ci/downstream.development.gitlab-ci.yml'
+    rules:
+      - if: ($CI_COMMIT_BRANCH =~ /at3.*|main/) && ($CI_PIPELINE_SOURCE != "pipeline")
 
-# Override globally defined variables
-workflow:
-  rules:
-    - if: $CI_COMMIT_BRANCH
-      variables:
-        DOWNSTREAM_BRANCH: $CI_COMMIT_BRANCH
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-      variables:
-        DOWNSTREAM_BRANCH: $CI_MERGE_REQUEST_SOURCE_BRANCH_NAME
+  # Merge request builds - downstream integration test
+  - local: '.gitlab/ci/downstream.merge.gitlab-ci.yml'
+    rules:
+      - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+
+  # Release builds - downstream integration test
+  - local: '.gitlab/ci/downstream.release.gitlab-ci.yml'
+    rules:
+      - if: ($CI_COMMIT_BRANCH =~ /rel.*|main/) && ($CI_PIPELINE_SOURCE != "pipeline")
+      - if: $CI_COMMIT_TAG

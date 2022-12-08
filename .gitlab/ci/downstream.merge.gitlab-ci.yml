@@ -1,10 +1,10 @@
-.downstream_branch:
+.downstream_merge_branch:
   stage: test
   trigger:
     branch: $DOWNSTREAM_BRANCH
 
-.downstream_common_config:
-  extends: .downstream_branch
+.downstream_merge_common_config:
+  extends: .downstream_merge_branch
   inherit:
     variables: false
   variables:
@@ -12,8 +12,8 @@
   trigger:
     strategy: depend
 
-trigger-ska-pst-smrb:
-  extends: .downstream_common_config
+trigger-merge-ska-pst-smrb:
+  extends: .downstream_merge_common_config
   variables:
     PST_OCI_COMMON_REGISTRY: $PST_OCI_COMMON_REGISTRY
     PST_OCI_COMMON_TAG: $PST_OCI_COMMON_TAG
@@ -21,35 +21,35 @@ trigger-ska-pst-smrb:
     project: ska-telescope/pst/ska-pst-smrb
   when: manual
 
-trigger-ska-pst-recv:
-  extends: .downstream_common_config
+trigger-merge-ska-pst-recv:
+  extends: .downstream_merge_common_config
   variables:
     PST_SMRB_OCI_REGISTRY: registry.gitlab.com/ska-telescope/pst/ska-pst-smrb
   needs:
-    - trigger-ska-pst-smrb
+    - trigger-merge-ska-pst-smrb
   trigger:
     project: ska-telescope/pst/ska-pst-recv
   when: manual
 
-trigger-ska-pst-dsp:
-  extends: .downstream_common_config
+trigger-merge-ska-pst-dsp:
+  extends: .downstream_merge_common_config
   variables:
     PST_SMRB_OCI_REGISTRY: registry.gitlab.com/ska-telescope/pst/ska-pst-smrb
   needs:
-    - trigger-ska-pst-smrb
+    - trigger-merge-ska-pst-smrb
   trigger:
     project: ska-telescope/pst/ska-pst-dsp
   when: manual
 
-trigger-ska-pst-integration:
-  extends: .downstream_common_config
+trigger-merge-ska-pst-integration:
+  extends: .downstream_merge_common_config
   variables:
     PST_SMRB_OCI_REGISTRY: registry.gitlab.com/ska-telescope/pst/ska-pst-smrb
     PST_RECV_OCI_REGISTRY: registry.gitlab.com/ska-telescope/pst/ska-pst-recv
     PST_DSP_OCI_REGISTRY: registry.gitlab.com/ska-telescope/pst/ska-pst-dsp
   needs:
-    - trigger-ska-pst-recv
-    - trigger-ska-pst-dsp
+    - trigger-merge-ska-pst-recv
+    - trigger-merge-ska-pst-dsp
   trigger:
     project: ska-telescope/pst/ska-pst-integration
   when: manual
