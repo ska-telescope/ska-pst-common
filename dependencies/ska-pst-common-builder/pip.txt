@@ -1,4 +1,0 @@
-pyyaml
-sphinx
-sphinx-rtd-theme
-cppcheck-junit

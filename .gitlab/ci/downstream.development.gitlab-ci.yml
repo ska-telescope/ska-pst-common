@@ -1,0 +1,56 @@
+.downstream_development_branch:
+  stage: test
+  trigger:
+    branch: $CI_COMMIT_BRANCH
+
+.downstream_development_common_config:
+  extends: .downstream_development_branch
+  needs: ["dynamic_vars"]
+  inherit:
+    variables: false
+  variables:
+    OCI_SKIP_PUSH: "true"
+  trigger:
+    strategy: depend
+
+trigger-development-ska-pst-smrb:
+  extends: .downstream_development_common_config
+  variables:
+    PST_OCI_COMMON_REGISTRY: $PST_OCI_COMMON_REGISTRY
+    PST_OCI_COMMON_TAG: $PST_OCI_COMMON_TAG
+  trigger:
+    project: ska-telescope/pst/ska-pst-smrb
+  when: manual
+
+trigger-development-ska-pst-recv:
+  extends: .downstream_development_common_config
+  variables:
+    PST_SMRB_OCI_REGISTRY: registry.gitlab.com/ska-telescope/pst/ska-pst-smrb
+  needs:
+    - trigger-development-ska-pst-smrb
+  trigger:
+    project: ska-telescope/pst/ska-pst-recv
+  when: manual
+
+trigger-development-ska-pst-dsp:
+  extends: .downstream_development_common_config
+  variables:
+    PST_SMRB_OCI_REGISTRY: registry.gitlab.com/ska-telescope/pst/ska-pst-smrb
+  needs:
+    - trigger-development-ska-pst-smrb
+  trigger:
+    project: ska-telescope/pst/ska-pst-dsp
+  when: manual
+
+trigger-development-ska-pst-integration:
+  extends: .downstream_development_common_config
+  variables:
+    PST_SMRB_OCI_REGISTRY: registry.gitlab.com/ska-telescope/pst/ska-pst-smrb
+    PST_RECV_OCI_REGISTRY: registry.gitlab.com/ska-telescope/pst/ska-pst-recv
+    PST_DSP_OCI_REGISTRY: registry.gitlab.com/ska-telescope/pst/ska-pst-dsp
+  needs:
+    - trigger-development-ska-pst-recv
+    - trigger-development-ska-pst-dsp
+  trigger:
+    project: ska-telescope/pst/ska-pst-integration
+  when: manual

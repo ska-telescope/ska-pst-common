@@ -1,27 +1,25 @@
-# This file is a template, and might need editing before it works on your project.
-# use the official gcc image, based on debian
-# can use verions as well, like gcc:5.2
-# see https://hub.docker.com/_/gcc/
-#
-# This base image is based on debian:buster-slim and contains:
-#  * gcc 8.3.0
-#  * clang 7.0.1
-#  * cmake 3.13.4
-#  * and more
-#
-# For details see https://github.com/ska-telescope/cpp_build_base
-#
-image: $SKA_CPP_DOCKER_BUILDER_IMAGE
-
 variables:
   # Needed if you want automatic submodule checkout
   # For details see https://docs.gitlab.com/ee/ci/yaml/README.html#git-submodule-strategy
   GIT_SUBMODULE_STRATEGY: recursive
   SKA_CPP_DOCKER_BUILDER_IMAGE: artefact.skao.int/ska-cicd-cpp-build-base:0.2.10
-  OCI_IMAGE_BUILD_CONTEXT: $(PWD)
-  OCI_IMAGES: "ska-pst-common-builder ska-pst-common-proto"
   K8S_TEST_CLUSTER_TAG: k8srunner
-  OCI_TEST_TAG: ""
+  SKA_RELEASE_REGISTRY: artefact.skao.int
+  GITLAB_OCI_COMMON_REGISTRY: registry.gitlab.com/ska-telescope/pst/ska-pst-common
+  GITLAB_OCI_BUILDTOOLS_REGISTRY: registry.gitlab.com/ska-telescope/pst/ska-pst-buildtools
+  # OCI variables that overrides values in Makefile
+  # CI Variables enable upstream/downstream CI integration
+  PST_OCI_BUILDTOOLS_REGISTRY: $SKA_RELEASE_REGISTRY
+  PST_OCI_BUILDTOOLS_IMAGE: ska-pst-buildtools
+  PST_OCI_BUILDTOOLS_TAG: "0.0.0"
+  PST_OCI_COMMON_REGISTRY: $SKA_RELEASE_REGISTRY
+  PST_OCI_COMMON_BUILDER: ska-pst-common-builder
+  PST_OCI_COMMON_PROTO: ska-pst-common-proto
+  PST_OCI_COMMON_TAG: ""
+  OCI_IMAGE_BUILD_CONTEXT: $(PWD)
+  OCI_IMAGE: "$PST_OCI_COMMON_BUILDER $PST_OCI_COMMON_PROTO"
+
+image: $SKA_CPP_DOCKER_BUILDER_IMAGE
 
 stages:
   - build
@@ -42,6 +40,34 @@ docs-pages:
   image: registry.gitlab.com/ska-telescope/pst/ska-pst-common/ska-pst-common-builder:0.3.0
   needs:
   - oci-image-build
+
+dynamic_vars:
+  stage: build
+  variables:
+    GIT_SUBMODULE_STRATEGY: normal
+  script:
+    - echo "PST_OCI_COMMON_TAG=$(grep -m 1 -o '[0-9].*' .release)-dev.c${CI_COMMIT_SHORT_SHA}" > build.env
+    - echo "PST_OCI_COMMON_RELEASE=$(grep -m 1 -o '[0-9].*' .release)" >> build.env
+  artifacts:
+    reports:
+      dotenv: build.env
+
+oci-image-build:
+  needs:
+    - dynamic_vars
+  dependencies:
+    - dynamic_vars
+  script:
+    - make oci-build-all CAR_OCI_REGISTRY_HOST=${CI_REGISTRY}/${CI_PROJECT_NAMESPACE}/${CI_PROJECT_NAME} OCI_BUILD_ADDITIONAL_ARGS=" --build-arg BUILD_IMAGE=$PST_OCI_BUILDTOOLS_REGISTRY/$PST_OCI_BUILDTOOLS_IMAGE:$PST_OCI_BUILDTOOLS_TAG"
+  rules:
+    - if: ($CI_COMMIT_BRANCH =~ /at3.*/) || (($CI_MERGE_REQUEST_SOURCE_BRANCH_NAME =~ /at3.*/) && ($CI_PIPELINE_SOURCE == "merge_request_event"))
+      variables:
+        PST_OCI_COMMON_REGISTRY: ${GITLAB_OCI_COMMON_REGISTRY}
+        PST_OCI_BUILDTOOLS_REGISTRY: ${GITLAB_OCI_BUILDTOOLS_REGISTRY}
+    - if: ($CI_COMMIT_TAG) || ($CI_COMMIT_BRANCH =~ /rel.*/) || (($CI_MERGE_REQUEST_SOURCE_BRANCH_NAME =~ /rel.*/) && ($CI_PIPELINE_SOURCE == "merge_request_event"))
+      variables:
+        PST_OCI_COMMON_REGISTRY: ${SKA_RELEASE_REGISTRY}
+        PST_OCI_BUILDTOOLS_REGISTRY: ${SKA_RELEASE_REGISTRY}
 
 include:
   # OCI
@@ -74,8 +100,19 @@ include:
   # Umbrella include for all Raw life cycle stages
   - project: 'ska-telescope/templates-repository'
     file: gitlab-ci/includes/release.gitlab-ci.yml
+  
+    # Development based builds - downstream integration test
+  - local: '.gitlab/ci/downstream.development.gitlab-ci.yml'
+    rules:
+      - if: ($CI_COMMIT_BRANCH =~ /at3.*|main/) && ($CI_PIPELINE_SOURCE != "pipeline")
 
-  # Override for branch based builds
-  # - local: '.gitlab/ci/branch.gitlab-ci.yml'
-  #   rules:
-  #     - if: $CI_COMMIT_BRANCH =~ /at3.*/
+  # Merge request builds - downstream integration test
+  - local: '.gitlab/ci/downstream.merge.gitlab-ci.yml'
+    rules:
+      - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+
+  # Release builds - downstream integration test
+  - local: '.gitlab/ci/downstream.release.gitlab-ci.yml'
+    rules:
+      - if: ($CI_COMMIT_BRANCH =~ /rel.*|main/) && ($CI_PIPELINE_SOURCE != "pipeline")
+      - if: $CI_COMMIT_TAG
