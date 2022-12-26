@@ -16,7 +16,7 @@
     -exec sed -i "s|$old_sdir|$this_sdir|g" {} +
 
 .common:
-  image: $GITLAB_OCI_SMRB_REGISTRY/$PST_SMRB_OCI_BUILDER:$PST_SMRB_OCI_COMMON_TAG
+  image: $PST_OCI_BUILDTOOLS_REGISTRY/$PST_OCI_BUILDTOOLS_IMAGE:$PST_OCI_BUILDTOOLS_TAG
   tags: [k8srunner]
 
 .common.artifact-builder:
@@ -35,14 +35,6 @@
 
 .common.lint:
   extends: .common.artifact-retriever
-
-stages:
-  - build
-  - lint
-  - test
-  - publish
-  - scan
-  - pages
 
 build_debug:
   extends: .common.artifact-builder
