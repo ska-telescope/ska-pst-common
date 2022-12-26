@@ -16,7 +16,7 @@
     -exec sed -i "s|$old_sdir|$this_sdir|g" {} +
 
 .common:
-  image: $PST_OCI_BUILDTOOLS_REGISTRY/$PST_OCI_BUILDTOOLS_IMAGE:$PST_OCI_BUILDTOOLS_TAG
+  image: $GITLAB_OCI_BUILDTOOLS_REGISTRY/$PST_OCI_BUILDTOOLS_IMAGE:$PST_OCI_BUILDTOOLS_TAG
   tags: [k8srunner]
 
 .common.artifact-builder:
