@@ -2,6 +2,7 @@
 configure_file(config.h.in config.h)
 
 add_subdirectory(lmc)
+add_subdirectory(utils)
 
 set(public_headers
   version.h

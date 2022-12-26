@@ -1,0 +1,24 @@
+HDR_SIZE            4096
+HDR_VERSION         1.0
+COMMAND             START
+SOURCE              J1644-4559_R
+RA                  None
+DEC                 None
+TOBS                None
+OBSERVER            Sarah
+PID                 None
+MODE                CAL
+CALFREQ             11.1111111111
+OBS_OFFSET          0
+PERFORM_FOLD        1
+PERFORM_SEARCH      0
+PERFORM_TRANS       0
+ADC_SYNC_TIME       1501586468.0
+ANTENNAE            m006
+SCHEDULE_BLOCK_ID   20170801-0030
+EXPERIMENT_ID       20170801-0030
+PROPOSAL_ID         None
+PROGRAM_BLOCK_ID    TBD
+DESCRIPTION         Noise diode test
+UTC_START           2017-08-01-15:53:29
+BYTES_PER_SECOND    1234

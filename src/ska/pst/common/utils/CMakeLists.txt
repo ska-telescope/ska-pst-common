@@ -1,0 +1,48 @@
+
+set(public_headers
+    AsciiHeader.h
+    Endian.h
+    Time.h
+    Timer.h
+)
+
+set(sources
+    src/AsciiHeader.cpp
+    src/Time.cpp
+    src/Timer.cpp)
+
+set(private_headers
+)
+
+add_library(
+    ska-pst-common-utils
+    OBJECT
+    ${sources}
+    ${private_headers}
+    ${public_headers}
+)
+
+target_include_directories(
+    ska-pst-common-utils
+    PUBLIC
+    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>
+    $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/src>
+    $<INSTALL_INTERFACE:include>
+)
+
+target_link_libraries(
+    ska-pst-common-utils
+    PUBLIC
+    spdlog
+)
+
+if (BUILD_TESTING)
+  add_subdirectory(tests)
+endif()
+
+install(
+    FILES
+        ${public_headers}
+    DESTINATION
+        include/ska/pst/common
+)

@@ -3,10 +3,15 @@
 include .make/base.mk
 
 # include oci makefile targets for oci management
+include .make/cpp.mk
+
+# include oci makefile targets for oci management
 include .make/oci.mk
 
 # include pst common local make targets
 include .pst/base.mk
+
+PROJECT=ska-pst-common
 
 # Variables populated for local development and oci build.
 # 	Overriden by CI variables. See .gitlab-cy.yml#L7
@@ -22,6 +27,7 @@ OCI_BUILD_ADDITIONAL_ARGS	?=--build-arg BUILD_IMAGE=${PST_OCI_BUILDTOOLS_REGISTR
 -include PrivateRules.mak
 
 NPROC=`nproc`
+PROCESSOR_COUNT=$(NPROC)
 OCI_IMAGE_BUILD_CONTEXT=$(PWD)
 # OS package installation
 .PHONY: local-pkg-install
@@ -92,3 +98,7 @@ protobuf-docs:
 docs-pre-build: protobuf-docs
 
 .PHONY: protobuf-docs
+
+# Local ska-pst-common development environment
+DEV_IMAGE=$(PST_OCI_BUILDTOOLS_REGISTRY)/$(PST_OCI_BUILDTOOLS_IMAGE)
+DEV_TAG=$(PST_OCI_BUILDTOOLS_TAG)
