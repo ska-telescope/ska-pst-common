@@ -58,10 +58,10 @@ class TimerTest : public ::testing::Test
     private:
 };
 
-} // test
-} // common
-} // pst
-} // ska
+} // namespace test
+} // namespace common
+} // namespace pst
+} // namespace ska
 
 #endif // SKA_PST_SMRB_TESTS_TimerTest_h
 

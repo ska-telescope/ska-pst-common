@@ -218,8 +218,8 @@ namespace common {
       uint64_t attoseconds{0};
   };
 
-} // common
-} // pst
-} // ska
+} // namepace common
+} // namepace pst
+} // namepace ska
 
 #endif // SKA_PST_SMRB_UTIL_Time_h

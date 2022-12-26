@@ -171,8 +171,8 @@ static inline T betoh(T in)
   return detail::Endian<T>::betoh(in);
 }
 
-} // common
-} // pst
-} // ska
+} // namespace common
+} // namespace pst
+} // namespace ska
 
 #endif // SKA_PST_SMRB_UTILS_Endian_h

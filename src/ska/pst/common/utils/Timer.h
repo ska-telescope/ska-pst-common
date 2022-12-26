@@ -100,8 +100,8 @@ namespace common {
 
   };
 
-} // common
-} // pst
-} // ska
-            
+} // namespace common
+} // namespace pst
+} // namespace ska
+
 #endif // SKA_PST_SMRB_UTIL_Timer_h

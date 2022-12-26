@@ -34,7 +34,7 @@
 #define SKA_PST_SMRB_TESTS_AsciiHeaderTest_h
 
 namespace ska {
-namespace pst { 
+namespace pst {
 namespace common {
 namespace test {
 
@@ -58,10 +58,10 @@ class AsciiHeaderTest : public ::testing::Test
     private:
 };
 
-} // test
-} // common 
-} // pst
-} // ska
+} // namespace test
+} // namespace common
+} // namespace pst
+} // namespace ska
 
 #endif // SKA_PST_SMRB_TESTS_AsciiHeaderTest_h
 

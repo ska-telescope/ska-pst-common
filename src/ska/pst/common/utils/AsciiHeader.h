@@ -363,8 +363,8 @@ namespace common {
       uint32_t key_padding{20};
   };
 
-} // common
-} // pst
-} // ska
+} // namepace common
+} // namepace pst
+} // namepace ska
 
 #endif // SKA_PST_SMRB_UTIL_AsciiHeader_h
