@@ -60,6 +60,7 @@ lint_clang_tidy:
   extends: .common.lint
   stage: lint
   needs: ["build_export_compile_commands"]
+  depends: ["build_export_compile_commands"]
   script:
     - make local-cpp-lint-clang
   artifacts:
@@ -70,6 +71,7 @@ lint_iwyu:
   extends: .common.lint
   stage: lint
   needs: ["build_export_compile_commands"]
+  depends: ["build_export_compile_commands"]
   script:
     - make local-cpp-lint-iwyu
   artifacts:
@@ -80,6 +82,7 @@ lint_cppcheck:
   extends: .common.lint
   stage: lint
   needs: ["build_export_compile_commands"]
+  depends: ["build_export_compile_commands"]
   script:
     - make local-cpp-lint-cppcheck
   artifacts:
@@ -92,6 +95,7 @@ test:
   extends: .common.artifact-retriever
   stage: test
   needs: ["build_debug"]
+  depends: ["build_debug"]
   before_script:
     - make local-cpp-test-ctest
   script:
@@ -111,6 +115,7 @@ test_installation:
   extends: .common.artifact-retriever
   stage: test
   needs: ["build_release"]
+  depends: ["build_release"]
   script:
     - make local-cpp-test-installation
 
@@ -118,6 +123,7 @@ test_memcheck:
   extends: .common.artifact-retriever
   stage: test
   needs: ["build_debug"]
+  depends: ["build_debug"]
   script:
     - make local-cpp-test-ctest-memcheck
   artifacts:
@@ -131,6 +137,7 @@ test_debug_build:
   stage: test
   when: always
   needs: ["build_debug"]
+  depends: ["build_debug"]
   script:
     - make local-cpp-test-ctest
   artifacts:

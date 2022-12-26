@@ -40,7 +40,10 @@ auto main(int argc, char* argv[]) -> int
   return ska::pst::common::test::gtest_main(argc, argv);
 }
 
-namespace ska::pst::common::test {
+namespace ska {
+namespace pst {
+namespace common {
+namespace test {
 
 TimeTest::TimeTest()
     : ::testing::Test()
@@ -185,4 +188,7 @@ TEST_F(TimeTest, test_set_fractional_time_limits) // NOLINT
   EXPECT_THROW(epoch.set_fractional_time(fractional_seconds + 0.1), std::runtime_error); // NOLINT
 }
 
-} // namespace ska::pst::common::test
+} // namespace test
+} // namespace common
+} // namespace pst
+} // namespace ska
