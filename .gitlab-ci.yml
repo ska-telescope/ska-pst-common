@@ -138,13 +138,6 @@ test:
     reports:
       junit: build/reports/unit-tests.xml
 
-test_installation:
-  extends: .common.artifact-retriever
-  stage: test
-  needs: ["build_release"]
-  script:
-    - make local-cpp-test-installation
-
 test_memcheck:
   extends: .common.artifact-retriever
   stage: test
