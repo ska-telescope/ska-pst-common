@@ -34,8 +34,8 @@
 #include <stdexcept>
 #include <sstream>      // std::ostringstream
 
-#ifndef SKA_PST_SMRB_UTIL_AsciiHeader_h
-#define SKA_PST_SMRB_UTIL_AsciiHeader_h
+#ifndef SKA_PST_COMMON_UTIL_AsciiHeader_h
+#define SKA_PST_COMMON_UTIL_AsciiHeader_h
 
 #define DEFAULT_HEADER_SIZE 4096
 
@@ -367,4 +367,4 @@ namespace common {
 } // namepace pst
 } // namepace ska
 
-#endif // SKA_PST_SMRB_UTIL_AsciiHeader_h
+#endif // SKA_PST_COMMON_UTIL_AsciiHeader_h

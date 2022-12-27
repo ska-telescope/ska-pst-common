@@ -30,8 +30,8 @@
 
 #include <gtest/gtest.h>
 
-#ifndef SKA_PST_SMRB_TESTS_TimerTest_h
-#define SKA_PST_SMRB_TESTS_TimerTest_h
+#ifndef SKA_PST_COMMON_TESTS_TimerTest_h
+#define SKA_PST_COMMON_TESTS_TimerTest_h
 
 namespace ska {
 namespace pst { 
@@ -63,5 +63,5 @@ class TimerTest : public ::testing::Test
 } // namespace pst
 } // namespace ska
 
-#endif // SKA_PST_SMRB_TESTS_TimerTest_h
+#endif // SKA_PST_COMMON_TESTS_TimerTest_h
 

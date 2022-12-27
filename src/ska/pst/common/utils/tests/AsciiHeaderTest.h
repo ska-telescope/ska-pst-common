@@ -30,8 +30,8 @@
 
 #include <gtest/gtest.h>
 
-#ifndef SKA_PST_SMRB_TESTS_AsciiHeaderTest_h
-#define SKA_PST_SMRB_TESTS_AsciiHeaderTest_h
+#ifndef SKA_PST_COMMON_TESTS_AsciiHeaderTest_h
+#define SKA_PST_COMMON_TESTS_AsciiHeaderTest_h
 
 namespace ska {
 namespace pst {
@@ -63,5 +63,5 @@ class AsciiHeaderTest : public ::testing::Test
 } // namespace pst
 } // namespace ska
 
-#endif // SKA_PST_SMRB_TESTS_AsciiHeaderTest_h
+#endif // SKA_PST_COMMON_TESTS_AsciiHeaderTest_h
 

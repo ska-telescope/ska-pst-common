@@ -31,8 +31,8 @@
 #include <sys/time.h>
 #include <cinttypes>
 
-#ifndef SKA_PST_SMRB_UTIL_Timer_h
-#define SKA_PST_SMRB_UTIL_Timer_h
+#ifndef SKA_PST_COMMON_UTIL_Timer_h
+#define SKA_PST_COMMON_UTIL_Timer_h
 
 namespace ska {
 namespace pst {
@@ -104,4 +104,4 @@ namespace common {
 } // namespace pst
 } // namespace ska
 
-#endif // SKA_PST_SMRB_UTIL_Timer_h
+#endif // SKA_PST_COMMON_UTIL_Timer_h

@@ -32,8 +32,8 @@
 #include <cstring>
 #include <endian.h>
 
-#ifndef SKA_PST_SMRB_UTILS_Endian_h
-#define SKA_PST_SMRB_UTILS_Endian_h
+#ifndef SKA_PST_COMMON_UTILS_Endian_h
+#define SKA_PST_COMMON_UTILS_Endian_h
 
 namespace ska {
 namespace pst {
@@ -175,4 +175,4 @@ static inline T betoh(T in)
 } // namespace pst
 } // namespace ska
 
-#endif // SKA_PST_SMRB_UTILS_Endian_h
+#endif // SKA_PST_COMMON_UTILS_Endian_h
