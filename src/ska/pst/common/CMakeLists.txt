@@ -82,5 +82,5 @@ install(
     ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/SkaPstCommonConfig.cmake
     ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/SkaPstCommonVersion.cmake
   DESTINATION
-    "${export_dest_dir}"
+    ${export_dest_dir}
 )
