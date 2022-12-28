@@ -12,6 +12,7 @@ set(private_headers
 
 set(public_headers
     StateModel.h
+    ApplicationManager.h
 )
 
 add_library(
