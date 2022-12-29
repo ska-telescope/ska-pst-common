@@ -37,71 +37,71 @@
 #include "ska/pst/common/statemodel/StateModel.h"
 #include "ska/pst/common/utils/AsciiHeader.h"
 
-ska::pst::common::StateModel::StateModel()
+ska::pst::common::statemodel::StateModel::StateModel()
 {
 }
 
-void ska::pst::common::StateModel::configure_beam()
+void ska::pst::common::statemodel::StateModel::configure_beam()
 {
-  spdlog::debug("ska::pst::common::StateModel::configure_beam()");
+  spdlog::debug("ska::pst::common::statemodel::StateModel::configure_beam()");
 }
 
-void ska::pst::common::StateModel::configure_scan()
+void ska::pst::common::statemodel::StateModel::configure_scan()
 {
-  spdlog::debug("ska::pst::common::StateModel::configure_scan()");
+  spdlog::debug("ska::pst::common::statemodel::StateModel::configure_scan()");
 }
 
-void ska::pst::common::StateModel::start_scan()
+void ska::pst::common::statemodel::StateModel::start_scan()
 {
-  spdlog::debug("ska::pst::common::StateModel::start_scan()"); 
+  spdlog::debug("ska::pst::common::statemodel::StateModel::start_scan()"); 
 }
 
-void ska::pst::common::StateModel::stop_scan()
+void ska::pst::common::statemodel::StateModel::stop_scan()
 {
-  spdlog::debug("ska::pst::common::StateModel::stop_scan()"); 
+  spdlog::debug("ska::pst::common::statemodel::StateModel::stop_scan()"); 
 }
 
-void ska::pst::common::StateModel::deconfigure_scan()
+void ska::pst::common::statemodel::StateModel::deconfigure_scan()
 {
-  spdlog::debug("ska::pst::common::StateModel::deconfigure_scan()");
+  spdlog::debug("ska::pst::common::statemodel::StateModel::deconfigure_scan()");
 }
 
-void ska::pst::common::StateModel::deconfigure_beam()
+void ska::pst::common::statemodel::StateModel::deconfigure_beam()
 {
-  spdlog::debug("ska::pst::common::StateModel::deconfigure_beam()");
+  spdlog::debug("ska::pst::common::statemodel::StateModel::deconfigure_beam()");
 }
 
-void ska::pst::common::StateModel::reset()
+void ska::pst::common::statemodel::StateModel::reset()
 {
-  spdlog::debug("ska::pst::common::StateModel::reset()");
+  spdlog::debug("ska::pst::common::statemodel::StateModel::reset()");
 }
 
-
-void ska::pst::common::StateModel::validate_configure_beam(ska::pst::common::AsciiHeader config)
+ska::pst::common::statemodel::State ska::pst::common::statemodel::StateModel::get_state()
 {
-  spdlog::debug("ska::pst::common::StateModel::validate_configure_beam()");
+  return state;
 }
 
-
-void ska::pst::common::StateModel::validate_configure_scan(ska::pst::common::AsciiHeader config)
+void ska::pst::common::statemodel::StateModel::validate_configure_beam(ska::pst::common::AsciiHeader config)
 {
-  spdlog::debug("ska::pst::common::StateModel::validate_configure_scan()");
+  spdlog::debug("ska::pst::common::statemodel::StateModel::validate_configure_beam()");
 }
 
-
-void ska::pst::common::StateModel::validate_start_scan(ska::pst::common::AsciiHeader config)
+void ska::pst::common::statemodel::StateModel::validate_configure_scan(ska::pst::common::AsciiHeader config)
 {
-  spdlog::debug("ska::pst::common::StateModel::validate_start_scan()");
+  spdlog::debug("ska::pst::common::statemodel::StateModel::validate_configure_scan()");
 }
 
-
-void ska::pst::common::StateModel::set_command(ska::pst::common::Command cmd)
+void ska::pst::common::statemodel::StateModel::validate_start_scan(ska::pst::common::AsciiHeader config)
 {
-  spdlog::debug("ska::pst::common::StateModel::set_command()");
+  spdlog::debug("ska::pst::common::statemodel::StateModel::validate_start_scan()");
 }
 
-
-void ska::pst::common::StateModel::wait_for(ska::pst::common::State state)
+void ska::pst::common::statemodel::StateModel::set_command(ska::pst::common::statemodel::Command cmd)
 {
-  spdlog::debug("ska::pst::common::StateModel::wait_for()");
+  spdlog::debug("ska::pst::common::statemodel::StateModel::set_command()");
+}
+
+void ska::pst::common::statemodel::StateModel::wait_for(ska::pst::common::statemodel::State state)
+{
+  spdlog::debug("ska::pst::common::statemodel::StateModel::wait_for()");
 }

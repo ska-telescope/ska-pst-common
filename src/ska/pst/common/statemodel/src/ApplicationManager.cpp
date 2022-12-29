@@ -35,51 +35,77 @@
 #include <spdlog/spdlog.h>
 #include "ska/pst/common/statemodel/ApplicationManager.h"
 
-ska::pst::common::ApplicationManager(const std::string& _entity) : entity(_entity)
+ska::pst::common::statemodel::ApplicationManager::ApplicationManager(const std::string& _entity) : entity(_entity)
 {
 }
 
-void ska::pst::common::ApplicationManager::main()
+void ska::pst::common::statemodel::ApplicationManager::main()
 {
-  spdlog::debug("ska::pst::common::ApplicationManager::main");
+  spdlog::debug("ska::pst::common::statemodel::ApplicationManager::main");
 }
 
-void ska::pst::common::ApplicationManager::quit()
+void ska::pst::common::statemodel::ApplicationManager::quit()
 {
-  spdlog::debug("ska::pst::common::ApplicationManager::quit");
+  spdlog::debug("ska::pst::common::statemodel::ApplicationManager::quit");
 }
 
-void ska::pst::common::ApplicationManager::wait_for(ska::pst::common::StateModel::Command cmd)
+// TBC: confirm if following protected methods are meant to be implemented by agents. i.e. smrb, recv, dsp
+void ska::pst::common::statemodel::ApplicationManager::perform_initialise()
 {
-  spdlog::debug("ska::pst::common::ApplicationManager::wait_for");
+  spdlog::debug("ska::pst::common::statemodel::ApplicationManager::perform_initialise");
+  // TBA: Prerequisites prior for state to transition from Unknown to Idle
+  set_state(Idle);
 }
 
-void ska::pst::common::ApplicationManager::perform_initialise()
+void ska::pst::common::statemodel::ApplicationManager::perform_configure_beam()
 {
-  spdlog::debug("ska::pst::common::ApplicationManager::perform_initialise");
+  spdlog::debug("ska::pst::common::statemodel::ApplicationManager::perform_configure_beam");
+  // TBA: Prerequisites prior for state to transition from Idle to BeamConfigured
+  // TBA: Error handling transitioning to RuntimeError
+  set_state(BeamConfigured);
 }
 
-void ska::pst::common::ApplicationManager::perform_configure_beam()
+void ska::pst::common::statemodel::ApplicationManager::perform_configure_scan()
 {
-  spdlog::debug("ska::pst::common::ApplicationManager::perform_configure_beam");
+  spdlog::debug("ska::pst::common::statemodel::ApplicationManager::perform_configure_scan");
+  // TBA: Prerequisites prior for state to transition from BeamConfigured to ScanConfigured
+  // TBA: Error handling transitioning to RuntimeError
+  set_state(ScanConfigured);
 }
 
-void ska::pst::common::ApplicationManager::perform_configure_scan()
+void ska::pst::common::statemodel::ApplicationManager::perform_scan()
 {
-  spdlog::debug("ska::pst::common::ApplicationManager::perform_configure_scan");
+  spdlog::debug("ska::pst::common::statemodel::ApplicationManager::perform_scan");
+  // TBA: Prerequisites prior for state to transition from ScanConfigured to Scanning
+  // TBA: Error handling transitioning to RuntimeError
+  set_state(Scanning);
 }
 
-void ska::pst::common::ApplicationManager::perform_scan()
+void ska::pst::common::statemodel::ApplicationManager::perform_reset()
 {
-  spdlog::debug("ska::pst::common::ApplicationManager::perform_scan");
+  spdlog::debug("ska::pst::common::statemodel::ApplicationManager::reset");
+  // TBA: Prerequisites prior for state to transition from RuntimeError to Idle
+  set_state(Idle);
 }
 
-void ska::pst::common::ApplicationManager::perform_reset()
+void ska::pst::common::statemodel::ApplicationManager::perform_terminate()
 {
-  spdlog::debug("ska::pst::common::ApplicationManager::reset");
+  spdlog::debug("ska::pst::common::statemodel::ApplicationManager::terminate");
+  // TBA: Prerequisites prior for state to transition from Idle to Unknown
+  set_state(Unknown);
 }
 
-void ska::pst::common::ApplicationManager::perform_terminate()
+void ska::pst::common::statemodel::ApplicationManager::wait_for(ska::pst::common::statemodel::Command cmd)
 {
-  spdlog::debug("ska::pst::common::ApplicationManager::terminate");
+  spdlog::debug("ska::pst::common::statemodel::ApplicationManager::wait_for");
+}
+
+void ska::pst::common::statemodel::ApplicationManager::set_state(ska::pst::common::statemodel::State state)
+{
+  spdlog::debug("ska::pst::common::statemodel::ApplicationManager::set_state");
+}
+
+void ska::pst::common::statemodel::ApplicationManager::set_exception(std::exception exception)
+{
+  spdlog::debug("ska::pst::common::statemodel::ApplicationManager::set_exception");
 }

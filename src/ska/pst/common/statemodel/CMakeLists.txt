@@ -1,10 +1,12 @@
 
 set(public_headers
     StateModel.h
+    ApplicationManager.h
 )
 
 set(sources
     src/StateModel.cpp
+    src/ApplicationManager.cpp
 )
 
 set(private_headers

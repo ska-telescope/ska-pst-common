@@ -39,13 +39,13 @@
 #include "ska/pst/common/utils/AsciiHeader.h"
 #include "ska/pst/common/statemodel/StateModel.h"
 
-#ifndef SKA_PST_COMMON_AplicationManager_h
-#define SKA_PST_COMMON_AplicationManager_h
+#ifndef SKA_PST_COMMON_ApplicationManager_h
+#define SKA_PST_COMMON_ApplicationManager_h
 
 namespace ska {
 namespace pst {
 namespace common {
-
+namespace statemodel {
   /**
    * @brief The ApplicationManager
    * 
@@ -77,46 +77,44 @@ namespace common {
        *
        */
       void quit();
-
     protected:
       /**
        * @brief Initialisation callback to be implemented in the child class.
        * The method should wait for the Unknown state and transition the state model to the InitialisationComplete
        *
        */
-      virtual void perform_initialise() = 0;
-      
+      virtual void perform_initialise();
       /**
        * @brief Beam configuration callback that is called by \ref main to transition the state from ConfiguringBeam to BeamConfigured.
        * 
        */
-      virtual void perform_configure_beam() = 0;
+      virtual void perform_configure_beam();
 
       /**
        * @brief Scan configuration callback that is called by \ref main to transition the state from ConfiguringScan to ScanConfigured.
        *
        */
-      virtual void perform_configure_scan() = 0;
+      virtual void perform_configure_scan();
 
       /**
        * @brief Scan callback that is called by \ref main to transition the state from StartingScan to Scanning.
        * This method is expected to block until the scan is complete.
        *
        */
-      virtual void perform_scan() = 0;
+      virtual void perform_scan();
 
       /**
        * @brief Reset callback that is called by \ref main to transition the state from RuntimeError to Idle.
        * This method is expected to block until state transitions to Idle
        *
        */
-      virtual void perform_reset() = 0;
+      virtual void perform_reset();
       
       /**
        * @brief Terminate callback that is called by \ref main to transition the state from Idle to Terminating.
        * 
        */
-      virtual void perform_terminate() = 0;
+      virtual void perform_terminate();
 
     private:
       /**
@@ -153,8 +151,9 @@ namespace common {
       State previous_state;
   };
 
-} // namespace
-} // namespace
-} // namespace
+} // statemodel
+} // common
+} // pst
+} // ska
 
 #endif

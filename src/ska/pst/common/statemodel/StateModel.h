@@ -44,7 +44,7 @@
 namespace ska {
 namespace pst {
 namespace common {
-
+namespace statemodel {
   /**
    * @brief Enumeration of states in the state model
    *
@@ -190,14 +190,15 @@ namespace common {
        *
        * @return State current state of the state model
        */
-      State get_state() { return state; }
+      virtual State get_state();
 
       /**
        * @brief Return a pointer to the most recently received exception.
        *
        * @return std::exception_ptr
        */
-      std::exception_ptr get_exception();
+      std::exception_ptr get_exception() { return last_exception; };
+
 
     protected:
       //! TBD return values. i.e. replace void
@@ -239,6 +240,7 @@ namespace common {
 
   };
 
+} // statemodel
 } // common
 } // pst
 } // ska
