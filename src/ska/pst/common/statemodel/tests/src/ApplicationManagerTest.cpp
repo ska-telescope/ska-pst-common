@@ -47,8 +47,29 @@ namespace ska {
 namespace pst {
 namespace common {
 namespace test {
-  // all names from ska::pst::common::statemodel injected into global namespace
-  using namespace ska::pst::common::statemodel;
+
+  void get_logs_state_and_command(std::shared_ptr<TestApplicationManager> _applicationmanager, std::string method_name)
+  {
+    spdlog::trace("{} state={} command={}",method_name ,_applicationmanager->get_name(_applicationmanager->get_state()),_applicationmanager->get_name(_applicationmanager->get_command()));
+  }
+
+  void TestApplicationManager::perform_initialise()
+  {
+    spdlog::trace("ska::pst::common::test::TestApplicationManager::perform_initialise");
+    wait_for(Initialise);
+    spdlog::trace("ska::pst::common::test::TestApplicationManager::perform_initialise state={} required_state={}",state_names[state] , state_names[Idle]);          
+    set_state(Idle);
+    spdlog::trace("ska::pst::common::test::TestApplicationManager::perform_initialise state={}",state_names[state]);
+  }
+
+  void TestApplicationManager::perform_terminate()
+  {
+    spdlog::trace("ska::pst::common::test::TestApplicationManager::perform_terminate");
+    wait_for(Terminate);
+    spdlog::trace("ska::pst::common::test::TestApplicationManager::perform_terminate state={} required_state={}",state_names[state] , state_names[Idle]);          
+    set_state(Unknown);
+    spdlog::trace("ska::pst::common::test::TestApplicationManager::perform_terminate state={}",state_names[state]);
+  }
 
   ApplicationManagerTest::ApplicationManagerTest()
     : ::testing::Test()
@@ -58,24 +79,134 @@ namespace test {
   void ApplicationManagerTest::SetUp() 
   {
     spdlog::trace("ska::pst::common::test::ApplicationManagerTest::SetUp");
+    // get_logs_state_and_command(_applicationmanager, "ska::pst::common::test::ApplicationManagerTest::SetUp");
+    _applicationmanager = std::make_shared<TestApplicationManager>();
+    // ASSERT_EQ(Unknown, _applicationmanager->get_state());
+    // EXPECT_CALL(*_applicationmanager, _set_command(Initialise));
+    // _applicationmanager->_set_command(Initialise);
+    // EXPECT_CALL(*_applicationmanager, perform_initialise());
+    // _applicationmanager->perform_initialise();
+    // ASSERT_EQ(Idle, _applicationmanager->get_state());
   }
   void ApplicationManagerTest::TearDown()
   {
-    spdlog::trace("ska::pst::common::test::ApplicationManagerTest::SetUp");
+    spdlog::trace("ska::pst::common::test::ApplicationManagerTest::TearDown");
+    // EXPECT_CALL(*_applicationmanager, _set_state(Idle));
+    // _applicationmanager = std::make_shared<TestApplicationManager>();
+    // ASSERT_EQ(Unknown, _applicationmanager->get_state());
+    EXPECT_CALL(*_applicationmanager, _set_command(Terminate));
+    _applicationmanager->_set_command(Terminate);
+    // EXPECT_CALL(*_applicationmanager, perform_terminate());
+    // _applicationmanager->perform_terminate();
+    // ASSERT_EQ(Unknown, _applicationmanager->get_state());
+    _applicationmanager = nullptr;
   }
 
-  TEST_F(ApplicationManagerTest, test_construct_delete) // NOLINT
+  TEST_F(ApplicationManagerTest, test_happy_path) // NOLINT
   {
-    spdlog::trace("ska::pst::common::test::ApplicationManagerTest::test_construct_delete");
-    std::shared_ptr<ApplicationManager> am = std::make_shared<ApplicationManager>("ApplicationManagerTest");
+    std::string test_f;
+    std::string test_msg;
+    test_f="ska::pst::common::test::ApplicationManagerTest::test_happy_path";
+
+    spdlog::trace(test_f);
+
+    // perform_configure_beam
+    get_logs_state_and_command(_applicationmanager, ("{} perform_configure_beam", test_f));
+    EXPECT_CALL(*_applicationmanager, _set_command(ConfigureBeam));
+    _applicationmanager->_set_command(ConfigureBeam);
+    EXPECT_CALL(*_applicationmanager, perform_configure_beam());
+    _applicationmanager->perform_configure_beam();
+    ASSERT_EQ(BeamConfigured, _applicationmanager->get_state());
+
+    get_logs_state_and_command(_applicationmanager, ("{} perform_configure_scan", test_f));
+    EXPECT_CALL(*_applicationmanager, _set_command(ConfigureScan));
+    _applicationmanager-> _set_command(ConfigureScan);
+    EXPECT_CALL(*_applicationmanager, perform_configure_scan());
+    _applicationmanager->perform_configure_scan();
+    ASSERT_EQ(ScanConfigured, _applicationmanager->get_state());
+
+    get_logs_state_and_command(_applicationmanager, ("{} perform_scan", test_f));
+    EXPECT_CALL(*_applicationmanager, _set_command(StartScan));
+    _applicationmanager-> _set_command(StartScan);
+    EXPECT_CALL(*_applicationmanager, perform_scan());
+    _applicationmanager->perform_scan();
+    ASSERT_EQ(Scanning, _applicationmanager->get_state());
+
+    get_logs_state_and_command(_applicationmanager, ("{} perform_stop_scan", test_f));
+    EXPECT_CALL(*_applicationmanager, _set_command(StopScan));
+    _applicationmanager-> _set_command(StopScan);
+    EXPECT_CALL(*_applicationmanager, perform_stop_scan());
+    _applicationmanager->perform_stop_scan();
+    ASSERT_EQ(ScanConfigured, _applicationmanager->get_state());
+    
+    get_logs_state_and_command(_applicationmanager, ("{} perform_deconfigure_scan", test_f));
+    EXPECT_CALL(*_applicationmanager, _set_command(DeconfigureScan));
+    _applicationmanager-> _set_command(DeconfigureScan);
+    EXPECT_CALL(*_applicationmanager, perform_deconfigure_scan());
+    _applicationmanager->perform_deconfigure_scan();
+    ASSERT_EQ(BeamConfigured, _applicationmanager->get_state());
+    
+    get_logs_state_and_command(_applicationmanager, ("{} perform_deconfigure_beam", test_f));
+    EXPECT_CALL(*_applicationmanager, _set_command(DeconfigureBeam));
+    _applicationmanager-> _set_command(DeconfigureBeam);
+    EXPECT_CALL(*_applicationmanager, perform_deconfigure_beam());
+    _applicationmanager->perform_deconfigure_beam();
+    ASSERT_EQ(Idle, _applicationmanager->get_state());
   }
 
-  // TEST_F(ApplicationManagerTest, test_initial_state) // NOLINT
-  // {
-  //   spdlog::trace("ska::pst::common::test::ApplicationManagerTest::test_initial_state");
-  //   std::shared_ptr<ApplicationManager> am = std::make_shared<ApplicationManager>("ApplicationManagerTest");    
-  // }
-}
-}
-}
-}
+  TEST_F(ApplicationManagerTest, test_reset) // NOLINT
+  {
+    std::string test_f;
+    std::string test_msg;
+    test_f="ska::pst::common::test::ApplicationManagerTest::test_happy_path";
+
+    spdlog::trace(test_f);
+
+    // perform_configure_beam
+    get_logs_state_and_command(_applicationmanager, ("{} perform_configure_beam", test_f));
+    EXPECT_CALL(*_applicationmanager, _set_command(ConfigureBeam));
+    _applicationmanager->_set_command(ConfigureBeam);
+    EXPECT_CALL(*_applicationmanager, perform_configure_beam());
+    _applicationmanager->perform_configure_beam();
+    ASSERT_EQ(BeamConfigured, _applicationmanager->get_state());
+
+    get_logs_state_and_command(_applicationmanager, ("{} perform_configure_scan", test_f));
+    EXPECT_CALL(*_applicationmanager, _set_command(ConfigureScan));
+    _applicationmanager-> _set_command(ConfigureScan);
+    EXPECT_CALL(*_applicationmanager, perform_configure_scan());
+    _applicationmanager->perform_configure_scan();
+    ASSERT_EQ(ScanConfigured, _applicationmanager->get_state());
+
+    get_logs_state_and_command(_applicationmanager, ("{} perform_scan", test_f));
+    EXPECT_CALL(*_applicationmanager, _set_command(StartScan));
+    _applicationmanager-> _set_command(StartScan);
+    EXPECT_CALL(*_applicationmanager, perform_scan());
+    _applicationmanager->perform_scan();
+    ASSERT_EQ(Scanning, _applicationmanager->get_state());
+
+    get_logs_state_and_command(_applicationmanager, ("{} perform_stop_scan", test_f));
+    EXPECT_CALL(*_applicationmanager, _set_command(StopScan));
+    _applicationmanager-> _set_command(StopScan);
+    EXPECT_CALL(*_applicationmanager, perform_stop_scan());
+    _applicationmanager->perform_stop_scan();
+    ASSERT_EQ(ScanConfigured, _applicationmanager->get_state());
+    
+    get_logs_state_and_command(_applicationmanager, ("{} perform_deconfigure_scan", test_f));
+    EXPECT_CALL(*_applicationmanager, _set_command(DeconfigureScan));
+    _applicationmanager-> _set_command(DeconfigureScan);
+    EXPECT_CALL(*_applicationmanager, perform_deconfigure_scan());
+    _applicationmanager->perform_deconfigure_scan();
+    ASSERT_EQ(BeamConfigured, _applicationmanager->get_state());
+    
+    get_logs_state_and_command(_applicationmanager, ("{} perform_deconfigure_beam", test_f));
+    EXPECT_CALL(*_applicationmanager, _set_command(DeconfigureBeam));
+    _applicationmanager-> _set_command(DeconfigureBeam);
+    EXPECT_CALL(*_applicationmanager, perform_deconfigure_beam());
+    _applicationmanager->perform_deconfigure_beam();
+    ASSERT_EQ(Idle, _applicationmanager->get_state());
+  }
+
+} // test
+} // common
+} // pst
+} // ska

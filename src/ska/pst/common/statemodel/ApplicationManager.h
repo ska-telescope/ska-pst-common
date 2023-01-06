@@ -45,7 +45,6 @@
 namespace ska {
 namespace pst {
 namespace common {
-namespace statemodel {
   /**
    * @brief The ApplicationManager
    * 
@@ -63,7 +62,7 @@ namespace statemodel {
        * @brief Destroy the ApplicationManager object
        *
        */
-      virtual ~ApplicationManager() = default;
+      ~ApplicationManager();
 
       /**
        * @brief Main thread of control for the implementing class, and uses UpdateCommands to transistion intermediate states to steady states.
@@ -77,59 +76,86 @@ namespace statemodel {
        *
        */
       void quit();
+
     protected:
       /**
        * @brief Initialisation callback to be implemented in the child class.
        * The method should wait for the Unknown state and transition the state model to the InitialisationComplete
        *
        */
-      virtual void perform_initialise();
+      virtual void perform_initialise() = 0;
+
       /**
        * @brief Beam configuration callback that is called by \ref main to transition the state from ConfiguringBeam to BeamConfigured.
        * 
        */
-      virtual void perform_configure_beam();
+      virtual void perform_configure_beam() = 0;
 
       /**
        * @brief Scan configuration callback that is called by \ref main to transition the state from ConfiguringScan to ScanConfigured.
        *
        */
-      virtual void perform_configure_scan();
+      virtual void perform_configure_scan() = 0;
 
       /**
        * @brief Scan callback that is called by \ref main to transition the state from StartingScan to Scanning.
        * This method is expected to block until the scan is complete.
        *
        */
-      virtual void perform_scan();
+      virtual void perform_scan() = 0;
+
+      /**
+       * @brief Scan callback that is called by \ref main to transition the state from StartingScan to Scanning.
+       * This method is expected to block until the scan is complete.
+       * TBD
+       */
+      virtual void perform_stop_scan() = 0;
+
+      /**
+       * @brief Scan callback that is called by \ref main to transition the state from StartingScan to Scanning.
+       * This method is expected to block until the scan is complete.
+       * TBD
+       */
+      virtual void perform_deconfigure_scan() = 0;
+      /**
+       * @brief Scan callback that is called by \ref main to transition the state from StartingScan to Scanning.
+       * This method is expected to block until the scan is complete.
+       * TBD
+       */
+      virtual void perform_deconfigure_beam() = 0;
 
       /**
        * @brief Reset callback that is called by \ref main to transition the state from RuntimeError to Idle.
        * This method is expected to block until state transitions to Idle
        *
        */
-      virtual void perform_reset();
+      virtual void perform_reset() = 0;
       
       /**
        * @brief Terminate callback that is called by \ref main to transition the state from Idle to Terminating.
        * 
        */
-      virtual void perform_terminate();
+      virtual void perform_terminate() = 0;
 
-    private:
       /**
        * @brief Wait for the command to complete.
        *
        * @param required command to wait for.
+       * TBD
        */
-      void wait_for(Command cmd);
 
+      void wait_for(Command cmd);
       /**
        * @brief Transition the state.
        *
        * @param required state to transition.
+       * TBD
        */
       void set_state(State state);
+
+    private:
+      //! Main thread of execution for the state model interface
+      std::unique_ptr<std::thread> main_thread{nullptr};
 
       /**
        * @brief Transition the state.
@@ -151,7 +177,6 @@ namespace statemodel {
       State previous_state;
   };
 
-} // statemodel
 } // common
 } // pst
 } // ska

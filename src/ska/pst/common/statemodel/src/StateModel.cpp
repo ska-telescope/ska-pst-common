@@ -37,71 +37,102 @@
 #include "ska/pst/common/statemodel/StateModel.h"
 #include "ska/pst/common/utils/AsciiHeader.h"
 
-ska::pst::common::statemodel::StateModel::StateModel()
+ska::pst::common::StateModel::StateModel()
 {
+  spdlog::debug("ska::pst::common::StateModel::StateModel()");
 }
 
-void ska::pst::common::statemodel::StateModel::configure_beam()
+void ska::pst::common::StateModel::configure_beam(const AsciiHeader& config)
 {
-  spdlog::debug("ska::pst::common::statemodel::StateModel::configure_beam()");
+  spdlog::debug("ska::pst::common::StateModel::configure_beam()");
+  validate_configure_beam(config);
+  set_command(ConfigureBeam);
+  wait_for(BeamConfigured);
 }
 
-void ska::pst::common::statemodel::StateModel::configure_scan()
+void ska::pst::common::StateModel::configure_scan(const AsciiHeader& config)
 {
-  spdlog::debug("ska::pst::common::statemodel::StateModel::configure_scan()");
+  spdlog::debug("ska::pst::common::StateModel::configure_scan()");
+  validate_configure_scan(config);
+  set_command(ConfigureScan);
+  wait_for(ScanConfigured);
 }
 
-void ska::pst::common::statemodel::StateModel::start_scan()
+void ska::pst::common::StateModel::start_scan(const AsciiHeader& config)
 {
-  spdlog::debug("ska::pst::common::statemodel::StateModel::start_scan()"); 
+  spdlog::debug("ska::pst::common::StateModel::start_scan()");
+  validate_start_scan(config);
+  set_command(StartScan);
+  wait_for(Scanning);
 }
 
-void ska::pst::common::statemodel::StateModel::stop_scan()
+void ska::pst::common::StateModel::stop_scan()
 {
-  spdlog::debug("ska::pst::common::statemodel::StateModel::stop_scan()"); 
+  spdlog::debug("ska::pst::common::StateModel::stop_scan()");
+  set_command(StopScan);
+  wait_for(ScanConfigured);
 }
 
-void ska::pst::common::statemodel::StateModel::deconfigure_scan()
+void ska::pst::common::StateModel::deconfigure_scan()
 {
-  spdlog::debug("ska::pst::common::statemodel::StateModel::deconfigure_scan()");
+  spdlog::debug("ska::pst::common::StateModel::deconfigure_scan()");
+  set_command(DeconfigureScan);
+  wait_for(BeamConfigured);
 }
 
-void ska::pst::common::statemodel::StateModel::deconfigure_beam()
+void ska::pst::common::StateModel::deconfigure_beam()
 {
-  spdlog::debug("ska::pst::common::statemodel::StateModel::deconfigure_beam()");
+  spdlog::debug("ska::pst::common::StateModel::deconfigure_beam()");
+  set_command(DeconfigureBeam);
+  wait_for(Idle);
 }
 
-void ska::pst::common::statemodel::StateModel::reset()
+void ska::pst::common::StateModel::reset()
 {
-  spdlog::debug("ska::pst::common::statemodel::StateModel::reset()");
+  spdlog::debug("ska::pst::common::StateModel::reset()");
+  set_command(Reset);
+  wait_for(Idle);
 }
 
-ska::pst::common::statemodel::State ska::pst::common::statemodel::StateModel::get_state()
+void ska::pst::common::StateModel::set_command(Command cmd)
 {
-  return state;
+  spdlog::debug("ska::pst::common::StateModel::set_command() command={}", get_name(cmd));
+
+  // State not found
+  if (allowed_control_commands.find(state) == allowed_control_commands.end())
+  {
+    spdlog::warn("ska::pst::common::StateModel::set_command state={} did not exist in allowed_control_commands", state, get_name(cmd));
+    spdlog::warn("ska::pst::common::StateModel::set_command state set to RuntimeError");
+    state=RuntimeError;
+  }
+
+  // check if the specified command exists in the current state
+  auto it = std::find(allowed_control_commands[state].begin(), allowed_control_commands[state].end(), cmd);
+  bool allowed = (it != allowed_control_commands[state].end());
+  if (!allowed)
+  {
+    spdlog::debug("ska::pst::common::StateModel::set_command cmd={} was not allowed for state={}", get_name(cmd), state_names[state]);
+    throw std::runtime_error("ska::pst::common::StateModel::set_command was not allowed");
+  }
+  else 
+  {
+    spdlog::info("ska::pst::common::StateModel::set_command command updated cmd={}", get_name(cmd));
+    command = cmd;
+  }
 }
 
-void ska::pst::common::statemodel::StateModel::validate_configure_beam(ska::pst::common::AsciiHeader config)
+void ska::pst::common::StateModel::wait_for(ska::pst::common::State required)
 {
-  spdlog::debug("ska::pst::common::statemodel::StateModel::validate_configure_beam()");
-}
-
-void ska::pst::common::statemodel::StateModel::validate_configure_scan(ska::pst::common::AsciiHeader config)
-{
-  spdlog::debug("ska::pst::common::statemodel::StateModel::validate_configure_scan()");
-}
-
-void ska::pst::common::statemodel::StateModel::validate_start_scan(ska::pst::common::AsciiHeader config)
-{
-  spdlog::debug("ska::pst::common::statemodel::StateModel::validate_start_scan()");
-}
-
-void ska::pst::common::statemodel::StateModel::set_command(ska::pst::common::statemodel::Command cmd)
-{
-  spdlog::debug("ska::pst::common::statemodel::StateModel::set_command()");
-}
-
-void ska::pst::common::statemodel::StateModel::wait_for(ska::pst::common::statemodel::State state)
-{
-  spdlog::debug("ska::pst::common::statemodel::StateModel::wait_for()");
+  spdlog::trace("ska::pst::common::StateModel::wait_for state={} required={}",state_names[state] , state_names[required]);
+  std::unique_lock<std::mutex> control_lock(state_mutex);
+  state_cond.wait(control_lock, [&]{return (state == required);});
+  bool success = (state == required);
+  spdlog::trace("ska::pst::common::StateModel::wait_for state={} required={}",state_names[state] , state_names[required]);
+  control_lock.unlock();
+  state_cond.notify_one();
+  if (!success)
+  {
+    spdlog::debug("ska::pst::common::StateModel::wait_for raise_exception()");
+  }
+  spdlog::trace("ska::pst::common::StateModel::wait_for done");
 }

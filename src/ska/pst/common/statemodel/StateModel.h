@@ -44,7 +44,6 @@
 namespace ska {
 namespace pst {
 namespace common {
-namespace statemodel {
   /**
    * @brief Enumeration of states in the state model
    *
@@ -66,7 +65,7 @@ namespace statemodel {
     { Unknown, "Unknown" },
     { Idle, "Idle" },
     { BeamConfigured, "Beam Configured" },
-    { ScanConfigured, "ScanConfigured", },
+    { ScanConfigured, "Scan Configured", },
     { Scanning, "Scanning", },
     { RuntimeError, "Runtime Error" },
   };
@@ -92,7 +91,7 @@ namespace statemodel {
    * @brief Mapping of control commands to strings that describe the control command.
    *
    */
-  static std::map<Command, std::string> control_command_names {
+  static std::map<Command, std::string> command_names {
     { Initialise, "Initialise" },
     { ConfigureBeam, "Configure Beam" },
     { ConfigureScan, "Configure Scan" },
@@ -114,7 +113,7 @@ namespace statemodel {
     { Unknown, std::vector<Command> { Initialise } },
     { Idle, std::vector<Command> { ConfigureBeam, Terminate } },
     { BeamConfigured, std::vector<Command> { ConfigureScan, DeconfigureBeam } },
-    { ScanConfigured, std::vector<Command> { StartScan, DeconfigureScan} },
+    { ScanConfigured, std::vector<Command> { StartScan, DeconfigureScan } },
     { Scanning, std::vector<Command> { StopScan } },
     { RuntimeError, std::vector<Command> { Reset } },
   };
@@ -147,19 +146,19 @@ namespace statemodel {
        * @brief Issues the ConfigureBeam command and waits for the BeamConfigured or ConfiguringBeamError state to be reached.
        *
        */
-      virtual void configure_beam();
+      virtual void configure_beam(const AsciiHeader& config);
 
       /**
        * @brief Issues the ConfigureScan command and waits for the ScanConfigured or ConfiguringScanError state to be reached.
        *
        */
-      virtual void configure_scan();
+      virtual void configure_scan(const AsciiHeader& config);
 
       /**
        * @brief Issues the StartScan command and waits for the Scanning or ScanningError state to be reached.
        *
        */
-      virtual void start_scan();
+      virtual void start_scan(const AsciiHeader& config);
 
       /**
        * @brief Issues the StopScan command and waits for the ScanConfigured or ScanningError state to be reached.
@@ -189,8 +188,9 @@ namespace statemodel {
        * @brief Return the current state of the state model
        *
        * @return State current state of the state model
+       * 
        */
-      virtual State get_state();
+      State get_state() { return state; }
 
       /**
        * @brief Return a pointer to the most recently received exception.
@@ -199,15 +199,46 @@ namespace statemodel {
        */
       std::exception_ptr get_exception() { return last_exception; };
 
+      /**
+       * @brief Return the current command of the state model
+       *
+       * @return Command current command of the state model
+       * 
+       */
+      Command get_command() { return command; };
+
+      /**
+       * @brief Return the name of the specified  command.
+       *
+       * @param command command whose name to return
+       * @return std::string name of the command
+       * 
+       */
+      std::string get_name(Command command) { return command_names[command]; };
+
+      /**
+       * @brief Return the name of the specified state.
+       *
+       * @param state state whose name to return
+       * @return std::string name of the state
+       * 
+       */
+      std::string get_name(State state) { return state_names[state]; }
 
     protected:
-      //! TBD return values. i.e. replace void
-      virtual void validate_configure_beam(ska::pst::common::AsciiHeader config);
-      virtual void validate_configure_scan(ska::pst::common::AsciiHeader config);
-      virtual void validate_start_scan(ska::pst::common::AsciiHeader config);
+      virtual void validate_configure_beam(const AsciiHeader& config) {};
+      virtual void validate_configure_scan(const AsciiHeader& config) {};
+      virtual void validate_start_scan(const AsciiHeader& config) {};
+      /**
+       * @brief Set the command used as a reference for transitioning between states.
+       *
+       * @param command command to be set.
+       * TBD
+       */
+      void set_command(Command command);
 
       //! Command variable
-      Command command;
+      Command command{Initialise};
 
       //! Current state of the state model
       State state{Unknown};
@@ -216,12 +247,6 @@ namespace statemodel {
       std::exception_ptr last_exception{nullptr};
 
     private:
-      /**
-       * @brief Set the command used as a reference for transitioning between states.
-       *
-       * @param command command to be set.
-       */
-      void set_command(Command command);
 
       /**
        * @brief Wait for the state model to transition to the expected state or the error state.
@@ -240,7 +265,6 @@ namespace statemodel {
 
   };
 
-} // statemodel
 } // common
 } // pst
 } // ska

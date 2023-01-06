@@ -29,6 +29,8 @@
  */
 
 #include <gtest/gtest.h>
+#include <gmock/gmock.h>
+
 #include "ska/pst/common/statemodel/ApplicationManager.h"
 
 #ifndef SKA_PST_COMMON_TESTS_ApplicationManagerTest_h
@@ -40,11 +42,95 @@ namespace common {
 namespace test {
 
 /**
- * @brief Test the DiskManager class
+ * @brief Test the ApplicationManager class
  *
  * @details
  *
  */
+class TestApplicationManager : public ska::pst::common::ApplicationManager
+{
+  public:
+    TestApplicationManager() : ApplicationManager("TestApplicationManager") {
+      ON_CALL(*this, _set_command).WillByDefault([this](Command cmd) {
+          spdlog::trace("ska::pst::common::test::TestApplicationManager::_set_command cmd=[{}]", get_name(cmd));
+          command = cmd;
+      });
+      ON_CALL(*this, _set_state).WillByDefault([this](State required) {
+          spdlog::trace("ska::pst::common::test::TestApplicationManager::_set_state state=[{}] required=[{}]", get_name(state), get_name(required));
+          state = required;
+      });
+      /*
+      ON_CALL(*this, perform_initialise).WillByDefault([this]() {
+          spdlog::trace("ska::pst::common::test::TestApplicationManager::perform_initialise");
+          wait_for(Initialise);
+          spdlog::trace("ska::pst::common::test::TestApplicationManager::perform_initialise state={} required_state={}",state_names[state] , state_names[Idle]);          
+          set_state(Idle);
+          spdlog::trace("ska::pst::common::test::TestApplicationManager::perform_initialise state={}",state_names[state]);
+        });
+      ON_CALL(*this, perform_terminate).WillByDefault([this]() {
+          spdlog::trace("ska::pst::common::test::TestApplicationManager::perform_terminate");
+          wait_for(Terminate);
+          set_state(Unknown);
+        });
+      */
+      ON_CALL(*this, perform_configure_beam).WillByDefault([this]() {
+          spdlog::trace("ska::pst::common::test::TestApplicationManager::perform_configure_beam");
+          wait_for(ConfigureBeam);
+          set_state(BeamConfigured);
+        });
+      ON_CALL(*this, perform_configure_scan).WillByDefault([this]() {
+          spdlog::trace("ska::pst::common::test::TestApplicationManager::perform_configure_scan");
+          wait_for(ConfigureScan);
+          set_state(ScanConfigured);
+        });
+      ON_CALL(*this, perform_scan).WillByDefault([this]() {
+          spdlog::trace("ska::pst::common::test::TestApplicationManager::perform_scan");
+          wait_for(StartScan);
+          set_state(Scanning);
+        });
+      ON_CALL(*this, perform_stop_scan).WillByDefault([this]() {
+          spdlog::trace("ska::pst::common::test::TestApplicationManager::perform_stop_scan");
+          wait_for(StopScan);
+          set_state(ScanConfigured);
+        });
+      ON_CALL(*this, perform_deconfigure_scan).WillByDefault([this]() {
+          spdlog::trace("ska::pst::common::test::TestApplicationManager::perform_deconfigure_scan");
+          wait_for(DeconfigureScan);
+          set_state(BeamConfigured);
+        });
+      ON_CALL(*this, perform_deconfigure_beam).WillByDefault([this]() {
+          spdlog::trace("ska::pst::common::test::TestApplicationManager::perform_deconfigure_beam");
+          wait_for(DeconfigureBeam);
+          set_state(Idle);
+        });
+      // ON_CALL(*this, perform_reset).WillByDefault([this]() {
+      //     spdlog::trace("ska::pst::common::test::TestApplicationManager::perform_reset");
+      //     wait_for(Reset);
+      //     set_state(Idle);
+      //   });
+    }
+    ~TestApplicationManager() = default;
+
+    // Resources
+    MOCK_METHOD(void, _set_command, (Command cmd));
+    MOCK_METHOD(void, _set_state, (State required));
+    // MOCK_METHOD(void, perform_initialise, (), (override));
+    // MOCK_METHOD(void, perform_terminate, (), (override));
+    MOCK_METHOD(void, perform_configure_beam, (), (override));
+    MOCK_METHOD(void, perform_configure_scan, (), (override));
+    MOCK_METHOD(void, perform_scan, (), (override));
+    MOCK_METHOD(void, perform_stop_scan, (), (override));
+    MOCK_METHOD(void, perform_deconfigure_scan, (), (override));
+    MOCK_METHOD(void, perform_deconfigure_beam, (), (override));
+    MOCK_METHOD(void, perform_reset, (), (override));
+
+    void get_logs_state_and_command(std::shared_ptr<TestApplicationManager> _applicationmanager, std::string method_name);
+    void perform_initialise();
+    void perform_terminate();
+
+  private:
+};
+
 class ApplicationManagerTest : public ::testing::Test
 {
   protected:
@@ -53,6 +139,13 @@ class ApplicationManagerTest : public ::testing::Test
   public:
     ApplicationManagerTest();
     ~ApplicationManagerTest() = default;
+
+    std::shared_ptr<TestApplicationManager> _applicationmanager{nullptr};
+
+    // Resources
+    ska::pst::common::AsciiHeader beam_config;
+    ska::pst::common::AsciiHeader scan_config;
+    ska::pst::common::AsciiHeader startscan_config;
   private:
 };
 }
