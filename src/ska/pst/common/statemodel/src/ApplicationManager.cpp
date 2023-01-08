@@ -53,91 +53,177 @@ ska::pst::common::ApplicationManager::~ApplicationManager()
 
 void ska::pst::common::ApplicationManager::main()
 {
-  spdlog::debug("ska::pst::common::ApplicationManager::main");
-  wait_for(Initialise);
+  std::string method_name = "ska::pst::common::ApplicationManager::main";
+  spdlog::debug("{}", method_name);
+  // wait_for(Initialise);
+  spdlog::debug("{} perform_initialise", method_name);
   perform_initialise();
+  set_state(Idle);
+  spdlog::debug("{} perform_initialise done() state={}",method_name, state_names[get_state()]);
+
+  // loop through the statemodel
+  while(state != Unknown)
+  {
+    spdlog::debug("{} [{}] state_model.wait_for_command", method_name, entity);
+    ska::pst::common::Command cmd = wait_for_command();
+    spdlog::debug("{} [{}] state={} command={}", method_name, entity, get_name(state), get_name(cmd));
+
+    try {
+      switch (cmd)
+      {
+        case ConfigureBeam:
+          spdlog::debug("{} {} perform_configure_beam", method_name, get_name(cmd));
+          perform_configure_beam();
+          spdlog::debug("{} {} perform_configure_beam done", method_name, get_name(cmd));
+          spdlog::debug("{} {} set_state(BeamConfigured)", method_name, get_name(cmd));
+          set_state(BeamConfigured);
+          spdlog::debug("{} {} state={}", method_name, get_name(cmd), state_names[get_state()]);
+          break;
+          
+        case ConfigureScan:
+          spdlog::debug("{} {} perform_configure_scan", method_name, get_name(cmd));
+          perform_configure_scan();
+          spdlog::debug("{} {} perform_configure_scan done", method_name, get_name(cmd));
+          spdlog::debug("{} {} set_state(ScanConfigured)", method_name, get_name(cmd));
+          set_state(ScanConfigured);
+          spdlog::debug("{} {} state={}", method_name, get_name(cmd), state_names[get_state()]);
+          break;
+          
+        case StartScan:
+          spdlog::debug("{} {} perform_start_scan", method_name, get_name(cmd));
+          perform_start_scan();
+          scan_thread = std::make_unique<std::thread>(std::thread(&ska::pst::common::ApplicationManager::perform_scan, this));
+          spdlog::debug("{} {} perform_start_scan done", method_name, get_name(cmd));
+          spdlog::debug("{} {} set_state(Scanning)", method_name, get_name(cmd));
+          set_state(Scanning);
+          spdlog::debug("{} {} state={}", method_name, get_name(cmd), state_names[get_state()]);
+          break;
+          
+        case StopScan:
+          spdlog::debug("{} {} perform_stop_scan", method_name, get_name(cmd));
+          perform_stop_scan();
+          scan_thread->join();
+          spdlog::debug("{} {} perform_stop_scan done", method_name, get_name(cmd));
+          spdlog::debug("{} {} set_state(ScanConfigured)", method_name, get_name(cmd));
+          set_state(ScanConfigured);
+          spdlog::debug("{} {} state={}", method_name, get_name(cmd), state_names[get_state()]);
+          break;
+          
+        case DeconfigureScan:
+          spdlog::debug("{} {} perform_deconfigure_scan", method_name, get_name(cmd));
+          perform_deconfigure_scan();
+          spdlog::debug("{} {} perform_deconfigure_scan done", method_name, get_name(cmd));
+          spdlog::debug("{} {} set_state(BeamConfigured)", method_name, get_name(cmd));
+          set_state(BeamConfigured);
+          spdlog::debug("{} {} state={}", method_name, get_name(cmd), state_names[get_state()]);
+          break;
+
+        case DeconfigureBeam:
+          spdlog::debug("{} {} perform_deconfigure_beam", method_name, get_name(cmd));
+          perform_deconfigure_beam();
+          spdlog::debug("{} {} perform_deconfigure_beam done", method_name, get_name(cmd));
+          spdlog::debug("{} {} set_state(Idle)", method_name, get_name(cmd));
+          set_state(Idle);
+          spdlog::debug("{} {} state={}", method_name, get_name(cmd), state_names[get_state()]);
+          break;
+          
+        case Reset:
+          spdlog::debug("{} {} perform_configure_beam", method_name, get_name(cmd));
+          perform_reset();
+          spdlog::debug("{} {} perform_configure_beam done", method_name, get_name(cmd));
+          spdlog::debug("{} {} set_state(BeamConfigured)", method_name, get_name(cmd));
+          set_state(Idle);
+          spdlog::debug("{} {} state={}", method_name, get_name(cmd), state_names[get_state()]);
+          break;
+
+        case Terminate:
+          spdlog::debug("{} {} perform_terminate", method_name, get_name(cmd));
+          perform_terminate();
+          spdlog::debug("{} {} perform_terminate done", method_name, get_name(cmd));
+          spdlog::debug("{} {} set_state(Unknown)", method_name, get_name(cmd));
+          set_state(Unknown);
+          spdlog::debug("{} {} state={}", method_name, get_name(cmd), state_names[get_state()]);
+          break;
+      }
+    }
+    catch (const std::exception& exc)
+    {
+      spdlog::warn("ska::pst::dsp::StateModel::main [{}] exception during perform command: {}", entity, exc.what());
+      set_exception(exc);
+      previous_state = get_state();
+      set_state(RuntimeError);
+    }
+  }
 }
 
 void ska::pst::common::ApplicationManager::quit()
 {
-  spdlog::debug("ska::pst::common::ApplicationManager::quit set_command={}",get_name(Terminate));
-  wait_for(Terminate);
-  spdlog::debug("ska::pst::common::ApplicationManager::quit get_command={}",get_name(get_command()));
-  perform_terminate();
+  if (get_state() == Scanning)
+  {
+    set_command(StopScan);
+    wait_for(ScanConfigured);
+  }
+
+  if (get_state() == ScanConfigured)
+  {
+    set_command(DeconfigureScan);
+    wait_for(BeamConfigured);
+  }
+
+  if (get_state() == BeamConfigured)
+  {
+    set_command(DeconfigureBeam);
+    wait_for(Idle);
+  }
+
+  if (get_state() == RuntimeError)
+  {
+    set_command(Reset);
+    wait_for(Idle);
+  }
+
+  if (get_state() == Idle)
+  {
+    set_command(Terminate);
+    wait_for(Unknown);
+  }
 }
 
-void ska::pst::common::ApplicationManager::wait_for(ska::pst::common::Command cmd)
+ska::pst::common::Command ska::pst::common::ApplicationManager::wait_for_command()
 {
-  spdlog::trace("ska::pst::common::ApplicationManager::wait_for command={}",get_name(cmd));
+  spdlog::trace("ska::pst::common::ApplicationManager::wait_for_command [{}]", entity);
   std::unique_lock<std::mutex> control_lock(command_mutex);
-  command_cond.wait(control_lock, [&]{return (command == cmd);});
-  bool success = (command == cmd);
-  spdlog::trace("ska::pst::common::ApplicationManager::wait_for state={} required={}",get_name(command) , get_name(cmd));
+
+  command_cond.wait(control_lock, [&]{return (command != None);});
+  ska::pst::common::Command cmd = command;
+  command = None;
   control_lock.unlock();
   command_cond.notify_one();
-  if (!success)
-  {
-    spdlog::debug("ska::pst::common::ApplicationManager::wait_for raise_exception()");
-  }
-  spdlog::trace("ska::pst::common::ApplicationManager::wait_for done");
+  spdlog::trace("ska::pst::common::ApplicationManager::wait_for_command [{}] done", entity);
+  return cmd;
 }
 
-void ska::pst::common::ApplicationManager::set_state(ska::pst::common::State required)
+void ska::pst::common::ApplicationManager::set_state(ska::pst::common::State new_state)
 {
-  spdlog::debug("ska::pst::common::ApplicationManager::set_state");
-  previous_state=state;
-  state=required;
+  spdlog::debug("ska::pst::common::ApplicationManager::set_state({})", get_name(new_state));
+
+  std::unique_lock<std::mutex> control_lock(state_mutex);
+  if (entity.size() == 0)
+  {
+    spdlog::info("{} -> {}", get_name(state), get_name(new_state));
+  }
+  else
+  {
+    spdlog::debug("{}: {} -> {}", entity, get_name(state), get_name(new_state));
+  }
+  previous_state = state;
+  state = new_state;
+  control_lock.unlock();
+  state_cond.notify_one();
 }
 
 void ska::pst::common::ApplicationManager::set_exception(std::exception exception)
 {
   spdlog::debug("ska::pst::common::ApplicationManager::set_exception");
+  last_exception = std::make_exception_ptr(exception);
 }
-
-/*/ TBC: confirm if following protected methods are meant to be implemented by agents. i.e. smrb, recv, dsp
-void ska::pst::common::ApplicationManager::perform_initialise()
-{
-  spdlog::debug("ska::pst::common::ApplicationManager::perform_initialise");
-  set_state(Idle);
-}
-/*
-void ska::pst::common::ApplicationManager::perform_terminate()
-{
-  spdlog::debug("ska::pst::common::ApplicationManager::perform_terminate");
-  // TBA: Prerequisites prior for state to transition from Idle to Unknown
-  wait_for(Terminate);
-  set_state(Unknown);
-}
-*/
-/*
-void ska::pst::common::ApplicationManager::perform_configure_beam()
-{
-  spdlog::debug("ska::pst::common::ApplicationManager::perform_configure_beam");
-  // TBA: Prerequisites prior for state to transition from Idle to BeamConfigured
-  // TBA: Error handling transitioning to RuntimeError
-  set_state(BeamConfigured);
-}
-
-void ska::pst::common::ApplicationManager::perform_configure_scan()
-{
-  spdlog::debug("ska::pst::common::ApplicationManager::perform_configure_scan");
-  // TBA: Prerequisites prior for state to transition from BeamConfigured to ScanConfigured
-  // TBA: Error handling transitioning to RuntimeError
-  set_state(ScanConfigured);
-}
-
-void ska::pst::common::ApplicationManager::perform_scan()
-{
-  spdlog::debug("ska::pst::common::ApplicationManager::perform_scan");
-  // TBA: Prerequisites prior for state to transition from ScanConfigured to Scanning
-  // TBA: Error handling transitioning to RuntimeError
-  set_state(Scanning);
-}
-
-void ska::pst::common::ApplicationManager::perform_reset()
-{
-  spdlog::debug("ska::pst::common::ApplicationManager::reset");
-  // TBA: Prerequisites prior for state to transition from RuntimeError to Idle
-  set_state(Idle);
-}
-*/

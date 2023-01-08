@@ -103,6 +103,13 @@ namespace common {
        *
        */
       virtual void perform_scan() = 0;
+  
+      /**
+       * @brief Scan callback that is called by \ref main to transition the state from StartingScan to Scanning.
+       * This method is expected to block until the scan is complete.
+       *
+       */
+      virtual void perform_start_scan() = 0;
 
       /**
        * @brief Scan callback that is called by \ref main to transition the state from StartingScan to Scanning.
@@ -138,14 +145,6 @@ namespace common {
       virtual void perform_terminate() = 0;
 
       /**
-       * @brief Wait for the command to complete.
-       *
-       * @param required command to wait for.
-       * TBD
-       */
-
-      void wait_for(Command cmd);
-      /**
        * @brief Transition the state.
        *
        * @param required state to transition.
@@ -154,8 +153,15 @@ namespace common {
       void set_state(State state);
 
     private:
-      //! Main thread of execution for the state model interface
-      std::unique_ptr<std::thread> main_thread{nullptr};
+
+      /**
+       * @brief Wait for the command to complete.
+       *
+       * @param required command to wait for.
+       * TBD
+       */
+      ska::pst::common::Command wait_for_command();
+
 
       /**
        * @brief Transition the state.
@@ -164,14 +170,14 @@ namespace common {
        */
       void set_exception(std::exception exception);
 
+      //! Main thread of execution for the state model interface
+      std::unique_ptr<std::thread> main_thread{nullptr};
+
+      //! Scan thread of execution for the state model interface
+      std::unique_ptr<std::thread> scan_thread{nullptr};
+
       //! Name of the agent using the ApplicationManager
       std::string entity;
-
-      //! Store command
-      std::mutex command_mutex;
-
-      //! Coordinates interactions with processes waiting on changes to the state attribute
-      std::condition_variable command_cond;
 
       //! Previous state of the entity
       State previous_state;

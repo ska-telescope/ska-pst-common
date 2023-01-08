@@ -51,16 +51,20 @@ class TestStateModel : public StateModel
 {
   public:
     TestStateModel() {
-        ON_CALL(*this, set_command).WillByDefault([this](Command cmd) {
-            spdlog::trace("ska::pst::common::test::TestStateModel::set_command cmd=[{}]", get_name(cmd));
-            command = cmd;
-        });
-        ON_CALL(*this, set_state).WillByDefault([this](State required) {
-            spdlog::trace("ska::pst::common::test::TestStateModel::set_state state=[{}] required=[{}]", get_name(state), get_name(required));
-            state = required;
-        });
+      ON_CALL(*this, set_command).WillByDefault([this](Command cmd) {
+          spdlog::trace("ska::pst::common::test::TestStateModel::set_command cmd=[{}]", get_name(cmd));
+          command = cmd;
+      });
+      ON_CALL(*this, set_state).WillByDefault([this](State required) {
+          spdlog::trace("ska::pst::common::test::TestStateModel::set_state state=[{}] required=[{}]", get_name(state), get_name(required));
+          state = required;
+      });
     }
     ~TestStateModel() = default;
+
+    void validate_configure_beam(const ska::pst::common::AsciiHeader& config) {; };
+    void validate_configure_scan(const ska::pst::common::AsciiHeader& config) {; };
+    void validate_start_scan(const ska::pst::common::AsciiHeader& config) {; };
 
     // Resources
     MOCK_METHOD(void, set_command, (Command cmd));
@@ -87,8 +91,8 @@ class StateModelTest : public ::testing::Test
     std::shared_ptr<TestStateModel> _statemodel{nullptr};
   private:
 };
-}
-}
-}
-}
+} // test
+} // common
+} // pst
+} // ska
 #endif // SKA_PST_COMMON_StateModelTest_h

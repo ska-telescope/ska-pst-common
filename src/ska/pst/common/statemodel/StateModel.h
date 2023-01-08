@@ -76,6 +76,7 @@ namespace common {
    *
    */
   enum Command {
+    None,
     Initialise,
     ConfigureBeam,
     ConfigureScan,
@@ -92,6 +93,7 @@ namespace common {
    *
    */
   static std::map<Command, std::string> command_names {
+    { None, "None" },
     { Initialise, "Initialise" },
     { ConfigureBeam, "Configure Beam" },
     { ConfigureScan, "Configure Scan" },
@@ -109,7 +111,7 @@ namespace common {
    * can be applied to it.
    *
    */
-  static std::map<State, std::vector<Command>> allowed_control_commands {
+  static std::map<State, std::vector<Command>> allowed_commands {
     { Unknown, std::vector<Command> { Initialise } },
     { Idle, std::vector<Command> { ConfigureBeam, Terminate } },
     { BeamConfigured, std::vector<Command> { ConfigureScan, DeconfigureBeam } },
@@ -226,9 +228,13 @@ namespace common {
       std::string get_name(State state) { return state_names[state]; }
 
     protected:
-      virtual void validate_configure_beam(const AsciiHeader& config) {};
-      virtual void validate_configure_scan(const AsciiHeader& config) {};
-      virtual void validate_start_scan(const AsciiHeader& config) {};
+
+      virtual void validate_configure_beam(const AsciiHeader& config) = 0;
+
+      virtual void validate_configure_scan(const AsciiHeader& config) = 0;
+
+      virtual void validate_start_scan(const AsciiHeader& config) = 0;
+
       /**
        * @brief Set the command used as a reference for transitioning between states.
        *
@@ -236,17 +242,6 @@ namespace common {
        * TBD
        */
       void set_command(Command command);
-
-      //! Command variable
-      Command command{Initialise};
-
-      //! Current state of the state model
-      State state{Unknown};
-
-      //! Reference to the most recently experienced exception
-      std::exception_ptr last_exception{nullptr};
-
-    private:
 
       /**
        * @brief Wait for the state model to transition to the expected state or the error state.
@@ -257,11 +252,29 @@ namespace common {
        */
       void wait_for(State expected);
 
+      //! Command variable
+      Command command{None};
+
+      //! Current state of the state model
+      State state{Unknown};
+
+      //! Reference to the most recently experienced exception
+      std::exception_ptr last_exception{nullptr};
+
       //! Control access to the state attribute
       std::mutex state_mutex;
 
       //! Coordinates interactions with processes waiting on changes to the state attribute
       std::condition_variable state_cond;
+
+      //! Control access to the command attribute
+      std::mutex command_mutex;
+
+      //! Coordinates interactions with processes waiting on changes to the command attribute
+      std::condition_variable command_cond;
+
+    private:
+
 
   };
 

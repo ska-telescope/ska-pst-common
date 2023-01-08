@@ -51,83 +51,107 @@ class TestApplicationManager : public ska::pst::common::ApplicationManager
 {
   public:
     TestApplicationManager() : ApplicationManager("TestApplicationManager") {
-      ON_CALL(*this, _set_command).WillByDefault([this](Command cmd) {
-          spdlog::trace("ska::pst::common::test::TestApplicationManager::_set_command cmd=[{}]", get_name(cmd));
-          command = cmd;
+      // For initialise
+      ON_CALL(*this, _wait_for).WillByDefault([this](State required) {
+          spdlog::trace("ska::pst::common::test::TestApplicationManager::_wait_for cmd=[{}]", get_name(required));
+          wait_for(required);
       });
-      ON_CALL(*this, _set_state).WillByDefault([this](State required) {
-          spdlog::trace("ska::pst::common::test::TestApplicationManager::_set_state state=[{}] required=[{}]", get_name(state), get_name(required));
-          state = required;
-      });
-      /*
-      ON_CALL(*this, perform_initialise).WillByDefault([this]() {
-          spdlog::trace("ska::pst::common::test::TestApplicationManager::perform_initialise");
-          wait_for(Initialise);
-          spdlog::trace("ska::pst::common::test::TestApplicationManager::perform_initialise state={} required_state={}",state_names[state] , state_names[Idle]);          
-          set_state(Idle);
-          spdlog::trace("ska::pst::common::test::TestApplicationManager::perform_initialise state={}",state_names[state]);
-        });
-      ON_CALL(*this, perform_terminate).WillByDefault([this]() {
-          spdlog::trace("ska::pst::common::test::TestApplicationManager::perform_terminate");
-          wait_for(Terminate);
-          set_state(Unknown);
-        });
-      */
+
       ON_CALL(*this, perform_configure_beam).WillByDefault([this]() {
-          spdlog::trace("ska::pst::common::test::TestApplicationManager::perform_configure_beam");
-          wait_for(ConfigureBeam);
-          set_state(BeamConfigured);
+          spdlog::trace("ska::pst::common::test::TestApplicationManager::perform_configure_beam mock_function");
+          if(force_error)
+          {
+            throw std::runtime_error("ska::pst::common::test::TestApplicationManager::perform_configure_beam force_error=true");
+            // set_state(RuntimeError);
+          }
         });
       ON_CALL(*this, perform_configure_scan).WillByDefault([this]() {
-          spdlog::trace("ska::pst::common::test::TestApplicationManager::perform_configure_scan");
-          wait_for(ConfigureScan);
-          set_state(ScanConfigured);
+          spdlog::trace("ska::pst::common::test::TestApplicationManager::perform_configure_scan mock_function");
+          if(force_error)
+          {
+            throw std::runtime_error("ska::pst::common::test::TestApplicationManager::perform_configure_scan force_error=true");
+            set_state(RuntimeError);
+          }
         });
       ON_CALL(*this, perform_scan).WillByDefault([this]() {
-          spdlog::trace("ska::pst::common::test::TestApplicationManager::perform_scan");
-          wait_for(StartScan);
-          set_state(Scanning);
+          spdlog::trace("ska::pst::common::test::TestApplicationManager::perform_scan mock_function");
+          if(force_error)
+          {
+            throw std::runtime_error("ska::pst::common::test::TestApplicationManager::perform_scan force_error=true");
+            set_state(RuntimeError);
+          }
+        });
+      ON_CALL(*this, perform_start_scan).WillByDefault([this]() {
+          spdlog::trace("ska::pst::common::test::TestApplicationManager::perform_start_scan mock_function");
+          if(force_error)
+          {
+            throw std::runtime_error("ska::pst::common::test::TestApplicationManager::perform_start_scan force_error=true");
+            set_state(RuntimeError);
+          }
         });
       ON_CALL(*this, perform_stop_scan).WillByDefault([this]() {
-          spdlog::trace("ska::pst::common::test::TestApplicationManager::perform_stop_scan");
-          wait_for(StopScan);
-          set_state(ScanConfigured);
+          spdlog::trace("ska::pst::common::test::TestApplicationManager::perform_stop_scan mock_function");
+          if(force_error)
+          {
+            throw std::runtime_error("ska::pst::common::test::TestApplicationManager::perform_stop_scan force_error=true");
+            set_state(RuntimeError);
+          }
         });
       ON_CALL(*this, perform_deconfigure_scan).WillByDefault([this]() {
-          spdlog::trace("ska::pst::common::test::TestApplicationManager::perform_deconfigure_scan");
-          wait_for(DeconfigureScan);
-          set_state(BeamConfigured);
+          spdlog::trace("ska::pst::common::test::TestApplicationManager::perform_deconfigure_scan mock_function");
+          if(force_error)
+          {
+            throw std::runtime_error("ska::pst::common::test::TestApplicationManager::perform_deconfigure_scan force_error=true");
+            set_state(RuntimeError);
+          }
         });
       ON_CALL(*this, perform_deconfigure_beam).WillByDefault([this]() {
-          spdlog::trace("ska::pst::common::test::TestApplicationManager::perform_deconfigure_beam");
-          wait_for(DeconfigureBeam);
-          set_state(Idle);
+          spdlog::trace("ska::pst::common::test::TestApplicationManager::perform_deconfigure_beam mock_function");
+          if(force_error)
+          {
+            throw std::runtime_error("ska::pst::common::test::TestApplicationManager::perform_deconfigure_beam force_error=true");
+            set_state(RuntimeError);
+          }
         });
-      // ON_CALL(*this, perform_reset).WillByDefault([this]() {
-      //     spdlog::trace("ska::pst::common::test::TestApplicationManager::perform_reset");
-      //     wait_for(Reset);
-      //     set_state(Idle);
-      //   });
+      ON_CALL(*this, perform_reset).WillByDefault([this]() {
+          spdlog::trace("ska::pst::common::test::TestApplicationManager::perform_reset mock_function");
+        });
+
+      /*/ Config validations
+      ON_CALL(*this, validate_configure_beam).WillByDefault([this](const ska::pst::common::AsciiHeader& beam_config) {
+          spdlog::trace("ska::pst::common::test::TestApplicationManager::validate_configure_beam");
+        });
+      ON_CALL(*this, validate_configure_scan).WillByDefault([this](const ska::pst::common::AsciiHeader& scan_config) {
+          spdlog::trace("ska::pst::common::test::TestApplicationManager::validate_configure_scan");
+        });
+      ON_CALL(*this, validate_start_scan).WillByDefault([this](const ska::pst::common::AsciiHeader& startscan_config) {
+          spdlog::trace("ska::pst::common::test::TestApplicationManager::validate_start_scan");
+        });*/
     }
     ~TestApplicationManager() = default;
 
     // Resources
-    MOCK_METHOD(void, _set_command, (Command cmd));
-    MOCK_METHOD(void, _set_state, (State required));
-    // MOCK_METHOD(void, perform_initialise, (), (override));
-    // MOCK_METHOD(void, perform_terminate, (), (override));
+    MOCK_METHOD(void, _wait_for, (State required));
     MOCK_METHOD(void, perform_configure_beam, (), (override));
     MOCK_METHOD(void, perform_configure_scan, (), (override));
     MOCK_METHOD(void, perform_scan, (), (override));
+    MOCK_METHOD(void, perform_start_scan, (), (override));
     MOCK_METHOD(void, perform_stop_scan, (), (override));
     MOCK_METHOD(void, perform_deconfigure_scan, (), (override));
     MOCK_METHOD(void, perform_deconfigure_beam, (), (override));
     MOCK_METHOD(void, perform_reset, (), (override));
+    // MOCK_METHOD(void, validate_configure_beam, (const ska::pst::common::AsciiHeader& config), (override));
+    // MOCK_METHOD(void, validate_configure_scan, (const ska::pst::common::AsciiHeader& config), (override));
+    // MOCK_METHOD(void, validate_start_scan, (const ska::pst::common::AsciiHeader& config), (override));
 
     void get_logs_state_and_command(std::shared_ptr<TestApplicationManager> _applicationmanager, std::string method_name);
     void perform_initialise();
     void perform_terminate();
+    void validate_configure_beam(const ska::pst::common::AsciiHeader& config);
+    void validate_configure_scan(const ska::pst::common::AsciiHeader& config);
+    void validate_start_scan(const ska::pst::common::AsciiHeader& config);
 
+    bool force_error=false;
   private:
 };
 
@@ -143,9 +167,10 @@ class ApplicationManagerTest : public ::testing::Test
     std::shared_ptr<TestApplicationManager> _applicationmanager{nullptr};
 
     // Resources
-    ska::pst::common::AsciiHeader beam_config;
-    ska::pst::common::AsciiHeader scan_config;
-    ska::pst::common::AsciiHeader startscan_config;
+    ska::pst::common::AsciiHeader beam_config{};
+    ska::pst::common::AsciiHeader scan_config{};
+    ska::pst::common::AsciiHeader startscan_config{};
+
   private:
 };
 }

@@ -28,7 +28,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #include <stdexcept>
 #include <algorithm>
 #include <chrono>
@@ -98,17 +97,20 @@ void ska::pst::common::StateModel::set_command(Command cmd)
 {
   spdlog::debug("ska::pst::common::StateModel::set_command() command={}", get_name(cmd));
 
+  std::unique_lock<std::mutex> control_lock(command_mutex);
+
   // State not found
-  if (allowed_control_commands.find(state) == allowed_control_commands.end())
+  if (allowed_commands.find(state) == allowed_commands.end())
   {
-    spdlog::warn("ska::pst::common::StateModel::set_command state={} did not exist in allowed_control_commands", state, get_name(cmd));
+    spdlog::warn("ska::pst::common::StateModel::set_command state={} did not exist in allowed_commands", state, get_name(cmd));
     spdlog::warn("ska::pst::common::StateModel::set_command state set to RuntimeError");
+    // might need to throw an exception here so that the calling LmcServiceHandler can catch it
     state=RuntimeError;
   }
 
   // check if the specified command exists in the current state
-  auto it = std::find(allowed_control_commands[state].begin(), allowed_control_commands[state].end(), cmd);
-  bool allowed = (it != allowed_control_commands[state].end());
+  auto it = std::find(allowed_commands[state].begin(), allowed_commands[state].end(), cmd);
+  bool allowed = (it != allowed_commands[state].end());
   if (!allowed)
   {
     spdlog::debug("ska::pst::common::StateModel::set_command cmd={} was not allowed for state={}", get_name(cmd), state_names[state]);
@@ -119,6 +121,9 @@ void ska::pst::common::StateModel::set_command(Command cmd)
     spdlog::info("ska::pst::common::StateModel::set_command command updated cmd={}", get_name(cmd));
     command = cmd;
   }
+
+  control_lock.unlock();
+  command_cond.notify_one();
 }
 
 void ska::pst::common::StateModel::wait_for(ska::pst::common::State required)

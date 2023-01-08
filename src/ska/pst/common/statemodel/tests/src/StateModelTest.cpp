@@ -256,8 +256,6 @@ TEST_F(StateModelTest, test_deconfigure_beam) // NOLINT
     EXPECT_CALL(*_statemodel,set_state(BeamConfigured));
     _statemodel->set_state(BeamConfigured);
     // _statemodel->deconfigure_beam(); // blocking call
-    // assert_command(DeconfigureBeam);
-    // Test error DeconfigureBeam on Idle
     _set_state(Idle);
     ASSERT_THROW(_statemodel->deconfigure_beam(),std::runtime_error);
     ASSERT_NE(DeconfigureBeam, _statemodel->get_command());
@@ -285,7 +283,7 @@ TEST_F(StateModelTest, test_reset) // NOLINT
     EXPECT_CALL(*_statemodel,set_state(RuntimeError));
     _statemodel->set_state(RuntimeError);
     // _statemodel->reset(); // blocking call
-    // assert_command(RuntimeError);
+
     // Test error reset on Idle
     _set_state(Idle);
     ASSERT_THROW(_statemodel->reset(),std::runtime_error);
