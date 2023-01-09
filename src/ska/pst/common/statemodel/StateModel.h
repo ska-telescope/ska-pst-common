@@ -71,7 +71,7 @@ namespace common {
   };
 
   /**
-   * @brief Enumeration of the control commands that can be issued by the LmcService to
+   * @brief Enumeration of the commands that can be issued by the LmcService to
    * effect a change of state in the Receiver.
    *
    */
@@ -123,15 +123,12 @@ namespace common {
   /**
    * @brief The state model that regulates the behaviour of the classes that inherit from it.
    * This model expects that commands will be executed on it from different threads
-   *  - Commands: these will be issued by an LmcService, and commence a state change from a steady state (e.g. Idle) to an intermediate state (e.g. ConfiguringBeam)
-   *  - UpdateCommands: these will be issued by the child class, and conclude the transition from an intermediate state (e.g. ConfiguringBeam) to a steady state (e.g. BeamConfigured)
-   *  - ResetCommands: these will be issued by the LmcService, and are used to reset the model from an error state, back to a steady state.
+   *  - Commands: these will be issued by an LmcService, and commence a state change from a steady state (e.g. Idle) to an intermediate state (e.g. ConfiguringBeam).
    *
    */
   class StateModel {
 
     public:
-
       /**
        * @brief Construct a new StateModel object, initialising the State to Unknown.
        *

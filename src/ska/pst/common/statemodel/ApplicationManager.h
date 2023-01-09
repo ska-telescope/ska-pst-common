@@ -80,25 +80,25 @@ namespace common {
     protected:
       /**
        * @brief Initialisation callback to be implemented in the child class.
-       * The method should wait for the Unknown state and transition the state model to the InitialisationComplete
+       * The method should wait for the Unknown state and transition the state model to the Initialised
        *
        */
       virtual void perform_initialise() = 0;
 
       /**
-       * @brief Beam configuration callback that is called by \ref main to transition the state from ConfiguringBeam to BeamConfigured.
+       * @brief Beam configuration callback that is called by \ref main to transition the state from Idle to BeamConfigured.
        * 
        */
       virtual void perform_configure_beam() = 0;
 
       /**
-       * @brief Scan configuration callback that is called by \ref main to transition the state from ConfiguringScan to ScanConfigured.
+       * @brief Scan configuration callback that is called by \ref main to transition the state from BeamConfigured to ScanConfigured.
        *
        */
       virtual void perform_configure_scan() = 0;
 
       /**
-       * @brief Scan callback that is called by \ref main to transition the state from StartingScan to Scanning.
+       * @brief Scan callback that is called by \ref main to spawn a child thread that calls perform_start_scan.
        * This method is expected to block until the scan is complete.
        *
        */
@@ -112,22 +112,23 @@ namespace common {
       virtual void perform_start_scan() = 0;
 
       /**
-       * @brief Scan callback that is called by \ref main to transition the state from StartingScan to Scanning.
-       * This method is expected to block until the scan is complete.
-       * TBD
+       * @brief StopScan callback that is called by \ref main to transition the state from Scanning to ScanConfigured.
+       * This method is expected to block until state transitions to ScanConfigured
+       * 
        */
       virtual void perform_stop_scan() = 0;
 
       /**
-       * @brief Scan callback that is called by \ref main to transition the state from StartingScan to Scanning.
-       * This method is expected to block until the scan is complete.
-       * TBD
+       * @brief Scan callback that is called by \ref main to transition the state from ScanConfigured to BeamConfigured.
+       * This method is expected to block until state transitions to BeamConfigured
+       * 
        */
+    
       virtual void perform_deconfigure_scan() = 0;
       /**
-       * @brief Scan callback that is called by \ref main to transition the state from StartingScan to Scanning.
-       * This method is expected to block until the scan is complete.
-       * TBD
+       * @brief Scan callback that is called by \ref main to transition the state from BeamConfigured to Idle.
+       * This method is expected to block until state transitions to Idle
+       * 
        */
       virtual void perform_deconfigure_beam() = 0;
 
@@ -148,7 +149,6 @@ namespace common {
        * @brief Transition the state.
        *
        * @param required state to transition.
-       * TBD
        */
       void set_state(State state);
 
