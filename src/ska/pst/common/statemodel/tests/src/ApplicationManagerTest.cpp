@@ -58,6 +58,7 @@ namespace test {
   {
     spdlog::trace("ska::pst::common::test::TestApplicationManager::perform_initialise mock_function");
   }
+
   void TestApplicationManager::perform_terminate()
   {
     spdlog::trace("ska::pst::common::test::TestApplicationManager::perform_terminate mock_function");
@@ -75,6 +76,7 @@ namespace test {
       throw std::runtime_error("TestApplicationManager::validate_configure_beam beam_config[beam_config-FOO] not found");
     }
   }
+
   void TestApplicationManager::validate_configure_scan(const ska::pst::common::AsciiHeader& scan_config) 
   {
     spdlog::trace("ska::pst::common::test::TestApplicationManager::validate_configure_scan");
@@ -110,15 +112,12 @@ namespace test {
   {
     spdlog::trace("ska::pst::common::test::ApplicationManagerTest::SetUp");
     _applicationmanager = std::make_shared<TestApplicationManager>();
-    // Runtime error
-    // beam_config.load_from_file(test_data_file("beam_config.txt"));
-    // scan_config.load_from_file(test_data_file("scan_config.txt"));
-    // startscan_config.load_from_file(test_data_file("startscan_config.txt"));
 
-    EXPECT_CALL(*_applicationmanager, _wait_for(Idle));
-    _applicationmanager->_wait_for(Idle);
+    EXPECT_CALL(*_applicationmanager, _wait_for_state(Idle));
+    _applicationmanager->_wait_for_state(Idle);
     ASSERT_EQ(Idle, _applicationmanager->get_state());
   }
+
   void ApplicationManagerTest::TearDown()
   {
     spdlog::trace("ska::pst::common::test::ApplicationManagerTest::TearDown");
@@ -231,35 +230,105 @@ namespace test {
     scan_config.set_val("scan_config-FOO", "BAR");
     startscan_config.set_val("startscan_config-FOO", "BAR");
 
-    /* 
     // Trigger error in perform_configure_beam
     _applicationmanager->force_error=true;
     get_logs_state_and_command(_applicationmanager, ("{} configure_beam", test_f));
     EXPECT_CALL(*_applicationmanager, perform_configure_beam());
-    ASSERT_THROW(_applicationmanager->configure_beam(beam_config),std::runtime_error);
-    // ensure that state is runtime error
-    _applicationmanager->_wait_for(RuntimeError);
-  
+    ASSERT_THROW(_applicationmanager->perform_configure_beam(),std::runtime_error);
+
+    get_logs_state_and_command(_applicationmanager, ("{} reset", test_f));
     ASSERT_EQ(RuntimeError, _applicationmanager->get_state());
     EXPECT_CALL(*_applicationmanager, perform_reset());
     _applicationmanager->reset();
     ASSERT_EQ(Idle, _applicationmanager->get_state());
 
     // Proceed to BeamConfigured
-    _applicationmanager->force_error=false;
-    EXPECT_CALL(*_applicationmanager, perform_configure_beam());
-    _applicationmanager->configure_beam(beam_config);
+    EXPECT_CALL(*_applicationmanager, _set_state(BeamConfigured));
+    _applicationmanager->_set_state(BeamConfigured);
     ASSERT_EQ(BeamConfigured, _applicationmanager->get_state());
-    */
 
     // Trigger error in perform_configure_scan
-    // Trigger error in perform_start_scan
-    // Trigger error in perform_scan
-    // Trigger error in perform_stop_scan
-    // Trigger error in perform_stop_scan
-    // Trigger error in perform_deconfigure_scan
-    // Trigger error in perform_deconfigure_beam
+    _applicationmanager->force_error=true;
+    get_logs_state_and_command(_applicationmanager, ("{} configure_scan", test_f));
+    EXPECT_CALL(*_applicationmanager, perform_configure_scan());
+    ASSERT_THROW(_applicationmanager->perform_configure_scan(),std::runtime_error);
 
+    get_logs_state_and_command(_applicationmanager, ("{} reset", test_f));
+    ASSERT_EQ(RuntimeError, _applicationmanager->get_state());
+    EXPECT_CALL(*_applicationmanager, perform_reset());
+    _applicationmanager->reset();
+    ASSERT_EQ(Idle, _applicationmanager->get_state());
+
+    // Proceed to ScanConfigured
+    EXPECT_CALL(*_applicationmanager, _set_state(ScanConfigured));
+    _applicationmanager->_set_state(ScanConfigured);
+    ASSERT_EQ(ScanConfigured, _applicationmanager->get_state());
+    
+
+    // Trigger error in perform_start_scan
+    _applicationmanager->force_error=true;
+    get_logs_state_and_command(_applicationmanager, ("{} start_scan", test_f));
+    EXPECT_CALL(*_applicationmanager, perform_start_scan());
+    ASSERT_THROW(_applicationmanager->perform_start_scan(),std::runtime_error);
+
+    get_logs_state_and_command(_applicationmanager, ("{} reset", test_f));
+    ASSERT_EQ(RuntimeError, _applicationmanager->get_state());
+    EXPECT_CALL(*_applicationmanager, perform_reset());
+    _applicationmanager->reset();
+    ASSERT_EQ(Idle, _applicationmanager->get_state());
+
+    // Proceed to Scanning
+    EXPECT_CALL(*_applicationmanager, _set_state(Scanning));
+    _applicationmanager->_set_state(Scanning);
+    ASSERT_EQ(Scanning, _applicationmanager->get_state());
+
+
+    // Trigger error in perform_stop_scan
+    _applicationmanager->force_error=true;
+    get_logs_state_and_command(_applicationmanager, ("{} stop_scan", test_f));
+    EXPECT_CALL(*_applicationmanager, perform_stop_scan());
+    ASSERT_THROW(_applicationmanager->perform_stop_scan(),std::runtime_error);
+
+    get_logs_state_and_command(_applicationmanager, ("{} reset", test_f));
+    ASSERT_EQ(RuntimeError, _applicationmanager->get_state());
+    EXPECT_CALL(*_applicationmanager, perform_reset());
+    _applicationmanager->reset();
+    ASSERT_EQ(Idle, _applicationmanager->get_state());
+
+    // Proceed to ScanConfigured
+    EXPECT_CALL(*_applicationmanager, _set_state(ScanConfigured));
+    _applicationmanager->_set_state(ScanConfigured);
+    ASSERT_EQ(ScanConfigured, _applicationmanager->get_state());
+
+
+    // Trigger error in perform_deconfigure_scan
+    _applicationmanager->force_error=true;
+    get_logs_state_and_command(_applicationmanager, ("{} deconfigure_scan", test_f));
+    EXPECT_CALL(*_applicationmanager, perform_deconfigure_scan());
+    ASSERT_THROW(_applicationmanager->perform_deconfigure_scan(),std::runtime_error);
+
+    get_logs_state_and_command(_applicationmanager, ("{} reset", test_f));
+    ASSERT_EQ(RuntimeError, _applicationmanager->get_state());
+    EXPECT_CALL(*_applicationmanager, perform_reset());
+    _applicationmanager->reset();
+    ASSERT_EQ(Idle, _applicationmanager->get_state());
+
+    // Proceed to BeamConfigured
+    EXPECT_CALL(*_applicationmanager, _set_state(BeamConfigured));
+    _applicationmanager->_set_state(BeamConfigured);
+    ASSERT_EQ(BeamConfigured, _applicationmanager->get_state());
+    
+    // Trigger error in perform_deconfigure_beam
+    _applicationmanager->force_error=true;
+    get_logs_state_and_command(_applicationmanager, ("{} configure_beam", test_f));
+    EXPECT_CALL(*_applicationmanager, perform_deconfigure_beam());
+    ASSERT_THROW(_applicationmanager->perform_deconfigure_beam(),std::runtime_error);
+
+    get_logs_state_and_command(_applicationmanager, ("{} configure_beam error encountered", test_f));
+    ASSERT_EQ(RuntimeError, _applicationmanager->get_state());
+    EXPECT_CALL(*_applicationmanager, perform_reset());
+    _applicationmanager->reset();
+    ASSERT_EQ(Idle, _applicationmanager->get_state());
   }
 } // test
 } // common

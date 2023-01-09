@@ -55,7 +55,7 @@ void ska::pst::common::ApplicationManager::main()
 {
   std::string method_name = "ska::pst::common::ApplicationManager::main";
   spdlog::debug("{}", method_name);
-  // wait_for(Initialise);
+  // wait_for_state(Initialise);
   spdlog::debug("{} perform_initialise", method_name);
   perform_initialise();
   set_state(Idle);
@@ -64,94 +64,95 @@ void ska::pst::common::ApplicationManager::main()
   // loop through the statemodel
   while(state != Unknown)
   {
-    spdlog::debug("{} [{}] state_model.wait_for_command", method_name, entity);
+    spdlog::debug("{} [{}] state_model.wait_for_command", method_name, entity, entity);
     ska::pst::common::Command cmd = wait_for_command();
-    spdlog::debug("{} [{}] state={} command={}", method_name, entity, get_name(state), get_name(cmd));
+    spdlog::debug("{} [{}] state={} command={}", method_name, entity, entity, get_name(state), get_name(cmd));
 
     try {
       switch (cmd)
       {
         case ConfigureBeam:
-          spdlog::debug("{} {} perform_configure_beam", method_name, get_name(cmd));
+          spdlog::debug("{} {} {} perform_configure_beam", method_name, entity, get_name(cmd));
           perform_configure_beam();
-          spdlog::debug("{} {} perform_configure_beam done", method_name, get_name(cmd));
-          spdlog::debug("{} {} set_state(BeamConfigured)", method_name, get_name(cmd));
+          spdlog::debug("{} {} {} perform_configure_beam done", method_name, entity, get_name(cmd));
+          spdlog::debug("{} {} {} set_state(BeamConfigured)", method_name, entity, get_name(cmd));
           set_state(BeamConfigured);
-          spdlog::debug("{} {} state={}", method_name, get_name(cmd), state_names[get_state()]);
+          spdlog::debug("{} {} [{}] state={}", method_name, entity, get_name(cmd), state_names[get_state()]);
           break;
           
         case ConfigureScan:
-          spdlog::debug("{} {} perform_configure_scan", method_name, get_name(cmd));
+          spdlog::debug("{} {} {} perform_configure_scan", method_name, entity, get_name(cmd));
           perform_configure_scan();
-          spdlog::debug("{} {} perform_configure_scan done", method_name, get_name(cmd));
-          spdlog::debug("{} {} set_state(ScanConfigured)", method_name, get_name(cmd));
+          spdlog::debug("{} {} {} perform_configure_scan done", method_name, entity, get_name(cmd));
+          spdlog::debug("{} {} {} set_state(ScanConfigured)", method_name, entity, get_name(cmd));
           set_state(ScanConfigured);
-          spdlog::debug("{} {} state={}", method_name, get_name(cmd), state_names[get_state()]);
+          spdlog::debug("{} {} [{}] state={}", method_name, entity, get_name(cmd), state_names[get_state()]);
           break;
           
         case StartScan:
-          spdlog::debug("{} {} perform_start_scan", method_name, get_name(cmd));
+          spdlog::debug("{} {} {} perform_start_scan", method_name, entity, get_name(cmd));
           perform_start_scan();
           scan_thread = std::make_unique<std::thread>(std::thread(&ska::pst::common::ApplicationManager::perform_scan, this));
-          spdlog::debug("{} {} perform_start_scan done", method_name, get_name(cmd));
-          spdlog::debug("{} {} set_state(Scanning)", method_name, get_name(cmd));
+          spdlog::debug("{} {} {} perform_start_scan done", method_name, entity, get_name(cmd));
+          spdlog::debug("{} {} {} set_state(Scanning)", method_name, entity, get_name(cmd));
           set_state(Scanning);
-          spdlog::debug("{} {} state={}", method_name, get_name(cmd), state_names[get_state()]);
+          spdlog::debug("{} {} [{}] state={}", method_name, entity, get_name(cmd), state_names[get_state()]);
           break;
           
         case StopScan:
-          spdlog::debug("{} {} perform_stop_scan", method_name, get_name(cmd));
+          spdlog::debug("{} {} {} perform_stop_scan", method_name, entity, get_name(cmd));
           perform_stop_scan();
           scan_thread->join();
-          spdlog::debug("{} {} perform_stop_scan done", method_name, get_name(cmd));
-          spdlog::debug("{} {} set_state(ScanConfigured)", method_name, get_name(cmd));
+          spdlog::debug("{} {} {} perform_stop_scan done", method_name, entity, get_name(cmd));
+          spdlog::debug("{} {} {} set_state(ScanConfigured)", method_name, entity, get_name(cmd));
           set_state(ScanConfigured);
-          spdlog::debug("{} {} state={}", method_name, get_name(cmd), state_names[get_state()]);
+          spdlog::debug("{} {} [{}] state={}", method_name, entity, get_name(cmd), state_names[get_state()]);
           break;
           
         case DeconfigureScan:
-          spdlog::debug("{} {} perform_deconfigure_scan", method_name, get_name(cmd));
+          spdlog::debug("{} {} {} perform_deconfigure_scan", method_name, entity, get_name(cmd));
           perform_deconfigure_scan();
-          spdlog::debug("{} {} perform_deconfigure_scan done", method_name, get_name(cmd));
-          spdlog::debug("{} {} set_state(BeamConfigured)", method_name, get_name(cmd));
+          spdlog::debug("{} {} {} perform_deconfigure_scan done", method_name, entity, get_name(cmd));
+          spdlog::debug("{} {} {} set_state(BeamConfigured)", method_name, entity, get_name(cmd));
           set_state(BeamConfigured);
-          spdlog::debug("{} {} state={}", method_name, get_name(cmd), state_names[get_state()]);
+          spdlog::debug("{} {} [{}] state={}", method_name, entity, get_name(cmd), state_names[get_state()]);
           break;
 
         case DeconfigureBeam:
-          spdlog::debug("{} {} perform_deconfigure_beam", method_name, get_name(cmd));
+          spdlog::debug("{} {} {} perform_deconfigure_beam", method_name, entity, get_name(cmd));
           perform_deconfigure_beam();
-          spdlog::debug("{} {} perform_deconfigure_beam done", method_name, get_name(cmd));
-          spdlog::debug("{} {} set_state(Idle)", method_name, get_name(cmd));
+          spdlog::debug("{} {} {} perform_deconfigure_beam done", method_name, entity, get_name(cmd));
+          spdlog::debug("{} {} {} set_state(Idle)", method_name, entity, get_name(cmd));
           set_state(Idle);
-          spdlog::debug("{} {} state={}", method_name, get_name(cmd), state_names[get_state()]);
+          spdlog::debug("{} {} [{}] state={}", method_name, entity, get_name(cmd), state_names[get_state()]);
           break;
           
         case Reset:
-          spdlog::debug("{} {} perform_configure_beam", method_name, get_name(cmd));
+          spdlog::debug("{} {} {} perform_configure_beam", method_name, entity, get_name(cmd));
           perform_reset();
-          spdlog::debug("{} {} perform_configure_beam done", method_name, get_name(cmd));
-          spdlog::debug("{} {} set_state(BeamConfigured)", method_name, get_name(cmd));
+          spdlog::debug("{} {} {} perform_configure_beam done", method_name, entity, get_name(cmd));
+          spdlog::debug("{} {} {} set_state(BeamConfigured)", method_name, entity, get_name(cmd));
           set_state(Idle);
-          spdlog::debug("{} {} state={}", method_name, get_name(cmd), state_names[get_state()]);
+          spdlog::debug("{} {} [{}] state={}", method_name, entity, get_name(cmd), state_names[get_state()]);
           break;
 
         case Terminate:
-          spdlog::debug("{} {} perform_terminate", method_name, get_name(cmd));
+          spdlog::debug("{} {} {} perform_terminate", method_name, entity, get_name(cmd));
           perform_terminate();
-          spdlog::debug("{} {} perform_terminate done", method_name, get_name(cmd));
-          spdlog::debug("{} {} set_state(Unknown)", method_name, get_name(cmd));
+          spdlog::debug("{} {} {} perform_terminate done", method_name, entity, get_name(cmd));
+          spdlog::debug("{} {} {} set_state(Unknown)", method_name, entity, get_name(cmd));
           set_state(Unknown);
-          spdlog::debug("{} {} state={}", method_name, get_name(cmd), state_names[get_state()]);
+          spdlog::debug("{} {} [{}] state={}", method_name, entity, get_name(cmd), state_names[get_state()]);
           break;
       }
     }
     catch (const std::exception& exc)
     {
-      spdlog::warn("ska::pst::dsp::StateModel::main [{}] exception during perform command: {}", entity, exc.what());
+      spdlog::warn("{} {} exception during command [{}] {}", method_name, entity, get_name(cmd), exc.what());
       set_exception(exc);
-      previous_state = get_state();
+      spdlog::debug("ska::pst::common::ApplicationManager::set_exception done");
       set_state(RuntimeError);
+      spdlog::debug("{} {} [{}] state={}", method_name, entity, get_name(cmd), state_names[get_state()]);
     }
   }
 }
@@ -161,37 +162,37 @@ void ska::pst::common::ApplicationManager::quit()
   if (get_state() == Scanning)
   {
     set_command(StopScan);
-    wait_for(ScanConfigured);
+    wait_for_state(ScanConfigured);
   }
 
   if (get_state() == ScanConfigured)
   {
     set_command(DeconfigureScan);
-    wait_for(BeamConfigured);
+    wait_for_state(BeamConfigured);
   }
 
   if (get_state() == BeamConfigured)
   {
     set_command(DeconfigureBeam);
-    wait_for(Idle);
+    wait_for_state(Idle);
   }
 
   if (get_state() == RuntimeError)
   {
     set_command(Reset);
-    wait_for(Idle);
+    wait_for_state(Idle);
   }
 
   if (get_state() == Idle)
   {
     set_command(Terminate);
-    wait_for(Unknown);
+    wait_for_state(Unknown);
   }
 }
 
 ska::pst::common::Command ska::pst::common::ApplicationManager::wait_for_command()
 {
-  spdlog::trace("ska::pst::common::ApplicationManager::wait_for_command [{}]", entity);
+  spdlog::trace("ska::pst::common::ApplicationManager::wait_for_command [{}] command={}", entity, command);
   std::unique_lock<std::mutex> control_lock(command_mutex);
 
   command_cond.wait(control_lock, [&]{return (command != None);});

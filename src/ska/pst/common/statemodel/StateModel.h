@@ -250,7 +250,7 @@ namespace common {
        *
        * @param expected expected state to wait for.
        */
-      void wait_for(State expected);
+      void wait_for_state(State expected);
 
       //! Command variable
       Command command{None};
