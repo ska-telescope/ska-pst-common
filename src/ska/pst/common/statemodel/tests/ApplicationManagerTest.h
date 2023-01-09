@@ -69,7 +69,6 @@ class TestApplicationManager : public ska::pst::common::ApplicationManager
           }
         });
       ON_CALL(*this, perform_configure_scan).WillByDefault([this]() {
-          spdlog::info("ska::pst::common::test::TestApplicationManager::perform_configure_scan mock_function");
           if(force_error)
           {
             // Mock RuntimeError state
@@ -88,7 +87,6 @@ class TestApplicationManager : public ska::pst::common::ApplicationManager
       ON_CALL(*this, perform_start_scan).WillByDefault([this]() {
           if(force_error)
           {
-            spdlog::info("ska::pst::common::test::TestApplicationManager::perform_start_scan force_error={}", force_error);
             // Mock RuntimeError state
             set_state(RuntimeError);
             throw std::runtime_error("ska::pst::common::test::TestApplicationManager::perform_start_scan force_error=true");
@@ -111,7 +109,6 @@ class TestApplicationManager : public ska::pst::common::ApplicationManager
           }
         });
       ON_CALL(*this, perform_deconfigure_beam).WillByDefault([this]() {
-          spdlog::info("ska::pst::common::test::TestApplicationManager::perform_deconfigure_beam mock_function");
           if(force_error)
           {
             // Mock RuntimeError state
