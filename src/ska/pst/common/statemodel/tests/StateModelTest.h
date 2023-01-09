@@ -52,11 +52,9 @@ class TestStateModel : public StateModel
   public:
     TestStateModel() {
       ON_CALL(*this, set_command).WillByDefault([this](Command cmd) {
-          spdlog::trace("ska::pst::common::test::TestStateModel::set_command cmd=[{}]", get_name(cmd));
           command = cmd;
       });
       ON_CALL(*this, set_state).WillByDefault([this](State required) {
-          spdlog::trace("ska::pst::common::test::TestStateModel::set_state state=[{}] required=[{}]", get_name(state), get_name(required));
           state = required;
       });
     }
