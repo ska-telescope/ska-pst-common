@@ -73,7 +73,7 @@ namespace test {
     }
     catch (const std::exception& exc)
     {
-      throw std::runtime_error("TestApplicationManager::validate_configure_beam beam_config[beam_config-FOO] not found");
+      throw std::invalid_argument("TestApplicationManager::validate_configure_beam beam_config[beam_config-FOO] not found");
     }
   }
 
@@ -86,7 +86,7 @@ namespace test {
     }
     catch (const std::exception& exc)
     {
-      throw std::runtime_error("TestApplicationManager::validate_configure_scan scan_config[scan_config-FOO] not found");
+      throw std::invalid_argument("TestApplicationManager::validate_configure_scan scan_config[scan_config-FOO] not found");
     }
   }
 
@@ -99,7 +99,7 @@ namespace test {
     }
     catch (const std::exception& exc)
     {
-      throw std::runtime_error("TestApplicationManager::validate_start_scan startscan_config[startscan_config-FOO] not found");
+      throw std::invalid_argument("TestApplicationManager::validate_start_scan startscan_config[startscan_config-FOO] not found");
     }
   }
 
@@ -182,7 +182,7 @@ namespace test {
 
     // validate_configure_beam
     log_state_and_command(_applicationmanager, ("{} validate_configure_beam", test_f));
-    ASSERT_THROW(_applicationmanager->configure_beam(beam_config),std::runtime_error);
+    ASSERT_THROW(_applicationmanager->configure_beam(beam_config),std::invalid_argument);
     ASSERT_EQ(Idle, _applicationmanager->get_state());
 
     // Proceed to BeamConfigured
@@ -193,7 +193,7 @@ namespace test {
 
     // validate_configure_scan
     log_state_and_command(_applicationmanager, ("{} validate_configure_scan", test_f));
-    ASSERT_THROW(_applicationmanager->configure_scan(scan_config),std::runtime_error);
+    ASSERT_THROW(_applicationmanager->configure_scan(scan_config),std::invalid_argument);
     ASSERT_EQ(BeamConfigured, _applicationmanager->get_state());
 
     // Proceed to ScanConfigured
@@ -204,7 +204,7 @@ namespace test {
 
     // validate_configure_startscan
     log_state_and_command(_applicationmanager, ("{} validate_configure_startscan", test_f));
-    ASSERT_THROW(_applicationmanager->start_scan(scan_config),std::runtime_error);
+    ASSERT_THROW(_applicationmanager->start_scan(scan_config),std::invalid_argument);
     ASSERT_EQ(ScanConfigured, _applicationmanager->get_state());
 
     // Proceed to Scanning

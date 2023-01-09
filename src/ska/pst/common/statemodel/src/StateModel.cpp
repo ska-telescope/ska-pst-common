@@ -103,10 +103,8 @@ void ska::pst::common::StateModel::set_command(Command required_cmd)
     // State not found
     if (allowed_commands.find(state) == allowed_commands.end())
     {
-      spdlog::warn("ska::pst::common::StateModel::set_command state={} did not exist in allowed_commands", state, get_name(cmd));
-      spdlog::warn("ska::pst::common::StateModel::set_command state set to RuntimeError");
-      // might need to throw an exception here so that the calling LmcServiceHandler can catch it
-      state=RuntimeError;
+      std::string error_msg = ("ska::pst::common::StateModel::set_command state={} did not exist in allowed_commands", state, get_name(cmd));
+      throw std::out_of_range(error_msg);
     }
 
     // check if the specified command exists in the current state
@@ -114,8 +112,8 @@ void ska::pst::common::StateModel::set_command(Command required_cmd)
     bool allowed = (it != allowed_commands[state].end());
     if (!allowed)
     {
-      spdlog::debug("ska::pst::common::StateModel::set_command cmd={} was not allowed for state={}", get_name(cmd), state_names[state]);
-      throw std::runtime_error("ska::pst::common::StateModel::set_command was not allowed");
+      std::string error_msg = ("ska::pst::common::StateModel::set_command cmd={} was not allowed for state={}", get_name(cmd), state_names[state]);
+      throw std::out_of_range(error_msg);
     }
     else 
     {

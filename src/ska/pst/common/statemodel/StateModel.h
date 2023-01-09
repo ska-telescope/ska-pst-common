@@ -143,6 +143,8 @@ namespace common {
 
       /**
        * @brief Issues the ConfigureBeam command and waits for the BeamConfigured or ConfiguringBeamError state to be reached.
+       * 
+       * @param config Beam configuration
        *
        */
       virtual void configure_beam(const AsciiHeader& config);
@@ -150,12 +152,16 @@ namespace common {
       /**
        * @brief Issues the ConfigureScan command and waits for the ScanConfigured or ConfiguringScanError state to be reached.
        *
+       * @param config Scan configuration
+       * 
        */
       virtual void configure_scan(const AsciiHeader& config);
 
       /**
        * @brief Issues the StartScan command and waits for the Scanning or ScanningError state to be reached.
        *
+       * @param config StartScan configuration
+       * 
        */
       virtual void start_scan(const AsciiHeader& config);
 
@@ -209,7 +215,6 @@ namespace common {
       /**
        * @brief Return the name of the specified  command.
        *
-       * @param command command whose name to return
        * @return std::string name of the command
        * 
        */
@@ -225,18 +230,35 @@ namespace common {
       std::string get_name(State state) { return state_names[state]; }
 
     protected:
-
+      /**
+       * @brief Validates Beam configuration. Specific validation errors must be set when throwing exceptions.
+       *
+       * @param config Beam configuration to validate
+       * 
+       */
       virtual void validate_configure_beam(const AsciiHeader& config) = 0;
 
+      /**
+       * @brief Validates Scan configuration. Specific validation errors must be set when throwing exceptions.
+       *
+       * @param config Scan configuration to validate
+       * 
+       */
       virtual void validate_configure_scan(const AsciiHeader& config) = 0;
 
+      /**
+       * @brief Validates StartScan configuration. Specific validation errors must be set when throwing exceptions.
+       *
+       * @param config StartScan configuration to validate
+       * 
+       */
       virtual void validate_start_scan(const AsciiHeader& config) = 0;
 
       /**
        * @brief Set the command used as a reference for transitioning between states.
        *
        * @param command command to be set.
-       * TBD
+       * 
        */
       void set_command(Command command);
 
@@ -246,6 +268,7 @@ namespace common {
        * that caused the error will be raised here.
        *
        * @param expected expected state to wait for.
+       * 
        */
       void wait_for_state(State expected);
 
