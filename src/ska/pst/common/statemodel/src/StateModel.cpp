@@ -93,51 +93,55 @@ void ska::pst::common::StateModel::reset()
   wait_for_state(Idle);
 }
 
-void ska::pst::common::StateModel::set_command(Command cmd)
+void ska::pst::common::StateModel::set_command(Command required_cmd)
 {
-  spdlog::debug("ska::pst::common::StateModel::set_command() command={}", get_name(cmd));
+  spdlog::debug("ska::pst::common::StateModel::set_command() required_cmd={}", get_name(required_cmd));
 
-  std::unique_lock<std::mutex> control_lock(command_mutex);
-
-  // State not found
-  if (allowed_commands.find(state) == allowed_commands.end())
+  ska::pst::common::Command cmd = required_cmd;
   {
-    spdlog::warn("ska::pst::common::StateModel::set_command state={} did not exist in allowed_commands", state, get_name(cmd));
-    spdlog::warn("ska::pst::common::StateModel::set_command state set to RuntimeError");
-    // might need to throw an exception here so that the calling LmcServiceHandler can catch it
-    state=RuntimeError;
-  }
+    std::unique_lock<std::mutex> control_lock(command_mutex);
+    // State not found
+    if (allowed_commands.find(state) == allowed_commands.end())
+    {
+      spdlog::warn("ska::pst::common::StateModel::set_command state={} did not exist in allowed_commands", state, get_name(cmd));
+      spdlog::warn("ska::pst::common::StateModel::set_command state set to RuntimeError");
+      // might need to throw an exception here so that the calling LmcServiceHandler can catch it
+      state=RuntimeError;
+    }
 
-  // check if the specified command exists in the current state
-  auto it = std::find(allowed_commands[state].begin(), allowed_commands[state].end(), cmd);
-  bool allowed = (it != allowed_commands[state].end());
-  if (!allowed)
-  {
-    spdlog::debug("ska::pst::common::StateModel::set_command cmd={} was not allowed for state={}", get_name(cmd), state_names[state]);
-    throw std::runtime_error("ska::pst::common::StateModel::set_command was not allowed");
+    // check if the specified command exists in the current state
+    auto it = std::find(allowed_commands[state].begin(), allowed_commands[state].end(), cmd);
+    bool allowed = (it != allowed_commands[state].end());
+    if (!allowed)
+    {
+      spdlog::debug("ska::pst::common::StateModel::set_command cmd={} was not allowed for state={}", get_name(cmd), state_names[state]);
+      throw std::runtime_error("ska::pst::common::StateModel::set_command was not allowed");
+    }
+    else 
+    {
+      spdlog::info("ska::pst::common::StateModel::set_command command updated cmd={}", get_name(cmd));
+      command = cmd;
+    }
   }
-  else 
-  {
-    spdlog::info("ska::pst::common::StateModel::set_command command updated cmd={}", get_name(cmd));
-    command = cmd;
-  }
-
-  control_lock.unlock();
   command_cond.notify_one();
 }
 
-void ska::pst::common::StateModel::wait_for_state(ska::pst::common::State required)
+void ska::pst::common::StateModel::wait_for_state(ska::pst::common::State required_state)
 {
-  spdlog::trace("ska::pst::common::StateModel::wait_for_state state={} required={}",state_names[state] , state_names[required]);
-  std::unique_lock<std::mutex> control_lock(state_mutex);
-  state_cond.wait(control_lock, [&]{return (state == required);});
-  bool success = (state == required);
-  spdlog::trace("ska::pst::common::StateModel::wait_for_state state={} required={}",state_names[state] , state_names[required]);
-  control_lock.unlock();
-  state_cond.notify_one();
-  if (!success)
+  
+  spdlog::trace("ska::pst::common::StateModel::wait_for_state state={} required={}",state_names[state] , state_names[required_state]);
+
+  ska::pst::common::State state_required = required_state;
   {
-    spdlog::debug("ska::pst::common::StateModel::wait_for_state raise_exception()");
+    std::unique_lock<std::mutex> control_lock(state_mutex);
+    state_cond.wait(control_lock, [&]{return (state == state_required);});
+    bool success = (state == state_required);
+    spdlog::trace("ska::pst::common::StateModel::wait_for_state state={} required={}",state_names[state] , state_names[state_required]);
+    state_cond.notify_one();
+    if (!success)
+    {
+      spdlog::debug("ska::pst::common::StateModel::wait_for_state raise_exception()");
+    }
   }
   spdlog::trace("ska::pst::common::StateModel::wait_for_state done");
 }
