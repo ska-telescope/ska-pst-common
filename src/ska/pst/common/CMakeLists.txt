@@ -26,6 +26,8 @@ add_library(ska_pst_common
     ${sources} ${optional_sources}
     ${private_headers} ${optional_private_headers}
     ${public_headers}
+    $<TARGET_OBJECTS:ska_pst_common-utils>
+    $<TARGET_OBJECTS:ska_pst_common-statemodel>
 )
 
 target_include_directories(

@@ -12,13 +12,8 @@ set(sources
 set(private_headers
 )
 
-set(public_headers
-    StateModel.h
-    ApplicationManager.h
-)
-
 add_library(
-    ska-pst-common-statemodel
+    ska_pst_common-statemodel
     OBJECT
     ${sources}
     ${private_headers}
@@ -26,7 +21,7 @@ add_library(
 )
 
 target_include_directories(
-    ska-pst-common-statemodel
+    ska_pst_common-statemodel
     PUBLIC
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>
     $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/src>
@@ -34,7 +29,7 @@ target_include_directories(
 )
 
 target_link_libraries(
-    ska-pst-common-statemodel
+    ska_pst_common-statemodel
     PUBLIC
     spdlog
 )

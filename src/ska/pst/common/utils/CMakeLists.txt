@@ -15,7 +15,7 @@ set(private_headers
 )
 
 add_library(
-    ska-pst-common-utils
+    ska_pst_common-utils
     OBJECT
     ${sources}
     ${private_headers}
@@ -23,7 +23,7 @@ add_library(
 )
 
 target_include_directories(
-    ska-pst-common-utils
+    ska_pst_common-utils
     PUBLIC
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>
     $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/src>
@@ -31,7 +31,7 @@ target_include_directories(
 )
 
 target_link_libraries(
-    ska-pst-common-utils
+    ska_pst_common-utils
     PUBLIC
     spdlog
 )
