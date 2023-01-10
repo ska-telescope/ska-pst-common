@@ -105,7 +105,7 @@ void ska::pst::common::StateModel::set_command(Command required_cmd)
     if (allowed_commands.find(state) == allowed_commands.end())
     {
       std::string error_msg = ("ska::pst::common::StateModel::set_command state={} did not exist in allowed_commands", state, get_name(cmd));
-      throw std::out_of_range(error_msg);
+      throw ska::pst::common::pst_validation_error(error_msg);
     }
 
     // check if the specified command exists in the current state
@@ -114,7 +114,7 @@ void ska::pst::common::StateModel::set_command(Command required_cmd)
     if (!allowed)
     {
       std::string error_msg = ("ska::pst::common::StateModel::set_command cmd={} was not allowed for state={}", get_name(cmd), state_names[state]);
-      throw std::out_of_range(error_msg);
+      throw ska::pst::common::pst_validation_error(error_msg);
     }
     else 
     {
