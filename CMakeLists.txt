@@ -5,7 +5,7 @@ message(STATUS "Building ...")
 # Project configuration, specifying version, languages,
 # and the C++ standard to use for the whole project
 set(PACKAGE_NAME SkaPstCommon)
-set(DESCRIPTION "Shared memory ring buffer for the SKA Pulsar Timing instrument")
+set(DESCRIPTION "Common C++ code for the SKA Pulsar Timing instrument")
 file(STRINGS version.txt SkaPstCommon_VERSION)
 
 project(${PACKAGE_NAME} VERSION ${SkaPstCommon_VERSION} DESCRIPTION ${DESCRIPTION} LANGUAGES CXX )

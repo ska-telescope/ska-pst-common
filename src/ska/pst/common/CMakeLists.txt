@@ -2,6 +2,8 @@
 configure_file(config.h.in config.h)
 
 add_subdirectory(lmc)
+add_subdirectory(utils)
+add_subdirectory(statemodel)
 
 set(public_headers
   version.h
@@ -24,6 +26,8 @@ add_library(ska_pst_common
     ${sources} ${optional_sources}
     ${private_headers} ${optional_private_headers}
     ${public_headers}
+    $<TARGET_OBJECTS:ska_pst_common-utils>
+    $<TARGET_OBJECTS:ska_pst_common-statemodel>
 )
 
 target_include_directories(
@@ -80,5 +84,5 @@ install(
     ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/SkaPstCommonConfig.cmake
     ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/SkaPstCommonVersion.cmake
   DESTINATION
-    "${export_dest_dir}"
+    ${export_dest_dir}
 )

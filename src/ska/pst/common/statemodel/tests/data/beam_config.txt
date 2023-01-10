@@ -1,0 +1,5 @@
+HDR_SIZE          4096
+HDR_VERSION       1.0
+
+DATA_KEY          a000
+WEIGHTS_KEY       a002
