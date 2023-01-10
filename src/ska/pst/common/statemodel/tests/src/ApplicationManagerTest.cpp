@@ -36,6 +36,7 @@
 #include "ska/pst/common/utils/AsciiHeader.h"
 #include "ska/pst/common/utils/Timer.h"
 #include "ska/pst/common/testutils/GtestMain.h"
+#include "ska/pst/common/statemodel/StateModelException.h"
 #include "ska/pst/common/statemodel/tests/ApplicationManagerTest.h"
 
 auto main(int argc, char* argv[]) -> int
@@ -73,7 +74,7 @@ namespace test {
     }
     catch (const std::exception& exc)
     {
-      throw std::invalid_argument("TestApplicationManager::validate_configure_beam beam_config[beam_config-FOO] not found");
+      throw ska::pst::common::pst_validation_error("TestApplicationManager::validate_configure_beam beam_config[beam_config-FOO] not found");
     }
   }
 
@@ -86,7 +87,7 @@ namespace test {
     }
     catch (const std::exception& exc)
     {
-      throw std::invalid_argument("TestApplicationManager::validate_configure_scan scan_config[scan_config-FOO] not found");
+      throw ska::pst::common::pst_validation_error("TestApplicationManager::validate_configure_scan scan_config[scan_config-FOO] not found");
     }
   }
 
@@ -99,7 +100,7 @@ namespace test {
     }
     catch (const std::exception& exc)
     {
-      throw std::invalid_argument("TestApplicationManager::validate_start_scan startscan_config[startscan_config-FOO] not found");
+      throw ska::pst::common::pst_validation_error("TestApplicationManager::validate_start_scan startscan_config[startscan_config-FOO] not found");
     }
   }
 
@@ -121,6 +122,9 @@ namespace test {
   void ApplicationManagerTest::TearDown()
   {
     spdlog::trace("ska::pst::common::test::ApplicationManagerTest::TearDown");
+    beam_config.reset();
+    scan_config.reset();
+    startscan_config.reset();
     _applicationmanager->quit();
     _applicationmanager = nullptr;
   }
@@ -182,7 +186,7 @@ namespace test {
 
     // validate_configure_beam
     log_state_and_command(_applicationmanager, ("{} validate_configure_beam", test_f));
-    ASSERT_THROW(_applicationmanager->configure_beam(beam_config),std::invalid_argument);
+    ASSERT_THROW(_applicationmanager->configure_beam(beam_config),std::logic_error);
     ASSERT_EQ(Idle, _applicationmanager->get_state());
 
     // Proceed to BeamConfigured
@@ -193,7 +197,7 @@ namespace test {
 
     // validate_configure_scan
     log_state_and_command(_applicationmanager, ("{} validate_configure_scan", test_f));
-    ASSERT_THROW(_applicationmanager->configure_scan(scan_config),std::invalid_argument);
+    ASSERT_THROW(_applicationmanager->configure_scan(scan_config),ska::pst::common::pst_validation_error);
     ASSERT_EQ(BeamConfigured, _applicationmanager->get_state());
 
     // Proceed to ScanConfigured
@@ -204,7 +208,7 @@ namespace test {
 
     // validate_configure_startscan
     log_state_and_command(_applicationmanager, ("{} validate_configure_startscan", test_f));
-    ASSERT_THROW(_applicationmanager->start_scan(scan_config),std::invalid_argument);
+    ASSERT_THROW(_applicationmanager->start_scan(scan_config),ska::pst::common::pst_validation_error);
     ASSERT_EQ(ScanConfigured, _applicationmanager->get_state());
 
     // Proceed to Scanning

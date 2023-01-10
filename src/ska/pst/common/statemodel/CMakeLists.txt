@@ -1,6 +1,7 @@
 
 set(public_headers
     StateModel.h
+    StateModelException.h
     ApplicationManager.h
 )
 

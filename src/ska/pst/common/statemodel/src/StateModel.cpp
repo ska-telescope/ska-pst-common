@@ -35,6 +35,7 @@
 
 #include "ska/pst/common/statemodel/StateModel.h"
 #include "ska/pst/common/utils/AsciiHeader.h"
+#include "ska/pst/common/statemodel/StateModelException.h"
 
 ska::pst::common::StateModel::StateModel()
 {

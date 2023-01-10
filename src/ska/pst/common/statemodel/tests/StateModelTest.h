@@ -31,6 +31,7 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
+#include "ska/pst/common/statemodel/StateModelException.h"
 #include "ska/pst/common/statemodel/StateModel.h"
 
 #ifndef SKA_PST_COMMON_TESTS_StateModelTest_h
