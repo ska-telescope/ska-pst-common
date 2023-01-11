@@ -55,7 +55,7 @@ void ska::pst::common::ApplicationManager::main()
 {
   std::string method_name = "ska::pst::common::ApplicationManager::main";
   spdlog::debug("{}", method_name);
-  // wait_for_state(Initialise);
+
   spdlog::debug("{} perform_initialise", method_name);
   perform_initialise();
   set_state(Idle);
@@ -66,7 +66,7 @@ void ska::pst::common::ApplicationManager::main()
   {
     spdlog::debug("{} [{}] state_model.wait_for_command", method_name, entity, entity);
     ska::pst::common::Command cmd = wait_for_command();
-    spdlog::debug("{} [{}] state={} command={}", method_name, entity, entity, get_name(state), get_name(cmd));
+    spdlog::debug("{} [{}] state={} command={}", method_name, entity, get_name(state), get_name(cmd));
 
     try {
       switch (cmd)

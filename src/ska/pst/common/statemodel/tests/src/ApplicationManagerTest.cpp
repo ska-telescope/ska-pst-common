@@ -113,9 +113,6 @@ namespace test {
   {
     spdlog::trace("ska::pst::common::test::ApplicationManagerTest::SetUp");
     _applicationmanager = std::make_shared<TestApplicationManager>();
-
-    EXPECT_CALL(*_applicationmanager, _wait_for_state(Idle));
-    _applicationmanager->_wait_for_state(Idle);
     ASSERT_EQ(Idle, _applicationmanager->get_state());
   }
 
