@@ -51,10 +51,10 @@ class TestApplicationManager : public ska::pst::common::ApplicationManager
 {
   public:
     TestApplicationManager() : ApplicationManager("TestApplicationManager") {
-      // For initialise
-      ON_CALL(*this, _wait_for_state).WillByDefault([this](State required) {
-          wait_for_state(required);
-      });
+
+      // For Initialise
+      wait_for_state(Idle);
+
       // For jumping states
       ON_CALL(*this, _set_state).WillByDefault([this](State required) {
           set_state(required);
@@ -123,7 +123,6 @@ class TestApplicationManager : public ska::pst::common::ApplicationManager
     ~TestApplicationManager() = default;
 
     // Resources
-    MOCK_METHOD(void, _wait_for_state, (State required));
     MOCK_METHOD(void, _set_state, (State required));
     MOCK_METHOD(void, perform_configure_beam, (), (override));
     MOCK_METHOD(void, perform_configure_scan, (), (override));

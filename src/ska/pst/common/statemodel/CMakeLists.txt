@@ -43,5 +43,5 @@ install(
     FILES
         ${public_headers}
     DESTINATION
-        include/ska/pst/common
+        include/ska/pst/common/statemodel
 )
