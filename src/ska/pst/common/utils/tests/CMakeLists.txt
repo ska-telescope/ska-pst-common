@@ -14,5 +14,5 @@ target_link_libraries(RandomSequenceTest gtest_main ska_pst_common-utils ska-pst
 add_test(AsciiHeaderTest AsciiHeaderTest --test_data "${CMAKE_CURRENT_LIST_DIR}/data")
 add_test(TimeTest TimeTest --test_data "${CMAKE_CURRENT_LIST_DIR}/data")
 add_test(TimerTest TimerTest)
-add_test(RandomSequenceTest RandomSequenceTest)
+add_test(RandomSequenceTest RandomSequenceTest --test_data "${CMAKE_CURRENT_LIST_DIR}/data")
 

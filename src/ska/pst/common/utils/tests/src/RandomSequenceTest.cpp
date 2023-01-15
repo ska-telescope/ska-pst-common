@@ -29,10 +29,11 @@
  */
 
 #include <spdlog/spdlog.h>
+#include <filesystem>
+#include <vector>
 
-#include "ska/pst/common/utils/tests/RandomSequenceTest.h"
-#include "ska/pst/common/utils/RandomSequence.h"
 #include "ska/pst/common/testutils/GtestMain.h"
+#include "ska/pst/common/utils/tests/RandomSequenceTest.h"
 
 auto main(int argc, char* argv[]) -> int
 {
@@ -49,15 +50,48 @@ RandomSequenceTest::RandomSequenceTest()
 
 void RandomSequenceTest::SetUp()
 {
+  header.load_from_file(test_data_file("data_header.txt"));
+  buffer.resize(default_buffer_size);
 }
 
 void RandomSequenceTest::TearDown()
 {
 }
 
-TEST_F(RandomSequenceTest, default_constructor) // NOLINT
+TEST_F(RandomSequenceTest, test_generate_validate) // NOLINT
 {
-  RandomSequence epoch;
+  RandomSequence sg;
+
+  auto buffer_ptr = reinterpret_cast<uint8_t*>(&buffer[0]);
+
+  sg.configure(header);
+  sg.generate(buffer_ptr, buffer.size());
+  sg.reset();
+  EXPECT_TRUE(sg.validate(buffer_ptr, buffer.size()));
+  EXPECT_FALSE(sg.validate(buffer_ptr, buffer.size()));
+
+  // perform a shift of all the values in the buffer
+  for (unsigned i=0; i<buffer.size()-1; i++)
+  {
+    buffer_ptr[i] = buffer_ptr[i+1]; // NOLINT
+  }
+
+  sg.reset();
+  EXPECT_FALSE(sg.validate(buffer_ptr, buffer.size()));
 }
 
-} // namepsace ska::pst::common::test
+TEST_F(RandomSequenceTest, test_seek) // NOLINT
+{
+  RandomSequence sg;
+  auto buffer_ptr = reinterpret_cast<uint8_t*>(&buffer[0]);
+
+  sg.configure(header);
+  sg.generate(buffer_ptr, buffer.size());
+  sg.reset();
+
+  size_t half_buffer = buffer.size() / 2;
+  sg.seek(half_buffer);
+  EXPECT_TRUE(sg.validate(buffer_ptr + half_buffer, half_buffer)); // NOLINT
+}
+
+} // namespace ska::pst::common::test

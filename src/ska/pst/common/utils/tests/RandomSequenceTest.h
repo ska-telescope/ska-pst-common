@@ -29,33 +29,47 @@
  */
 
 #include <gtest/gtest.h>
+#include <string>
+#include <memory>
+#include <vector>
 
-#ifndef SKA_PST_COMMON_TESTS_RandomSequenceTest_h
-#define SKA_PST_COMMON_TESTS_RandomSequenceTest_h
+#include "ska/pst/common/utils/AsciiHeader.h"
+#include "ska/pst/common/utils/RandomSequence.h"
+
+#ifndef SKA_PST_COMMON_UTILS_TESTS_RandomSequenceTest_h
+#define SKA_PST_COMMON_UTILS_TESTS_RandomSequenceTest_h
 
 namespace ska::pst::common::test {
 
-/**
- * @brief Test the RandomSequence class
- * 
- * @details
- * 
- */
-class RandomSequenceTest : public ::testing::Test
-{
+  /**
+   * @brief Test the RandomSequence class
+   * 
+   * @details
+   * 
+   */
+  class RandomSequenceTest : public ::testing::Test
+  {
     protected:
-        void SetUp() override;
-        void TearDown() override;
+      void SetUp() override;
+
+      void TearDown() override;
 
     public:
-        RandomSequenceTest();
+      RandomSequenceTest();
 
-        ~RandomSequenceTest() = default;
+      ~RandomSequenceTest() = default;
+
+      ska::pst::common::AsciiHeader header;
+
+      std::vector<char> buffer;
 
     private:
-};
 
-} // namespace ska::pst::common:test
+      uint32_t default_buffer_size{1024};
 
-#endif // SKA_PST_COMMON_TESTS_RandomSequenceTest_h
+  };
+
+} // namespace ska::pst::common::test
+
+#endif // SKA_PST_COMMON_UTILS_TESTS_RandomSequenceTest_h
 
