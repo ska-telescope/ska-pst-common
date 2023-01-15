@@ -64,16 +64,30 @@ namespace ska::pst::common {
       void configure(const ska::pst::common::AsciiHeader& config) override;
 
       /**
-       * @brief Fill the data + weights of the next UDP packet
+       * @brief Fill the buffer with a sequence of data
        *
-       * @param buf base memory address of the packet to be filled
+       * @param buf base memory address of the buffer to be filled
        */
-      void fill_data_and_weights (char * buf) override;
+      void fill_data (char * buf, uint64_t size) override;
+
+      /**
+       * @brief Fill the buffer with a sequence of weights
+       *
+       * @param buf base memory address of the buffer to be filled
+       */
+      void fill_weights (char * buf, uint64_t size) override;
+
+      /**
+       * @brief Fill the buffer with a sequence of scale factors
+       *
+       * @param buf base memory address of the buffer to be filled
+       */
+      void fill_scales (char * buf, uint64_t size) override;
 
       /**
        * @brief Verify the data stream in the provided buffer
        * 
-       * @param buffer pointer to buffer containing sequence of received UDP packets
+       * @param buffer pointer to buffer containing sequence of data to be verified
        * @return true if data match expectations
        */
       virtual bool test_data (char * buf, uint64_t size) override;
@@ -81,16 +95,31 @@ namespace ska::pst::common {
       /**
        * @brief Verify the weights stream in the provided buffer
        * 
-       * @param buffer pointer to buffer containing sequence of received UDP packets
+       * @param buffer pointer to buffer containing sequence of weights to be verified
        * @return true if weights match expectations
        */
       virtual bool test_weights (char * buf, uint64_t size) override;
+
+      /**
+       * @brief Verify the scales stream in the provided buffer
+       * 
+       * @param buffer pointer to buffer containing sequence of scale factors to be verified
+       * @return true if scales match expectations
+       */
+      virtual bool test_scales (char * buf, uint64_t size) override;
+
+      /**
+       * @brief Reset all sequences (data, weights, and scales)
+       * The next call to fill_block or test_block will behave as per the first call to these functions.
+       * 
+       */
+      virtual void reset() override;
 
     private:
 
       ska::pst::common::RandomSequence dat_sequence;
       ska::pst::common::RandomSequence wts_sequence;
-
+      ska::pst::common::RandomSequence scl_sequence;
   };
 
 } // ska::pst::common

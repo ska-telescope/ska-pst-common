@@ -41,10 +41,26 @@ void ska::pst::common::RandomDataGenerator::configure(const ska::pst::common::As
   spdlog::debug("ska::pst::common::RandomDataGenerator::configure");
   dat_sequence.configure(config);
   wts_sequence.configure(config);
+  scl_sequence.configure(config);
 
 #ifdef DEBUG
   dat_sequence.verbose = true;
 #endif
+}
+
+void ska::pst::common::RandomDataGenerator::fill_data(char * buf, uint64_t size)
+{
+  dat_sequence.generate(reinterpret_cast<uint8_t*> (buf), size);
+}
+
+void ska::pst::common::RandomDataGenerator::fill_weights(char * buf, uint64_t size)
+{
+  wts_sequence.generate(reinterpret_cast<uint8_t*>(buf), size);
+}
+
+void ska::pst::common::RandomDataGenerator::fill_scales(char * buf, uint64_t size)
+{
+  scl_sequence.generate(reinterpret_cast<uint8_t*>(buf), size);
 }
 
 auto ska::pst::common::RandomDataGenerator::test_data(char * buf, uint64_t size) -> bool
@@ -57,31 +73,14 @@ auto ska::pst::common::RandomDataGenerator::test_weights(char * buf, uint64_t si
   return wts_sequence.validate(reinterpret_cast<uint8_t*>(buf), size);
 }
 
-void ska::pst::common::RandomDataGenerator::fill_data_and_weights(char * buf)
+auto ska::pst::common::RandomDataGenerator::test_scales(char * buf, uint64_t size) -> bool
 {
-  #ifdef DEBUG
-  static unsigned print_count = 0;
+  return scl_sequence.validate(reinterpret_cast<uint8_t*>(buf), size);
+}
 
-  if (print_count < 2)
-  {
-    spdlog::debug("ska::pst::common::RandomDataGenerator::fill_data_and_weights packet_scales_size={}", packet_scales_size);
-    spdlog::debug("ska::pst::common::RandomDataGenerator::fill_data_and_weights packet_scales_offset={}", packet_scales_offset);
-
-    spdlog::debug("ska::pst::common::RandomDataGenerator::fill_data_and_weights packet_weights_size={}", packet_weights_size);
-    spdlog::debug("ska::pst::common::RandomDataGenerator::fill_data_and_weights packet_weights_offset={}", packet_weights_offset);
-
-    spdlog::debug("ska::pst::common::RandomDataGenerator::fill_data_and_weights packet_data_size={}", packet_data_size);
-    spdlog::debug("ska::pst::common::RandomDataGenerator::fill_data_and_weights packet_data_offset={}", packet_data_offset);
-
-    print_count ++;
-  }
-  #endif
-
-  uint8_t* scales = reinterpret_cast<uint8_t*>(buf + packet_scales_offset); // NOLINT
-  uint8_t* weights = reinterpret_cast<uint8_t*>(buf + packet_weights_offset); // NOLINT
-  uint8_t* data = reinterpret_cast<uint8_t*>(buf + packet_data_offset); // NOLINT
-
-  wts_sequence.generate(scales, packet_scales_size);
-  wts_sequence.generate(weights, packet_weights_size);
-  dat_sequence.generate(data, packet_data_size);
+void ska::pst::common::RandomDataGenerator::reset ()
+{
+  dat_sequence.reset();
+  wts_sequence.reset();
+  scl_sequence.reset();
 }

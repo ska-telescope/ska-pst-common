@@ -32,6 +32,7 @@
 #define SKA_PST_COMMON_UTILS_DataGenerator_h
 
 #include "ska/pst/common/utils/AsciiHeader.h"
+#include "ska/pst/common/utils/DataLayout.h"
 
 namespace ska::pst::common {
 
@@ -47,7 +48,7 @@ namespace ska::pst::common {
        * @brief Construct a new DataGenerator object
        * 
        */
-      DataGenerator();
+      DataGenerator() = default;
 
       /**
        * @brief Destroy the DataGenerator object
@@ -63,11 +64,39 @@ namespace ska::pst::common {
       virtual void configure(const ska::pst::common::AsciiHeader& config);
 
       /**
+       * @brief Configure the offsets and sizes of data + weights in each packet
+       *
+       * @param layout DataLayout that defines the packet structure
+       */
+      void copy_layout (const ska::pst::common::DataLayout* layout);
+
+      /**
        * @brief Fill the data + weights of the next UDP packet
        * 
        * @param buf base memory address of the packet to be filled
        */
-      virtual void fill_data_and_weights(char * buf) = 0;
+      virtual void fill_block(char * buf);
+
+      /**
+       * @brief Fill the data stream in the provided buffer
+       * 
+       * @param buffer pointer to buffer to be filled with sequence of data elements
+       */
+      virtual void fill_data(char * buf, uint64_t size) = 0;
+
+      /**
+       * @brief Verify the weights stream in the provided buffer
+       * 
+       * @param buffer pointer to buffer to be filled with sequence of weight elements
+       */
+      virtual void fill_weights(char * buf, uint64_t size) = 0;
+
+      /**
+       * @brief Verify the scales stream in the provided buffer
+       * 
+       * @param buffer pointer to buffer to be filled with sequence of weight elements
+       */
+      virtual void fill_scales(char * buf, uint64_t size) = 0;
 
       /**
        * @brief Verify the data + weights of the received UDP packet
@@ -75,7 +104,7 @@ namespace ska::pst::common {
        * @param buffer pointer to buffer containing received UDP packet
        * @return true if both data and weights match expectations
        */
-      virtual bool test_data_and_weights(char * buf);
+      virtual bool test_block(char * buf);
 
       /**
        * @brief Verify the data stream in the provided buffer
@@ -93,7 +122,25 @@ namespace ska::pst::common {
        */
       virtual bool test_weights(char * buf, uint64_t size) = 0;
 
+      /**
+       * @brief Verify the scales stream in the provided buffer
+       * 
+       * @param buffer pointer to buffer containing sequence of weight elements
+       * @return true if scales match expectations
+       */
+      virtual bool test_scales(char * buf, uint64_t size) = 0;
+
+      /**
+       * @brief Reset all sequences (data, weights, and scales)
+       * The next call to fill_block or test_block will behave as per the first call to these functions.
+       * 
+       */
+      virtual void reset() = 0;
+
     protected:
+
+      //! Layout of each block of data
+      DataLayout layout;
 
       //! size of the header in the UDP packet payload in bytes
       unsigned packet_header_size{0};
@@ -117,7 +164,7 @@ namespace ska::pst::common {
       unsigned packet_scales_offset{0};
 
       //! flag for format configuration, fixed time parameters received
-      bool configured{false};
+      bool layout_configured{false};
 
   };
 
