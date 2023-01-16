@@ -5,6 +5,7 @@ set(public_headers
     Time.h
     Timer.h
     RandomSequence.h
+    DataLayout.h
     DataGenerator.h
     DataGeneratorFactory.h
     RandomDataGenerator.h
