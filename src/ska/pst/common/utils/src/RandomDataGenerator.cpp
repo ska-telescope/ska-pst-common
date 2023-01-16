@@ -60,7 +60,8 @@ void ska::pst::common::RandomDataGenerator::fill_weights(char * buf, uint64_t si
 
 void ska::pst::common::RandomDataGenerator::fill_scales(char * buf, uint64_t size)
 {
-  scl_sequence.generate(reinterpret_cast<uint8_t*>(buf), size);
+  // kludge: currently, weights and scales are written contiguously
+  wts_sequence.generate(reinterpret_cast<uint8_t*>(buf), size);
 }
 
 auto ska::pst::common::RandomDataGenerator::test_data(char * buf, uint64_t size) -> bool
@@ -75,7 +76,8 @@ auto ska::pst::common::RandomDataGenerator::test_weights(char * buf, uint64_t si
 
 auto ska::pst::common::RandomDataGenerator::test_scales(char * buf, uint64_t size) -> bool
 {
-  return scl_sequence.validate(reinterpret_cast<uint8_t*>(buf), size);
+  // kludge: currently, weights and scales are written contiguously
+  return wts_sequence.validate(reinterpret_cast<uint8_t*>(buf), size);
 }
 
 void ska::pst::common::RandomDataGenerator::reset ()

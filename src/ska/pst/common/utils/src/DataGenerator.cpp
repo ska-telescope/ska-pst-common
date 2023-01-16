@@ -45,9 +45,9 @@ auto ska::pst::common::DataGenerator::test_block (char * buf) -> bool
   if (!layout_configured)
     throw std::runtime_error("ska::pst::common::DataGenerator::test_block block layout not configured");
 
-  return test_weights(buf + layout.get_packet_weights_offset(), layout.get_packet_weights_size()) // NOLINT
-     &&  test_data(buf + layout.get_packet_data_offset(), layout.get_packet_data_size()) // NOLINT
-     &&  test_scales(buf + layout.get_packet_scales_offset(), layout.get_packet_scales_size()); // NOLINT
+  return test_scales(buf + layout.get_packet_scales_offset(), layout.get_packet_scales_size()) // NOLINT
+     &&  test_weights(buf + layout.get_packet_weights_offset(), layout.get_packet_weights_size()) // NOLINT
+     &&  test_data(buf + layout.get_packet_data_offset(), layout.get_packet_data_size()); // NOLINT
 }
 
 void ska::pst::common::DataGenerator::fill_block (char * buf)
@@ -55,9 +55,9 @@ void ska::pst::common::DataGenerator::fill_block (char * buf)
   if (!layout_configured)
     throw std::runtime_error("ska::pst::common::DataGenerator::fill_block block layout not configured");
 
+  fill_scales(buf + layout.get_packet_scales_offset(), layout.get_packet_scales_size()); // NOLINT
   fill_weights(buf + layout.get_packet_weights_offset(), layout.get_packet_weights_size()); // NOLINT
   fill_data(buf + layout.get_packet_data_offset(), layout.get_packet_data_size()); // NOLINT
-  fill_scales(buf + layout.get_packet_scales_offset(), layout.get_packet_scales_size()); // NOLINT
 }
 
 void ska::pst::common::DataGenerator::copy_layout (const DataLayout* _layout)
