@@ -256,6 +256,7 @@ namespace test {
 
     log_state_and_command(_applicationmanager, ("{} reset", test_f));
     ASSERT_EQ(RuntimeError, _applicationmanager->get_state());
+    ASSERT_EQ(BeamConfigured, _applicationmanager->get_previous_state());
     EXPECT_CALL(*_applicationmanager, perform_reset());
     _applicationmanager->reset();
     ASSERT_EQ(Idle, _applicationmanager->get_state());
@@ -274,6 +275,7 @@ namespace test {
 
     log_state_and_command(_applicationmanager, ("{} reset", test_f));
     ASSERT_EQ(RuntimeError, _applicationmanager->get_state());
+    ASSERT_EQ(ScanConfigured, _applicationmanager->get_previous_state());
     EXPECT_CALL(*_applicationmanager, perform_reset());
     _applicationmanager->reset();
     ASSERT_EQ(Idle, _applicationmanager->get_state());

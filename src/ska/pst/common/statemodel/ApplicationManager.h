@@ -77,6 +77,14 @@ namespace common {
        */
       void quit();
 
+
+      /**
+       * @brief Get the previous state before being in a RuntimeError state
+       * 
+       * @return State 
+       */
+      State get_previous_state();
+
     protected:
       /**
        * @brief Initialisation callback to be implemented in the child class.

@@ -73,6 +73,7 @@ void ska::pst::common::ApplicationManager::main()
       {
         case ConfigureBeam:
           spdlog::trace("{} {} {} perform_configure_beam", method_name, entity, get_name(cmd));
+          previous_state = Idle;
           perform_configure_beam();
           spdlog::trace("{} {} {} perform_configure_beam done", method_name, entity, get_name(cmd));
           spdlog::trace("{} {} {} set_state(BeamConfigured)", method_name, entity, get_name(cmd));
@@ -82,6 +83,7 @@ void ska::pst::common::ApplicationManager::main()
           
         case ConfigureScan:
           spdlog::trace("{} {} {} perform_configure_scan", method_name, entity, get_name(cmd));
+          previous_state = BeamConfigured;
           perform_configure_scan();
           spdlog::trace("{} {} {} perform_configure_scan done", method_name, entity, get_name(cmd));
           spdlog::trace("{} {} {} set_state(ScanConfigured)", method_name, entity, get_name(cmd));
@@ -91,6 +93,7 @@ void ska::pst::common::ApplicationManager::main()
           
         case StartScan:
           spdlog::trace("{} {} {} perform_start_scan", method_name, entity, get_name(cmd));
+          previous_state = ScanConfigured;
           perform_start_scan();
           scan_thread = std::make_unique<std::thread>(std::thread(&ska::pst::common::ApplicationManager::perform_scan, this));
           spdlog::trace("{} {} {} perform_start_scan done", method_name, entity, get_name(cmd));
@@ -101,6 +104,7 @@ void ska::pst::common::ApplicationManager::main()
           
         case StopScan:
           spdlog::trace("{} {} {} perform_stop_scan", method_name, entity, get_name(cmd));
+          previous_state = Scanning;
           perform_stop_scan();
           scan_thread->join();
           spdlog::trace("{} {} {} perform_stop_scan done", method_name, entity, get_name(cmd));
@@ -111,6 +115,7 @@ void ska::pst::common::ApplicationManager::main()
           
         case DeconfigureScan:
           spdlog::trace("{} {} {} perform_deconfigure_scan", method_name, entity, get_name(cmd));
+          previous_state = ScanConfigured;
           perform_deconfigure_scan();
           spdlog::trace("{} {} {} perform_deconfigure_scan done", method_name, entity, get_name(cmd));
           spdlog::trace("{} {} {} set_state(BeamConfigured)", method_name, entity, get_name(cmd));
@@ -120,6 +125,7 @@ void ska::pst::common::ApplicationManager::main()
 
         case DeconfigureBeam:
           spdlog::trace("{} {} {} perform_deconfigure_beam", method_name, entity, get_name(cmd));
+          previous_state = BeamConfigured;
           perform_deconfigure_beam();
           spdlog::trace("{} {} {} perform_deconfigure_beam done", method_name, entity, get_name(cmd));
           spdlog::trace("{} {} {} set_state(Idle)", method_name, entity, get_name(cmd));
@@ -231,4 +237,9 @@ void ska::pst::common::ApplicationManager::set_exception(std::exception exceptio
 {
   spdlog::debug("ska::pst::common::ApplicationManager::set_exception");
   last_exception = std::make_exception_ptr(exception);
+}
+
+ska::pst::common::State ska::pst::common::ApplicationManager::get_previous_state()
+{
+  return previous_state;
 }
