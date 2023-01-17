@@ -30,6 +30,7 @@
 
 #include "ska/pst/common/utils/DataGeneratorFactory.h"
 #include "ska/pst/common/utils/RandomDataGenerator.h"
+#include "ska/pst/common/utils/SineWaveGenerator.h"
 
 auto ska::pst::common::get_supported_data_generators() -> std::vector<std::string>
 {
@@ -54,6 +55,9 @@ auto ska::pst::common::DataGeneratorFactory(const std::string &name) -> std::sha
   if (name == "Random") {
     return std::shared_ptr<ska::pst::common::DataGenerator>(new ska::pst::common::RandomDataGenerator());
   } 
+  if (name == "Sine") {
+    return std::shared_ptr<ska::pst::common::DataGenerator>(new ska::pst::common::SineWaveGenerator());
+  }
   else {
     throw std::runtime_error("ska::pst::common::DataGeneratorFactory unrecognized name");  
   }
