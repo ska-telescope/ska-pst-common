@@ -28,13 +28,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <cstring>
-#include <cmath>
-#include <stdexcept>
-#include <spdlog/spdlog.h>
-
-// #include "ska/pst/common/definitions.h"
 #include "ska/pst/common/utils/RandomDataGenerator.h"
+#include <spdlog/spdlog.h>
 
 void ska::pst::common::RandomDataGenerator::configure(const ska::pst::common::AsciiHeader& config)
 {

@@ -67,6 +67,7 @@ namespace ska::pst::common {
        * @brief Fill the buffer with a sequence of data
        *
        * @param buf base memory address of the buffer to be filled
+       * @param size number of bytes to be written to buffer
        */
       void fill_data (char * buf, uint64_t size) override;
 
@@ -74,6 +75,7 @@ namespace ska::pst::common {
        * @brief Fill the buffer with a sequence of weights
        *
        * @param buf base memory address of the buffer to be filled
+       * @param size number of bytes to be written to buffer
        */
       void fill_weights (char * buf, uint64_t size) override;
 
@@ -81,6 +83,7 @@ namespace ska::pst::common {
        * @brief Fill the buffer with a sequence of scale factors
        *
        * @param buf base memory address of the buffer to be filled
+       * @param size number of bytes to be written to buffer
        */
       void fill_scales (char * buf, uint64_t size) override;
 
@@ -88,6 +91,8 @@ namespace ska::pst::common {
        * @brief Verify the data stream in the provided buffer
        * 
        * @param buffer pointer to buffer containing sequence of data to be verified
+       * @param size number of bytes in buffer to be tested
+       *
        * @return true if data match expectations
        */
       virtual bool test_data (char * buf, uint64_t size) override;
@@ -96,6 +101,8 @@ namespace ska::pst::common {
        * @brief Verify the weights stream in the provided buffer
        * 
        * @param buffer pointer to buffer containing sequence of weights to be verified
+       * @param size number of bytes in buffer to be tested
+       *
        * @return true if weights match expectations
        */
       virtual bool test_weights (char * buf, uint64_t size) override;
@@ -104,6 +111,8 @@ namespace ska::pst::common {
        * @brief Verify the scales stream in the provided buffer
        * 
        * @param buffer pointer to buffer containing sequence of scale factors to be verified
+       * @param size number of bytes in buffer to be tested
+       *
        * @return true if scales match expectations
        */
       virtual bool test_scales (char * buf, uint64_t size) override;

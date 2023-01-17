@@ -29,8 +29,6 @@
  */
 
 #include <gtest/gtest.h>
-#include <string>
-#include <memory>
 #include <vector>
 
 #include "ska/pst/common/utils/AsciiHeader.h"

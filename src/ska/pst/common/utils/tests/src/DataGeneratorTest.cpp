@@ -29,8 +29,6 @@
  */
 
 #include <spdlog/spdlog.h>
-#include <filesystem>
-#include <vector>
 
 #include "ska/pst/common/testutils/GtestMain.h"
 #include "ska/pst/common/utils/tests/DataGeneratorTest.h"
@@ -66,7 +64,7 @@ TEST_F(DataGeneratorTest, test_layout_not_configured) // NOLINT
   auto buffer_ptr = (&buffer[0]);
 
   dg->configure(header);
-  EXPECT_THROW (dg->fill_block(buffer_ptr), std::runtime_error);
+  EXPECT_THROW (dg->fill_block(buffer_ptr), std::runtime_error); // NOLINT
 }
 
 class TestDataLayout : public ska::pst::common::DataLayout
@@ -75,18 +73,18 @@ class TestDataLayout : public ska::pst::common::DataLayout
   TestDataLayout ()
   {
     unsigned offset = 0;
-    packet_header_size = 100;
+    packet_header_size = 100; // NOLINT
     offset += packet_header_size;
 
-    packet_data_size = 5000;
+    packet_data_size = 5000; // NOLINT
     packet_data_offset = offset;
     offset += packet_data_size;
 
-    packet_weights_size = 500;
+    packet_weights_size = 500; // NOLINT
     packet_weights_offset = offset;
     offset += packet_weights_size;
 
-    packet_scales_size = 50;
+    packet_scales_size = 50; // NOLINT
     packet_scales_offset = offset;
 
     packet_size = offset + packet_scales_size;

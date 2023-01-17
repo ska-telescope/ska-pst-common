@@ -28,11 +28,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <stdexcept>
-#include <algorithm>
-#include <sstream>
-#include <numeric>
-
 #include "ska/pst/common/utils/DataGeneratorFactory.h"
 #include "ska/pst/common/utils/RandomDataGenerator.h"
 

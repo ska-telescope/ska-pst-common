@@ -37,7 +37,7 @@
 namespace ska::pst::common {
 
   /**
-   * @brief Abstract base class for data + weights generation and validation
+   * @brief Abstract base class for data+weights+scales generation and validation
    * 
    */
   class DataGenerator
@@ -57,21 +57,21 @@ namespace ska::pst::common {
       virtual ~DataGenerator() = default;
 
       /**
-       * @brief Configure the streams written to data + weights
+       * @brief Configure the streams written to data+weights+scales
        * 
-       * @param config the keyword/value pairs used to configure the data+weights streams
+       * @param config the keyword/value pairs used to configure the data+weights+scales streams
        */
       virtual void configure(const ska::pst::common::AsciiHeader& config);
 
       /**
-       * @brief Configure the offsets and sizes of data + weights in each packet
+       * @brief Configure the offsets and sizes of data+weights+scales in each packet
        *
        * @param layout DataLayout that defines the packet structure
        */
       void copy_layout (const ska::pst::common::DataLayout* layout);
 
       /**
-       * @brief Fill the data + weights of the next UDP packet
+       * @brief Fill the data+weights+scales of the next UDP packet
        * 
        * @param buf base memory address of the packet to be filled
        */
@@ -85,21 +85,21 @@ namespace ska::pst::common {
       virtual void fill_data(char * buf, uint64_t size) = 0;
 
       /**
-       * @brief Verify the weights stream in the provided buffer
+       * @brief Fill the weights stream in the provided buffer
        * 
        * @param buffer pointer to buffer to be filled with sequence of weight elements
        */
       virtual void fill_weights(char * buf, uint64_t size) = 0;
 
       /**
-       * @brief Verify the scales stream in the provided buffer
+       * @brief Fill the scales stream in the provided buffer
        * 
-       * @param buffer pointer to buffer to be filled with sequence of weight elements
+       * @param buffer pointer to buffer to be filled with sequence of scale elements
        */
       virtual void fill_scales(char * buf, uint64_t size) = 0;
 
       /**
-       * @brief Verify the data + weights of the received UDP packet
+       * @brief Verify the data+weights+scales of the received UDP packet
        * 
        * @param buffer pointer to buffer containing received UDP packet
        * @return true if both data and weights match expectations
@@ -125,7 +125,7 @@ namespace ska::pst::common {
       /**
        * @brief Verify the scales stream in the provided buffer
        * 
-       * @param buffer pointer to buffer containing sequence of weight elements
+       * @param buffer pointer to buffer containing sequence of scale elements
        * @return true if scales match expectations
        */
       virtual bool test_scales(char * buf, uint64_t size) = 0;
@@ -142,30 +142,8 @@ namespace ska::pst::common {
       //! Layout of each block of data
       DataLayout layout;
 
-      //! size of the header in the UDP packet payload in bytes
-      unsigned packet_header_size{0};
-
-      //! size of the data in the UDP packet payload in bytes
-      unsigned packet_data_size{0};
-
-      //! size of the weights in the UDP packet payload in bytes
-      unsigned packet_weights_size{0};
-
-      //! size of the scales in the UDP packet payload in bytes
-      unsigned packet_scales_size{0};
-
-      //! offset from first byte of UDP packet payload for the data
-      unsigned packet_data_offset{0};
-
-      //! offset from first byte of UDP packet payload for the weights
-      unsigned packet_weights_offset{0};
-
-      //! offset from first byte of UDP packet payload for the scales
-      unsigned packet_scales_offset{0};
-
-      //! flag for format configuration, fixed time parameters received
+      //! flag set when block/packet memory layout has been configured
       bool layout_configured{false};
-
   };
 
 } // ska::pst::common

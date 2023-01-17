@@ -96,7 +96,7 @@ namespace ska::pst::common {
       void seek(uint64_t nelements);
 
       //! verbosity flag used during debugging
-      bool verbose;
+      bool verbose{false};
       
     private:
 

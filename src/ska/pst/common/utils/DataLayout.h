@@ -138,4 +138,5 @@ namespace ska::pst::common {
 
 } // ska::pst::common
 
-#endif
+#endif // SKA_PST_COMMON_UTILS_DataLayout_h
+

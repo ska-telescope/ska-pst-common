@@ -42,8 +42,9 @@ void ska::pst::common::DataGenerator::configure(const ska::pst::common::AsciiHea
 
 auto ska::pst::common::DataGenerator::test_block (char * buf) -> bool
 {
-  if (!layout_configured)
+  if (!layout_configured) {
     throw std::runtime_error("ska::pst::common::DataGenerator::test_block block layout not configured");
+  }
 
   return test_scales(buf + layout.get_packet_scales_offset(), layout.get_packet_scales_size()) // NOLINT
      &&  test_weights(buf + layout.get_packet_weights_offset(), layout.get_packet_weights_size()) // NOLINT
@@ -52,8 +53,9 @@ auto ska::pst::common::DataGenerator::test_block (char * buf) -> bool
 
 void ska::pst::common::DataGenerator::fill_block (char * buf)
 {
-  if (!layout_configured)
+  if (!layout_configured) {
     throw std::runtime_error("ska::pst::common::DataGenerator::fill_block block layout not configured");
+  }
 
   fill_scales(buf + layout.get_packet_scales_offset(), layout.get_packet_scales_size()); // NOLINT
   fill_weights(buf + layout.get_packet_weights_offset(), layout.get_packet_weights_size()); // NOLINT

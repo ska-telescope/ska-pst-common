@@ -236,7 +236,7 @@ auto ska::pst::common::RandomSequence::search_expected_sequence_for_buffer (uint
   }
 
   spdlog::warn("ska::pst::common::RandomSequence::search_expected_sequence_for_buffer match not found in first {} samples of expected sequence", max_offset);
-  spdlog::warn("ska::pst::common::RandomSequence::validate longest match={} out of {} buffer samples", longest_match, bufsz);
+  spdlog::warn("ska::pst::common::RandomSequence::search_expected_sequence_for_buffer longest match={} out of {} buffer samples", longest_match, bufsz);
 
   return -1;
 }

@@ -29,8 +29,6 @@
  */
 
 #include <spdlog/spdlog.h>
-#include <filesystem>
-#include <vector>
 
 #include "ska/pst/common/testutils/GtestMain.h"
 #include "ska/pst/common/utils/tests/RandomSequenceTest.h"
