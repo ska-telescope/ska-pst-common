@@ -42,11 +42,6 @@ auto main(int argc, char* argv[]) -> int
 
 namespace ska::pst::common::test {
 
-DataGeneratorTest::DataGeneratorTest()
-    : ::testing::Test()
-{
-}
-
 void DataGeneratorTest::SetUp()
 {
   header.load_from_file(test_data_file("data_header.txt"));
@@ -57,14 +52,14 @@ void DataGeneratorTest::TearDown()
 {
 }
 
-TEST_F(DataGeneratorTest, test_layout_not_configured) // NOLINT
+TEST_P(DataGeneratorTest, test_layout_not_configured) // NOLINT
 {
-  std::shared_ptr<ska::pst::common::DataGenerator> dg = DataGeneratorFactory ("Random");
+  std::shared_ptr<ska::pst::common::DataGenerator> dg = DataGeneratorFactory(GetParam());
 
   auto buffer_ptr = (&buffer[0]);
 
   dg->configure(header);
-  EXPECT_THROW (dg->fill_block(buffer_ptr), std::runtime_error); // NOLINT
+  EXPECT_THROW(dg->fill_block(buffer_ptr), std::runtime_error); // NOLINT
 }
 
 class TestDataLayout : public ska::pst::common::DataLayout
@@ -91,9 +86,9 @@ class TestDataLayout : public ska::pst::common::DataLayout
   }
 };
 
-TEST_F(DataGeneratorTest, test_generate_validate) // NOLINT
+TEST_P(DataGeneratorTest, test_generate_validate) // NOLINT
 {
-  std::shared_ptr<ska::pst::common::DataGenerator> dg = DataGeneratorFactory ("Random");
+  std::shared_ptr<ska::pst::common::DataGenerator> dg = DataGeneratorFactory(GetParam());
   dg->configure(header);
 
   TestDataLayout layout;
@@ -115,5 +110,9 @@ TEST_F(DataGeneratorTest, test_generate_validate) // NOLINT
   dg->reset();
   EXPECT_FALSE(dg->test_block(buffer_ptr));
 }
+
+INSTANTIATE_TEST_SUITE_P(SignalGenerators,
+                         DataGeneratorTest,
+                         testing::Values("Random", "Sine"));
 
 } // namespace ska::pst::common::test
