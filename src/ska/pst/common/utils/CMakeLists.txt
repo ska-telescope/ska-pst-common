@@ -4,12 +4,22 @@ set(public_headers
     Endian.h
     Time.h
     Timer.h
+    RandomSequence.h
+    DataLayout.h
+    DataGenerator.h
+    DataGeneratorFactory.h
+    RandomDataGenerator.h
 )
 
 set(sources
     src/AsciiHeader.cpp
     src/Time.cpp
-    src/Timer.cpp)
+    src/Timer.cpp
+    src/RandomSequence.cpp
+    src/DataGenerator.cpp
+    src/DataGeneratorFactory.cpp
+    src/RandomDataGenerator.cpp
+)
 
 set(private_headers
 )
