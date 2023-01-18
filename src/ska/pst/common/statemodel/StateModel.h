@@ -280,6 +280,27 @@ namespace common {
       virtual void validate_start_scan(const AsciiHeader& config) = 0;
 
       /**
+       * @brief Set the beam config object
+       * 
+       * @param config 
+       */
+      void set_beam_config(const AsciiHeader &config);
+
+      /**
+       * @brief Set the scan config object
+       * 
+       * @param config 
+       */
+      void set_scan_config(const AsciiHeader &config);
+
+      /**
+       * @brief Set the startscan config object
+       * 
+       * @param config 
+       */
+      void set_startscan_config(const AsciiHeader &config);
+
+      /**
        * @brief Set the command used as a reference for transitioning between states.
        *
        * @param command command to be set.
@@ -303,6 +324,15 @@ namespace common {
       //! Current state of the state model
       State state{Unknown};
 
+      //! Beam configuration
+      AsciiHeader beam_config;
+
+      //! Scan configuration
+      AsciiHeader scan_config;
+
+      //! StartScan configuration
+      AsciiHeader startscan_config;
+
       //! Reference to the most recently experienced exception
       std::exception_ptr last_exception{nullptr};
 
@@ -319,36 +349,6 @@ namespace common {
       std::condition_variable command_cond;
 
     private:
-      /**
-       * @brief Set the beam config object
-       * 
-       * @param config 
-       */
-      void set_beam_config(const AsciiHeader &config);
-
-      /**
-       * @brief Set the scan config object
-       * 
-       * @param config 
-       */
-      void set_scan_config(const AsciiHeader &config);
-
-      /**
-       * @brief Set the startscan config object
-       * 
-       * @param config 
-       */
-      void set_startscan_config(const AsciiHeader &config);
-
-      //! Beam configuration
-      AsciiHeader beam_config;
-
-      //! Scan configuration
-      AsciiHeader scan_config;
-
-      //! StartScan configuration
-      AsciiHeader startscan_config;
-
 
   };
 
