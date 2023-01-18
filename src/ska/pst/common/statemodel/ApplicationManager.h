@@ -160,6 +160,7 @@ namespace common {
        */
       void set_state(State state);
 
+
     private:
 
       /**

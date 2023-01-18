@@ -229,6 +229,31 @@ namespace common {
        */
       std::string get_name(State state) { return state_names[state]; }
 
+
+      /**
+       * @brief Return the currently assigned beam resources.
+       *
+       */
+      virtual ska::pst::common::AsciiHeader& get_beam_configuration() {
+        return beam_config;
+      }
+
+      /**
+       * @brief Return the current scan configuration.
+       *
+       */
+      virtual ska::pst::common::AsciiHeader& get_scan_configuration() {
+        return scan_config;
+      }
+
+      /**
+       * @brief Return the current scan configuration.
+       *
+       */
+      virtual ska::pst::common::AsciiHeader& get_startscan_configuration() {
+        return startscan_config;
+      }
+
     protected:
       /**
        * @brief Validates Beam configuration. Specific validation errors must be set when throwing exceptions.
@@ -294,6 +319,35 @@ namespace common {
       std::condition_variable command_cond;
 
     private:
+      /**
+       * @brief Set the beam config object
+       * 
+       * @param config 
+       */
+      void set_beam_config(const AsciiHeader &config);
+
+      /**
+       * @brief Set the scan config object
+       * 
+       * @param config 
+       */
+      void set_scan_config(const AsciiHeader &config);
+
+      /**
+       * @brief Set the startscan config object
+       * 
+       * @param config 
+       */
+      void set_startscan_config(const AsciiHeader &config);
+
+      //! Beam configuration
+      AsciiHeader beam_config;
+
+      //! Scan configuration
+      AsciiHeader scan_config;
+
+      //! StartScan configuration
+      AsciiHeader startscan_config;
 
 
   };

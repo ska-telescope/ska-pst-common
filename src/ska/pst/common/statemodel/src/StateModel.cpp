@@ -46,6 +46,7 @@ void ska::pst::common::StateModel::configure_beam(const AsciiHeader& config)
 {
   SPDLOG_DEBUG("ska::pst::common::StateModel::configure_beam()");
   validate_configure_beam(config);
+  set_beam_config(config);
   set_command(ConfigureBeam);
   wait_for_state(BeamConfigured);
 }
@@ -54,6 +55,7 @@ void ska::pst::common::StateModel::configure_scan(const AsciiHeader& config)
 {
   SPDLOG_DEBUG("ska::pst::common::StateModel::configure_scan()");
   validate_configure_scan(config);
+  set_scan_config(config);
   set_command(ConfigureScan);
   wait_for_state(ScanConfigured);
 }
@@ -62,6 +64,7 @@ void ska::pst::common::StateModel::start_scan(const AsciiHeader& config)
 {
   SPDLOG_DEBUG("ska::pst::common::StateModel::start_scan()");
   validate_start_scan(config);
+  set_startscan_config(config);
   set_command(StartScan);
   wait_for_state(Scanning);
 }
@@ -143,4 +146,22 @@ void ska::pst::common::StateModel::wait_for_state(ska::pst::common::State requir
     }
   }
   SPDLOG_TRACE("ska::pst::common::StateModel::wait_for_state done");
+}
+
+void ska::pst::common::StateModel::set_beam_config(const AsciiHeader &config)
+{
+  spdlog::debug("ska::pst::common::StateModel::set_beam_config");
+  beam_config.clone(config);
+}
+
+void ska::pst::common::StateModel::set_scan_config(const AsciiHeader &config)
+{
+  spdlog::debug("ska::pst::common::StateModel::set_scan_config done");
+  scan_config.clone(config);
+}
+
+void ska::pst::common::StateModel::set_startscan_config(const AsciiHeader &config)
+{
+  spdlog::debug("ska::pst::common::StateModel::set_startscan_config done");
+  startscan_config.clone(config);
 }

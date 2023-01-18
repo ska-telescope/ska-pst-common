@@ -333,6 +333,47 @@ namespace test {
     _applicationmanager->reset();
     ASSERT_EQ(Idle, _applicationmanager->get_state());
   }
+
+  TEST_F(ApplicationManagerTest, test_set_config) // NOLINT
+  {
+    std::string test_f;
+    test_f="ska::pst::common::test::ApplicationManagerTest::test_set_config";
+
+    spdlog::trace(test_f);
+    beam_config.set_val("beam_config-FOO", "BAR");
+    scan_config.set_val("scan_config-FOO", "BAR");
+    startscan_config.set_val("startscan_config-FOO", "BAR");
+
+    // perform_configure_beam
+    log_state_and_command(_applicationmanager, ("{} perform_configure_beam", test_f));
+    EXPECT_CALL(*_applicationmanager, perform_configure_beam());
+    _applicationmanager->configure_beam(beam_config);
+    ASSERT_EQ(BeamConfigured, _applicationmanager->get_state());
+    ska::pst::common::AsciiHeader new_beam_config;
+    new_beam_config = _applicationmanager->get_beam_configuration();
+    ASSERT_EQ(beam_config.get_val("beam_config-FOO"), new_beam_config.get_val("beam_config-FOO"));
+    
+    // perform_configure_scan
+    log_state_and_command(_applicationmanager, ("{} perform_configure_scan", test_f));
+    EXPECT_CALL(*_applicationmanager, perform_configure_scan());
+    _applicationmanager->configure_scan(scan_config);
+    ASSERT_EQ(ScanConfigured, _applicationmanager->get_state());
+    ska::pst::common::AsciiHeader new_scan_config;
+    new_scan_config = _applicationmanager->get_scan_configuration();
+    ASSERT_EQ(scan_config.get_val("scan_config-FOO"), new_scan_config.get_val("scan_config-FOO"));
+
+    // perform_scan
+    log_state_and_command(_applicationmanager, ("{} perform_scan", test_f));
+    EXPECT_CALL(*_applicationmanager, perform_start_scan());
+    EXPECT_CALL(*_applicationmanager, perform_scan());
+    _applicationmanager->start_scan(startscan_config);
+    ASSERT_EQ(Scanning, _applicationmanager->get_state());
+    ska::pst::common::AsciiHeader new_startscan_config;
+    new_startscan_config = _applicationmanager->get_startscan_configuration();
+    ASSERT_EQ(startscan_config.get_val("startscan_config-FOO"), new_startscan_config.get_val("startscan_config-FOO"));
+
+  }
+
 } // test
 } // common
 } // pst
