@@ -58,7 +58,7 @@ auto ska::pst::common::DataGeneratorFactory(const std::string &name) -> std::sha
   if (name == "Sine") {
     return std::shared_ptr<ska::pst::common::DataGenerator>(new ska::pst::common::SineWaveGenerator());
   }
-  else {
-    throw std::runtime_error("ska::pst::common::DataGeneratorFactory unrecognized name");  
-  }
+
+  throw std::runtime_error("ska::pst::common::DataGeneratorFactory unrecognized name");  
 }
+
