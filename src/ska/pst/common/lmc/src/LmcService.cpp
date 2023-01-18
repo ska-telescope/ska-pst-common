@@ -37,8 +37,8 @@
 #include <spdlog/spdlog.h>
 
 void ska::pst::common::LmcService::start() {
-    spdlog::trace("ska::pst::common::LmcService::start()");
-    spdlog::info("Starting gRPC LMC server '{}'", _service_name);
+    SPDLOG_TRACE("ska::pst::common::LmcService::start()");
+    SPDLOG_INFO("Starting gRPC LMC server '{}'", _service_name);
     grpc::internal::MutexLock lock(&_mu);
     if (_started) {
       return;
@@ -53,49 +53,49 @@ void ska::pst::common::LmcService::start() {
       _cond.Wait(&_mu);
     }
     _server_ready = false;
-    spdlog::info("Started gRPC LMC server '{}' on port {}", _service_name, _port);
+    SPDLOG_INFO("Started gRPC LMC server '{}' on port {}", _service_name, _port);
 }
 
 void ska::pst::common::LmcService::serve() {
     // this need to be on a background daemon thread.
-    spdlog::trace("ska::pst::common::LmcService::serve()");
+    SPDLOG_TRACE("ska::pst::common::LmcService::serve()");
     std::string server_address("0.0.0.0:");
     server_address.append(std::to_string(_port));
-    spdlog::trace("ska::pst::common::LmcService::serve setting up listen on port {}", _port);
+    SPDLOG_TRACE("ska::pst::common::LmcService::serve setting up listen on port {}", _port);
 
     try
     {
         grpc::ServerBuilder builder;
-        spdlog::trace("ska::pst::common::LmcService::serve adding TCP listener {} to service", server_address);
+        SPDLOG_TRACE("ska::pst::common::LmcService::serve adding TCP listener {} to service", server_address);
 
-        spdlog::trace("ska::pst::common::LmcService::serve creating listener credentials");
+        SPDLOG_TRACE("ska::pst::common::LmcService::serve creating listener credentials");
         auto credentials = grpc::InsecureServerCredentials();
-        spdlog::trace("ska::pst::common::LmcService::serve created credentials");
+        SPDLOG_TRACE("ska::pst::common::LmcService::serve created credentials");
 
-        spdlog::trace("ska::pst::common::LmcService::serve creating listener");
+        SPDLOG_TRACE("ska::pst::common::LmcService::serve creating listener");
         builder.AddListeningPort(server_address, credentials, &_port);
-        spdlog::trace("ska::pst::common::LmcService::serve listener created");
+        SPDLOG_TRACE("ska::pst::common::LmcService::serve listener created");
 
-        spdlog::trace("ska::pst::common::LmcService::serve registering service.");
+        SPDLOG_TRACE("ska::pst::common::LmcService::serve registering service.");
         builder.RegisterService(this);
 
-        spdlog::trace("ska::pst::common::LmcService::serve starting server");
+        SPDLOG_TRACE("ska::pst::common::LmcService::serve starting server");
         server = builder.BuildAndStart();
-        spdlog::trace("ska::pst::common::LmcService::serve listening on port {}", _port);
+        SPDLOG_TRACE("ska::pst::common::LmcService::serve listening on port {}", _port);
 
         grpc::internal::MutexLock lock(&_mu);
         _server_ready = true;
         _cond.Signal();
     } catch (std::exception& ex) {
-        spdlog::error("Error {} raised during startin up of gRPC service", ex.what());
+        SPDLOG_ERROR("Error {} raised during startin up of gRPC service", ex.what());
         exit(1);
     }
 
 }
 
 void ska::pst::common::LmcService::stop() {
-    spdlog::trace("ska::pst::common::LmcService::stop()");
-    spdlog::info("Stopping gRPC LMC server '{}'", _service_name);
+    SPDLOG_TRACE("ska::pst::common::LmcService::stop()");
+    SPDLOG_INFO("Stopping gRPC LMC server '{}'", _service_name);
     grpc::internal::MutexLock lock(&_mu);
     if (!_started) {
       return;
@@ -124,8 +124,8 @@ auto ska::pst::common::LmcService::connect(
     ska::pst::lmc::ConnectionResponse* /*response*/
 ) -> grpc::Status
 {
-    spdlog::trace("ska::pst::common::LmcService::connect()");
-    spdlog::info("gRPC LMC connection received from {}", request->client_id());
+    SPDLOG_TRACE("ska::pst::common::LmcService::connect()");
+    SPDLOG_INFO("gRPC LMC connection received from {}", request->client_id());
 
     return grpc::Status::OK;
 }
@@ -136,7 +136,7 @@ auto ska::pst::common::LmcService::configure_beam(
     ska::pst::lmc::ConfigureBeamResponse* /*response*/
 ) -> grpc::Status
 {
-    spdlog::trace("ska::pst::common::LmcService::configure_beam()");
+    SPDLOG_TRACE("ska::pst::common::LmcService::configure_beam()");
 
     // check if handler has already have had beam configured
     if (handler->is_beam_configured()) {
@@ -182,7 +182,7 @@ auto ska::pst::common::LmcService::deconfigure_beam(
     ska::pst::lmc::DeconfigureBeamResponse* /*response*/
 ) -> grpc::Status
 {
-    spdlog::trace("ska::pst::common::LmcService::deconfigure_beam()");
+    SPDLOG_TRACE("ska::pst::common::LmcService::deconfigure_beam()");
 
     // check if handler has already have had beam configured
     if (!handler->is_beam_configured()) {
@@ -213,7 +213,7 @@ auto ska::pst::common::LmcService::get_beam_configuration(
     ska::pst::lmc::GetBeamConfigurationResponse* response
 ) -> grpc::Status
 {
-    spdlog::trace("ska::pst::common::LmcService::get_beam_configuration()");
+    SPDLOG_TRACE("ska::pst::common::LmcService::get_beam_configuration()");
     if (!handler->is_beam_configured())
     {
         spdlog::warn("Received request to get beam configuration when no beam configured.");
@@ -354,7 +354,7 @@ auto ska::pst::common::LmcService::start_scan(
     ska::pst::lmc::StartScanResponse* /*response*/
 ) -> grpc::Status
 {
-    spdlog::trace("ska::pst::common::LmcService::scan()");
+    SPDLOG_TRACE("ska::pst::common::LmcService::scan()");
     if (_state == ska::pst::lmc::ObsState::SCANNING) {
         spdlog::warn("Received scan request but already in SCANNING state.");
         ska::pst::lmc::Status status;
@@ -395,7 +395,7 @@ auto ska::pst::common::LmcService::stop_scan(
     ska::pst::lmc::StopScanResponse* /*response*/
 ) -> grpc::Status
 {
-    spdlog::trace("ska::pst::common::LmcService::stop_scan()");
+    SPDLOG_TRACE("ska::pst::common::LmcService::stop_scan()");
     if (_state != ska::pst::lmc::ObsState::SCANNING) {
         auto curr_state_name = ska::pst::lmc::ObsState_Name(_state);
         spdlog::warn("Received stop scan request but not in SCANNING state. Currently in {} state.", curr_state_name);
@@ -428,7 +428,7 @@ auto ska::pst::common::LmcService::get_state(
     ska::pst::lmc::GetStateResponse* response
 ) -> grpc::Status
 {
-    spdlog::trace("ska::pst::common::LmcService::get_state()");
+    SPDLOG_TRACE("ska::pst::common::LmcService::get_state()");
     response->set_state(_state);
     return grpc::Status::OK;
 }
@@ -466,17 +466,17 @@ auto ska::pst::common::LmcService::monitor(
             return _state != ska::pst::lmc::ObsState::SCANNING;
         }))
         {
-            spdlog::info("No longer in SCANNING state. Exiting monitor");
+            SPDLOG_INFO("No longer in SCANNING state. Exiting monitor");
             break;
         }
-        spdlog::trace("Getting latest monitor data");
+        SPDLOG_TRACE("Getting latest monitor data");
 
         ska::pst::lmc::MonitorResponse response;
         auto *monitor_data = response.mutable_monitor_data();
         handler->get_monitor_data(monitor_data);
 
         if (context->IsCancelled()) {
-            spdlog::info("Monitoring context cancelled. Exiting monitor.");
+            SPDLOG_INFO("Monitoring context cancelled. Exiting monitor.");
             break;
         }
         if (!writer->Write(response)) {

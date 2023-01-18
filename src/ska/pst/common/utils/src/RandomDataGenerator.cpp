@@ -33,7 +33,7 @@
 
 void ska::pst::common::RandomDataGenerator::configure(const ska::pst::common::AsciiHeader& config)
 {
-  spdlog::debug("ska::pst::common::RandomDataGenerator::configure");
+  SPDLOG_DEBUG("ska::pst::common::RandomDataGenerator::configure");
   dat_sequence.configure(config);
   wts_sequence.configure(config);
   scl_sequence.configure(config);

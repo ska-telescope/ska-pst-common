@@ -39,12 +39,12 @@
 
 ska::pst::common::StateModel::StateModel()
 {
-  spdlog::debug("ska::pst::common::StateModel::StateModel()");
+  SPDLOG_DEBUG("ska::pst::common::StateModel::StateModel()");
 }
 
 void ska::pst::common::StateModel::configure_beam(const AsciiHeader& config)
 {
-  spdlog::debug("ska::pst::common::StateModel::configure_beam()");
+  SPDLOG_DEBUG("ska::pst::common::StateModel::configure_beam()");
   validate_configure_beam(config);
   set_command(ConfigureBeam);
   wait_for_state(BeamConfigured);
@@ -52,7 +52,7 @@ void ska::pst::common::StateModel::configure_beam(const AsciiHeader& config)
 
 void ska::pst::common::StateModel::configure_scan(const AsciiHeader& config)
 {
-  spdlog::debug("ska::pst::common::StateModel::configure_scan()");
+  SPDLOG_DEBUG("ska::pst::common::StateModel::configure_scan()");
   validate_configure_scan(config);
   set_command(ConfigureScan);
   wait_for_state(ScanConfigured);
@@ -60,7 +60,7 @@ void ska::pst::common::StateModel::configure_scan(const AsciiHeader& config)
 
 void ska::pst::common::StateModel::start_scan(const AsciiHeader& config)
 {
-  spdlog::debug("ska::pst::common::StateModel::start_scan()");
+  SPDLOG_DEBUG("ska::pst::common::StateModel::start_scan()");
   validate_start_scan(config);
   set_command(StartScan);
   wait_for_state(Scanning);
@@ -68,35 +68,35 @@ void ska::pst::common::StateModel::start_scan(const AsciiHeader& config)
 
 void ska::pst::common::StateModel::stop_scan()
 {
-  spdlog::debug("ska::pst::common::StateModel::stop_scan()");
+  SPDLOG_DEBUG("ska::pst::common::StateModel::stop_scan()");
   set_command(StopScan);
   wait_for_state(ScanConfigured);
 }
 
 void ska::pst::common::StateModel::deconfigure_scan()
 {
-  spdlog::debug("ska::pst::common::StateModel::deconfigure_scan()");
+  SPDLOG_DEBUG("ska::pst::common::StateModel::deconfigure_scan()");
   set_command(DeconfigureScan);
   wait_for_state(BeamConfigured);
 }
 
 void ska::pst::common::StateModel::deconfigure_beam()
 {
-  spdlog::debug("ska::pst::common::StateModel::deconfigure_beam()");
+  SPDLOG_DEBUG("ska::pst::common::StateModel::deconfigure_beam()");
   set_command(DeconfigureBeam);
   wait_for_state(Idle);
 }
 
 void ska::pst::common::StateModel::reset()
 {
-  spdlog::debug("ska::pst::common::StateModel::reset()");
+  SPDLOG_DEBUG("ska::pst::common::StateModel::reset()");
   set_command(Reset);
   wait_for_state(Idle);
 }
 
 void ska::pst::common::StateModel::set_command(Command required_cmd)
 {
-  spdlog::debug("ska::pst::common::StateModel::set_command() required_cmd={}", get_name(required_cmd));
+  SPDLOG_DEBUG("ska::pst::common::StateModel::set_command() required_cmd={}", get_name(required_cmd));
 
   ska::pst::common::Command cmd = required_cmd;
   {
@@ -118,7 +118,7 @@ void ska::pst::common::StateModel::set_command(Command required_cmd)
     }
     else 
     {
-      spdlog::info("ska::pst::common::StateModel::set_command command updated cmd={}", get_name(cmd));
+      SPDLOG_INFO("ska::pst::common::StateModel::set_command command updated cmd={}", get_name(cmd));
       command = cmd;
     }
   }
@@ -128,19 +128,19 @@ void ska::pst::common::StateModel::set_command(Command required_cmd)
 void ska::pst::common::StateModel::wait_for_state(ska::pst::common::State required_state)
 {
   
-  spdlog::trace("ska::pst::common::StateModel::wait_for_state state={} required={}",state_names[state] , state_names[required_state]);
+  SPDLOG_TRACE("ska::pst::common::StateModel::wait_for_state state={} required={}",state_names[state] , state_names[required_state]);
 
   ska::pst::common::State state_required = required_state;
   {
     std::unique_lock<std::mutex> control_lock(state_mutex);
     state_cond.wait(control_lock, [&]{return (state == state_required);});
     bool success = (state == state_required);
-    spdlog::trace("ska::pst::common::StateModel::wait_for_state state={} required={}",state_names[state] , state_names[state_required]);
+    SPDLOG_TRACE("ska::pst::common::StateModel::wait_for_state state={} required={}",state_names[state] , state_names[state_required]);
     state_cond.notify_one();
     if (!success)
     {
-      spdlog::debug("ska::pst::common::StateModel::wait_for_state raise_exception()");
+      SPDLOG_DEBUG("ska::pst::common::StateModel::wait_for_state raise_exception()");
     }
   }
-  spdlog::trace("ska::pst::common::StateModel::wait_for_state done");
+  SPDLOG_TRACE("ska::pst::common::StateModel::wait_for_state done");
 }

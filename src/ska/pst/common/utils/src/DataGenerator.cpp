@@ -37,7 +37,7 @@
 
 void ska::pst::common::DataGenerator::configure(const ska::pst::common::AsciiHeader& /* config */)
 {
-  spdlog::debug("ska::pst::common::DataGenerator::configure does nothing");
+  SPDLOG_DEBUG("ska::pst::common::DataGenerator::configure does nothing");
 }
 
 auto ska::pst::common::DataGenerator::test_block (char * buf) -> bool
@@ -66,14 +66,14 @@ void ska::pst::common::DataGenerator::copy_layout (const DataLayout* _layout)
 {
   layout = *_layout;
 
-  spdlog::debug("ska::pst::common::DataGenerator::configure_format packet_weights_size={}", layout.get_packet_weights_size());
-  spdlog::debug("ska::pst::common::DataGenerator::configure_format packet_weights_offset={}", layout.get_packet_weights_offset());
+  SPDLOG_DEBUG("ska::pst::common::DataGenerator::configure_format packet_weights_size={}", layout.get_packet_weights_size());
+  SPDLOG_DEBUG("ska::pst::common::DataGenerator::configure_format packet_weights_offset={}", layout.get_packet_weights_offset());
 
-  spdlog::debug("ska::pst::common::DataGenerator::configure_format packet_scales_size={}", layout.get_packet_scales_size());
-  spdlog::debug("ska::pst::common::DataGenerator::configure_format packet_scales_offset={}", layout.get_packet_scales_offset());
+  SPDLOG_DEBUG("ska::pst::common::DataGenerator::configure_format packet_scales_size={}", layout.get_packet_scales_size());
+  SPDLOG_DEBUG("ska::pst::common::DataGenerator::configure_format packet_scales_offset={}", layout.get_packet_scales_offset());
 
-  spdlog::debug("ska::pst::common::DataGenerator::configure_format packet_data_size={}", layout.get_packet_data_size());
-  spdlog::debug("ska::pst::common::DataGenerator::configure_format packet_data_offset={}", layout.get_packet_data_offset());
+  SPDLOG_DEBUG("ska::pst::common::DataGenerator::configure_format packet_data_size={}", layout.get_packet_data_size());
+  SPDLOG_DEBUG("ska::pst::common::DataGenerator::configure_format packet_data_offset={}", layout.get_packet_data_offset());
 
   layout_configured = true;
 }

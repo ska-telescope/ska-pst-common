@@ -131,11 +131,11 @@ auto ska::pst::common::AsciiHeader::get_header_length() const -> size_t
 
 void ska::pst::common::AsciiHeader::load_from_file(const std::string &filename)
 {
-  spdlog::debug("ska::pst::common::AsciiHeader::load_from_file filename={}", filename);
+  SPDLOG_DEBUG("ska::pst::common::AsciiHeader::load_from_file filename={}", filename);
   std::ifstream header_file(filename);
   if (!header_file.good())
   {
-    spdlog::error("ska::pst::common::AsciiHeader::load_from_file could not open file for reading");
+    SPDLOG_ERROR("ska::pst::common::AsciiHeader::load_from_file could not open file for reading");
     throw std::runtime_error("ska::pst::common::AsciiHeader::load_from_file could not open file for reading");
   }
 
@@ -176,7 +176,7 @@ void ska::pst::common::AsciiHeader::load_from_line(const std::string &line)
   {
     return;
   }
-  spdlog::trace("ska::pst::common::AsciiHeader::load_from_line set_val({}, {})", key, value);
+  SPDLOG_TRACE("ska::pst::common::AsciiHeader::load_from_line set_val({}, {})", key, value);
   set_val(key, value);
 }
 
@@ -344,7 +344,7 @@ auto ska::pst::common::AsciiHeader::compute_bytes_per_second() const -> double
   double nbit_per_second = nbit_per_sample * nsamp_per_second;
   double bytes_ps = nbit_per_second / nbits_per_byte;
 
-  spdlog::debug("ska::pst::common::AsciiHeader::compute_bytes_per_second bytes_ps={}", bytes_ps);
+  SPDLOG_DEBUG("ska::pst::common::AsciiHeader::compute_bytes_per_second bytes_ps={}", bytes_ps);
   return bytes_ps;
 }
 

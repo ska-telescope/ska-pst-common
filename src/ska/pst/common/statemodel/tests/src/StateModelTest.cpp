@@ -56,8 +56,8 @@ StateModelTest::StateModelTest()
 
 void StateModelTest::SetUp()
 {
-    spdlog::trace("StateModelTest::SetUp()");
-    spdlog::trace("StateModelTest::SetUp() Load configurations");
+    SPDLOG_TRACE("StateModelTest::SetUp()");
+    SPDLOG_TRACE("StateModelTest::SetUp() Load configurations");
     // beam_config.load_from_file(test_data_file("beam_config.txt"));
     // scan_config.load_from_file(test_data_file("scan_config.txt"));
 
@@ -89,12 +89,12 @@ void StateModelTest::_set_state(State state)
 
 TEST_F(StateModelTest, test_construct_delete) // NOLINT
 {
-    spdlog::trace("ska::pst::common::test::StateModelTest::test_construct_delete");
+    SPDLOG_TRACE("ska::pst::common::test::StateModelTest::test_construct_delete");
 }
 
 TEST_F(StateModelTest, test_set_command) // NOLINT
 {
-    spdlog::trace("ska::pst::common::test::StateModelTest::test_set_command");
+    SPDLOG_TRACE("ska::pst::common::test::StateModelTest::test_set_command");
     assert_set_command(ConfigureBeam);
     assert_set_command(ConfigureScan);
     assert_set_command(StartScan);
@@ -107,7 +107,7 @@ TEST_F(StateModelTest, test_set_command) // NOLINT
 
 TEST_F(StateModelTest, test_configure_beam) // NOLINT
 {
-    spdlog::trace("ska::pst::common::test::StateModelTest::test_configure_beam");
+    SPDLOG_TRACE("ska::pst::common::test::StateModelTest::test_configure_beam");
     _set_state(Idle);
     // _statemodel->configure_beam(beam_config); // blocking call
     // assert_command(ConfigureBeam);
@@ -136,7 +136,7 @@ TEST_F(StateModelTest, test_configure_beam) // NOLINT
 
 TEST_F(StateModelTest, test_configure_scan) // NOLINT
 {
-    spdlog::trace("ska::pst::common::test::StateModelTest::test_configure_scan");
+    SPDLOG_TRACE("ska::pst::common::test::StateModelTest::test_configure_scan");
     EXPECT_CALL(*_statemodel,set_state(BeamConfigured));
     _statemodel->set_state(BeamConfigured);
     // _statemodel->configure_scan(scan_config); // blocking call
@@ -165,7 +165,7 @@ TEST_F(StateModelTest, test_configure_scan) // NOLINT
 
 TEST_F(StateModelTest, test_start_scan) // NOLINT
 {
-    spdlog::trace("ska::pst::common::test::StateModelTest::test_start_scan");
+    SPDLOG_TRACE("ska::pst::common::test::StateModelTest::test_start_scan");
     EXPECT_CALL(*_statemodel,set_state(ScanConfigured));
     _statemodel->set_state(ScanConfigured);
     // _statemodel->start_scan(startscan_config); // blocking call
@@ -194,7 +194,7 @@ TEST_F(StateModelTest, test_start_scan) // NOLINT
 
 TEST_F(StateModelTest, test_stop_scan) // NOLINT
 {
-    spdlog::trace("ska::pst::common::test::StateModelTest::test_stop_scan");
+    SPDLOG_TRACE("ska::pst::common::test::StateModelTest::test_stop_scan");
     EXPECT_CALL(*_statemodel,set_state(Scanning));
     _statemodel->set_state(Scanning);
     // _statemodel->stop_scan(); // blocking call
@@ -223,7 +223,7 @@ TEST_F(StateModelTest, test_stop_scan) // NOLINT
 
 TEST_F(StateModelTest, test_deconfigure_scan) // NOLINT
 {
-    spdlog::trace("ska::pst::common::test::StateModelTest::test_deconfigure_scan");
+    SPDLOG_TRACE("ska::pst::common::test::StateModelTest::test_deconfigure_scan");
     EXPECT_CALL(*_statemodel,set_state(ScanConfigured));
     _statemodel->set_state(ScanConfigured);
     // _statemodel->deconfigure_scan(); // blocking call
@@ -252,7 +252,7 @@ TEST_F(StateModelTest, test_deconfigure_scan) // NOLINT
 
 TEST_F(StateModelTest, test_deconfigure_beam) // NOLINT
 {
-    spdlog::trace("ska::pst::common::test::StateModelTest::test_deconfigure_beam");
+    SPDLOG_TRACE("ska::pst::common::test::StateModelTest::test_deconfigure_beam");
     EXPECT_CALL(*_statemodel,set_state(BeamConfigured));
     _statemodel->set_state(BeamConfigured);
     // _statemodel->deconfigure_beam(); // blocking call
@@ -279,7 +279,7 @@ TEST_F(StateModelTest, test_deconfigure_beam) // NOLINT
 
 TEST_F(StateModelTest, test_reset) // NOLINT
 {
-    spdlog::trace("ska::pst::common::test::StateModelTest::test_reset");
+    SPDLOG_TRACE("ska::pst::common::test::StateModelTest::test_reset");
     EXPECT_CALL(*_statemodel,set_state(RuntimeError));
     _statemodel->set_state(RuntimeError);
     // _statemodel->reset(); // blocking call

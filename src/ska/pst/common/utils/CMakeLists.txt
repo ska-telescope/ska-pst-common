@@ -9,6 +9,7 @@ set(public_headers
     DataGenerator.h
     DataGeneratorFactory.h
     RandomDataGenerator.h
+    Logging.h
 )
 
 set(sources
@@ -19,6 +20,7 @@ set(sources
     src/DataGenerator.cpp
     src/DataGeneratorFactory.cpp
     src/RandomDataGenerator.cpp
+    src/Logging.cpp
 )
 
 set(private_headers
