@@ -32,57 +32,75 @@
 #include <spdlog/spdlog.h>
 #include <algorithm>
 
-void ska::pst::common::SineWaveGenerator::configure(const ska::pst::common::AsciiHeader& config)
+void ska::pst::common::SineWaveGenerator::configure(const ska::pst::common::AsciiHeader& /* config */)
 {
   spdlog::debug("ska::pst::common::SineWaveGenerator::configure");
 
   // might parse the period / frequency of the pure tone from the AsciiHeader ?
 }
 
-char ska::pst::common::SineWaveGenerator::next_sample ()
+auto ska::pst::common::SineWaveGenerator::next_sample () -> char
 {
   double phase = current_sample / period;
   current_sample ++;
 
   const double amplitude = 127.0; // output signed char will span -127 to 127
-  return static_cast<char> ( amplitude * sin(phase ));
+  return static_cast<char>(amplitude * sin(phase));
 }
 
 void ska::pst::common::SineWaveGenerator::fill_data(char * buf, uint64_t size)
 {
   for (uint64_t i=0; i<size; i++)
   {
-    buf[i] = next_sample();
+    buf[i] = next_sample(); // NOLINT
   }
 }
 
+static const char all_ones = 0xff;
+
 void ska::pst::common::SineWaveGenerator::fill_weights(char * buf, uint64_t size)
 {
-  std::fill (buf, buf+size, 0xff);
+  std::fill (buf, buf+size, all_ones); // NOLINT
 }
 
 void ska::pst::common::SineWaveGenerator::fill_scales(char * buf, uint64_t size)
 {
-  std::fill (buf, buf+size, 0xff);
+  std::fill (buf, buf+size, all_ones); // NOLINT
 }
 
 auto ska::pst::common::SineWaveGenerator::test_data(char * buf, uint64_t size) -> bool
 {
   for (uint64_t i=0; i<size; i++)
   {
-    if (buf[i] != next_sample())
+    if (buf[i] != next_sample()) // NOLINT
+    {
       return false;
+    }
   }
   return true;
 }
 
 auto ska::pst::common::SineWaveGenerator::test_weights(char * buf, uint64_t size) -> bool
 {
+  for (uint64_t i=0; i<size; i++)
+  {
+    if (buf[i] != all_ones) // NOLINT
+    {
+      return false;
+    }
+  }
   return true;
 }
 
 auto ska::pst::common::SineWaveGenerator::test_scales(char * buf, uint64_t size) -> bool
 {
+  for (uint64_t i=0; i<size; i++)
+  {
+    if (buf[i] != all_ones) // NOLINT
+    {
+      return false;
+    }
+  }
   return true;
 }
 
