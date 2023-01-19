@@ -77,6 +77,29 @@ namespace common {
        */
       void quit();
 
+      /**
+       * @brief Return true if Application beam resources are currently assigned
+       *
+       * @return true beam configured
+       * @return false beam not configured
+       */
+      bool is_beam_configured();
+
+      /**
+       * @brief Return true if the Application has been configured for scan.
+       *
+       * @return true Application has been configured for scan
+       * @return false Application has not been configured for scan
+       */
+      bool is_scan_configured();
+
+      /**
+       * @brief Return true if the Application is Scanning
+       *
+       * @return true Application is in a Scanning state
+       * @return false Application is not in a Scanning state
+       */
+      bool is_scanning();
 
       /**
        * @brief Get the previous state before being in a RuntimeError state
@@ -160,6 +183,11 @@ namespace common {
        */
       void set_state(State state);
 
+      bool beam_configured{false};
+
+      bool scan_configured{false};
+
+      bool scanning{false};
 
     private:
 

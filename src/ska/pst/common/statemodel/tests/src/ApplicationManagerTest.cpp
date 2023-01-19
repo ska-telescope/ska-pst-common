@@ -136,17 +136,27 @@ namespace test {
     scan_config.set_val("scan_config-FOO", "BAR");
     startscan_config.set_val("startscan_config-FOO", "BAR");
 
+    EXPECT_FALSE(_applicationmanager->is_beam_configured());
+    EXPECT_FALSE(_applicationmanager->is_scan_configured());
+    EXPECT_FALSE(_applicationmanager->is_scanning());
+
     // perform_configure_beam
     log_state_and_command(_applicationmanager, ("{} perform_configure_beam", test_f));
     EXPECT_CALL(*_applicationmanager, perform_configure_beam());
     _applicationmanager->configure_beam(beam_config);
     ASSERT_EQ(BeamConfigured, _applicationmanager->get_state());
+    ASSERT_TRUE(_applicationmanager->is_beam_configured());
+    EXPECT_FALSE(_applicationmanager->is_scan_configured());
+    EXPECT_FALSE(_applicationmanager->is_scanning());
     
     // perform_configure_scan
     log_state_and_command(_applicationmanager, ("{} perform_configure_scan", test_f));
     EXPECT_CALL(*_applicationmanager, perform_configure_scan());
     _applicationmanager->configure_scan(scan_config);
     ASSERT_EQ(ScanConfigured, _applicationmanager->get_state());
+    EXPECT_TRUE(_applicationmanager->is_beam_configured());
+    ASSERT_TRUE(_applicationmanager->is_scan_configured());
+    EXPECT_FALSE(_applicationmanager->is_scanning());
 
     // perform_scan
     log_state_and_command(_applicationmanager, ("{} perform_scan", test_f));
@@ -154,24 +164,36 @@ namespace test {
     EXPECT_CALL(*_applicationmanager, perform_scan());
     _applicationmanager->start_scan(startscan_config);
     ASSERT_EQ(Scanning, _applicationmanager->get_state());
+    EXPECT_TRUE(_applicationmanager->is_beam_configured());
+    EXPECT_TRUE(_applicationmanager->is_scan_configured());
+    ASSERT_TRUE(_applicationmanager->is_scanning());
 
     // perform_stop_scan
     log_state_and_command(_applicationmanager, ("{} perform_stop_scan", test_f));
     EXPECT_CALL(*_applicationmanager, perform_stop_scan());
     _applicationmanager->stop_scan();
     ASSERT_EQ(ScanConfigured, _applicationmanager->get_state());
+    EXPECT_TRUE(_applicationmanager->is_beam_configured());
+    EXPECT_TRUE(_applicationmanager->is_scan_configured());
+    ASSERT_FALSE(_applicationmanager->is_scanning());
 
     // perform_deconfigure_scan
     log_state_and_command(_applicationmanager, ("{} perform_deconfigure_scan", test_f));
     EXPECT_CALL(*_applicationmanager, perform_deconfigure_scan());
     _applicationmanager->deconfigure_scan();
     ASSERT_EQ(BeamConfigured, _applicationmanager->get_state());
+    EXPECT_TRUE(_applicationmanager->is_beam_configured());
+    ASSERT_FALSE(_applicationmanager->is_scan_configured());
+    EXPECT_FALSE(_applicationmanager->is_scanning());
 
     // perform_deconfigure_beam
     log_state_and_command(_applicationmanager, ("{} perform_deconfigure_beam", test_f));
     EXPECT_CALL(*_applicationmanager, perform_deconfigure_beam());
     _applicationmanager->deconfigure_beam();
     ASSERT_EQ(Idle, _applicationmanager->get_state());
+    ASSERT_FALSE(_applicationmanager->is_beam_configured());
+    EXPECT_FALSE(_applicationmanager->is_scan_configured());
+    EXPECT_FALSE(_applicationmanager->is_scanning());
   }
 
   TEST_F(ApplicationManagerTest, test_config_validations) // NOLINT
@@ -242,6 +264,9 @@ namespace test {
     EXPECT_CALL(*_applicationmanager, perform_reset());
     _applicationmanager->reset();
     ASSERT_EQ(Idle, _applicationmanager->get_state());
+    ASSERT_FALSE(_applicationmanager->is_beam_configured());
+    ASSERT_FALSE(_applicationmanager->is_scan_configured());
+    ASSERT_FALSE(_applicationmanager->is_scanning());
 
     // Proceed to BeamConfigured
     EXPECT_CALL(*_applicationmanager, _set_state(BeamConfigured));
@@ -260,6 +285,9 @@ namespace test {
     EXPECT_CALL(*_applicationmanager, perform_reset());
     _applicationmanager->reset();
     ASSERT_EQ(Idle, _applicationmanager->get_state());
+    ASSERT_FALSE(_applicationmanager->is_beam_configured());
+    ASSERT_FALSE(_applicationmanager->is_scan_configured());
+    ASSERT_FALSE(_applicationmanager->is_scanning());
 
     // Proceed to ScanConfigured
     EXPECT_CALL(*_applicationmanager, _set_state(ScanConfigured));
@@ -297,6 +325,9 @@ namespace test {
     EXPECT_CALL(*_applicationmanager, perform_reset());
     _applicationmanager->reset();
     ASSERT_EQ(Idle, _applicationmanager->get_state());
+    ASSERT_FALSE(_applicationmanager->is_beam_configured());
+    ASSERT_FALSE(_applicationmanager->is_scan_configured());
+    ASSERT_FALSE(_applicationmanager->is_scanning());
 
     // Proceed to ScanConfigured
     EXPECT_CALL(*_applicationmanager, _set_state(ScanConfigured));
@@ -315,6 +346,9 @@ namespace test {
     EXPECT_CALL(*_applicationmanager, perform_reset());
     _applicationmanager->reset();
     ASSERT_EQ(Idle, _applicationmanager->get_state());
+    ASSERT_FALSE(_applicationmanager->is_beam_configured());
+    ASSERT_FALSE(_applicationmanager->is_scan_configured());
+    ASSERT_FALSE(_applicationmanager->is_scanning());
 
     // Proceed to BeamConfigured
     EXPECT_CALL(*_applicationmanager, _set_state(BeamConfigured));
@@ -323,15 +357,18 @@ namespace test {
     
     // Trigger error in perform_deconfigure_beam
     _applicationmanager->force_error=true;
-    log_state_and_command(_applicationmanager, ("{} configure_beam", test_f));
+    log_state_and_command(_applicationmanager, ("{} deconfigure_beam", test_f));
     EXPECT_CALL(*_applicationmanager, perform_deconfigure_beam());
     ASSERT_THROW(_applicationmanager->perform_deconfigure_beam(),std::runtime_error);
 
-    log_state_and_command(_applicationmanager, ("{} configure_beam error encountered", test_f));
+    log_state_and_command(_applicationmanager, ("{} deconfigure_beam error encountered", test_f));
     ASSERT_EQ(RuntimeError, _applicationmanager->get_state());
     EXPECT_CALL(*_applicationmanager, perform_reset());
     _applicationmanager->reset();
     ASSERT_EQ(Idle, _applicationmanager->get_state());
+    ASSERT_FALSE(_applicationmanager->is_beam_configured());
+    ASSERT_FALSE(_applicationmanager->is_scan_configured());
+    ASSERT_FALSE(_applicationmanager->is_scanning());
   }
 
   TEST_F(ApplicationManagerTest, test_set_config) // NOLINT

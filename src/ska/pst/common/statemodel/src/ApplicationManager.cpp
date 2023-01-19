@@ -243,3 +243,39 @@ ska::pst::common::State ska::pst::common::ApplicationManager::get_previous_state
 {
   return previous_state;
 }
+
+bool ska::pst::common::ApplicationManager::is_beam_configured()
+{
+  if (beam_configured)
+  {
+    return true;
+  }
+  else
+  {
+    return false;
+  }
+}
+
+bool ska::pst::common::ApplicationManager::is_scan_configured()
+{
+  if (scan_configured)
+  {
+    return true;
+  }
+  else
+  {
+    return false;
+  }
+}
+
+bool ska::pst::common::ApplicationManager::is_scanning()
+{
+  if (scanning)
+  {
+    return true;
+  }
+  else
+  {
+    return false;
+  }
+}
