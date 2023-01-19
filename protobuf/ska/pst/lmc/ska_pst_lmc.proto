@@ -600,6 +600,41 @@ message ReceiveMonitorData {
     uint64 data_dropped = 4;
     // Number of out of order UDP packets received in the current scan
     uint64 misordered_packets = 5;
+    // Number of out of order UDP packets per second.
+    // This is the instantaneous rate for the last second.
+    float misordered_packet_rate = 6;
+
+    // Total number of malformed packets for the current scan.
+    // TODO - better describe what a malformed packet is
+    uint64 malformed_packets = 7;
+    // The rate of malformed packets per second for the current scan.
+    float malformed_packet_rate = 8;
+
+    // Total number of valid packets but sent to the wrong subband or
+    // for a different scan ID. Receiving misdirected packets is a sign
+    // that there is something wrong with the upstream configuration for
+    // the scan.
+    uint64 misdirected_packets = 9;
+    // The rate of mis-directected packets per second.  See documentation
+    // on the misdirected_packets field for explaination of what a
+    // misdirected packet is.
+    float misdirected_packet_rate = 10;
+
+    // Total number of UDP packets with a checksum failure. This value is
+    // reported from the network interface (NIC).
+    uint64 packet_checksum_failure = 11;
+    // The current rate per second of UDP packets with a checksum failures.
+    float packet_checksum_failure_rate = 12;
+
+    // TODO - get better description for this
+    uint64 packet_timestamp_sync_error = 13;
+    // The current rate per second of UDP packets with a checksum failures.
+    float packet_timestamp_sync_error_rate = 14;
+
+    // TODO - get better description for this
+    uint64 packet_seq_number_sync_error = 15;
+    // The current rate per second of UDP packets with a checksum failures.
+    float packet_seq_number_sync_error_rate = 16;
 }
 
 // Message for the DSP.DISK monitoring results of a subband.
