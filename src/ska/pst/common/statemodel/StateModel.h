@@ -317,6 +317,7 @@ namespace common {
        * 
        */
       void wait_for_state(State expected);
+      bool wait_for_state(State expected, unsigned milliseconds);
 
       //! Command variable
       Command command{None};

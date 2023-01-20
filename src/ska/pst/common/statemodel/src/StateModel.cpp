@@ -148,6 +148,17 @@ void ska::pst::common::StateModel::wait_for_state(ska::pst::common::State requir
   SPDLOG_TRACE("ska::pst::common::StateModel::wait_for_state done");
 }
 
+bool ska::pst::common::StateModel::wait_for_state(ska::pst::common::State required, unsigned milliseconds)
+{
+  using namespace std::chrono_literals;
+  std::chrono::milliseconds timeout = milliseconds * 1ms;
+  std::unique_lock<std::mutex> control_lock(state_mutex);
+  bool reached_required = state_cond.wait_for(control_lock, timeout, [&]{return (state != required);});
+  control_lock.unlock();
+  state_cond.notify_one();
+  return reached_required;
+}
+
 void ska::pst::common::StateModel::set_beam_config(const AsciiHeader &config)
 {
   spdlog::debug("ska::pst::common::StateModel::set_beam_config");
