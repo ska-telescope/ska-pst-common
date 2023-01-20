@@ -52,22 +52,22 @@ namespace test {
 
   void log_state_and_command(std::shared_ptr<TestApplicationManager> _applicationmanager, std::string method_name)
   {
-    spdlog::trace("{} state={} command={}",method_name ,_applicationmanager->get_name(_applicationmanager->get_state()) ,_applicationmanager->get_name(_applicationmanager->get_command()));
+    SPDLOG_TRACE("{} state={} command={}",method_name ,_applicationmanager->get_name(_applicationmanager->get_state()) ,_applicationmanager->get_name(_applicationmanager->get_command()));
   }
 
   void TestApplicationManager::perform_initialise()
   {
-    spdlog::trace("ska::pst::common::test::TestApplicationManager::perform_initialise mock_function");
+    SPDLOG_TRACE("ska::pst::common::test::TestApplicationManager::perform_initialise mock_function");
   }
 
   void TestApplicationManager::perform_terminate()
   {
-    spdlog::trace("ska::pst::common::test::TestApplicationManager::perform_terminate mock_function");
+    SPDLOG_TRACE("ska::pst::common::test::TestApplicationManager::perform_terminate mock_function");
   }
 
   void TestApplicationManager::validate_configure_beam(const ska::pst::common::AsciiHeader& beam_config) 
   {
-    spdlog::trace("ska::pst::common::test::TestApplicationManager::validate_configure_beam");
+    SPDLOG_TRACE("ska::pst::common::test::TestApplicationManager::validate_configure_beam");
     try
     {
       beam_config.get_val("beam_config-FOO");
@@ -80,7 +80,7 @@ namespace test {
 
   void TestApplicationManager::validate_configure_scan(const ska::pst::common::AsciiHeader& scan_config) 
   {
-    spdlog::trace("ska::pst::common::test::TestApplicationManager::validate_configure_scan");
+    SPDLOG_TRACE("ska::pst::common::test::TestApplicationManager::validate_configure_scan");
     try
     {
       scan_config.get_val("scan_config-FOO");
@@ -93,7 +93,7 @@ namespace test {
 
   void TestApplicationManager::validate_start_scan(const ska::pst::common::AsciiHeader& startscan_config) 
   {
-    spdlog::trace("ska::pst::common::test::TestApplicationManager::validate_start_scan");
+    SPDLOG_TRACE("ska::pst::common::test::TestApplicationManager::validate_start_scan");
     try
     {
       startscan_config.get_val("startscan_config-FOO");
@@ -111,14 +111,14 @@ namespace test {
 
   void ApplicationManagerTest::SetUp() 
   {
-    spdlog::trace("ska::pst::common::test::ApplicationManagerTest::SetUp");
+    SPDLOG_TRACE("ska::pst::common::test::ApplicationManagerTest::SetUp");
     _applicationmanager = std::make_shared<TestApplicationManager>();
     ASSERT_EQ(Idle, _applicationmanager->get_state());
   }
 
   void ApplicationManagerTest::TearDown()
   {
-    spdlog::trace("ska::pst::common::test::ApplicationManagerTest::TearDown");
+    SPDLOG_TRACE("ska::pst::common::test::ApplicationManagerTest::TearDown");
     beam_config.reset();
     scan_config.reset();
     startscan_config.reset();
@@ -131,7 +131,7 @@ namespace test {
     std::string test_f;
     test_f="ska::pst::common::test::ApplicationManagerTest::test_happy_path";
 
-    spdlog::trace(test_f);
+    SPDLOG_TRACE(test_f);
     beam_config.set_val("beam_config-FOO", "BAR");
     scan_config.set_val("scan_config-FOO", "BAR");
     startscan_config.set_val("startscan_config-FOO", "BAR");
@@ -179,7 +179,7 @@ namespace test {
     std::string test_f;
     test_f="ska::pst::common::test::ApplicationManagerTest::test_config_validations";
 
-    spdlog::trace(test_f);
+    SPDLOG_TRACE(test_f);
 
     // validate_configure_beam
     log_state_and_command(_applicationmanager, ("{} validate_configure_beam", test_f));
@@ -226,7 +226,7 @@ namespace test {
     std::string test_f;
     test_f="ska::pst::common::test::ApplicationManagerTest::test_reset";
 
-    spdlog::trace(test_f);
+    SPDLOG_TRACE(test_f);
     beam_config.set_val("beam_config-FOO", "BAR");
     scan_config.set_val("scan_config-FOO", "BAR");
     startscan_config.set_val("startscan_config-FOO", "BAR");

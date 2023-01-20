@@ -44,22 +44,22 @@ void ska::pst::common::RandomSequence::configure(const ska::pst::common::AsciiHe
   // spdlog::set_level(spdlog::level::debug);
 
   std::string utc_start_str = header.get_val("UTC_START");
-  spdlog::debug("ska::pst::common::RandomSequence::configure UTC_START={}", utc_start_str);
+  SPDLOG_DEBUG("ska::pst::common::RandomSequence::configure UTC_START={}", utc_start_str);
 
   ska::pst::common::Time utc_start(utc_start_str.c_str());
   seed_value = uint64_t(utc_start.get_time());
-  spdlog::debug("ska::pst::common::RandomSequence::configure seed_value={}", seed_value);
+  SPDLOG_DEBUG("ska::pst::common::RandomSequence::configure seed_value={}", seed_value);
 
   reset();
   uint64_t obs_offset = header.get_uint64("OBS_OFFSET");
-  spdlog::debug("ska::pst::common::RandomSequence::configure OBS_OFFSET={}", obs_offset);
+  SPDLOG_DEBUG("ska::pst::common::RandomSequence::configure OBS_OFFSET={}", obs_offset);
   seek(obs_offset);
 }
 
 void ska::pst::common::RandomSequence::reset()
 {
   // reinitialise the internal state of the random-number engine
-  spdlog::debug("ska::pst::common::RandomSequence::reset generator.seed({})", seed_value);
+  SPDLOG_DEBUG("ska::pst::common::RandomSequence::reset generator.seed({})", seed_value);
   generator.seed(seed_value);
 }
 
@@ -119,7 +119,7 @@ auto ska::pst::common::RandomSequence::validate(uint8_t * buffer, uint64_t bufsz
       else
       {
         // sequence is broken (data invalid)
-        spdlog::error("ska::pst::common::RandomSequence::validate expected sequence broken at i={}; bufsz={}", i, bufsz);
+        SPDLOG_ERROR("ska::pst::common::RandomSequence::validate expected sequence broken at i={}; bufsz={}", i, bufsz);
         break;
       }
     }

@@ -81,7 +81,7 @@ void ska::pst::common::Timer::print_rates(uint64_t bytes)
     gbytes_per_second = bytes_per_second / bytes_per_gigabyte;
   }
 
-  spdlog::info("Data: {} bytes", bytes);
-  spdlog::info("Duration: {} microseconds", elapsed_microseconds);
-  spdlog::info("Rate: {} GB/s ({} B/s)", gbytes_per_second, bytes_per_second);
+  SPDLOG_INFO("Data: {} bytes", bytes);
+  SPDLOG_INFO("Duration: {} microseconds", elapsed_microseconds);
+  SPDLOG_INFO("Rate: {} GB/s ({} B/s)", gbytes_per_second, bytes_per_second);
 }

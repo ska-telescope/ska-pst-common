@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Square Kilometre Array Observatory
+ * Copyright 2023 Square Kilometre Array Observatory
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -28,64 +28,23 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <string>
-#include <spdlog/spdlog.h>
+#ifndef SKA_PST_COMMON_UTILS_Logging_h
+#define SKA_PST_COMMON_UTILS_Logging_h
 
-#include "ska/pst/common/testutils/GtestMain.h"
-#include "ska/pst/common/utils/Logging.h"
+#define SKA_LOGGING_FORMAT "1|%Y-%m-%dT%T.%eZ|%l|Thread-%t|%!|%s#%#||%v"
 
 namespace ska {
 namespace pst {
 namespace common {
-namespace test {
 
-auto test_data_dir() -> std::string&
-{
-    static std::string data_dir = ".";
-    return data_dir;
-}
+/**
+ * Used to set up the spdlog logging framework for
+ */
+void setup_spdlog();
 
-auto test_data_file(std::string const& filename) -> std::string
-{
-    return test_data_dir() + "/" + filename;
-}
-
-auto gtest_main(int argc, char** argv) -> int
-{
-    // will process gtest options and pass on the rest
-    testing::InitGoogleTest(&argc, argv);
-    ska::pst::common::setup_spdlog();
-
-    // process extra command line options;
-    for (int i=0; i < argc; i++)
-    {
-        std::string const arg(argv[i]); // NOLINT
-        if (arg == "--test_data")
-        {
-            if(++i < argc)
-            {
-                std::string const val(argv[i]); //NOLINT
-                test_data_dir() = val;
-            }
-        }
-        if (arg == "--debug")
-        {
-            if (spdlog::get_level() != spdlog::level::trace)
-            {
-                spdlog::set_level(spdlog::level::debug);
-            }
-        }
-        if (arg == "--trace")
-        {
-            spdlog::set_level(spdlog::level::trace);
-        }
-    }
-
-    return RUN_ALL_TESTS();
-}
-
-} // namespace test
 } // namespace common
 } // namespace pst
 } // namespace ska
+
+#endif // SKA_PST_COMMON_UTILS_Logging_h
 
