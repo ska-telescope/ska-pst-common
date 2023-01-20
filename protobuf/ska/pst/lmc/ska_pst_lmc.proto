@@ -644,14 +644,14 @@ message ReceiveMonitorData {
     uint64 timestamp_sync_error_packets = 13;
     // The number of packet timestamp sync errors per second. See the
     // timestamp_sync_error_packets field for more detail.
-    float timestamp_sync_error_packets_rate = 14;
+    float timestamp_sync_error_packet_rate = 14;
 
     // The number of packets received where the packet sequence number has
     // become desynchronised with the data rate and elapsed time.
     uint64 seq_number_sync_error_packets = 15;
     // The number of packet sequence number sync errors per second. See
     // the seq_number_sync_error_packets for more detail.
-    float seq_number_sync_error_packets_rate = 16;
+    float seq_number_sync_error_packet_rate = 16;
 }
 
 // Message for the DSP.DISK monitoring results of a subband.
