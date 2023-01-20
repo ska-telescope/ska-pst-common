@@ -54,8 +54,6 @@ auto gtest_main(int argc, char** argv) -> int
 {
     // will process gtest options and pass on the rest
     testing::InitGoogleTest(&argc, argv);
-    // spdlog::logger  * logger = spdlog::default_logger_raw();
-    // logger->set_level(spdlog::level::info);
     ska::pst::common::setup_spdlog();
 
     // process extra command line options;
@@ -74,13 +72,11 @@ auto gtest_main(int argc, char** argv) -> int
         {
             if (spdlog::get_level() != spdlog::level::trace)
             {
-                //logger->set_level(spdlog::level::debug);
                 spdlog::set_level(spdlog::level::debug);
             }
         }
         if (arg == "--trace")
         {
-            // logger->set_level(spdlog::level::trace);
             spdlog::set_level(spdlog::level::trace);
         }
     }

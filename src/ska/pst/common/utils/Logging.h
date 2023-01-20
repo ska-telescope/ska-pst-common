@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Square Kilometre Array Observatory
+ * Copyright 2023 Square Kilometre Array Observatory
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -28,8 +28,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SKA_PST_COMMON_Logging_h
-#define SKA_PST_COMMON_Logging_h
+#ifndef SKA_PST_COMMON_UTILS_Logging_h
+#define SKA_PST_COMMON_UTILS_Logging_h
 
 #define SKA_LOGGING_FORMAT "1|%Y-%m-%dT%T.%eZ|%l|Thread-%t|%!|%s#%#||%v"
 
@@ -46,5 +46,5 @@ void setup_spdlog();
 } // namespace pst
 } // namespace ska
 
-#endif // SKA_PST_COMMON_Logging_h
+#endif // SKA_PST_COMMON_UTILS_Logging_h
 
