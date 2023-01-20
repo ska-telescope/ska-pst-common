@@ -40,7 +40,7 @@ void ska::pst::common::DataGenerator::configure(const ska::pst::common::AsciiHea
   SPDLOG_DEBUG("ska::pst::common::DataGenerator::configure does nothing");
 }
 
-auto ska::pst::common::DataGenerator::test_block (char * buf) -> bool
+auto ska::pst::common::DataGenerator::test_block(char * buf) -> bool
 {
   if (!layout_configured) {
     throw std::runtime_error("ska::pst::common::DataGenerator::test_block block layout not configured");
@@ -51,7 +51,7 @@ auto ska::pst::common::DataGenerator::test_block (char * buf) -> bool
      &&  test_data(buf + layout.get_packet_data_offset(), layout.get_packet_data_size()); // NOLINT
 }
 
-void ska::pst::common::DataGenerator::fill_block (char * buf)
+void ska::pst::common::DataGenerator::fill_block(char * buf)
 {
   if (!layout_configured) {
     throw std::runtime_error("ska::pst::common::DataGenerator::fill_block block layout not configured");
@@ -62,7 +62,7 @@ void ska::pst::common::DataGenerator::fill_block (char * buf)
   fill_data(buf + layout.get_packet_data_offset(), layout.get_packet_data_size()); // NOLINT
 }
 
-void ska::pst::common::DataGenerator::copy_layout (const DataLayout* _layout)
+void ska::pst::common::DataGenerator::copy_layout(const DataLayout* _layout)
 {
   layout = *_layout;
 

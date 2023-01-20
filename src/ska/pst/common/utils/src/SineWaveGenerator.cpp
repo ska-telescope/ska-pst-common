@@ -28,9 +28,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "ska/pst/common/utils/SineWaveGenerator.h"
-#include <spdlog/spdlog.h>
 #include <algorithm>
+#include <spdlog/spdlog.h>
+
+#include "ska/pst/common/utils/SineWaveGenerator.h"
 
 void ska::pst::common::SineWaveGenerator::configure(const ska::pst::common::AsciiHeader& /* config */)
 {
@@ -39,10 +40,10 @@ void ska::pst::common::SineWaveGenerator::configure(const ska::pst::common::Asci
   // might parse the period / frequency of the pure tone from the AsciiHeader ?
 }
 
-auto ska::pst::common::SineWaveGenerator::next_sample () -> char
+auto ska::pst::common::SineWaveGenerator::next_sample() -> char
 {
   double phase = current_sample / period;
-  current_sample ++;
+  current_sample++;
 
   const double amplitude = 127.0; // output signed char will span -127 to 127
   return static_cast<char>(amplitude * sin(phase));
@@ -60,12 +61,12 @@ static const char all_ones = 0xff;
 
 void ska::pst::common::SineWaveGenerator::fill_weights(char * buf, uint64_t size)
 {
-  std::fill (buf, buf+size, all_ones); // NOLINT
+  std::fill(buf, buf+size, all_ones); // NOLINT
 }
 
 void ska::pst::common::SineWaveGenerator::fill_scales(char * buf, uint64_t size)
 {
-  std::fill (buf, buf+size, all_ones); // NOLINT
+  std::fill(buf, buf+size, all_ones); // NOLINT
 }
 
 auto ska::pst::common::SineWaveGenerator::test_data(char * buf, uint64_t size) -> bool
@@ -104,7 +105,7 @@ auto ska::pst::common::SineWaveGenerator::test_scales(char * buf, uint64_t size)
   return true;
 }
 
-void ska::pst::common::SineWaveGenerator::reset ()
+void ska::pst::common::SineWaveGenerator::reset()
 {
   current_sample = 0;
 }

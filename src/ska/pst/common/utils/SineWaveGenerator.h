@@ -1,20 +1,20 @@
 /*
- * Copyright 2022 Square Kilometre Array Observatory
+ * Copyright 2023 Square Kilometre Array Observatory
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice,
  * this list of conditions and the following disclaimer.
- * 
+ *
  * 2. Redistributions in binary form must reproduce the above copyright
  * notice, this list of conditions and the following disclaimer in the
  * documentation and/or other materials provided with the distribution.
- * 
+ *
  * 3. Neither the name of the copyright holder nor the names of its
  * contributors may be used to endorse or promote products derived from this
  * software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -28,8 +28,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "ska/pst/common/utils/DataGenerator.h"
 #include <cmath>
+
+#include "ska/pst/common/utils/DataGenerator.h"
 
 #ifndef SKA_PST_COMMON_UTILS_SineWaveGenerator_h
 #define SKA_PST_COMMON_UTILS_SineWaveGenerator_h
@@ -38,7 +39,7 @@ namespace ska::pst::common {
 
   /**
    * @brief Generates and validates data + weights using a sine wave for each
-   * 
+   *
    */
   class SineWaveGenerator : public DataGenerator
   {
@@ -46,13 +47,13 @@ namespace ska::pst::common {
 
       /**
        * @brief Construct a new SineWaveGenerator object
-       * 
+       *
        */
       SineWaveGenerator() = default;
 
       /**
        * @brief Destroy the SineWaveGenerator object
-       * 
+       *
        */
       ~SineWaveGenerator() = default;
 
@@ -69,7 +70,7 @@ namespace ska::pst::common {
        * @param buf base memory address of the buffer to be filled
        * @param size number of bytes to be written to buffer
        */
-      void fill_data (char * buf, uint64_t size) override;
+      void fill_data(char * buf, uint64_t size) override;
 
       /**
        * @brief Fill the buffer with a sequence of weights
@@ -77,7 +78,7 @@ namespace ska::pst::common {
        * @param buf base memory address of the buffer to be filled
        * @param size number of bytes to be written to buffer
        */
-      void fill_weights (char * buf, uint64_t size) override;
+      void fill_weights(char * buf, uint64_t size) override;
 
       /**
        * @brief Fill the buffer with a sequence of scale factors
@@ -85,42 +86,42 @@ namespace ska::pst::common {
        * @param buf base memory address of the buffer to be filled
        * @param size number of bytes to be written to buffer
        */
-      void fill_scales (char * buf, uint64_t size) override;
+      void fill_scales(char * buf, uint64_t size) override;
 
       /**
        * @brief Verify the data stream in the provided buffer
-       * 
+       *
        * @param buffer pointer to buffer containing sequence of data to be verified
        * @param size number of bytes in buffer to be tested
        *
        * @return true if data match expectations
        */
-      virtual bool test_data (char * buf, uint64_t size) override;
+      virtual bool test_data(char * buf, uint64_t size) override;
 
       /**
        * @brief Verify the weights stream in the provided buffer
-       * 
+       *
        * @param buffer pointer to buffer containing sequence of weights to be verified
        * @param size number of bytes in buffer to be tested
        *
        * @return true if weights match expectations
        */
-      virtual bool test_weights (char * buf, uint64_t size) override;
+      virtual bool test_weights(char * buf, uint64_t size) override;
 
       /**
        * @brief Verify the scales stream in the provided buffer
-       * 
+       *
        * @param buffer pointer to buffer containing sequence of scale factors to be verified
        * @param size number of bytes in buffer to be tested
        *
        * @return true if scales match expectations
        */
-      virtual bool test_scales (char * buf, uint64_t size) override;
+      virtual bool test_scales(char * buf, uint64_t size) override;
 
       /**
        * @brief Reset all sequences (data, weights, and scales)
        * The next call to fill_block or test_block will behave as per the first call to these functions.
-       * 
+       *
        */
       virtual void reset() override;
 
