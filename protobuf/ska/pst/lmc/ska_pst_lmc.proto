@@ -628,7 +628,7 @@ message ReceiveMonitorData {
     // something wrong with the upstream configuration for the scan.
     uint64 misdirected_packets = 9;
     // The rate of mis-directected packets per second.  See documentation
-    // on the misdirected_packets field for explaination of what a
+    // on the misdirected_packets field for explanation of what a
     // misdirected packet is.
     float misdirected_packet_rate = 10;
 
