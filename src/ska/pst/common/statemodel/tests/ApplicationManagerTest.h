@@ -53,7 +53,7 @@ class TestApplicationManager : public ska::pst::common::ApplicationManager
     TestApplicationManager() : ApplicationManager("TestApplicationManager") {
 
       // For Initialise
-      wait_for_state(Idle);
+      initialise();
 
       // For jumping states
       ON_CALL(*this, _set_state).WillByDefault([this](State required) {
