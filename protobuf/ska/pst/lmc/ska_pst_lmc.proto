@@ -588,18 +588,70 @@ message SmrbMonitorData {
 
 // Message for the Receive monitoring results of a subband.
 message ReceiveMonitorData {
+
     // UDP data received in bytes per second.
     // This is the instantaneous rate for the last second.
     float receive_rate = 1;
     // UDP data received in the current scan (in bytes).
     uint64 data_received = 2;
+
     // UDP data dropped in bytes per second.
     // This is the instantaneous rate for the last second.
     float data_drop_rate = 3;
     // UDP data dropped in the current scan (in bytes).
     uint64 data_dropped = 4;
-    // Number of out of order UDP packets received in the current scan
+
+    // Number of out of order UDP packets received in the current scan.
+    // The UDP packets for all frequency channels of a given set of
+    // time samples that start at time t0 shall arrive before the
+    // first packet containing data sampled at time t0+2 delta_t,
+    // where delta_t is the time spanned by the set of time samples
+    // in a single packet.
     uint64 misordered_packets = 5;
+    // Number of out of order UDP packets per second. This is the
+    // instantaneous rate for the last second.  See the misordered_packets
+    // for more detail.
+    float misordered_packet_rate = 6;
+
+    // Malformed packets are valid UDP packets, but where contents of
+    // the UDP payload does not conform to the specification in the
+    // CBF/PST ICD. Examples of malformation include: bad magic-word
+    // field, invalid meta-data, incorrect packet size.
+    uint64 malformed_packets = 7;
+    // The rate of malformed packets per second for the current scan.
+    // See the malformed_packets field for more detail.
+    float malformed_packet_rate = 8;
+
+    // Total number of (valid) UDP packets that were unexpectedly received.
+    // Misdirection could be due to wrong ScanID, Beam ID, Network Interface
+    // or UDP port. Receiving misdirected packets is a sign that there is
+    // something wrong with the upstream configuration for the scan.
+    uint64 misdirected_packets = 9;
+    // The rate of mis-directected packets per second.  See documentation
+    // on the misdirected_packets field for explanation of what a
+    // misdirected packet is.
+    float misdirected_packet_rate = 10;
+
+    // Total number of packets with a UDP, IP header or CRC checksum failure.
+    // This value is reported from the network interface (NIC).
+    uint64 checksum_failure_packets = 11;
+    // The number of packet checksum failures per second. See the
+    // checksum_failure_packets field for more detail.
+    float checksum_failure_packet_rate = 12;
+
+    // The number of packets received where the timestamp has become
+    // desynchronised with the packet sequence number * sampling interval
+    uint64 timestamp_sync_error_packets = 13;
+    // The number of packet timestamp sync errors per second. See the
+    // timestamp_sync_error_packets field for more detail.
+    float timestamp_sync_error_packet_rate = 14;
+
+    // The number of packets received where the packet sequence number has
+    // become desynchronised with the data rate and elapsed time.
+    uint64 seq_number_sync_error_packets = 15;
+    // The number of packet sequence number sync errors per second. See
+    // the seq_number_sync_error_packets for more detail.
+    float seq_number_sync_error_packet_rate = 16;
 }
 
 // Message for the DSP.DISK monitoring results of a subband.
