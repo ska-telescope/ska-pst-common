@@ -142,8 +142,16 @@ namespace common {
       virtual ~StateModel() = default;
 
       /**
+       * @brief initialise call back responsible for the state transition from Unknown to Idle.
+       * Required to be called by the Application that uses this statemodel in the Applications constructor class.
+       * Calls the virtual method perform_initialise prior to the state transition.
+       *
+       */
+      void initialise();
+
+      /**
        * @brief Issues the ConfigureBeam command and waits for the BeamConfigured or ConfiguringBeamError state to be reached.
-       * 
+       *
        * @param config Beam configuration
        *
        */
@@ -153,7 +161,7 @@ namespace common {
        * @brief Issues the ConfigureScan command and waits for the ScanConfigured or ConfiguringScanError state to be reached.
        *
        * @param config Scan configuration
-       * 
+       *
        */
       virtual void configure_scan(const AsciiHeader& config);
 
@@ -161,7 +169,7 @@ namespace common {
        * @brief Issues the StartScan command and waits for the Scanning or ScanningError state to be reached.
        *
        * @param config StartScan configuration
-       * 
+       *
        */
       virtual void start_scan(const AsciiHeader& config);
 
@@ -193,7 +201,7 @@ namespace common {
        * @brief Return the current state of the state model
        *
        * @return State current state of the state model
-       * 
+       *
        */
       State get_state() { return state; }
 
@@ -208,7 +216,7 @@ namespace common {
        * @brief Return the current command of the state model
        *
        * @return Command current command of the state model
-       * 
+       *
        */
       Command get_command() { return command; };
 
@@ -216,7 +224,7 @@ namespace common {
        * @brief Return the name of the specified  command.
        *
        * @return std::string name of the command
-       * 
+       *
        */
       std::string get_name(Command command) { return command_names[command]; };
 
@@ -225,7 +233,7 @@ namespace common {
        *
        * @param state state whose name to return
        * @return std::string name of the state
-       * 
+       *
        */
       std::string get_name(State state) { return state_names[state]; }
 
@@ -259,7 +267,7 @@ namespace common {
        * @brief Validates Beam configuration. Specific validation errors must be set when throwing exceptions.
        *
        * @param config Beam configuration to validate
-       * 
+       *
        */
       virtual void validate_configure_beam(const AsciiHeader& config) = 0;
 
@@ -267,7 +275,7 @@ namespace common {
        * @brief Validates Scan configuration. Specific validation errors must be set when throwing exceptions.
        *
        * @param config Scan configuration to validate
-       * 
+       *
        */
       virtual void validate_configure_scan(const AsciiHeader& config) = 0;
 
@@ -275,27 +283,27 @@ namespace common {
        * @brief Validates StartScan configuration. Specific validation errors must be set when throwing exceptions.
        *
        * @param config StartScan configuration to validate
-       * 
+       *
        */
       virtual void validate_start_scan(const AsciiHeader& config) = 0;
 
       /**
        * @brief Set the beam config object
-       * 
+       *
        * @param config 
        */
       void set_beam_config(const AsciiHeader &config);
 
       /**
        * @brief Set the scan config object
-       * 
+       *
        * @param config 
        */
       void set_scan_config(const AsciiHeader &config);
 
       /**
        * @brief Set the startscan config object
-       * 
+       *
        * @param config 
        */
       void set_startscan_config(const AsciiHeader &config);
@@ -304,19 +312,28 @@ namespace common {
        * @brief Set the command used as a reference for transitioning between states.
        *
        * @param command command to be set.
-       * 
+       *
        */
       void set_command(Command command);
 
       /**
        * @brief Wait for the state model to transition to the expected state or the error state.
-       * If the state model transitions to the error state, the exception raised by the Receiver
+       * If the state model transitions to the error state, the exception raised by the Application
        * that caused the error will be raised here.
        *
        * @param expected expected state to wait for.
-       * 
+       *
        */
       void wait_for_state(State expected);
+
+      /**
+       * @brief Wait for the state model to transition to the required state with a timeout
+       *
+       * @param expected 
+       * @param milliseconds 
+       * @return true 
+       * @return false 
+       */
       bool wait_for_state(State expected, unsigned milliseconds);
 
       //! Command variable

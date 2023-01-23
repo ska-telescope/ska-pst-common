@@ -42,6 +42,13 @@ ska::pst::common::StateModel::StateModel()
   SPDLOG_DEBUG("ska::pst::common::StateModel::StateModel()");
 }
 
+void ska::pst::common::StateModel::initialise()
+{
+  spdlog::debug("ska::pst::common::StateModel::initialise()");
+  set_command(Initialise);
+  wait_for_state(Idle);
+}
+
 void ska::pst::common::StateModel::configure_beam(const AsciiHeader& config)
 {
   SPDLOG_DEBUG("ska::pst::common::StateModel::configure_beam()");
@@ -107,7 +114,7 @@ void ska::pst::common::StateModel::set_command(Command required_cmd)
     // State not found
     if (allowed_commands.find(state) == allowed_commands.end())
     {
-      std::string error_msg = ("ska::pst::common::StateModel::set_command state={} did not exist in allowed_commands", state, get_name(cmd));
+      std::string error_msg = ("ska::pst::common::StateModel::set_command state={} cmd={} state did not exist in allowed_commands", state, get_name(cmd));
       throw ska::pst::common::pst_validation_error(error_msg);
     }
 

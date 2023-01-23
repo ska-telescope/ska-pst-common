@@ -118,9 +118,6 @@ class TestApplicationManager : public ska::pst::common::ApplicationManager
         });
       ON_CALL(*this, perform_reset).WillByDefault([this]() {
           force_error=false;
-          beam_configured=false;
-          scan_configured=false;
-          scanning=false;
         });
     }
     ~TestApplicationManager() = default;

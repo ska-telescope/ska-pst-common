@@ -80,7 +80,7 @@ namespace common {
       /**
        * @brief Return true if Application beam resources are currently assigned
        *
-       * @return true beam configured
+       * @return true if state is one of the following: BeamConfigured, ScanConfigured, Scanning
        * @return false beam not configured
        */
       bool is_beam_configured();
@@ -182,12 +182,6 @@ namespace common {
        * @param required state to transition.
        */
       void set_state(State state);
-
-      bool beam_configured{false};
-
-      bool scan_configured{false};
-
-      bool scanning{false};
 
     private:
 
