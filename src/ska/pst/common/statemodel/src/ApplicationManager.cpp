@@ -238,7 +238,7 @@ void ska::pst::common::ApplicationManager::quit()
 
 ska::pst::common::Command ska::pst::common::ApplicationManager::wait_for_command()
 {
-  SPDLOG_TRACE("ska::pst::common::ApplicationManager::wait_for_command [{}]" entity);
+  SPDLOG_TRACE("ska::pst::common::ApplicationManager::wait_for_command [{}]", entity);
 
   ska::pst::common::Command cmd = command;
   {
