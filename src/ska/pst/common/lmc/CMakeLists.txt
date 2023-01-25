@@ -33,7 +33,7 @@ target_link_libraries(
   ska_pst_lmc
   PUBLIC
   ska_pst_lmc_generated
-  spdlog
+  spdlog::spdlog
   protobuf::libprotobuf
   gRPC::grpc
   gRPC::grpc++

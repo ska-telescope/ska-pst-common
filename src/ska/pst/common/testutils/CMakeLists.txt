@@ -13,6 +13,6 @@ target_include_directories(
     $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/src>
     $<INSTALL_INTERFACE:include>)
 
-target_link_libraries(ska-pst-common-testutils GTest::gtest_main gmock spdlog ska_pst_common-utils)
+target_link_libraries(ska-pst-common-testutils GTest::gtest_main gmock spdlog::spdlog ska_pst_common-utils)
 
 include_directories(..)
