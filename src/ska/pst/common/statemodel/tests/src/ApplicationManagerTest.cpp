@@ -207,6 +207,7 @@ namespace test {
     log_state_and_command(_applicationmanager, ("{} validate_configure_beam", test_f));
     ASSERT_THROW(_applicationmanager->configure_beam(beam_config),std::logic_error);
     ASSERT_EQ(Idle, _applicationmanager->get_state());
+    ASSERT_TRUE(_applicationmanager->is_idle());
 
     // Proceed to BeamConfigured
     beam_config.set_val("beam_config-FOO", "BAR");

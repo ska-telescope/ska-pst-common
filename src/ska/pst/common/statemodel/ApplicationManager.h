@@ -78,6 +78,14 @@ namespace common {
       void quit();
 
       /**
+       * @brief 
+       * 
+       * @return true if Application state is Idle
+       * @return false if Application state is not Idle
+       */
+      bool is_idle();
+
+      /**
        * @brief Return true if Application beam resources are currently assigned
        *
        * @return true if state is one of the following: BeamConfigured, ScanConfigured, Scanning
@@ -86,7 +94,7 @@ namespace common {
       bool is_beam_configured();
 
       /**
-       * @brief Return true if the Application has been configured for scan.
+       * @brief Return true if the Application scan resources are currently assigned
        *
        * @return true Application has been configured for scan
        * @return false Application has not been configured for scan
@@ -107,6 +115,14 @@ namespace common {
        * @return State 
        */
       State get_previous_state();
+
+      /**
+       * @brief Callback to handle state transition
+       * 
+       * @param required boolean method to determine state. Throws runtime error if method returns false.
+       * @param contextual_message Runtime error message with details.
+       */
+      void enforce(bool required, const std::string &contextual_message) const;
 
     protected:
       /**

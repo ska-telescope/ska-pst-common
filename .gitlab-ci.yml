@@ -11,7 +11,7 @@ variables:
   # CI Variables enable upstream/downstream CI integration
   PST_OCI_BUILDTOOLS_REGISTRY: $SKA_RELEASE_REGISTRY
   PST_OCI_BUILDTOOLS_IMAGE: ska-pst-buildtools
-  PST_OCI_BUILDTOOLS_TAG: "0.0.0"
+  PST_OCI_BUILDTOOLS_TAG: "0.0.1"
   PST_OCI_COMMON_REGISTRY: $SKA_RELEASE_REGISTRY
   PST_OCI_COMMON_BUILDER: ska-pst-common-builder
   PST_OCI_COMMON_PROTO: ska-pst-common-proto

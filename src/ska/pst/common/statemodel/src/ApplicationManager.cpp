@@ -259,6 +259,20 @@ ska::pst::common::State ska::pst::common::ApplicationManager::get_previous_state
   return previous_state;
 }
 
+void ska::pst::common::ApplicationManager::enforce(bool required, const std::string& contextual_message) const
+{
+  if (!required)
+  {
+    SPDLOG_ERROR("ska::pst::common::ApplicationManager::enforce required state failure: {}", contextual_message);
+    throw std::runtime_error(contextual_message);
+  }
+}
+
+bool ska::pst::common::ApplicationManager::is_idle()
+{
+  return get_state() == Idle;
+}
+
 bool ska::pst::common::ApplicationManager::is_beam_configured()
 {
   return get_state() == BeamConfigured || get_state() == ScanConfigured || get_state() == Scanning;
