@@ -132,6 +132,6 @@ namespace ska::pst::common {
       std::mt19937 generator;
   };
 
-} // ska::pst::common
+} // namespace ska::pst::common
 
 #endif // SKA_PST_COMMON_UTILS_RandomSequence_h

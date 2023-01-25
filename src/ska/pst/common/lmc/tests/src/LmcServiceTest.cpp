@@ -45,10 +45,7 @@ auto main(int argc, char* argv[]) -> int
   return ska::pst::common::test::gtest_main(argc, argv);
 }
 
-namespace ska {
-namespace pst {
-namespace common {
-namespace test {
+namespace ska::pst::common::test {
 
 LmcServiceTest::LmcServiceTest()
     : ::testing::Test()
@@ -1425,7 +1422,4 @@ TEST_F(LmcServiceTest, get_env_with_implementation) // NOLINT
     EXPECT_TRUE(MessageDifferencer::Equals(values.at("signed_int_value"), signed_int_value));
 }
 
-} // namespace test
-} // namespace common
-} // namespace pst
-} // namespace ska
+} // namespace ska::pst::common::test

@@ -34,23 +34,19 @@
 #ifndef __SKA_PST_COMMON_StateModelException_h
 #define __SKA_PST_COMMON_StateModelException_h
 
-namespace ska {
-namespace pst {
-namespace common {
-
-    /**
-     * @brief The pst_validation_error intended to be used at ska::pst::common::StateModel validate methods.
-     * 
-     */
-    class pst_validation_error : public std::logic_error {
-        public:
-            explicit pst_validation_error(const std::string& msg) : logic_error(msg) {};
-            explicit pst_validation_error(const char* msg) : logic_error(msg) {};
-            virtual ~pst_validation_error() = default;
-    };
+namespace ska::pst::common
+{
+  /**
+   * @brief The pst_validation_error intended to be used at ska::pst::common::StateModel validate methods.
+   * 
+   */
+  class pst_validation_error : public std::logic_error {
+    public:
+      explicit pst_validation_error(const std::string& msg) : logic_error(msg) {};
+      explicit pst_validation_error(const char* msg) : logic_error(msg) {};
+      virtual ~pst_validation_error() = default;
+ };
     
-} // namespace common
-} // namespace pst
-} // namespace ska
+} // namespace ska::pst::common
 
 #endif // __SKA_PST_COMMON_StateModelException_h

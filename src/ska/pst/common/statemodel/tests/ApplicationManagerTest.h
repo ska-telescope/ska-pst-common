@@ -33,13 +33,10 @@
 
 #include "ska/pst/common/statemodel/ApplicationManager.h"
 
-#ifndef SKA_PST_COMMON_TESTS_ApplicationManagerTest_h
-#define SKA_PST_COMMON_TESTS_ApplicationManagerTest_h
+#ifndef SKA_PST_COMMON_STATEMODEL_TESTS_ApplicationManagerTest_h
+#define SKA_PST_COMMON_STATEMODEL_TESTS_ApplicationManagerTest_h
 
-namespace ska {
-namespace pst {
-namespace common {
-namespace test {
+namespace ska::pst::common::test {
 
 /**
  * @brief Test the ApplicationManager class
@@ -162,9 +159,7 @@ class ApplicationManagerTest : public ::testing::Test
 
   private:
 };
-}
-}
-}
-}
 
-#endif // SKA_PST_COMMON_TESTS_ApplicationManagerTest_h
+} // ska::pst::common::test
+
+#endif // SKA_PST_COMMON_STATEMODEL_TESTS_ApplicationManagerTest_h

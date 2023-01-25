@@ -45,10 +45,8 @@ auto main(int argc, char* argv[]) -> int
   return ska::pst::common::test::gtest_main(argc, argv);
 }
 
-namespace ska {
-namespace pst {
-namespace common {
-namespace test {
+namespace ska::pst::common::test
+{
 
   void log_state_and_command(std::shared_ptr<TestApplicationManager> _applicationmanager, std::string method_name)
   {
@@ -412,7 +410,4 @@ namespace test {
 
   }
 
-} // test
-} // common
-} // pst
-} // ska
+} // namespace ska::pst::common::test

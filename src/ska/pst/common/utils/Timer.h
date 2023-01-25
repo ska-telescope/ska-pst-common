@@ -34,10 +34,8 @@
 #ifndef SKA_PST_COMMON_UTIL_Timer_h
 #define SKA_PST_COMMON_UTIL_Timer_h
 
-namespace ska {
-namespace pst {
-namespace common {
-
+namespace ska::pst::common
+{
   /**
    * @brief Provides functionality for millisecond precision timing
    * 
@@ -100,8 +98,6 @@ namespace common {
 
   };
 
-} // namespace common
-} // namespace pst
-} // namespace ska
+} // namespace ska::pst::common
 
 #endif // SKA_PST_COMMON_UTIL_Timer_h

@@ -33,15 +33,11 @@
 #ifndef SKA_PST_COMMON_version_h
 #define SKA_PST_COMMON_version_h
 
-namespace ska {
-namespace pst {
-namespace common {
+namespace ska::pst::common {
 
   //! return the version string of the library in form major:minor:patch
   std::string get_version_string();
 
-} // common
-} // pst
-} // ska
+} // namespace ska::pst::common
 
 #endif // SKA_PST_COMMON_version_h

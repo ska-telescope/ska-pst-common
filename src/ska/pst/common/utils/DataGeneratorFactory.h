@@ -62,6 +62,6 @@ std::vector<std::string> get_supported_data_generators();
  */
 std::string get_supported_data_generators_list();
 
-} // ska::pst::common
+} // namespace ska::pst::common
 
 #endif // SKA_PST_COMMON_UTILS_DataGeneratorFactory_h

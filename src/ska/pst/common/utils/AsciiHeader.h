@@ -39,9 +39,7 @@
 
 #define DEFAULT_HEADER_SIZE 4096
 
-namespace ska {
-namespace pst {
-namespace common {
+namespace ska::pst::common {
 
   /**
    * @brief Provides an interface to a PSRDada style ASCII Header
@@ -363,8 +361,6 @@ namespace common {
       uint32_t key_padding{20};
   };
 
-} // namepace common
-} // namepace pst
-} // namepace ska
+} // namespace ska::pst::common
 
 #endif // SKA_PST_COMMON_UTIL_AsciiHeader_h

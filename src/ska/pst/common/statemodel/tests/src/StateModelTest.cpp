@@ -44,10 +44,7 @@ auto main(int argc, char* argv[]) -> int
   return ska::pst::common::test::gtest_main(argc, argv);
 }
 
-namespace ska {
-namespace pst {
-namespace common {
-namespace test {
+namespace ska::pst::common::test {
 
 StateModelTest::StateModelTest()
 : ::testing::Test()
@@ -304,11 +301,6 @@ TEST_F(StateModelTest, test_reset) // NOLINT
     ASSERT_THROW(_statemodel->reset(),std::logic_error);
     ASSERT_NE(Reset, _statemodel->get_command());
 
-
-
 }
 
-} // namespace test
-} // namespace common
-} // namespace pst
-} // namespace ska
+} // namespace ska::pst::common::test

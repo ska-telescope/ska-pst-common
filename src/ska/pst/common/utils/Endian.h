@@ -35,9 +35,7 @@
 #ifndef SKA_PST_COMMON_UTILS_Endian_h
 #define SKA_PST_COMMON_UTILS_Endian_h
 
-namespace ska {
-namespace pst {
-namespace common {
+namespace ska::pst::common {
 namespace detail {
 
 /**
@@ -171,8 +169,6 @@ static inline T betoh(T in)
   return detail::Endian<T>::betoh(in);
 }
 
-} // namespace common
-} // namespace pst
-} // namespace ska
+} // namespace ska::pst::common
 
 #endif // SKA_PST_COMMON_UTILS_Endian_h
