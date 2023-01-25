@@ -3,18 +3,18 @@
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice,
  * this list of conditions and the following disclaimer.
- * 
+ *
  * 2. Redistributions in binary form must reproduce the above copyright
  * notice, this list of conditions and the following disclaimer in the
  * documentation and/or other materials provided with the distribution.
- * 
+ *
  * 3. Neither the name of the copyright holder nor the names of its
  * contributors may be used to endorse or promote products derived from this
  * software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -91,7 +91,7 @@ auto ska::pst::common::RandomSequence::validate(uint8_t * buffer, uint64_t bufsz
   // produces random integer values, uniformly distributed on the closed interval
   std::uniform_int_distribution<uint8_t> distribution(0, UCHAR_MAX);
 
-  uint64_t i = 0; 
+  uint64_t i = 0;
   while (i<bufsz)
   {
     const uint8_t expected = distribution(generator);
@@ -132,7 +132,7 @@ auto ska::pst::common::RandomSequence::validate(uint8_t * buffer, uint64_t bufsz
     // sequence was not broken (data valid)
     return true;
   }
- 
+
   uint64_t start_search_index = i + 1;
   uint8_t* remaining_buffer = buffer + start_search_index; // NOLINT
   uint64_t remaining_bufsz = bufsz - start_search_index;
@@ -155,7 +155,9 @@ auto ska::pst::common::RandomSequence::validate(uint8_t * buffer, uint64_t bufsz
   return false;
 }
 
-auto ska::pst::common::RandomSequence::search_buffer_for_expected_sequence (uint8_t * buffer, uint64_t bufsz, uint64_t seqlen) -> int64_t
+auto ska::pst::common::RandomSequence::search_buffer_for_expected_sequence(
+  uint8_t * buffer, uint64_t bufsz, uint64_t seqlen
+) -> int64_t
 {
   // avoid searching for a sequence longer than the input buffer
   seqlen = std::min (seqlen, bufsz);
@@ -197,12 +199,14 @@ auto ska::pst::common::RandomSequence::search_buffer_for_expected_sequence (uint
     spdlog::warn("ska::pst::common::RandomSequence::search_buffer_for_expected_sequence not found");
     return -1;
   }
-      
+
   spdlog::warn("ska::pst::common::RandomSequence::search_buffer_for_expected_sequence found at offset={}", i-seqlen);
   return i - seqlen;
 }
 
-auto ska::pst::common::RandomSequence::search_expected_sequence_for_buffer (uint8_t * buffer, uint64_t bufsz, uint64_t max_offset) -> int64_t
+auto ska::pst::common::RandomSequence::search_expected_sequence_for_buffer(
+  uint8_t * buffer, uint64_t bufsz, uint64_t max_offset
+) -> int64_t
 {
   spdlog::warn("ska::pst::common::RandomSequence::search_expected_sequence_for_buffer max offset = {}", max_offset);
 
@@ -240,5 +244,5 @@ auto ska::pst::common::RandomSequence::search_expected_sequence_for_buffer (uint
 
   return -1;
 }
-  
+
 

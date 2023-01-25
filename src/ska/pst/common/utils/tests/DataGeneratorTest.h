@@ -45,7 +45,7 @@ namespace ska::pst::common::test {
    * @details
    * 
    */
-  class DataGeneratorTest : public ::testing::Test
+  class DataGeneratorTest : public ::testing::TestWithParam<const char*>
   {
     protected:
       void SetUp() override;
@@ -53,7 +53,7 @@ namespace ska::pst::common::test {
       void TearDown() override;
 
     public:
-      DataGeneratorTest();
+      DataGeneratorTest() = default;
 
       ~DataGeneratorTest() = default;
 

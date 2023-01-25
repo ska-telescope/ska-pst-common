@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Square Kilometre Array Observatory
+ * Copyright 2023 Square Kilometre Array Observatory
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -28,33 +28,34 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "ska/pst/common/utils/DataGenerator.h"
-#include "ska/pst/common/utils/RandomSequence.h"
+#include <cmath>
 
-#ifndef SKA_PST_COMMON_UTILS_RandomDataGenerator_h
-#define SKA_PST_COMMON_UTILS_RandomDataGenerator_h
+#include "ska/pst/common/utils/DataGenerator.h"
+
+#ifndef SKA_PST_COMMON_UTILS_SineWaveGenerator_h
+#define SKA_PST_COMMON_UTILS_SineWaveGenerator_h
 
 namespace ska::pst::common {
 
   /**
-   * @brief Generates and validates data + weights using a RandomSequence for each
+   * @brief Generates and validates data + weights using a sine wave for each
    *
    */
-  class RandomDataGenerator : public DataGenerator
+  class SineWaveGenerator : public DataGenerator
   {
     public:
 
       /**
-       * @brief Construct a new RandomDataGenerator object
+       * @brief Construct a new SineWaveGenerator object
        *
        */
-      RandomDataGenerator() = default;
+      SineWaveGenerator() = default;
 
       /**
-       * @brief Destroy the RandomDataGenerator object
+       * @brief Destroy the SineWaveGenerator object
        *
        */
-      ~RandomDataGenerator() = default;
+      ~SineWaveGenerator() = default;
 
       /**
        * @brief Configure the streams written to data + weights
@@ -126,12 +127,17 @@ namespace ska::pst::common {
 
     private:
 
-      ska::pst::common::RandomSequence dat_sequence;
-      ska::pst::common::RandomSequence wts_sequence;
-      ska::pst::common::RandomSequence scl_sequence;
+      /* Current offset from t=0, updated on each call to fill_data or test_data */
+      uint64_t current_sample{0};
+
+      /* Period of sine wave in samples (irrational number ~100, finishes ~10 cycles in 1k points) */
+      double period{M_PI * M_PI * M_PI * M_PI};
+
+      /* Returns the next sample in the sequence */
+      char next_sample ();
   };
 
 } // ska::pst::common
 
-#endif // SKA_PST_COMMON_UTILS_RandomDataGenerator_h
+#endif // SKA_PST_COMMON_UTILS_SineWaveGenerator_h
 

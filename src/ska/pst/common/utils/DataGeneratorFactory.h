@@ -32,14 +32,12 @@
 #include <vector>
 #include <memory>
 
-#include "ska/pst/common/utils/RandomDataGenerator.h"
+#include "ska/pst/common/utils/DataGenerator.h"
 
 #ifndef SKA_PST_COMMON_UTILS_DataGeneratorFactory_h
 #define SKA_PST_COMMON_UTILS_DataGeneratorFactory_h
 
-namespace ska {
-namespace pst {
-namespace common {
+namespace ska::pst::common {
 
 /**
  * @brief Construct a DataGenerator from the name
@@ -64,8 +62,6 @@ std::vector<std::string> get_supported_data_generators();
  */
 std::string get_supported_data_generators_list();
 
-} // common
-} // pst
-} // ska
+} // ska::pst::common
 
 #endif // SKA_PST_COMMON_UTILS_DataGeneratorFactory_h

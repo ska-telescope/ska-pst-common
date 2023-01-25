@@ -3,18 +3,18 @@
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice,
  * this list of conditions and the following disclaimer.
- * 
+ *
  * 2. Redistributions in binary form must reproduce the above copyright
  * notice, this list of conditions and the following disclaimer in the
  * documentation and/or other materials provided with the distribution.
- * 
+ *
  * 3. Neither the name of the copyright holder nor the names of its
  * contributors may be used to endorse or promote products derived from this
  * software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -38,7 +38,7 @@ namespace ska::pst::common {
 
   /**
    * @brief Abstract base class for data+weights+scales generation and validation
-   * 
+   *
    */
   class DataGenerator
   {
@@ -46,19 +46,19 @@ namespace ska::pst::common {
 
       /**
        * @brief Construct a new DataGenerator object
-       * 
+       *
        */
       DataGenerator() = default;
 
       /**
        * @brief Destroy the DataGenerator object
-       * 
+       *
        */
       virtual ~DataGenerator() = default;
 
       /**
        * @brief Configure the streams written to data+weights+scales
-       * 
+       *
        * @param config the keyword/value pairs used to configure the data+weights+scales streams
        */
       virtual void configure(const ska::pst::common::AsciiHeader& config);
@@ -68,39 +68,39 @@ namespace ska::pst::common {
        *
        * @param layout DataLayout that defines the packet structure
        */
-      void copy_layout (const ska::pst::common::DataLayout* layout);
+      void copy_layout(const ska::pst::common::DataLayout* layout);
 
       /**
        * @brief Fill the data+weights+scales of the next UDP packet
-       * 
+       *
        * @param buf base memory address of the packet to be filled
        */
       virtual void fill_block(char * buf);
 
       /**
        * @brief Fill the data stream in the provided buffer
-       * 
+       *
        * @param buffer pointer to buffer to be filled with sequence of data elements
        */
       virtual void fill_data(char * buf, uint64_t size) = 0;
 
       /**
        * @brief Fill the weights stream in the provided buffer
-       * 
+       *
        * @param buffer pointer to buffer to be filled with sequence of weight elements
        */
       virtual void fill_weights(char * buf, uint64_t size) = 0;
 
       /**
        * @brief Fill the scales stream in the provided buffer
-       * 
+       *
        * @param buffer pointer to buffer to be filled with sequence of scale elements
        */
       virtual void fill_scales(char * buf, uint64_t size) = 0;
 
       /**
        * @brief Verify the data+weights+scales of the received UDP packet
-       * 
+       *
        * @param buffer pointer to buffer containing received UDP packet
        * @return true if both data and weights match expectations
        */
@@ -108,7 +108,7 @@ namespace ska::pst::common {
 
       /**
        * @brief Verify the data stream in the provided buffer
-       * 
+       *
        * @param buffer pointer to buffer containing sequence of data elements
        * @return true if data match expectations
        */
@@ -116,7 +116,7 @@ namespace ska::pst::common {
 
       /**
        * @brief Verify the weights stream in the provided buffer
-       * 
+       *
        * @param buffer pointer to buffer containing sequence of weight elements
        * @return true if weights match expectations
        */
@@ -124,7 +124,7 @@ namespace ska::pst::common {
 
       /**
        * @brief Verify the scales stream in the provided buffer
-       * 
+       *
        * @param buffer pointer to buffer containing sequence of scale elements
        * @return true if scales match expectations
        */
@@ -133,7 +133,7 @@ namespace ska::pst::common {
       /**
        * @brief Reset all sequences (data, weights, and scales)
        * The next call to fill_block or test_block will behave as per the first call to these functions.
-       * 
+       *
        */
       virtual void reset() = 0;
 
