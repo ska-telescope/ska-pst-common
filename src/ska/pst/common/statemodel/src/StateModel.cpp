@@ -101,7 +101,8 @@ void ska::pst::common::StateModel::reset()
 {
   SPDLOG_DEBUG("ska::pst::common::StateModel::reset()");
   set_command(Reset);
-  wait_for_state(Idle);
+  wait_for_state_without_error(Idle);
+  SPDLOG_DEBUG("ska::pst::common::StateModel::reset() state={}", get_name(state));
 }
 
 void ska::pst::common::StateModel::set_command(Command required_cmd)
@@ -137,13 +138,12 @@ void ska::pst::common::StateModel::set_command(Command required_cmd)
 
 void ska::pst::common::StateModel::wait_for_state(ska::pst::common::State required_state)
 {
-  
   SPDLOG_TRACE("ska::pst::common::StateModel::wait_for_state state={} required={}",state_names[state] , state_names[required_state]);
 
   ska::pst::common::State state_required = required_state;
   {
     std::unique_lock<std::mutex> control_lock(state_mutex);
-    state_cond.wait(control_lock, [&]{return (state == state_required);});
+    state_cond.wait(control_lock, [&]{return (state == state_required || state == ska::pst::common::RuntimeError);});
     bool success = (state == state_required);
     SPDLOG_TRACE("ska::pst::common::StateModel::wait_for_state state={} required={}",state_names[state] , state_names[state_required]);
     state_cond.notify_one();
@@ -155,15 +155,49 @@ void ska::pst::common::StateModel::wait_for_state(ska::pst::common::State requir
   SPDLOG_TRACE("ska::pst::common::StateModel::wait_for_state done");
 }
 
+void ska::pst::common::StateModel::wait_for_state_without_error(ska::pst::common::State required_state)
+{
+  SPDLOG_TRACE("ska::pst::common::StateModel::wait_for_state_without_error state={} required={}",state_names[state] , state_names[required_state]);
+
+  ska::pst::common::State state_required = required_state;
+  {
+    std::unique_lock<std::mutex> control_lock(state_mutex);
+    state_cond.wait(control_lock, [&]{return (state == state_required);});
+    bool success = (state == state_required);
+    SPDLOG_TRACE("ska::pst::common::StateModel::wait_for_state_without_error state={} required={}",state_names[state] , state_names[state_required]);
+    state_cond.notify_one();
+    if (!success)
+    {
+      SPDLOG_DEBUG("ska::pst::common::StateModel::wait_for_state_without_error raise_exception()");
+    }
+  }
+  SPDLOG_TRACE("ska::pst::common::StateModel::wait_for_state_without_error done");
+}
+
 bool ska::pst::common::StateModel::wait_for_state(ska::pst::common::State required, unsigned milliseconds)
 {
+  SPDLOG_TRACE("ska::pst::common::StateModel::wait_for_state required={} timeout={}", state_names[required], milliseconds);
   using namespace std::chrono_literals;
   std::chrono::milliseconds timeout = milliseconds * 1ms;
   std::unique_lock<std::mutex> control_lock(state_mutex);
-  bool reached_required = state_cond.wait_for(control_lock, timeout, [&]{return (state != required);});
+  bool reached_required = state_cond.wait_for(control_lock, timeout, [&]{return (state == required);});
   control_lock.unlock();
   state_cond.notify_one();
+  SPDLOG_TRACE("ska::pst::common::StateModel::wait_for_state reach_required={}", reached_required);
   return reached_required;
+}
+
+bool ska::pst::common::StateModel::wait_for_not_state(ska::pst::common::State required, unsigned milliseconds)
+{
+  SPDLOG_TRACE("ska::pst::common::StateModel::wait_for_not_state required={} timeout={}", state_names[required], milliseconds);
+  using namespace std::chrono_literals;
+  std::chrono::milliseconds timeout = milliseconds * 1ms;
+  std::unique_lock<std::mutex> control_lock(state_mutex);
+  bool left_required = state_cond.wait_for(control_lock, timeout, [&]{return (state != required);});
+  control_lock.unlock();
+  state_cond.notify_one();
+  SPDLOG_TRACE("ska::pst::common::StateModel::wait_for_state left_required={}", left_required);
+  return left_required;
 }
 
 void ska::pst::common::StateModel::set_beam_config(const AsciiHeader &config)

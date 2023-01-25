@@ -41,9 +41,8 @@
 #ifndef SKA_PST_COMMON_StateModel_h
 #define SKA_PST_COMMON_StateModel_h
 
-namespace ska {
-namespace pst {
-namespace common {
+namespace ska::pst::common
+{
   /**
    * @brief Enumeration of states in the state model
    *
@@ -203,7 +202,7 @@ namespace common {
        * @return State current state of the state model
        *
        */
-      State get_state() { return state; }
+      State get_state() const { return state; }
 
       /**
        * @brief Return a pointer to the most recently received exception.
@@ -218,7 +217,7 @@ namespace common {
        * @return Command current command of the state model
        *
        */
-      Command get_command() { return command; };
+      Command get_command() const { return command; };
 
       /**
        * @brief Return the name of the specified  command.
@@ -226,7 +225,7 @@ namespace common {
        * @return std::string name of the command
        *
        */
-      std::string get_name(Command command) { return command_names[command]; };
+      std::string get_name(Command command) const { return command_names[command]; };
 
       /**
        * @brief Return the name of the specified state.
@@ -235,28 +234,30 @@ namespace common {
        * @return std::string name of the state
        *
        */
-      std::string get_name(State state) { return state_names[state]; }
-
+      std::string get_name(State state) const { return state_names[state]; }
 
       /**
-       * @brief Return the currently assigned beam resources.
-       *
+       * @brief Get the beam configuration parameters.
+       * 
+       * @return ska::pst::common::AsciiHeader& beam configuration parameters
        */
       virtual ska::pst::common::AsciiHeader& get_beam_configuration() {
         return beam_config;
       }
 
       /**
-       * @brief Return the current scan configuration.
-       *
+       * @brief Get the scan configuration parameters.
+       * 
+       * @return ska::pst::common::AsciiHeader& scan configuration parameters
        */
       virtual ska::pst::common::AsciiHeader& get_scan_configuration() {
         return scan_config;
       }
 
       /**
-       * @brief Return the current scan configuration.
-       *
+       * @brief Get the start scan configuration parameters
+       * 
+       * @return ska::pst::common::AsciiHeader& start scan configuration parameters
        */
       virtual ska::pst::common::AsciiHeader& get_startscan_configuration() {
         return startscan_config;
@@ -317,24 +318,42 @@ namespace common {
       void set_command(Command command);
 
       /**
-       * @brief Wait for the state model to transition to the expected state or the error state.
-       * If the state model transitions to the error state, the exception raised by the Application
+       * @brief Wait for the state model to transition to the required state or the RuntimeError state.
+       * If the state model transitions to the RuntimeError state, the exception raised by the Application
        * that caused the error will be raised here.
        *
-       * @param expected expected state to wait for.
+       * @param required state to wait for.
        *
        */
-      void wait_for_state(State expected);
+      void wait_for_state(State required);
 
       /**
-       * @brief Wait for the state model to transition to the required state with a timeout
+       * @brief Wait for the state model to transition to the expected state.
        *
-       * @param expected 
-       * @param milliseconds 
-       * @return true 
-       * @return false 
+       * @param required state to wait for.
+       *
+       */
+      void wait_for_state_without_error(State required);
+
+      /**
+       * @brief Wait for the state model to achieve the required state within the timeout
+       *
+       * @param required target state for the state model to achieve.
+       * @param milliseconds timeout in milliseconds.
+       * @return true if the state model did achieve the required state before the timeout
+       * @return false if the state model did not achieve the required state before the timeout
        */
       bool wait_for_state(State expected, unsigned milliseconds);
+
+      /**
+       * @brief Wait for the state model to achieve any state other than the required state, within the timeout.
+       *
+       * @param required the required state for the state model to 
+       * @param milliseconds timeout in milliseconds
+       * @return true if the state model did achieve any state other than the required state within the timeout.
+       * @return false if the state model did not achieve any state other than the required state within the timeout
+       */
+      bool wait_for_not_state(State required, unsigned milliseconds);
 
       //! Command variable
       Command command{None};
@@ -370,8 +389,6 @@ namespace common {
 
   };
 
-} // common
-} // pst
-} // ska
+} // namespace ska::pst::common
 
 #endif // SKA_PST_COMMON_StateModel_h

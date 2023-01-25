@@ -46,7 +46,6 @@ ska::pst::common::ApplicationManager::ApplicationManager(const std::string& _ent
 ska::pst::common::ApplicationManager::~ApplicationManager()
 {
   SPDLOG_DEBUG("ska::pst::common::ApplicationManager::~ApplicationManager");
-  quit();
   SPDLOG_DEBUG("ska::pst::common::ApplicationManager::~ApplicationManager main_thread->join()");
   main_thread->join();
   SPDLOG_DEBUG("ska::pst::common::ApplicationManager::~ApplicationManager main_thread joined");
@@ -75,6 +74,9 @@ void ska::pst::common::ApplicationManager::main()
     }
   }
   
+  // thread to execute the perform_scan method asynchronously to the ApplicationManager
+  std::unique_ptr<std::thread> scan_thread{nullptr};
+
   // loop through the statemodel
   while(state != Unknown)
   {
@@ -122,6 +124,7 @@ void ska::pst::common::ApplicationManager::main()
           perform_stop_scan();
           SPDLOG_TRACE("{} {} {} perform_stop_scan done", method_name, entity, get_name(cmd));
           scan_thread->join();
+          scan_thread = nullptr;
           SPDLOG_TRACE("{} {} {} scan_thread joined", method_name, entity, get_name(cmd));
           SPDLOG_TRACE("{} {} {} set_state(ScanConfigured)", method_name, entity, get_name(cmd));
           set_state(ScanConfigured);
@@ -254,7 +257,7 @@ void ska::pst::common::ApplicationManager::set_exception(std::exception exceptio
   last_exception = std::make_exception_ptr(exception);
 }
 
-ska::pst::common::State ska::pst::common::ApplicationManager::get_previous_state()
+auto ska::pst::common::ApplicationManager::get_previous_state() const -> ska::pst::common::State
 {
   return previous_state;
 }
@@ -268,22 +271,31 @@ void ska::pst::common::ApplicationManager::enforce(bool required, const std::str
   }
 }
 
-bool ska::pst::common::ApplicationManager::is_idle()
+void ska::pst::common::ApplicationManager::enforce_state(ska::pst::common::State _state, const std::string& contextual_message) const
+{
+  if (state != _state)
+  {
+    SPDLOG_ERROR("ska::pst::common::ApplicationManager::enforce state[{}] != required state[{}] failure: {}", get_name(state), get_name(_state), contextual_message);
+    throw std::runtime_error(contextual_message);
+  }
+}
+
+auto ska::pst::common::ApplicationManager::is_idle() const -> bool
 {
   return get_state() == Idle;
 }
 
-bool ska::pst::common::ApplicationManager::is_beam_configured()
+auto ska::pst::common::ApplicationManager::is_beam_configured() const -> bool
 {
   return get_state() == BeamConfigured || get_state() == ScanConfigured || get_state() == Scanning;
 }
 
-bool ska::pst::common::ApplicationManager::is_scan_configured()
+auto ska::pst::common::ApplicationManager::is_scan_configured() const -> bool
 {
   return get_state() == ScanConfigured || get_state() == Scanning;
 }
 
-bool ska::pst::common::ApplicationManager::is_scanning()
+auto ska::pst::common::ApplicationManager::is_scanning() const -> bool
 {
   return get_state() == Scanning;
 }

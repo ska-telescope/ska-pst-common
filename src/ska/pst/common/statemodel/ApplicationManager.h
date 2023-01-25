@@ -1,4 +1,4 @@
- /*
+/*
  * Copyright 2022 Square Kilometre Array Observatory
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,9 +42,8 @@
 #ifndef SKA_PST_COMMON_ApplicationManager_h
 #define SKA_PST_COMMON_ApplicationManager_h
 
-namespace ska {
-namespace pst {
-namespace common {
+namespace ska::pst::common
+{
   /**
    * @brief The ApplicationManager
    * 
@@ -78,12 +77,12 @@ namespace common {
       void quit();
 
       /**
-       * @brief 
-       * 
-       * @return true if Application state is Idle
-       * @return false if Application state is not Idle
+       * @brief Return true if Application state model is Idle
+       *
+       * @return true if application state is Idle
+       * @return false if application state is not Idle
        */
-      bool is_idle();
+      bool is_idle() const;
 
       /**
        * @brief Return true if Application beam resources are currently assigned
@@ -91,15 +90,15 @@ namespace common {
        * @return true if state is one of the following: BeamConfigured, ScanConfigured, Scanning
        * @return false beam not configured
        */
-      bool is_beam_configured();
+      bool is_beam_configured() const;
 
       /**
-       * @brief Return true if the Application scan resources are currently assigned
+       * @brief Return true if the Application has been configured for scan.
        *
        * @return true Application has been configured for scan
        * @return false Application has not been configured for scan
        */
-      bool is_scan_configured();
+      bool is_scan_configured() const;
 
       /**
        * @brief Return true if the Application is Scanning
@@ -107,22 +106,32 @@ namespace common {
        * @return true Application is in a Scanning state
        * @return false Application is not in a Scanning state
        */
-      bool is_scanning();
+      bool is_scanning() const;
 
       /**
        * @brief Get the previous state before being in a RuntimeError state
        * 
        * @return State 
        */
-      State get_previous_state();
+      State get_previous_state() const;
 
       /**
-       * @brief Callback to handle state transition
+       * @brief Utility method to enforce that required is true or else an exception is thrown.
        * 
-       * @param required boolean method to determine state. Throws runtime error if method returns false.
-       * @param contextual_message Runtime error message with details.
+       * @param required boolean value that must be true.
+       * @param contextual_message Runtime error message describing the calling context.
+       * @throws std::runtime_error if required is false
        */
       void enforce(bool required, const std::string &contextual_message) const;
+
+      /**
+       * @brief Mandate the application manager is in the required state
+       * 
+       * @param required_state required state for the state model
+       * @param contextual_message Runtime error message describing the calling context
+       * @throws std::runtime_error if the state does not match the required_state
+       */
+      void enforce_state(ska::pst::common::State required_state, const std::string& contextual_message) const;
 
     protected:
       /**
@@ -209,7 +218,6 @@ namespace common {
        */
       ska::pst::common::Command wait_for_command();
 
-
       /**
        * @brief Transition the state.
        *
@@ -220,9 +228,6 @@ namespace common {
       //! Main thread of execution for the state model interface
       std::unique_ptr<std::thread> main_thread{nullptr};
 
-      //! Scan thread of execution for the state model interface
-      std::unique_ptr<std::thread> scan_thread{nullptr};
-
       //! Name of the agent using the ApplicationManager
       std::string entity;
 
@@ -230,8 +235,6 @@ namespace common {
       State previous_state;
   };
 
-} // common
-} // pst
-} // ska
+} // namespace ska::pst::common
 
-#endif
+#endif // SKA_PST_COMMON_ApplicationManager_h

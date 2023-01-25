@@ -33,18 +33,14 @@
 
 #define SKA_LOGGING_FORMAT "1|%Y-%m-%dT%T.%eZ|%l|Thread-%t|%!|%s#%#||%v"
 
-namespace ska {
-namespace pst {
-namespace common {
+namespace ska::pst::common {
 
 /**
- * Used to set up the spdlog logging framework for
+ * Used to set up the spdlog logging framework
  */
 void setup_spdlog();
 
-} // namespace common
-} // namespace pst
-} // namespace ska
+} // namespace ska::pst::common
 
 #endif // SKA_PST_COMMON_UTILS_Logging_h
 
