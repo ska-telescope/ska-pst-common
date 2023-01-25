@@ -40,12 +40,27 @@ namespace ska::pst::common
    * @brief The pst_validation_error intended to be used at ska::pst::common::StateModel validate methods.
    * 
    */
-  class pst_validation_error : public std::logic_error {
+  class pst_validation_error : public std::logic_error
+  {
     public:
+
       explicit pst_validation_error(const std::string& msg) : logic_error(msg) {};
       explicit pst_validation_error(const char* msg) : logic_error(msg) {};
       virtual ~pst_validation_error() = default;
- };
+  };
+
+  /**
+   * @brief Exception thrown when an invalid state transition occurs
+   * 
+   */
+  class pst_state_transition_error : public std::logic_error
+  {
+    public:
+
+      explicit pst_state_transition_error(const std::string& msg) : logic_error(msg) {};
+      explicit pst_state_transition_error(const char* msg) : logic_error(msg) {};
+      virtual ~pst_state_transition_error() = default;
+  };
     
 } // namespace ska::pst::common
 

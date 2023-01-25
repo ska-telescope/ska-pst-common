@@ -116,7 +116,7 @@ void ska::pst::common::StateModel::set_command(Command required_cmd)
     if (allowed_commands.find(state) == allowed_commands.end())
     {
       std::string error_msg = ("ska::pst::common::StateModel::set_command state={} cmd={} state did not exist in allowed_commands", state, get_name(cmd));
-      throw ska::pst::common::pst_validation_error(error_msg);
+      throw ska::pst::common::pst_state_transition_error(error_msg);
     }
 
     // check if the specified command exists in the current state
@@ -125,11 +125,11 @@ void ska::pst::common::StateModel::set_command(Command required_cmd)
     if (!allowed)
     {
       std::string error_msg = ("ska::pst::common::StateModel::set_command cmd={} was not allowed for state={}", get_name(cmd), state_names[state]);
-      throw ska::pst::common::pst_validation_error(error_msg);
+      throw ska::pst::common::pst_state_transition_error(error_msg);
     }
     else 
     {
-      SPDLOG_INFO("ska::pst::common::StateModel::set_command command updated cmd={}", get_name(cmd));
+      SPDLOG_DEBUG("ska::pst::common::StateModel::set_command command updated cmd={}", get_name(cmd));
       command = cmd;
     }
   }
@@ -150,6 +150,7 @@ void ska::pst::common::StateModel::wait_for_state(ska::pst::common::State requir
     if (!success)
     {
       SPDLOG_DEBUG("ska::pst::common::StateModel::wait_for_state raise_exception()");
+      raise_exception();
     }
   }
   SPDLOG_TRACE("ska::pst::common::StateModel::wait_for_state done");
@@ -163,13 +164,8 @@ void ska::pst::common::StateModel::wait_for_state_without_error(ska::pst::common
   {
     std::unique_lock<std::mutex> control_lock(state_mutex);
     state_cond.wait(control_lock, [&]{return (state == state_required);});
-    bool success = (state == state_required);
     SPDLOG_TRACE("ska::pst::common::StateModel::wait_for_state_without_error state={} required={}",state_names[state] , state_names[state_required]);
     state_cond.notify_one();
-    if (!success)
-    {
-      SPDLOG_DEBUG("ska::pst::common::StateModel::wait_for_state_without_error raise_exception()");
-    }
   }
   SPDLOG_TRACE("ska::pst::common::StateModel::wait_for_state_without_error done");
 }
@@ -198,6 +194,13 @@ bool ska::pst::common::StateModel::wait_for_not_state(ska::pst::common::State re
   state_cond.notify_one();
   SPDLOG_TRACE("ska::pst::common::StateModel::wait_for_state left_required={}", left_required);
   return left_required;
+}
+
+void ska::pst::common::StateModel::raise_exception()
+{
+  std::exception_ptr to_throw = last_exception;
+  last_exception = nullptr;
+  std::rethrow_exception(to_throw);
 }
 
 void ska::pst::common::StateModel::set_beam_config(const AsciiHeader &config)

@@ -212,6 +212,12 @@ namespace ska::pst::common
       std::exception_ptr get_exception() { return last_exception; };
 
       /**
+       * @brief Raise the stored exception from the ApplicationManager's main thread
+       * 
+       */
+      void raise_exception();
+
+      /**
        * @brief Return the current command of the state model
        *
        * @return Command current command of the state model

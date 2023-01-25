@@ -40,12 +40,11 @@ ska::pst::common::ApplicationManager::ApplicationManager(const std::string& _ent
 {
   SPDLOG_DEBUG("ska::pst::common::ApplicationManager::ApplicationManager({})", _entity);
   main_thread = std::make_unique<std::thread>(std::thread(&ska::pst::common::ApplicationManager::main, this));
-  spdlog::debug("ska::pst::common::ApplicationManager::ApplicationManager({}) main_thread started", _entity);
+  SPDLOG_DEBUG("ska::pst::common::ApplicationManager::ApplicationManager({}) main_thread started", _entity);
 }
 
 ska::pst::common::ApplicationManager::~ApplicationManager()
 {
-  SPDLOG_DEBUG("ska::pst::common::ApplicationManager::~ApplicationManager");
   SPDLOG_DEBUG("ska::pst::common::ApplicationManager::~ApplicationManager main_thread->join()");
   main_thread->join();
   SPDLOG_DEBUG("ska::pst::common::ApplicationManager::~ApplicationManager main_thread joined");
@@ -56,7 +55,13 @@ void ska::pst::common::ApplicationManager::main()
   std::string method_name = "ska::pst::common::ApplicationManager::main";
   SPDLOG_DEBUG("{}", method_name);
 
+<<<<<<< HEAD
   while(state == Unknown)
+=======
+  SPDLOG_DEBUG("{} initialisation loop", method_name);
+  previous_state = Unknown;
+  while (state == Unknown)
+>>>>>>> AT3-334 Improve exception handling in state model
   {
     SPDLOG_DEBUG("{} [{}] state_model.wait_for_command", method_name, entity, entity);
     ska::pst::common::Command cmd = wait_for_command();
@@ -64,9 +69,29 @@ void ska::pst::common::ApplicationManager::main()
 
     if (cmd == Initialise)
     {
+<<<<<<< HEAD
       perform_initialise();
       SPDLOG_DEBUG("{} perform_initialise done() state={}",method_name, state_names[get_state()]);
       set_state(Idle);
+=======
+      try
+      {
+        SPDLOG_DEBUG("{} perform_initialise", method_name);
+        perform_initialise();
+        SPDLOG_DEBUG("{} perform_initialise done() state={}",method_name, state_names[get_state()]);
+        set_state(Idle);
+      }
+      catch(const std::exception& exc)
+      {
+        spdlog::warn("{} {} exception during command [{}] {}", method_name, entity, get_name(cmd), exc.what());
+        set_exception(exc);
+        SPDLOG_DEBUG("ska::pst::common::ApplicationManager::set_exception done");
+        set_state(RuntimeError);
+        SPDLOG_DEBUG("{} {} [{}] state={}", method_name, entity, get_name(cmd), state_names[get_state()]);
+        return;
+      }
+      
+>>>>>>> AT3-334 Improve exception handling in state model
     }
     if(cmd == Terminate)
     {
@@ -80,7 +105,7 @@ void ska::pst::common::ApplicationManager::main()
   // loop through the statemodel
   while(state != Unknown)
   {
-    SPDLOG_DEBUG("{} [{}] state_model.wait_for_command", method_name, entity, entity);
+    SPDLOG_DEBUG("{} [{}] state_model.wait_for_command", method_name, entity);
     ska::pst::common::Command cmd = wait_for_command();
     SPDLOG_DEBUG("{} [{}] state={} command={}", method_name, entity, get_name(state), get_name(cmd));
 
@@ -108,13 +133,13 @@ void ska::pst::common::ApplicationManager::main()
           break;
           
         case StartScan:
-          SPDLOG_TRACE("{} {} {} perform_start_scan", method_name, entity, get_name(cmd));
           previous_state = ScanConfigured;
+          SPDLOG_TRACE("{} {} {} perform_start_scan", method_name, entity, get_name(cmd));
           perform_start_scan();
-          scan_thread = std::make_unique<std::thread>(std::thread(&ska::pst::common::ApplicationManager::perform_scan, this));
           SPDLOG_TRACE("{} {} {} perform_start_scan done", method_name, entity, get_name(cmd));
           SPDLOG_TRACE("{} {} {} set_state(Scanning)", method_name, entity, get_name(cmd));
           set_state(Scanning);
+          scan_thread = std::make_unique<std::thread>(std::thread(&ska::pst::common::ApplicationManager::perform_scan, this));
           SPDLOG_TRACE("{} {} [{}] state={}", method_name, entity, get_name(cmd), state_names[get_state()]);
           break;
           
@@ -123,11 +148,11 @@ void ska::pst::common::ApplicationManager::main()
           previous_state = Scanning;
           perform_stop_scan();
           SPDLOG_TRACE("{} {} {} perform_stop_scan done", method_name, entity, get_name(cmd));
+          SPDLOG_TRACE("{} {} {} set_state(ScanConfigured)", method_name, entity, get_name(cmd));
+          set_state(ScanConfigured);
           scan_thread->join();
           scan_thread = nullptr;
           SPDLOG_TRACE("{} {} {} scan_thread joined", method_name, entity, get_name(cmd));
-          SPDLOG_TRACE("{} {} {} set_state(ScanConfigured)", method_name, entity, get_name(cmd));
-          set_state(ScanConfigured);
           SPDLOG_TRACE("{} {} [{}] state={}", method_name, entity, get_name(cmd), state_names[get_state()]);
           break;
           
@@ -185,7 +210,9 @@ void ska::pst::common::ApplicationManager::quit()
 {
   if (get_state() == Scanning)
   {
+    SPDLOG_DEBUG("ska::pst::common::ApplicationManager::quit set_command(StopScan)");
     set_command(StopScan);
+    SPDLOG_DEBUG("ska::pst::common::ApplicationManager::quit wait_for_state(ScanConfigured)");
     wait_for_state(ScanConfigured);
   }
 
@@ -203,15 +230,20 @@ void ska::pst::common::ApplicationManager::quit()
 
   if (get_state() == RuntimeError)
   {
+    SPDLOG_DEBUG("ska::pst::common::ApplicationManager::quit set_command(Reset)");
     set_command(Reset);
-    wait_for_state(Idle);
+    SPDLOG_DEBUG("ska::pst::common::ApplicationManager::quit wait_for_state_without_error(Idle)");
+    wait_for_state_without_error(Idle);
   }
 
   if (get_state() == Idle)
   {
+    SPDLOG_DEBUG("ska::pst::common::ApplicationManager::quit set_command(Terminate)");
     set_command(Terminate);
+    SPDLOG_DEBUG("ska::pst::common::ApplicationManager::quit wait_for_state_without_error(Unknown)");
     wait_for_state(Unknown);
   }
+  SPDLOG_TRACE("ska::pst::common::ApplicationManager::quit done");
 }
 
 ska::pst::common::Command ska::pst::common::ApplicationManager::wait_for_command()
