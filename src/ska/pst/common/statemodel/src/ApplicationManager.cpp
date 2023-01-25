@@ -148,11 +148,11 @@ void ska::pst::common::ApplicationManager::main()
           previous_state = Scanning;
           perform_stop_scan();
           SPDLOG_TRACE("{} {} {} perform_stop_scan done", method_name, entity, get_name(cmd));
-          SPDLOG_TRACE("{} {} {} set_state(ScanConfigured)", method_name, entity, get_name(cmd));
-          set_state(ScanConfigured);
           scan_thread->join();
           scan_thread = nullptr;
           SPDLOG_TRACE("{} {} {} scan_thread joined", method_name, entity, get_name(cmd));
+          SPDLOG_TRACE("{} {} {} set_state(ScanConfigured)", method_name, entity, get_name(cmd));
+          set_state(ScanConfigured);
           SPDLOG_TRACE("{} {} [{}] state={}", method_name, entity, get_name(cmd), state_names[get_state()]);
           break;
           
