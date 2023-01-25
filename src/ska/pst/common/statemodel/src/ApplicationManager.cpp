@@ -55,13 +55,9 @@ void ska::pst::common::ApplicationManager::main()
   std::string method_name = "ska::pst::common::ApplicationManager::main";
   SPDLOG_DEBUG("{}", method_name);
 
-<<<<<<< HEAD
-  while(state == Unknown)
-=======
   SPDLOG_DEBUG("{} initialisation loop", method_name);
   previous_state = Unknown;
   while (state == Unknown)
->>>>>>> AT3-334 Improve exception handling in state model
   {
     SPDLOG_DEBUG("{} [{}] state_model.wait_for_command", method_name, entity, entity);
     ska::pst::common::Command cmd = wait_for_command();
@@ -69,11 +65,6 @@ void ska::pst::common::ApplicationManager::main()
 
     if (cmd == Initialise)
     {
-<<<<<<< HEAD
-      perform_initialise();
-      SPDLOG_DEBUG("{} perform_initialise done() state={}",method_name, state_names[get_state()]);
-      set_state(Idle);
-=======
       try
       {
         SPDLOG_DEBUG("{} perform_initialise", method_name);
@@ -91,7 +82,6 @@ void ska::pst::common::ApplicationManager::main()
         return;
       }
       
->>>>>>> AT3-334 Improve exception handling in state model
     }
     if(cmd == Terminate)
     {
