@@ -190,6 +190,11 @@ void ska::pst::common::ApplicationManager::main()
           throw std::runtime_error("Received Initialise command after initialisation completed");
           break;
 
+        case None:
+          SPDLOG_ERROR("{} wait_for_command returned None command which was unexepcted,", method_name);
+          throw std::runtime_error("Received None command from wait_for_command");
+          break;
+
         default:
           SPDLOG_WARN("{} Unexpected {} command", method_name, get_name(cmd));
           throw std::runtime_error("Received unexpected command");
