@@ -40,6 +40,7 @@ ska::pst::common::ApplicationManager::ApplicationManager(const std::string& _ent
 {
   SPDLOG_DEBUG("ska::pst::common::ApplicationManager::ApplicationManager({})", _entity);
   main_thread = std::make_unique<std::thread>(std::thread(&ska::pst::common::ApplicationManager::main, this));
+  previous_state = Unknown;
   SPDLOG_DEBUG("ska::pst::common::ApplicationManager::ApplicationManager({}) main_thread started", _entity);
 }
 
