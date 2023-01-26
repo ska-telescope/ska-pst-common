@@ -426,4 +426,4 @@ TEST_F(AsciiHeaderTest, test_compute_bytes_per_second) // NOLINT
   EXPECT_EQ(config.compute_bytes_per_second(), expected_bytes_per_second);
 }
 
-} // namepsace ska::pst::common::test
+} // namespace ska::pst::common::test

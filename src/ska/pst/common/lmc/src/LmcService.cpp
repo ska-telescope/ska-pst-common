@@ -119,7 +119,7 @@ void ska::pst::common::LmcService::set_state(
 }
 
 auto ska::pst::common::LmcService::connect(
-    grpc::ServerContext* context,
+    grpc::ServerContext* /*context*/,
     const ska::pst::lmc::ConnectionRequest* request,
     ska::pst::lmc::ConnectionResponse* /*response*/
 ) -> grpc::Status
@@ -131,7 +131,7 @@ auto ska::pst::common::LmcService::connect(
 }
 
 auto ska::pst::common::LmcService::configure_beam(
-    grpc::ServerContext* context,
+    grpc::ServerContext* /*context*/,
     const ska::pst::lmc::ConfigureBeamRequest* request,
     ska::pst::lmc::ConfigureBeamResponse* /*response*/
 ) -> grpc::Status
@@ -177,7 +177,7 @@ auto ska::pst::common::LmcService::configure_beam(
 }
 
 auto ska::pst::common::LmcService::deconfigure_beam(
-    grpc::ServerContext* context,
+    grpc::ServerContext* /*context*/,
     const ska::pst::lmc::DeconfigureBeamRequest* /*request*/,
     ska::pst::lmc::DeconfigureBeamResponse* /*response*/
 ) -> grpc::Status
@@ -208,7 +208,7 @@ auto ska::pst::common::LmcService::deconfigure_beam(
 }
 
 auto ska::pst::common::LmcService::get_beam_configuration(
-    grpc::ServerContext* context,
+    grpc::ServerContext* /*context*/,
     const ska::pst::lmc::GetBeamConfigurationRequest* /*request*/,
     ska::pst::lmc::GetBeamConfigurationResponse* response
 ) -> grpc::Status
@@ -238,7 +238,7 @@ auto ska::pst::common::LmcService::get_beam_configuration(
 }
 
 auto ska::pst::common::LmcService::configure_scan(
-    grpc::ServerContext* context,
+    grpc::ServerContext* /*context*/,
     const ska::pst::lmc::ConfigureScanRequest* request,
     ska::pst::lmc::ConfigureScanResponse* /*response*/
 ) -> grpc::Status
@@ -281,7 +281,7 @@ auto ska::pst::common::LmcService::configure_scan(
 }
 
 auto ska::pst::common::LmcService::deconfigure_scan(
-    grpc::ServerContext* context,
+    grpc::ServerContext* /*context*/,
     const ska::pst::lmc::DeconfigureScanRequest* /*request*/,
     ska::pst::lmc::DeconfigureScanResponse* /*response*/
 ) -> grpc::Status
@@ -314,7 +314,7 @@ auto ska::pst::common::LmcService::deconfigure_scan(
 }
 
 auto ska::pst::common::LmcService::get_scan_configuration(
-    grpc::ServerContext* context,
+    grpc::ServerContext* /*context*/,
     const ska::pst::lmc::GetScanConfigurationRequest* /*request*/,
     ska::pst::lmc::GetScanConfigurationResponse* response
 ) -> grpc::Status
@@ -349,7 +349,7 @@ auto ska::pst::common::LmcService::get_scan_configuration(
 }
 
 auto ska::pst::common::LmcService::start_scan(
-    grpc::ServerContext* context,
+    grpc::ServerContext* /*context*/,
     const ska::pst::lmc::StartScanRequest* request,
     ska::pst::lmc::StartScanResponse* /*response*/
 ) -> grpc::Status
@@ -390,7 +390,7 @@ auto ska::pst::common::LmcService::start_scan(
 }
 
 auto ska::pst::common::LmcService::stop_scan(
-    grpc::ServerContext* context,
+    grpc::ServerContext* /*context*/,
     const ska::pst::lmc::StopScanRequest* /*request*/,
     ska::pst::lmc::StopScanResponse* /*response*/
 ) -> grpc::Status
@@ -423,7 +423,7 @@ auto ska::pst::common::LmcService::stop_scan(
 }
 
 auto ska::pst::common::LmcService::get_state(
-    grpc::ServerContext* context,
+    grpc::ServerContext* /*context*/,
     const ska::pst::lmc::GetStateRequest* /*request*/,
     ska::pst::lmc::GetStateResponse* response
 ) -> grpc::Status
@@ -489,7 +489,7 @@ auto ska::pst::common::LmcService::monitor(
 }
 
 auto ska::pst::common::LmcService::abort(
-    grpc::ServerContext* context,
+    grpc::ServerContext* /*context*/,
     const ska::pst::lmc::AbortRequest* /*request*/,
     ska::pst::lmc::AbortResponse* /*response*/
 ) -> grpc::Status
@@ -535,7 +535,7 @@ auto ska::pst::common::LmcService::abort(
 }
 
 auto ska::pst::common::LmcService::reset(
-    grpc::ServerContext* context,
+    grpc::ServerContext* /*context*/,
     const ska::pst::lmc::ResetRequest* /*request*/,
     ska::pst::lmc::ResetResponse* /*response*/
 ) -> grpc::Status
@@ -578,7 +578,7 @@ auto ska::pst::common::LmcService::reset(
 }
 
 auto ska::pst::common::LmcService::restart(
-    grpc::ServerContext* context,
+    grpc::ServerContext* /*context*/,
     const ska::pst::lmc::RestartRequest* /*request*/,
     ska::pst::lmc::RestartResponse* /*response*/
 ) -> grpc::Status
@@ -623,7 +623,7 @@ auto ska::pst::common::LmcService::restart(
 }
 
 auto ska::pst::common::LmcService::go_to_fault(
-    grpc::ServerContext* context,
+    grpc::ServerContext* /*context*/,
     const ska::pst::lmc::GoToFaultRequest* /*request*/,
     ska::pst::lmc::GoToFaultResponse* /*response*/
 ) -> grpc::Status
@@ -642,7 +642,7 @@ auto ska::pst::common::LmcService::go_to_fault(
 }
 
 auto ska::pst::common::LmcService::get_env(
-    grpc::ServerContext* context,
+    grpc::ServerContext* /*context*/,
     const ska::pst::lmc::GetEnvironmentRequest* /*request*/,
     ska::pst::lmc::GetEnvironmentResponse* response
 ) -> grpc::Status

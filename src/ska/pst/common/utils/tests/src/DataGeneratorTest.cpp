@@ -111,8 +111,6 @@ TEST_P(DataGeneratorTest, test_generate_validate) // NOLINT
   EXPECT_FALSE(dg->test_block(buffer_ptr));
 }
 
-INSTANTIATE_TEST_SUITE_P(SignalGenerators,
-                         DataGeneratorTest,
-                         testing::Values("Random", "Sine"));
+INSTANTIATE_TEST_SUITE_P(SignalGenerators, DataGeneratorTest, testing::Values("Random", "Sine")); // NOLINT
 
 } // namespace ska::pst::common::test

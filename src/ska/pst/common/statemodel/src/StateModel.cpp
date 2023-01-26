@@ -115,7 +115,7 @@ void ska::pst::common::StateModel::set_command(Command required_cmd)
     // State not found
     if (allowed_commands.find(state) == allowed_commands.end())
     {
-      std::string error_msg = ("ska::pst::common::StateModel::set_command state={} cmd={} state did not exist in allowed_commands", state, get_name(cmd));
+      std::string error_msg = "ska::pst::common::StateModel::set_command state=" + get_name(state) + " cmd=" + get_name(cmd) + " state did not exist in allowed_commands";
       throw ska::pst::common::pst_state_transition_error(error_msg);
     }
 
@@ -124,7 +124,7 @@ void ska::pst::common::StateModel::set_command(Command required_cmd)
     bool allowed = (it != allowed_commands[state].end());
     if (!allowed)
     {
-      std::string error_msg = ("ska::pst::common::StateModel::set_command cmd={} was not allowed for state={}", get_name(cmd), state_names[state]);
+      std::string error_msg = "ska::pst::common::StateModel::set_command cmd=" + get_name(cmd) + " was not allowed for state=" + get_name(state);
       throw ska::pst::common::pst_state_transition_error(error_msg);
     }
     else 
@@ -170,7 +170,7 @@ void ska::pst::common::StateModel::wait_for_state_without_error(ska::pst::common
   SPDLOG_TRACE("ska::pst::common::StateModel::wait_for_state_without_error done");
 }
 
-bool ska::pst::common::StateModel::wait_for_state(ska::pst::common::State required, unsigned milliseconds)
+auto ska::pst::common::StateModel::wait_for_state(ska::pst::common::State required, unsigned milliseconds) -> bool
 {
   SPDLOG_TRACE("ska::pst::common::StateModel::wait_for_state required={} timeout={}", state_names[required], milliseconds);
   using namespace std::chrono_literals;
@@ -183,7 +183,7 @@ bool ska::pst::common::StateModel::wait_for_state(ska::pst::common::State requir
   return reached_required;
 }
 
-bool ska::pst::common::StateModel::wait_for_not_state(ska::pst::common::State required, unsigned milliseconds)
+auto ska::pst::common::StateModel::wait_for_not_state(ska::pst::common::State required, unsigned milliseconds) -> bool
 {
   SPDLOG_TRACE("ska::pst::common::StateModel::wait_for_not_state required={} timeout={}", state_names[required], milliseconds);
   using namespace std::chrono_literals;

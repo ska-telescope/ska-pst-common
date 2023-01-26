@@ -184,6 +184,16 @@ void ska::pst::common::ApplicationManager::main()
           set_state(Unknown);
           SPDLOG_TRACE("{} {} [{}] state={}", method_name, entity, get_name(cmd), state_names[get_state()]);
           break;
+
+        case Initialise:
+          SPDLOG_ERROR("{} Unexpected Initialise command", method_name);
+          throw std::runtime_error("Received Initialise command after initialisation completed");
+          break;
+
+        default:
+          SPDLOG_WARN("{} Unexpected {} command", method_name, get_name(cmd));
+          throw std::runtime_error("Received unexpected command");
+          break;
       }
     }
     catch (const std::exception& exc)
@@ -237,11 +247,11 @@ void ska::pst::common::ApplicationManager::quit()
   SPDLOG_TRACE("ska::pst::common::ApplicationManager::quit done");
 }
 
-ska::pst::common::Command ska::pst::common::ApplicationManager::wait_for_command()
+auto ska::pst::common::ApplicationManager::wait_for_command() -> ska::pst::common::Command
 {
   SPDLOG_TRACE("ska::pst::common::ApplicationManager::wait_for_command [{}]", entity);
 
-  ska::pst::common::Command cmd = command;
+  ska::pst::common::Command cmd{};
   {
     std::unique_lock<std::mutex> control_lock(command_mutex);
     command_cond.wait(control_lock, [&]{return (command != None);});
@@ -277,7 +287,7 @@ void ska::pst::common::ApplicationManager::set_state(ska::pst::common::State new
 void ska::pst::common::ApplicationManager::set_exception(std::exception exception)
 {
   SPDLOG_DEBUG("ska::pst::common::ApplicationManager::set_exception");
-  last_exception = std::make_exception_ptr(exception);
+  last_exception = std::make_exception_ptr(std::move(exception));
 }
 
 auto ska::pst::common::ApplicationManager::get_previous_state() const -> ska::pst::common::State

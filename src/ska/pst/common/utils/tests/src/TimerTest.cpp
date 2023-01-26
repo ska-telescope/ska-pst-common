@@ -85,4 +85,4 @@ TEST_F(TimerTest, get_print_rates) // NOLINT
   timer.print_rates(nbytes);
 }
 
-} // ska::pst::common::test
+} // namespace ska::pst::common::test

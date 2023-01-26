@@ -111,22 +111,22 @@ TEST_F(StateModelTest, test_configure_beam) // NOLINT
 
     // Test error ConfigureBeam on BeamConfigured
     _set_state(BeamConfigured);
-    ASSERT_THROW(_statemodel->configure_beam(beam_config),std::logic_error);
+    ASSERT_THROW(_statemodel->configure_beam(beam_config),std::logic_error); // NOLINT
     ASSERT_NE(ConfigureBeam, _statemodel->get_command());
 
     // Test error ConfigureBeam on ScanConfigured
     _set_state(ScanConfigured);
-    ASSERT_THROW(_statemodel->configure_beam(beam_config),std::logic_error);
+    ASSERT_THROW(_statemodel->configure_beam(beam_config),std::logic_error); // NOLINT
     ASSERT_NE(ConfigureBeam, _statemodel->get_command());
 
     // Test error ConfigureBeam on Scanning
     _set_state(Scanning);
-    ASSERT_THROW(_statemodel->configure_beam(beam_config),std::logic_error);
+    ASSERT_THROW(_statemodel->configure_beam(beam_config),std::logic_error); // NOLINT
     ASSERT_NE(ConfigureBeam, _statemodel->get_command());
 
     // Test error ConfigureBeam on RuntimeError
     _set_state(RuntimeError);
-    ASSERT_THROW(_statemodel->configure_beam(beam_config),std::logic_error);
+    ASSERT_THROW(_statemodel->configure_beam(beam_config),std::logic_error); // NOLINT
     ASSERT_NE(ConfigureBeam, _statemodel->get_command());
 
 }
@@ -141,22 +141,22 @@ TEST_F(StateModelTest, test_configure_scan) // NOLINT
 
     // Test error ConfigureScan on Idle
     _set_state(Idle);
-    ASSERT_THROW(_statemodel->configure_scan(scan_config),std::logic_error);
+    ASSERT_THROW(_statemodel->configure_scan(scan_config),std::logic_error); // NOLINT
     ASSERT_NE(ConfigureScan, _statemodel->get_command());
 
     // Test error ConfigureScan on ScanConfigured
     _set_state(ScanConfigured);
-    ASSERT_THROW(_statemodel->configure_scan(scan_config),std::logic_error);
+    ASSERT_THROW(_statemodel->configure_scan(scan_config),std::logic_error); // NOLINT
     ASSERT_NE(ConfigureScan, _statemodel->get_command());
 
     // Test error ConfigureScan on Scanning
     _set_state(Scanning);
-    ASSERT_THROW(_statemodel->configure_scan(scan_config),std::logic_error);
+    ASSERT_THROW(_statemodel->configure_scan(scan_config),std::logic_error); // NOLINT
     ASSERT_NE(ConfigureBeam, _statemodel->get_command());
 
     // Test error ConfigureScan on RuntimeError
     _set_state(RuntimeError);
-    ASSERT_THROW(_statemodel->configure_scan(scan_config),std::logic_error);
+    ASSERT_THROW(_statemodel->configure_scan(scan_config),std::logic_error); // NOLINT
     ASSERT_NE(ConfigureBeam, _statemodel->get_command());
 }
 
@@ -169,22 +169,22 @@ TEST_F(StateModelTest, test_start_scan) // NOLINT
     // assert_command(StartScan);
     // Test error StartScan on Idle
     _set_state(Idle);
-    ASSERT_THROW(_statemodel->start_scan(startscan_config),std::logic_error);
+    ASSERT_THROW(_statemodel->start_scan(startscan_config),std::logic_error); // NOLINT
     ASSERT_NE(StartScan, _statemodel->get_command());
 
     // Test error StartScan on BeamConfigured
     _set_state(BeamConfigured);
-    ASSERT_THROW(_statemodel->start_scan(startscan_config),std::logic_error);
+    ASSERT_THROW(_statemodel->start_scan(startscan_config),std::logic_error); // NOLINT
     ASSERT_NE(StartScan, _statemodel->get_command());
 
     // Test error StartScan on Scanning
     _set_state(Scanning);
-    ASSERT_THROW(_statemodel->start_scan(startscan_config),std::logic_error);
+    ASSERT_THROW(_statemodel->start_scan(startscan_config),std::logic_error); // NOLINT
     ASSERT_NE(StartScan, _statemodel->get_command());
 
     // Test error StartScan on RuntimeError
     _set_state(RuntimeError);
-    ASSERT_THROW(_statemodel->start_scan(startscan_config),std::logic_error);
+    ASSERT_THROW(_statemodel->start_scan(startscan_config),std::logic_error); // NOLINT
     ASSERT_NE(StartScan, _statemodel->get_command());
 
 }
@@ -198,22 +198,22 @@ TEST_F(StateModelTest, test_stop_scan) // NOLINT
     // assert_command(StopScan);
     // Test error StopScan on Idle
     _set_state(Idle);
-    ASSERT_THROW(_statemodel->stop_scan(),std::logic_error);
+    ASSERT_THROW(_statemodel->stop_scan(),std::logic_error); // NOLINT
     ASSERT_NE(StopScan, _statemodel->get_command());
 
     // Test error StopScan on BeamConfigured
     _set_state(BeamConfigured);
-    ASSERT_THROW(_statemodel->stop_scan(),std::logic_error);
+    ASSERT_THROW(_statemodel->stop_scan(),std::logic_error); // NOLINT
     ASSERT_NE(StopScan, _statemodel->get_command());
 
     // Test error StopScan on ScanConfigured
     _set_state(ScanConfigured);
-    ASSERT_THROW(_statemodel->stop_scan(),std::logic_error);
+    ASSERT_THROW(_statemodel->stop_scan(),std::logic_error); // NOLINT
     ASSERT_NE(StopScan, _statemodel->get_command());
 
     // Test error StopScan on RuntimeError
     _set_state(RuntimeError);
-    ASSERT_THROW(_statemodel->stop_scan(),std::logic_error);
+    ASSERT_THROW(_statemodel->stop_scan(),std::logic_error); // NOLINT
     ASSERT_NE(StopScan, _statemodel->get_command());
 
 }
@@ -227,22 +227,22 @@ TEST_F(StateModelTest, test_deconfigure_scan) // NOLINT
     // assert_command(DeconfigureScan);
     // Test error DeconfigureScan on Idle
     _set_state(Idle);
-    ASSERT_THROW(_statemodel->deconfigure_scan(),std::logic_error);
+    ASSERT_THROW(_statemodel->deconfigure_scan(),std::logic_error); // NOLINT
     ASSERT_NE(DeconfigureScan, _statemodel->get_command());
 
     // Test error DeconfigureScan on BeamConfigured
     _set_state(BeamConfigured);
-    ASSERT_THROW(_statemodel->deconfigure_scan(),std::logic_error);
+    ASSERT_THROW(_statemodel->deconfigure_scan(),std::logic_error); // NOLINT
     ASSERT_NE(DeconfigureScan, _statemodel->get_command());
 
     // Test error DeconfigureScan on Scanning
     _set_state(Scanning);
-    ASSERT_THROW(_statemodel->deconfigure_scan(),std::logic_error);
+    ASSERT_THROW(_statemodel->deconfigure_scan(),std::logic_error); // NOLINT
     ASSERT_NE(DeconfigureScan, _statemodel->get_command());
 
     // Test error DeconfigureScan on RuntimeError
     _set_state(RuntimeError);
-    ASSERT_THROW(_statemodel->deconfigure_scan(),std::logic_error);
+    ASSERT_THROW(_statemodel->deconfigure_scan(),std::logic_error); // NOLINT
     ASSERT_NE(DeconfigureScan, _statemodel->get_command());
 
 }
@@ -254,22 +254,22 @@ TEST_F(StateModelTest, test_deconfigure_beam) // NOLINT
     _statemodel->set_state(BeamConfigured);
     // _statemodel->deconfigure_beam(); // blocking call
     _set_state(Idle);
-    ASSERT_THROW(_statemodel->deconfigure_beam(),std::logic_error);
+    ASSERT_THROW(_statemodel->deconfigure_beam(),std::logic_error); // NOLINT
     ASSERT_NE(DeconfigureBeam, _statemodel->get_command());
 
     // Test error DeconfigureBeam on ScanConfigured
     _set_state(ScanConfigured);
-    ASSERT_THROW(_statemodel->deconfigure_beam(),std::logic_error);
+    ASSERT_THROW(_statemodel->deconfigure_beam(),std::logic_error); // NOLINT
     ASSERT_NE(DeconfigureBeam, _statemodel->get_command());
 
     // Test error DeconfigureBeam on Scanning
     _set_state(Scanning);
-    ASSERT_THROW(_statemodel->deconfigure_beam(),std::logic_error);
+    ASSERT_THROW(_statemodel->deconfigure_beam(),std::logic_error); // NOLINT
     ASSERT_NE(DeconfigureBeam, _statemodel->get_command());
 
     // Test error DeconfigureBeam on RuntimeError
     _set_state(RuntimeError);
-    ASSERT_THROW(_statemodel->deconfigure_beam(),std::logic_error);
+    ASSERT_THROW(_statemodel->deconfigure_beam(),std::logic_error); // NOLINT
     ASSERT_NE(DeconfigureBeam, _statemodel->get_command());
 
 }
@@ -283,22 +283,22 @@ TEST_F(StateModelTest, test_reset) // NOLINT
 
     // Test error reset on Idle
     _set_state(Idle);
-    ASSERT_THROW(_statemodel->reset(),std::logic_error);
+    ASSERT_THROW(_statemodel->reset(),std::logic_error); // NOLINT
     ASSERT_NE(Reset, _statemodel->get_command());
 
     // Test error reset on BeamConfigured
     _set_state(BeamConfigured);
-    ASSERT_THROW(_statemodel->reset(),std::logic_error);
+    ASSERT_THROW(_statemodel->reset(),std::logic_error); // NOLINT
     ASSERT_NE(Reset, _statemodel->get_command());
 
     // Test error reset on ScanConfigured
     _set_state(ScanConfigured);
-    ASSERT_THROW(_statemodel->reset(),std::logic_error);
+    ASSERT_THROW(_statemodel->reset(),std::logic_error); // NOLINT
     ASSERT_NE(Reset, _statemodel->get_command());
 
     // Test error reset on Scanning
     _set_state(Scanning);
-    ASSERT_THROW(_statemodel->reset(),std::logic_error);
+    ASSERT_THROW(_statemodel->reset(),std::logic_error); // NOLINT
     ASSERT_NE(Reset, _statemodel->get_command());
 
 }
