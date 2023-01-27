@@ -47,7 +47,7 @@ target_include_directories(
 target_link_libraries(
     ska_pst_common-utils
     PUBLIC
-    spdlog
+    spdlog::spdlog
 )
 
 if (BUILD_TESTING)

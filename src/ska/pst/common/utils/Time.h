@@ -40,9 +40,7 @@
 #define MJD_TO_UNIX_TIME(m) ( (long) (((m) - MJD_1970_01_01) * 86400.0) )
 #define STRUCT_TM_INIT {0, 0, 0, 0, 0, 0, 0, 0}
 
-namespace ska {
-namespace pst {
-namespace common {
+namespace ska::pst::common {
 
   /**
    * @brief Provides functionality for time stamps and conversion between different formats.
@@ -218,8 +216,6 @@ namespace common {
       uint64_t attoseconds{0};
   };
 
-} // namepace common
-} // namepace pst
-} // namepace ska
+} // namespace ska::pst::common
 
 #endif // SKA_PST_COMMON_UTIL_Time_h

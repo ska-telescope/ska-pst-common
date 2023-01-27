@@ -30,13 +30,10 @@
 
 #include <gtest/gtest.h>
 
-#ifndef SKA_PST_COMMON_TESTS_TimeTest_h
-#define SKA_PST_COMMON_TESTS_TimeTest_h
+#ifndef SKA_PST_COMMON_UTILS_TESTS_TimeTest_h
+#define SKA_PST_COMMON_UTILS_TESTS_TimeTest_h
 
-namespace ska {
-namespace pst { 
-namespace common {
-namespace test {
+namespace ska::pst::common::test {
 
 /**
  * @brief Test the Time class
@@ -58,10 +55,6 @@ class TimeTest : public ::testing::Test
     private:
 };
 
-} // namespace test
-} // namespace common
-} // namespace pst
-} // namespace ska
+} // namespace ska::pst::common::test
 
-#endif // SKA_PST_COMMON_TESTS_TimeTest_h
-
+#endif // SKA_PST_COMMON_UTILS_TESTS_TimeTest_h

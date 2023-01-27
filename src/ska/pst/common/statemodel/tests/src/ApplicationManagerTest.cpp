@@ -45,12 +45,10 @@ auto main(int argc, char* argv[]) -> int
   return ska::pst::common::test::gtest_main(argc, argv);
 }
 
-namespace ska {
-namespace pst {
-namespace common {
-namespace test {
+namespace ska::pst::common::test
+{
 
-  void log_state_and_command(std::shared_ptr<TestApplicationManager> _applicationmanager, std::string method_name)
+  void log_state_and_command(const std::shared_ptr<TestApplicationManager>& _applicationmanager, const std::string& method_name)
   {
     SPDLOG_TRACE("{} state={} command={}",method_name ,_applicationmanager->get_name(_applicationmanager->get_state()) ,_applicationmanager->get_name(_applicationmanager->get_command()));
   }
@@ -136,42 +134,64 @@ namespace test {
     scan_config.set_val("scan_config-FOO", "BAR");
     startscan_config.set_val("startscan_config-FOO", "BAR");
 
+    EXPECT_FALSE(_applicationmanager->is_beam_configured());
+    EXPECT_FALSE(_applicationmanager->is_scan_configured());
+    EXPECT_FALSE(_applicationmanager->is_scanning());
+
     // perform_configure_beam
-    log_state_and_command(_applicationmanager, ("{} perform_configure_beam", test_f));
+    log_state_and_command(_applicationmanager, ("{} perform_configure_beam", test_f)); // NOLINT
     EXPECT_CALL(*_applicationmanager, perform_configure_beam());
     _applicationmanager->configure_beam(beam_config);
     ASSERT_EQ(BeamConfigured, _applicationmanager->get_state());
+    ASSERT_TRUE(_applicationmanager->is_beam_configured());
+    EXPECT_FALSE(_applicationmanager->is_scan_configured());
+    EXPECT_FALSE(_applicationmanager->is_scanning());
     
     // perform_configure_scan
-    log_state_and_command(_applicationmanager, ("{} perform_configure_scan", test_f));
+    log_state_and_command(_applicationmanager, ("{} perform_configure_scan", test_f)); // NOLINT
     EXPECT_CALL(*_applicationmanager, perform_configure_scan());
     _applicationmanager->configure_scan(scan_config);
     ASSERT_EQ(ScanConfigured, _applicationmanager->get_state());
+    EXPECT_TRUE(_applicationmanager->is_beam_configured());
+    ASSERT_TRUE(_applicationmanager->is_scan_configured());
+    EXPECT_FALSE(_applicationmanager->is_scanning());
 
     // perform_scan
-    log_state_and_command(_applicationmanager, ("{} perform_scan", test_f));
+    log_state_and_command(_applicationmanager, ("{} perform_scan", test_f)); // NOLINT
     EXPECT_CALL(*_applicationmanager, perform_start_scan());
     EXPECT_CALL(*_applicationmanager, perform_scan());
     _applicationmanager->start_scan(startscan_config);
     ASSERT_EQ(Scanning, _applicationmanager->get_state());
+    EXPECT_TRUE(_applicationmanager->is_beam_configured());
+    EXPECT_TRUE(_applicationmanager->is_scan_configured());
+    ASSERT_TRUE(_applicationmanager->is_scanning());
 
     // perform_stop_scan
-    log_state_and_command(_applicationmanager, ("{} perform_stop_scan", test_f));
+    log_state_and_command(_applicationmanager, ("{} perform_stop_scan", test_f)); // NOLINT
     EXPECT_CALL(*_applicationmanager, perform_stop_scan());
     _applicationmanager->stop_scan();
     ASSERT_EQ(ScanConfigured, _applicationmanager->get_state());
+    EXPECT_TRUE(_applicationmanager->is_beam_configured());
+    EXPECT_TRUE(_applicationmanager->is_scan_configured());
+    ASSERT_FALSE(_applicationmanager->is_scanning());
 
     // perform_deconfigure_scan
-    log_state_and_command(_applicationmanager, ("{} perform_deconfigure_scan", test_f));
+    log_state_and_command(_applicationmanager, ("{} perform_deconfigure_scan", test_f)); // NOLINT
     EXPECT_CALL(*_applicationmanager, perform_deconfigure_scan());
     _applicationmanager->deconfigure_scan();
     ASSERT_EQ(BeamConfigured, _applicationmanager->get_state());
+    EXPECT_TRUE(_applicationmanager->is_beam_configured());
+    ASSERT_FALSE(_applicationmanager->is_scan_configured());
+    EXPECT_FALSE(_applicationmanager->is_scanning());
 
     // perform_deconfigure_beam
-    log_state_and_command(_applicationmanager, ("{} perform_deconfigure_beam", test_f));
+    log_state_and_command(_applicationmanager, ("{} perform_deconfigure_beam", test_f)); // NOLINT
     EXPECT_CALL(*_applicationmanager, perform_deconfigure_beam());
     _applicationmanager->deconfigure_beam();
     ASSERT_EQ(Idle, _applicationmanager->get_state());
+    ASSERT_FALSE(_applicationmanager->is_beam_configured());
+    EXPECT_FALSE(_applicationmanager->is_scan_configured());
+    EXPECT_FALSE(_applicationmanager->is_scanning());
   }
 
   TEST_F(ApplicationManagerTest, test_config_validations) // NOLINT
@@ -182,9 +202,10 @@ namespace test {
     SPDLOG_TRACE(test_f);
 
     // validate_configure_beam
-    log_state_and_command(_applicationmanager, ("{} validate_configure_beam", test_f));
-    ASSERT_THROW(_applicationmanager->configure_beam(beam_config),std::logic_error);
+    log_state_and_command(_applicationmanager, ("{} validate_configure_beam", test_f)); // NOLINT
+    ASSERT_THROW(_applicationmanager->configure_beam(beam_config),std::logic_error); // NOLINT
     ASSERT_EQ(Idle, _applicationmanager->get_state());
+    ASSERT_TRUE(_applicationmanager->is_idle());
 
     // Proceed to BeamConfigured
     beam_config.set_val("beam_config-FOO", "BAR");
@@ -193,8 +214,8 @@ namespace test {
     ASSERT_EQ(BeamConfigured, _applicationmanager->get_state());
 
     // validate_configure_scan
-    log_state_and_command(_applicationmanager, ("{} validate_configure_scan", test_f));
-    ASSERT_THROW(_applicationmanager->configure_scan(scan_config),ska::pst::common::pst_validation_error);
+    log_state_and_command(_applicationmanager, ("{} validate_configure_scan", test_f)); // NOLINT
+    ASSERT_THROW(_applicationmanager->configure_scan(scan_config),ska::pst::common::pst_validation_error); // NOLINT
     ASSERT_EQ(BeamConfigured, _applicationmanager->get_state());
 
     // Proceed to ScanConfigured
@@ -204,8 +225,8 @@ namespace test {
     ASSERT_EQ(ScanConfigured, _applicationmanager->get_state());
 
     // validate_configure_startscan
-    log_state_and_command(_applicationmanager, ("{} validate_configure_startscan", test_f));
-    ASSERT_THROW(_applicationmanager->start_scan(scan_config),ska::pst::common::pst_validation_error);
+    log_state_and_command(_applicationmanager, ("{} validate_configure_startscan", test_f)); // NOLINT
+    ASSERT_THROW(_applicationmanager->start_scan(scan_config),ska::pst::common::pst_validation_error); // NOLINT
     ASSERT_EQ(ScanConfigured, _applicationmanager->get_state());
 
     // Proceed to Scanning
@@ -221,7 +242,7 @@ namespace test {
     EXPECT_CALL(*_applicationmanager, perform_deconfigure_beam());
   }
 
-  TEST_F(ApplicationManagerTest, test_reset) // NO_LINT
+  TEST_F(ApplicationManagerTest, test_reset) // NOLINT
   {
     std::string test_f;
     test_f="ska::pst::common::test::ApplicationManagerTest::test_reset";
@@ -233,15 +254,18 @@ namespace test {
 
     // Trigger error in perform_configure_beam
     _applicationmanager->force_error=true;
-    log_state_and_command(_applicationmanager, ("{} configure_beam", test_f));
+    log_state_and_command(_applicationmanager, ("{} configure_beam", test_f)); // NOLINT
     EXPECT_CALL(*_applicationmanager, perform_configure_beam());
-    ASSERT_THROW(_applicationmanager->perform_configure_beam(),std::runtime_error);
+    ASSERT_THROW(_applicationmanager->perform_configure_beam(),std::runtime_error); // NOLINT
 
-    log_state_and_command(_applicationmanager, ("{} reset", test_f));
+    log_state_and_command(_applicationmanager, ("{} reset", test_f)); // NOLINT
     ASSERT_EQ(RuntimeError, _applicationmanager->get_state());
     EXPECT_CALL(*_applicationmanager, perform_reset());
     _applicationmanager->reset();
     ASSERT_EQ(Idle, _applicationmanager->get_state());
+    ASSERT_FALSE(_applicationmanager->is_beam_configured());
+    ASSERT_FALSE(_applicationmanager->is_scan_configured());
+    ASSERT_FALSE(_applicationmanager->is_scanning());
 
     // Proceed to BeamConfigured
     EXPECT_CALL(*_applicationmanager, _set_state(BeamConfigured));
@@ -250,16 +274,19 @@ namespace test {
 
     // Trigger error in perform_configure_scan
     _applicationmanager->force_error=true;
-    log_state_and_command(_applicationmanager, ("{} configure_scan", test_f));
+    log_state_and_command(_applicationmanager, ("{} configure_scan", test_f)); // NOLINT
     EXPECT_CALL(*_applicationmanager, perform_configure_scan());
-    ASSERT_THROW(_applicationmanager->perform_configure_scan(),std::runtime_error);
+    ASSERT_THROW(_applicationmanager->perform_configure_scan(),std::runtime_error); // NOLINT
 
-    log_state_and_command(_applicationmanager, ("{} reset", test_f));
+    log_state_and_command(_applicationmanager, ("{} reset", test_f)); // NOLINT
     ASSERT_EQ(RuntimeError, _applicationmanager->get_state());
     ASSERT_EQ(BeamConfigured, _applicationmanager->get_previous_state());
     EXPECT_CALL(*_applicationmanager, perform_reset());
     _applicationmanager->reset();
     ASSERT_EQ(Idle, _applicationmanager->get_state());
+    ASSERT_FALSE(_applicationmanager->is_beam_configured());
+    ASSERT_FALSE(_applicationmanager->is_scan_configured());
+    ASSERT_FALSE(_applicationmanager->is_scanning());
 
     // Proceed to ScanConfigured
     EXPECT_CALL(*_applicationmanager, _set_state(ScanConfigured));
@@ -269,11 +296,11 @@ namespace test {
 
     // Trigger error in perform_start_scan
     _applicationmanager->force_error=true;
-    log_state_and_command(_applicationmanager, ("{} start_scan", test_f));
+    log_state_and_command(_applicationmanager, ("{} start_scan", test_f)); // NOLINT
     EXPECT_CALL(*_applicationmanager, perform_start_scan());
-    ASSERT_THROW(_applicationmanager->perform_start_scan(),std::runtime_error);
+    ASSERT_THROW(_applicationmanager->perform_start_scan(),std::runtime_error); // NOLINT
 
-    log_state_and_command(_applicationmanager, ("{} reset", test_f));
+    log_state_and_command(_applicationmanager, ("{} reset", test_f)); // NOLINT
     ASSERT_EQ(RuntimeError, _applicationmanager->get_state());
     ASSERT_EQ(ScanConfigured, _applicationmanager->get_previous_state());
     EXPECT_CALL(*_applicationmanager, perform_reset());
@@ -285,18 +312,20 @@ namespace test {
     _applicationmanager->_set_state(Scanning);
     ASSERT_EQ(Scanning, _applicationmanager->get_state());
 
-
     // Trigger error in perform_stop_scan
     _applicationmanager->force_error=true;
-    log_state_and_command(_applicationmanager, ("{} stop_scan", test_f));
+    log_state_and_command(_applicationmanager, ("{} stop_scan", test_f)); // NOLINT
     EXPECT_CALL(*_applicationmanager, perform_stop_scan());
-    ASSERT_THROW(_applicationmanager->perform_stop_scan(),std::runtime_error);
+    ASSERT_THROW(_applicationmanager->perform_stop_scan(),std::runtime_error); // NOLINT
 
-    log_state_and_command(_applicationmanager, ("{} reset", test_f));
+    log_state_and_command(_applicationmanager, ("{} reset", test_f)); // NOLINT
     ASSERT_EQ(RuntimeError, _applicationmanager->get_state());
     EXPECT_CALL(*_applicationmanager, perform_reset());
     _applicationmanager->reset();
     ASSERT_EQ(Idle, _applicationmanager->get_state());
+    ASSERT_FALSE(_applicationmanager->is_beam_configured());
+    ASSERT_FALSE(_applicationmanager->is_scan_configured());
+    ASSERT_FALSE(_applicationmanager->is_scanning());
 
     // Proceed to ScanConfigured
     EXPECT_CALL(*_applicationmanager, _set_state(ScanConfigured));
@@ -306,15 +335,18 @@ namespace test {
 
     // Trigger error in perform_deconfigure_scan
     _applicationmanager->force_error=true;
-    log_state_and_command(_applicationmanager, ("{} deconfigure_scan", test_f));
+    log_state_and_command(_applicationmanager, ("{} deconfigure_scan", test_f)); // NOLINT
     EXPECT_CALL(*_applicationmanager, perform_deconfigure_scan());
-    ASSERT_THROW(_applicationmanager->perform_deconfigure_scan(),std::runtime_error);
+    ASSERT_THROW(_applicationmanager->perform_deconfigure_scan(),std::runtime_error); // NOLINT
 
-    log_state_and_command(_applicationmanager, ("{} reset", test_f));
+    log_state_and_command(_applicationmanager, ("{} reset", test_f)); // NOLINT
     ASSERT_EQ(RuntimeError, _applicationmanager->get_state());
     EXPECT_CALL(*_applicationmanager, perform_reset());
     _applicationmanager->reset();
     ASSERT_EQ(Idle, _applicationmanager->get_state());
+    ASSERT_FALSE(_applicationmanager->is_beam_configured());
+    ASSERT_FALSE(_applicationmanager->is_scan_configured());
+    ASSERT_FALSE(_applicationmanager->is_scanning());
 
     // Proceed to BeamConfigured
     EXPECT_CALL(*_applicationmanager, _set_state(BeamConfigured));
@@ -323,17 +355,58 @@ namespace test {
     
     // Trigger error in perform_deconfigure_beam
     _applicationmanager->force_error=true;
-    log_state_and_command(_applicationmanager, ("{} configure_beam", test_f));
+    log_state_and_command(_applicationmanager, ("{} deconfigure_beam", test_f)); // NOLINT
     EXPECT_CALL(*_applicationmanager, perform_deconfigure_beam());
-    ASSERT_THROW(_applicationmanager->perform_deconfigure_beam(),std::runtime_error);
+    ASSERT_THROW(_applicationmanager->perform_deconfigure_beam(),std::runtime_error); // NOLINT
 
-    log_state_and_command(_applicationmanager, ("{} configure_beam error encountered", test_f));
+    log_state_and_command(_applicationmanager, ("{} deconfigure_beam error encountered", test_f)); // NOLINT
     ASSERT_EQ(RuntimeError, _applicationmanager->get_state());
     EXPECT_CALL(*_applicationmanager, perform_reset());
     _applicationmanager->reset();
     ASSERT_EQ(Idle, _applicationmanager->get_state());
+    ASSERT_FALSE(_applicationmanager->is_beam_configured());
+    ASSERT_FALSE(_applicationmanager->is_scan_configured());
+    ASSERT_FALSE(_applicationmanager->is_scanning());
   }
-} // test
-} // common
-} // pst
-} // ska
+
+  TEST_F(ApplicationManagerTest, test_set_config) // NOLINT
+  {
+    std::string test_f;
+    test_f="ska::pst::common::test::ApplicationManagerTest::test_set_config";
+
+    spdlog::trace(test_f);
+    beam_config.set_val("beam_config-FOO", "BAR");
+    scan_config.set_val("scan_config-FOO", "BAR");
+    startscan_config.set_val("startscan_config-FOO", "BAR");
+
+    // perform_configure_beam
+    log_state_and_command(_applicationmanager, ("{} perform_configure_beam", test_f)); // NOLINT
+    EXPECT_CALL(*_applicationmanager, perform_configure_beam());
+    _applicationmanager->configure_beam(beam_config);
+    ASSERT_EQ(BeamConfigured, _applicationmanager->get_state());
+    ska::pst::common::AsciiHeader new_beam_config;
+    new_beam_config = _applicationmanager->get_beam_configuration();
+    ASSERT_EQ(beam_config.get_val("beam_config-FOO"), new_beam_config.get_val("beam_config-FOO"));
+    
+    // perform_configure_scan
+    log_state_and_command(_applicationmanager, ("{} perform_configure_scan", test_f)); // NOLINT
+    EXPECT_CALL(*_applicationmanager, perform_configure_scan());
+    _applicationmanager->configure_scan(scan_config);
+    ASSERT_EQ(ScanConfigured, _applicationmanager->get_state());
+    ska::pst::common::AsciiHeader new_scan_config;
+    new_scan_config = _applicationmanager->get_scan_configuration();
+    ASSERT_EQ(scan_config.get_val("scan_config-FOO"), new_scan_config.get_val("scan_config-FOO"));
+
+    // perform_scan
+    log_state_and_command(_applicationmanager, ("{} perform_scan", test_f)); // NOLINT
+    EXPECT_CALL(*_applicationmanager, perform_start_scan());
+    EXPECT_CALL(*_applicationmanager, perform_scan());
+    _applicationmanager->start_scan(startscan_config);
+    ASSERT_EQ(Scanning, _applicationmanager->get_state());
+    ska::pst::common::AsciiHeader new_startscan_config;
+    new_startscan_config = _applicationmanager->get_startscan_configuration();
+    ASSERT_EQ(startscan_config.get_val("startscan_config-FOO"), new_startscan_config.get_val("startscan_config-FOO"));
+
+  }
+
+} // namespace ska::pst::common::test

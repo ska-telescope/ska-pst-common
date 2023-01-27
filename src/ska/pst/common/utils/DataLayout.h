@@ -136,7 +136,7 @@ namespace ska::pst::common {
       unsigned packet_scales_offset{0};
   };
 
-} // ska::pst::common
+} // namespace ska::pst::common
 
 #endif // SKA_PST_COMMON_UTILS_DataLayout_h
 

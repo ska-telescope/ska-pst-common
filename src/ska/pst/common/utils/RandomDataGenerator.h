@@ -131,7 +131,7 @@ namespace ska::pst::common {
       ska::pst::common::RandomSequence scl_sequence;
   };
 
-} // ska::pst::common
+} // namespace ska::pst::common
 
 #endif // SKA_PST_COMMON_UTILS_RandomDataGenerator_h
 

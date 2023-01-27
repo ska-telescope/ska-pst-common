@@ -17,7 +17,7 @@ PROJECT=ska-pst-common
 # 	Overriden by CI variables. See .gitlab-cy.yml#L7
 PST_OCI_BUILDTOOLS_REGISTRY	?=registry.gitlab.com/ska-telescope/pst/ska-pst-buildtools
 PST_OCI_BUILDTOOLS_IMAGE	?=ska-pst-buildtools
-PST_OCI_BUILDTOOLS_TAG		?=0.0.0
+PST_OCI_BUILDTOOLS_TAG		?=0.0.1
 PST_OCI_COMMON_REGISTRY		?=registry.gitlab.com/ska-telescope/pst/ska-pst-common
 PST_OCI_COMMON_BUILDER		?=ska-pst-common-builder
 PST_OCI_COMMON_PROTO		?=ska-pst-common-proto

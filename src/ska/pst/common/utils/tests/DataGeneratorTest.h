@@ -70,4 +70,3 @@ namespace ska::pst::common::test {
 } // namespace ska::pst::common::test
 
 #endif // SKA_PST_COMMON_UTILS_TESTS_DataGeneratorTest_h
-

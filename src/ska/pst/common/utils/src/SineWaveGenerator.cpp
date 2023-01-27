@@ -57,7 +57,7 @@ void ska::pst::common::SineWaveGenerator::fill_data(char * buf, uint64_t size)
   }
 }
 
-static const char all_ones = 0xff;
+static const char all_ones = '\xff';
 
 void ska::pst::common::SineWaveGenerator::fill_weights(char * buf, uint64_t size)
 {

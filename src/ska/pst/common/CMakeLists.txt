@@ -42,7 +42,7 @@ target_include_directories(
 target_link_libraries(
   ska_pst_common
   PUBLIC
-  spdlog
+  spdlog::spdlog
   ${PSRDADA_LIBRARIES}
 )
 

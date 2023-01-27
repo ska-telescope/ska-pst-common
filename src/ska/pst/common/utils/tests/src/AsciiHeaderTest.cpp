@@ -41,10 +41,7 @@ auto main(int argc, char* argv[]) -> int
   return ska::pst::common::test::gtest_main(argc, argv);
 }
 
-namespace ska {
-namespace pst {
-namespace common {
-namespace test {
+namespace ska::pst::common::test {
 
 static constexpr int test_int_val = 123;
 static constexpr float test_float_val = 1.2346789;
@@ -429,7 +426,4 @@ TEST_F(AsciiHeaderTest, test_compute_bytes_per_second) // NOLINT
   EXPECT_EQ(config.compute_bytes_per_second(), expected_bytes_per_second);
 }
 
-} // namepsace test
-} // namepsace common
-} // namepsace pst
-} // namepsace ska
+} // namespace ska::pst::common::test

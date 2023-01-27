@@ -40,12 +40,12 @@ ska::pst::common::ApplicationManager::ApplicationManager(const std::string& _ent
 {
   SPDLOG_DEBUG("ska::pst::common::ApplicationManager::ApplicationManager({})", _entity);
   main_thread = std::make_unique<std::thread>(std::thread(&ska::pst::common::ApplicationManager::main, this));
+  previous_state = Unknown;
+  SPDLOG_DEBUG("ska::pst::common::ApplicationManager::ApplicationManager({}) main_thread started", _entity);
 }
 
 ska::pst::common::ApplicationManager::~ApplicationManager()
 {
-  SPDLOG_DEBUG("ska::pst::common::ApplicationManager::~ApplicationManager");
-  quit();
   SPDLOG_DEBUG("ska::pst::common::ApplicationManager::~ApplicationManager main_thread->join()");
   main_thread->join();
   SPDLOG_DEBUG("ska::pst::common::ApplicationManager::~ApplicationManager main_thread joined");
@@ -56,15 +56,47 @@ void ska::pst::common::ApplicationManager::main()
   std::string method_name = "ska::pst::common::ApplicationManager::main";
   SPDLOG_DEBUG("{}", method_name);
 
-  SPDLOG_DEBUG("{} perform_initialise", method_name);
-  perform_initialise();
-  set_state(Idle);
-  SPDLOG_DEBUG("{} perform_initialise done() state={}",method_name, state_names[get_state()]);
+  SPDLOG_DEBUG("{} initialisation loop", method_name);
+  previous_state = Unknown;
+  while (state == Unknown)
+  {
+    SPDLOG_DEBUG("{} [{}] state_model.wait_for_command", method_name, entity, entity);
+    ska::pst::common::Command cmd = wait_for_command();
+    SPDLOG_DEBUG("{} [{}] state={} command={}", method_name, entity, get_name(state), get_name(cmd));
+
+    if (cmd == Initialise)
+    {
+      try
+      {
+        SPDLOG_DEBUG("{} perform_initialise", method_name);
+        perform_initialise();
+        SPDLOG_DEBUG("{} perform_initialise done() state={}",method_name, state_names[get_state()]);
+        set_state(Idle);
+      }
+      catch(const std::exception& exc)
+      {
+        spdlog::warn("{} {} exception during command [{}] {}", method_name, entity, get_name(cmd), exc.what());
+        set_exception(exc);
+        SPDLOG_DEBUG("ska::pst::common::ApplicationManager::set_exception done");
+        set_state(RuntimeError);
+        SPDLOG_DEBUG("{} {} [{}] state={}", method_name, entity, get_name(cmd), state_names[get_state()]);
+        return;
+      }
+      
+    }
+    if(cmd == Terminate)
+    {
+      return;
+    }
+  }
+  
+  // thread to execute the perform_scan method asynchronously to the ApplicationManager
+  std::unique_ptr<std::thread> scan_thread{nullptr};
 
   // loop through the statemodel
   while(state != Unknown)
   {
-    SPDLOG_DEBUG("{} [{}] state_model.wait_for_command", method_name, entity, entity);
+    SPDLOG_DEBUG("{} [{}] state_model.wait_for_command", method_name, entity);
     ska::pst::common::Command cmd = wait_for_command();
     SPDLOG_DEBUG("{} [{}] state={} command={}", method_name, entity, get_name(state), get_name(cmd));
 
@@ -92,13 +124,13 @@ void ska::pst::common::ApplicationManager::main()
           break;
           
         case StartScan:
-          SPDLOG_TRACE("{} {} {} perform_start_scan", method_name, entity, get_name(cmd));
           previous_state = ScanConfigured;
+          SPDLOG_TRACE("{} {} {} perform_start_scan", method_name, entity, get_name(cmd));
           perform_start_scan();
-          scan_thread = std::make_unique<std::thread>(std::thread(&ska::pst::common::ApplicationManager::perform_scan, this));
           SPDLOG_TRACE("{} {} {} perform_start_scan done", method_name, entity, get_name(cmd));
           SPDLOG_TRACE("{} {} {} set_state(Scanning)", method_name, entity, get_name(cmd));
           set_state(Scanning);
+          scan_thread = std::make_unique<std::thread>(std::thread(&ska::pst::common::ApplicationManager::perform_scan, this));
           SPDLOG_TRACE("{} {} [{}] state={}", method_name, entity, get_name(cmd), state_names[get_state()]);
           break;
           
@@ -106,8 +138,10 @@ void ska::pst::common::ApplicationManager::main()
           SPDLOG_TRACE("{} {} {} perform_stop_scan", method_name, entity, get_name(cmd));
           previous_state = Scanning;
           perform_stop_scan();
-          scan_thread->join();
           SPDLOG_TRACE("{} {} {} perform_stop_scan done", method_name, entity, get_name(cmd));
+          scan_thread->join();
+          scan_thread = nullptr;
+          SPDLOG_TRACE("{} {} {} scan_thread joined", method_name, entity, get_name(cmd));
           SPDLOG_TRACE("{} {} {} set_state(ScanConfigured)", method_name, entity, get_name(cmd));
           set_state(ScanConfigured);
           SPDLOG_TRACE("{} {} [{}] state={}", method_name, entity, get_name(cmd), state_names[get_state()]);
@@ -150,6 +184,21 @@ void ska::pst::common::ApplicationManager::main()
           set_state(Unknown);
           SPDLOG_TRACE("{} {} [{}] state={}", method_name, entity, get_name(cmd), state_names[get_state()]);
           break;
+
+        case Initialise:
+          SPDLOG_ERROR("{} Unexpected Initialise command", method_name);
+          throw std::runtime_error("Received Initialise command after initialisation completed");
+          break;
+
+        case None:
+          SPDLOG_ERROR("{} wait_for_command returned None command which was unexepcted,", method_name);
+          throw std::runtime_error("Received None command from wait_for_command");
+          break;
+
+        default:
+          SPDLOG_WARN("{} Unexpected {} command", method_name, get_name(cmd));
+          throw std::runtime_error("Received unexpected command");
+          break;
       }
     }
     catch (const std::exception& exc)
@@ -167,7 +216,9 @@ void ska::pst::common::ApplicationManager::quit()
 {
   if (get_state() == Scanning)
   {
+    SPDLOG_DEBUG("ska::pst::common::ApplicationManager::quit set_command(StopScan)");
     set_command(StopScan);
+    SPDLOG_DEBUG("ska::pst::common::ApplicationManager::quit wait_for_state(ScanConfigured)");
     wait_for_state(ScanConfigured);
   }
 
@@ -185,22 +236,27 @@ void ska::pst::common::ApplicationManager::quit()
 
   if (get_state() == RuntimeError)
   {
+    SPDLOG_DEBUG("ska::pst::common::ApplicationManager::quit set_command(Reset)");
     set_command(Reset);
-    wait_for_state(Idle);
+    SPDLOG_DEBUG("ska::pst::common::ApplicationManager::quit wait_for_state_without_error(Idle)");
+    wait_for_state_without_error(Idle);
   }
 
   if (get_state() == Idle)
   {
+    SPDLOG_DEBUG("ska::pst::common::ApplicationManager::quit set_command(Terminate)");
     set_command(Terminate);
+    SPDLOG_DEBUG("ska::pst::common::ApplicationManager::quit wait_for_state_without_error(Unknown)");
     wait_for_state(Unknown);
   }
+  SPDLOG_TRACE("ska::pst::common::ApplicationManager::quit done");
 }
 
-ska::pst::common::Command ska::pst::common::ApplicationManager::wait_for_command()
+auto ska::pst::common::ApplicationManager::wait_for_command() -> ska::pst::common::Command
 {
-  SPDLOG_TRACE("ska::pst::common::ApplicationManager::wait_for_command [{}] command={}", entity, command);
+  SPDLOG_TRACE("ska::pst::common::ApplicationManager::wait_for_command [{}]", entity);
 
-  ska::pst::common::Command cmd = command;
+  ska::pst::common::Command cmd{};
   {
     std::unique_lock<std::mutex> control_lock(command_mutex);
     command_cond.wait(control_lock, [&]{return (command != None);});
@@ -208,7 +264,7 @@ ska::pst::common::Command ska::pst::common::ApplicationManager::wait_for_command
     command = None;
   }
   command_cond.notify_one();
-  SPDLOG_TRACE("ska::pst::common::ApplicationManager::wait_for_command [{}] done", entity);
+  SPDLOG_TRACE("ska::pst::common::ApplicationManager::wait_for_command [{}] command={}", entity, get_name(cmd));
   return cmd;
 }
 
@@ -236,10 +292,48 @@ void ska::pst::common::ApplicationManager::set_state(ska::pst::common::State new
 void ska::pst::common::ApplicationManager::set_exception(std::exception exception)
 {
   SPDLOG_DEBUG("ska::pst::common::ApplicationManager::set_exception");
-  last_exception = std::make_exception_ptr(exception);
+  last_exception = std::make_exception_ptr(std::move(exception));
 }
 
-ska::pst::common::State ska::pst::common::ApplicationManager::get_previous_state()
+auto ska::pst::common::ApplicationManager::get_previous_state() const -> ska::pst::common::State
 {
   return previous_state;
+}
+
+void ska::pst::common::ApplicationManager::enforce(bool required, const std::string& contextual_message) const
+{
+  if (!required)
+  {
+    SPDLOG_ERROR("ska::pst::common::ApplicationManager::enforce required state failure: {}", contextual_message);
+    throw std::runtime_error(contextual_message);
+  }
+}
+
+void ska::pst::common::ApplicationManager::enforce_state(ska::pst::common::State _state, const std::string& contextual_message) const
+{
+  if (state != _state)
+  {
+    SPDLOG_ERROR("ska::pst::common::ApplicationManager::enforce state[{}] != required state[{}] failure: {}", get_name(state), get_name(_state), contextual_message);
+    throw std::runtime_error(contextual_message);
+  }
+}
+
+auto ska::pst::common::ApplicationManager::is_idle() const -> bool
+{
+  return get_state() == Idle;
+}
+
+auto ska::pst::common::ApplicationManager::is_beam_configured() const -> bool
+{
+  return get_state() == BeamConfigured || get_state() == ScanConfigured || get_state() == Scanning;
+}
+
+auto ska::pst::common::ApplicationManager::is_scan_configured() const -> bool
+{
+  return get_state() == ScanConfigured || get_state() == Scanning;
+}
+
+auto ska::pst::common::ApplicationManager::is_scanning() const -> bool
+{
+  return get_state() == Scanning;
 }

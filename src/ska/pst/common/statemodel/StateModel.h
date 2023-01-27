@@ -41,9 +41,8 @@
 #ifndef SKA_PST_COMMON_StateModel_h
 #define SKA_PST_COMMON_StateModel_h
 
-namespace ska {
-namespace pst {
-namespace common {
+namespace ska::pst::common
+{
   /**
    * @brief Enumeration of states in the state model
    *
@@ -142,8 +141,16 @@ namespace common {
       virtual ~StateModel() = default;
 
       /**
+       * @brief initialise call back responsible for the state transition from Unknown to Idle.
+       * Required to be called by the Application that uses this statemodel in the Applications constructor class.
+       * Calls the virtual method perform_initialise prior to the state transition.
+       *
+       */
+      void initialise();
+
+      /**
        * @brief Issues the ConfigureBeam command and waits for the BeamConfigured or ConfiguringBeamError state to be reached.
-       * 
+       *
        * @param config Beam configuration
        *
        */
@@ -153,7 +160,7 @@ namespace common {
        * @brief Issues the ConfigureScan command and waits for the ScanConfigured or ConfiguringScanError state to be reached.
        *
        * @param config Scan configuration
-       * 
+       *
        */
       virtual void configure_scan(const AsciiHeader& config);
 
@@ -161,7 +168,7 @@ namespace common {
        * @brief Issues the StartScan command and waits for the Scanning or ScanningError state to be reached.
        *
        * @param config StartScan configuration
-       * 
+       *
        */
       virtual void start_scan(const AsciiHeader& config);
 
@@ -193,9 +200,9 @@ namespace common {
        * @brief Return the current state of the state model
        *
        * @return State current state of the state model
-       * 
+       *
        */
-      State get_state() { return state; }
+      State get_state() const { return state; }
 
       /**
        * @brief Return a pointer to the most recently received exception.
@@ -205,36 +212,69 @@ namespace common {
       std::exception_ptr get_exception() { return last_exception; };
 
       /**
+       * @brief Raise the stored exception from the ApplicationManager's main thread
+       * 
+       */
+      void raise_exception();
+
+      /**
        * @brief Return the current command of the state model
        *
        * @return Command current command of the state model
-       * 
+       *
        */
-      Command get_command() { return command; };
+      Command get_command() const { return command; };
 
       /**
        * @brief Return the name of the specified  command.
        *
        * @return std::string name of the command
-       * 
+       *
        */
-      std::string get_name(Command command) { return command_names[command]; };
+      std::string get_name(Command command) const { return command_names[command]; };
 
       /**
        * @brief Return the name of the specified state.
        *
        * @param state state whose name to return
        * @return std::string name of the state
-       * 
+       *
        */
-      std::string get_name(State state) { return state_names[state]; }
+      std::string get_name(State state) const { return state_names[state]; }
+
+      /**
+       * @brief Get the beam configuration parameters.
+       * 
+       * @return ska::pst::common::AsciiHeader& beam configuration parameters
+       */
+      virtual ska::pst::common::AsciiHeader& get_beam_configuration() {
+        return beam_config;
+      }
+
+      /**
+       * @brief Get the scan configuration parameters.
+       * 
+       * @return ska::pst::common::AsciiHeader& scan configuration parameters
+       */
+      virtual ska::pst::common::AsciiHeader& get_scan_configuration() {
+        return scan_config;
+      }
+
+      /**
+       * @brief Get the start scan configuration parameters
+       * 
+       * @return ska::pst::common::AsciiHeader& start scan configuration parameters
+       */
+      virtual ska::pst::common::AsciiHeader& get_startscan_configuration() {
+        return startscan_config;
+      }
 
     protected:
       /**
        * @brief Validates Beam configuration. Specific validation errors must be set when throwing exceptions.
        *
        * @param config Beam configuration to validate
-       * 
+       *
        */
       virtual void validate_configure_beam(const AsciiHeader& config) = 0;
 
@@ -242,7 +282,7 @@ namespace common {
        * @brief Validates Scan configuration. Specific validation errors must be set when throwing exceptions.
        *
        * @param config Scan configuration to validate
-       * 
+       *
        */
       virtual void validate_configure_scan(const AsciiHeader& config) = 0;
 
@@ -250,33 +290,91 @@ namespace common {
        * @brief Validates StartScan configuration. Specific validation errors must be set when throwing exceptions.
        *
        * @param config StartScan configuration to validate
-       * 
+       *
        */
       virtual void validate_start_scan(const AsciiHeader& config) = 0;
+
+      /**
+       * @brief Set the beam config object
+       *
+       * @param config 
+       */
+      void set_beam_config(const AsciiHeader &config);
+
+      /**
+       * @brief Set the scan config object
+       *
+       * @param config 
+       */
+      void set_scan_config(const AsciiHeader &config);
+
+      /**
+       * @brief Set the startscan config object
+       *
+       * @param config 
+       */
+      void set_startscan_config(const AsciiHeader &config);
 
       /**
        * @brief Set the command used as a reference for transitioning between states.
        *
        * @param command command to be set.
-       * 
+       *
        */
       void set_command(Command command);
 
       /**
-       * @brief Wait for the state model to transition to the expected state or the error state.
-       * If the state model transitions to the error state, the exception raised by the Receiver
+       * @brief Wait for the state model to transition to the required state or the RuntimeError state.
+       * If the state model transitions to the RuntimeError state, the exception raised by the Application
        * that caused the error will be raised here.
        *
-       * @param expected expected state to wait for.
-       * 
+       * @param required state to wait for.
+       *
        */
-      void wait_for_state(State expected);
+      void wait_for_state(State required);
+
+      /**
+       * @brief Wait for the state model to transition to the expected state.
+       *
+       * @param required state to wait for.
+       *
+       */
+      void wait_for_state_without_error(State required);
+
+      /**
+       * @brief Wait for the state model to achieve the required state within the timeout
+       *
+       * @param required target state for the state model to achieve.
+       * @param milliseconds timeout in milliseconds.
+       * @return true if the state model did achieve the required state before the timeout
+       * @return false if the state model did not achieve the required state before the timeout
+       */
+      bool wait_for_state(State expected, unsigned milliseconds);
+
+      /**
+       * @brief Wait for the state model to achieve any state other than the required state, within the timeout.
+       *
+       * @param required the required state for the state model to 
+       * @param milliseconds timeout in milliseconds
+       * @return true if the state model did achieve any state other than the required state within the timeout.
+       * @return false if the state model did not achieve any state other than the required state within the timeout
+       */
+      bool wait_for_not_state(State required, unsigned milliseconds);
 
       //! Command variable
       Command command{None};
 
       //! Current state of the state model
       State state{Unknown};
+
+      //! Beam configuration
+      AsciiHeader beam_config;
+
+      //! Scan configuration
+      AsciiHeader scan_config;
+
+      //! StartScan configuration
+      AsciiHeader startscan_config;
 
       //! Reference to the most recently experienced exception
       std::exception_ptr last_exception{nullptr};
@@ -295,11 +393,8 @@ namespace common {
 
     private:
 
-
   };
 
-} // common
-} // pst
-} // ska
+} // namespace ska::pst::common
 
 #endif // SKA_PST_COMMON_StateModel_h

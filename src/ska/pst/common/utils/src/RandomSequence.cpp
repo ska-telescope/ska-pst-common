@@ -171,8 +171,8 @@ auto ska::pst::common::RandomSequence::search_buffer_for_expected_sequence(
     test_sequence[i] = distribution(generator);
 
     const unsigned tmpsize = 8;
-    std::array<char,tmpsize> temp;
-    snprintf (temp.data(), tmpsize, " %02x", test_sequence[i]);
+    std::array<char,tmpsize> temp; // NOLINT
+    snprintf(temp.data(), tmpsize, " %02x", test_sequence[i]); // NOLINT
     sequence_str += temp.data();
   }
 

@@ -34,10 +34,7 @@
 #include "ska/pst/common/testutils/GtestMain.h"
 #include "ska/pst/common/utils/Logging.h"
 
-namespace ska {
-namespace pst {
-namespace common {
-namespace test {
+namespace ska::pst::common::test {
 
 auto test_data_dir() -> std::string&
 {
@@ -84,8 +81,4 @@ auto gtest_main(int argc, char** argv) -> int
     return RUN_ALL_TESTS();
 }
 
-} // namespace test
-} // namespace common
-} // namespace pst
-} // namespace ska
-
+} // namespace ska::pst::common::test

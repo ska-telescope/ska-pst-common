@@ -39,10 +39,7 @@
 #ifndef SKA_PST_SMRB_TESTS_LmcServiceTest_h
 #define SKA_PST_SMRB_TESTS_LmcServiceTest_h
 
-namespace ska {
-namespace pst {
-namespace common {
-namespace test {
+namespace ska::pst::common::test {
 
 class TestLmcServiceHandler : public ska::pst::common::LmcServiceHandler {
     public:
@@ -178,9 +175,6 @@ class LmcServiceTest : public ::testing::Test
 
 };
 
-} // namespace test
-} // namespace common
-} // namespace pst
-} // namespace ska
+} // namespace ska::pst::common::test
 
 #endif // SKA_PST_SMRB_TESTS_LmcServiceTest_h

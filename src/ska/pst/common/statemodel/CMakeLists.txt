@@ -32,7 +32,7 @@ target_include_directories(
 target_link_libraries(
     ska_pst_common-statemodel
     PUBLIC
-    spdlog
+    spdlog::spdlog
 )
 
 if (BUILD_TESTING)

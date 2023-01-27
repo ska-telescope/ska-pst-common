@@ -146,7 +146,7 @@ namespace ska::pst::common {
       bool layout_configured{false};
   };
 
-} // ska::pst::common
+} // namespace ska::pst::common
 
 #endif // SKA_PST_COMMON_UTILS_DataGenerator_h
 

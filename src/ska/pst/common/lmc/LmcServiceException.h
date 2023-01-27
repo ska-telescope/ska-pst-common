@@ -34,9 +34,7 @@
 #include "ska/pst/lmc/ska_pst_lmc.pb.h"
 #include <grpc++/grpc++.h>
 
-namespace ska {
-namespace pst {
-namespace common {
+namespace ska::pst::common {
 
     /**
      * @brief Custom exception that can be used by @see LmcServiceHandler instances to return specific error codes.
@@ -109,9 +107,7 @@ namespace common {
 
     };
 
-} // common
-} // pst
-} // ska
+} // namespace ska::pst::common
 
 
 #endif // __SKA_PST_COMMON_LmcServiceException_h

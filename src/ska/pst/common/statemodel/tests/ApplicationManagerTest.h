@@ -33,13 +33,10 @@
 
 #include "ska/pst/common/statemodel/ApplicationManager.h"
 
-#ifndef SKA_PST_COMMON_TESTS_ApplicationManagerTest_h
-#define SKA_PST_COMMON_TESTS_ApplicationManagerTest_h
+#ifndef SKA_PST_COMMON_STATEMODEL_TESTS_ApplicationManagerTest_h
+#define SKA_PST_COMMON_STATEMODEL_TESTS_ApplicationManagerTest_h
 
-namespace ska {
-namespace pst {
-namespace common {
-namespace test {
+namespace ska::pst::common::test {
 
 /**
  * @brief Test the ApplicationManager class
@@ -53,7 +50,7 @@ class TestApplicationManager : public ska::pst::common::ApplicationManager
     TestApplicationManager() : ApplicationManager("TestApplicationManager") {
 
       // For Initialise
-      wait_for_state(Idle);
+      initialise();
 
       // For jumping states
       ON_CALL(*this, _set_state).WillByDefault([this](State required) {
@@ -162,9 +159,7 @@ class ApplicationManagerTest : public ::testing::Test
 
   private:
 };
-}
-}
-}
-}
 
-#endif // SKA_PST_COMMON_TESTS_ApplicationManagerTest_h
+} // ska::pst::common::test
+
+#endif // SKA_PST_COMMON_STATEMODEL_TESTS_ApplicationManagerTest_h

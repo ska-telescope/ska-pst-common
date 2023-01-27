@@ -34,13 +34,10 @@
 #include "ska/pst/common/statemodel/StateModelException.h"
 #include "ska/pst/common/statemodel/StateModel.h"
 
-#ifndef SKA_PST_COMMON_TESTS_StateModelTest_h
-#define SKA_PST_COMMON_TESTS_StateModelTest_h
+#ifndef SKA_PST_COMMON_STATEMODEL_TESTS_StateModelTest_h
+#define SKA_PST_COMMON_STATEMODEL_TESTS_StateModelTest_h
 
-namespace ska {
-namespace pst {
-namespace common {
-namespace test {
+namespace ska::pst::common::test {
 
 /**
  * @brief Test the StateModel class
@@ -90,8 +87,7 @@ class StateModelTest : public ::testing::Test
     std::shared_ptr<TestStateModel> _statemodel{nullptr};
   private:
 };
-} // test
-} // common
-} // pst
-} // ska
-#endif // SKA_PST_COMMON_StateModelTest_h
+
+} // namespace ska::pst::common::test
+
+#endif // SKA_PST_COMMON_STATEMODEL_TESTS_StateModelTest_h

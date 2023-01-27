@@ -42,9 +42,7 @@
 #include "ska/pst/common/lmc/LmcServiceHandler.h"
 #include "ska/pst/lmc/ska_pst_lmc.grpc.pb.h"
 
-namespace ska {
-namespace pst {
-namespace common {
+namespace ska::pst::common {
 
     /**
      * @brief Class to handle the local monitoring and control of PST Services.
@@ -359,8 +357,6 @@ namespace common {
             grpc::Status get_env(grpc::ServerContext* context, const ska::pst::lmc::GetEnvironmentRequest* request, ska::pst::lmc::GetEnvironmentResponse* response) override;
     };
 
-} // common
-} // pst
-} // ska
+} // namespace ska::pst::common
 
 #endif // __SKA_PST_COMMON_LmcService_h

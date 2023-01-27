@@ -37,10 +37,7 @@
 #pragma GCC diagnostic pop
 #include <string>
 
-namespace ska {
-namespace pst {
-namespace common {
-namespace test {
+namespace ska::pst::common::test {
 
 /*
  * @brief the data directory to find test data files
@@ -58,10 +55,6 @@ std::string test_data_file(std::string const& filename);
  */
 int gtest_main(int argc, char** argv);
 
-} // namespace test
-} // namespace common
-} // namespace pst
-} // namespace ska
+} // namespace ska::pst::common::test
 
 #endif // SKA_PST_COMMON_TESTUTILS_GtestMain_h
-

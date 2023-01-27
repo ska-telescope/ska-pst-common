@@ -35,9 +35,7 @@
 
 #include "ska/pst/lmc/ska_pst_lmc.pb.h"
 
-namespace ska {
-namespace pst {
-namespace common {
+namespace ska::pst::common {
 
     /**
      * @brief A purely abstract class that is used as a bridge between gRPC service and PST applications.
@@ -243,9 +241,7 @@ namespace common {
              virtual void get_env(ska::pst::lmc::GetEnvironmentResponse *data) noexcept {}
     };
 
-} // common
-} // pst
-} // ska
+} // namespace ska::pst::common
 
 #endif // __SKA_PST_COMMON_LmcServiceHandler_h
 

@@ -40,10 +40,7 @@ auto main(int argc, char* argv[]) -> int
   return ska::pst::common::test::gtest_main(argc, argv);
 }
 
-namespace ska {
-namespace pst {
-namespace common {
-namespace test {
+namespace ska::pst::common::test {
 
 TimerTest::TimerTest()
     : ::testing::Test()
@@ -88,7 +85,4 @@ TEST_F(TimerTest, get_print_rates) // NOLINT
   timer.print_rates(nbytes);
 }
 
-} // namepsace test
-} // namepsace common
-} // namepsace pst
-} // namepsace ska
+} // namespace ska::pst::common::test
