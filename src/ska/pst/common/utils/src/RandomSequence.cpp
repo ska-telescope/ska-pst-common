@@ -40,9 +40,6 @@
 
 void ska::pst::common::RandomSequence::configure(const ska::pst::common::AsciiHeader& header)
 {
-  // to enable debug-level verbosity (when make build_debug doesn't)
-  // spdlog::set_level(spdlog::level::debug);
-
   std::string utc_start_str = header.get_val("UTC_START");
   SPDLOG_DEBUG("ska::pst::common::RandomSequence::configure UTC_START={}", utc_start_str);
 
@@ -102,7 +99,7 @@ auto ska::pst::common::RandomSequence::validate(uint8_t * buffer, uint64_t bufsz
     }
     else
     {
-      spdlog::warn("ska::pst::common::RandomSequence::validate unexpected byte at index={}", i);
+      SPDLOG_WARN("ska::pst::common::RandomSequence::validate unexpected byte at index={}", i);
 
       unsigned zeroes = 0;
       while (i<bufsz && buffer[i] == 0) // NOLINT
@@ -113,7 +110,7 @@ auto ska::pst::common::RandomSequence::validate(uint8_t * buffer, uint64_t bufsz
 
       if (zeroes > 1)
       {
-        spdlog::warn("ska::pst::common::RandomSequence::validate skipping {} consecutive zeroes", zeroes);
+        SPDLOG_WARN("ska::pst::common::RandomSequence::validate skipping {} consecutive zeroes", zeroes);
         seek (zeroes - 1);
       }
       else
@@ -176,7 +173,7 @@ auto ska::pst::common::RandomSequence::search_buffer_for_expected_sequence(
     sequence_str += temp.data();
   }
 
-  spdlog::warn("ska::pst::common::RandomSequence::search_buffer_for_expected_sequence: {}", sequence_str);
+  SPDLOG_WARN("ska::pst::common::RandomSequence::search_buffer_for_expected_sequence: {}", sequence_str);
 
   unsigned matched = 0;
   uint64_t i = 0;
@@ -196,11 +193,11 @@ auto ska::pst::common::RandomSequence::search_buffer_for_expected_sequence(
 
   if (matched < seqlen)
   {
-    spdlog::warn("ska::pst::common::RandomSequence::search_buffer_for_expected_sequence not found");
+    SPDLOG_WARN("ska::pst::common::RandomSequence::search_buffer_for_expected_sequence not found");
     return -1;
   }
 
-  spdlog::warn("ska::pst::common::RandomSequence::search_buffer_for_expected_sequence found at offset={}", i-seqlen);
+  SPDLOG_WARN("ska::pst::common::RandomSequence::search_buffer_for_expected_sequence found at offset={}", i-seqlen);
   return i - seqlen;
 }
 
@@ -208,7 +205,7 @@ auto ska::pst::common::RandomSequence::search_expected_sequence_for_buffer(
   uint8_t * buffer, uint64_t bufsz, uint64_t max_offset
 ) -> int64_t
 {
-  spdlog::warn("ska::pst::common::RandomSequence::search_expected_sequence_for_buffer max offset = {}", max_offset);
+  SPDLOG_WARN("ska::pst::common::RandomSequence::search_expected_sequence_for_buffer max offset = {}", max_offset);
 
   uint64_t matched = 0;
   uint64_t longest_match = 0;
@@ -235,12 +232,12 @@ auto ska::pst::common::RandomSequence::search_expected_sequence_for_buffer(
 
   if (matched == bufsz)
   {
-    spdlog::warn("ska::pst::common::RandomSequence::search_expected_sequence_for_buffer match found at offset={}", offset-bufsz);
+    SPDLOG_WARN("ska::pst::common::RandomSequence::search_expected_sequence_for_buffer match found at offset={}", offset-bufsz);
     return offset - bufsz;
   }
 
-  spdlog::warn("ska::pst::common::RandomSequence::search_expected_sequence_for_buffer match not found in first {} samples of expected sequence", max_offset);
-  spdlog::warn("ska::pst::common::RandomSequence::search_expected_sequence_for_buffer longest match={} out of {} buffer samples", longest_match, bufsz);
+  SPDLOG_WARN("ska::pst::common::RandomSequence::search_expected_sequence_for_buffer match not found in first {} samples of expected sequence", max_offset);
+  SPDLOG_WARN("ska::pst::common::RandomSequence::search_expected_sequence_for_buffer longest match={} out of {} buffer samples", longest_match, bufsz);
 
   return -1;
 }

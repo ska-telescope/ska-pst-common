@@ -75,7 +75,7 @@ void ska::pst::common::ApplicationManager::main()
       }
       catch(const std::exception& exc)
       {
-        spdlog::warn("{} {} exception during command [{}] {}", method_name, entity, get_name(cmd), exc.what());
+        SPDLOG_WARN("{} {} exception during command [{}] {}", method_name, entity, get_name(cmd), exc.what());
         set_exception(exc);
         SPDLOG_DEBUG("ska::pst::common::ApplicationManager::set_exception done");
         set_state(RuntimeError);
@@ -203,7 +203,7 @@ void ska::pst::common::ApplicationManager::main()
     }
     catch (const std::exception& exc)
     {
-      spdlog::warn("{} {} exception during command [{}] {}", method_name, entity, get_name(cmd), exc.what());
+      SPDLOG_WARN("{} {} exception during command [{}] {}", method_name, entity, get_name(cmd), exc.what());
       set_exception(exc);
       SPDLOG_DEBUG("ska::pst::common::ApplicationManager::set_exception done");
       set_state(RuntimeError);

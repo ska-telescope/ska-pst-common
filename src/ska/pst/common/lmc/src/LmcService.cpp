@@ -140,7 +140,7 @@ auto ska::pst::common::LmcService::configure_beam(
 
     // check if handler has already have had beam configured
     if (handler->is_beam_configured()) {
-        spdlog::warn("Received configure beam request but beam configured already.");
+        SPDLOG_WARN("Received configure beam request but beam configured already.");
         ska::pst::lmc::Status status;
         status.set_code(ska::pst::lmc::ErrorCode::CONFIGURED_FOR_BEAM_ALREADY);
         status.set_message(_service_name + " beam configured already. Beam configuation needs to be deconfigured before reconfiguring.");
@@ -149,7 +149,7 @@ auto ska::pst::common::LmcService::configure_beam(
 
     if (_state != ska::pst::lmc::ObsState::EMPTY) {
         auto curr_state_name = ska::pst::lmc::ObsState_Name(_state);
-        spdlog::warn("Received configure beam request but not in EMPTY state. Currently in {} state.", curr_state_name);
+        SPDLOG_WARN("Received configure beam request but not in EMPTY state. Currently in {} state.", curr_state_name);
 
         ska::pst::lmc::Status status;
         status.set_code(ska::pst::lmc::ErrorCode::INVALID_REQUEST);
@@ -186,7 +186,7 @@ auto ska::pst::common::LmcService::deconfigure_beam(
 
     // check if handler has already have had beam configured
     if (!handler->is_beam_configured()) {
-        spdlog::warn("Received request to deconfigure beam when no beam configured.");
+        SPDLOG_WARN("Received request to deconfigure beam when no beam configured.");
 
         ska::pst::lmc::Status status;
         status.set_code(ska::pst::lmc::ErrorCode::NOT_CONFIGURED_FOR_BEAM);
@@ -216,7 +216,7 @@ auto ska::pst::common::LmcService::get_beam_configuration(
     SPDLOG_TRACE("ska::pst::common::LmcService::get_beam_configuration()");
     if (!handler->is_beam_configured())
     {
-        spdlog::warn("Received request to get beam configuration when no beam configured.");
+        SPDLOG_WARN("Received request to get beam configuration when no beam configured.");
         ska::pst::lmc::Status status;
         status.set_code(ska::pst::lmc::ErrorCode::NOT_CONFIGURED_FOR_BEAM);
         status.set_message("No " + _service_name + " beam configured.");
@@ -245,7 +245,7 @@ auto ska::pst::common::LmcService::configure_scan(
 {
     // check if handler has already been configured
     if (handler->is_scan_configured()) {
-        spdlog::warn("Received configure scan request but handler already has scan configured.");
+        SPDLOG_WARN("Received configure scan request but handler already has scan configured.");
         ska::pst::lmc::Status status;
         status.set_code(ska::pst::lmc::ErrorCode::CONFIGURED_FOR_SCAN_ALREADY);
         status.set_message(_service_name + " already configured for scan. Scan needs to be deconfigured before reconfiguring.");
@@ -255,7 +255,7 @@ auto ska::pst::common::LmcService::configure_scan(
     // ensure in IDLE state
     if (_state != ska::pst::lmc::ObsState::IDLE) {
         auto curr_state_name = ska::pst::lmc::ObsState_Name(_state);
-        spdlog::warn("Received configure request but not in IDLE state. Currently in {} state.", curr_state_name);
+        SPDLOG_WARN("Received configure request but not in IDLE state. Currently in {} state.", curr_state_name);
         ska::pst::lmc::Status status;
         status.set_code(ska::pst::lmc::ErrorCode::INVALID_REQUEST);
 
@@ -289,7 +289,7 @@ auto ska::pst::common::LmcService::deconfigure_scan(
     // ensure in READY state
     if (_state != ska::pst::lmc::ObsState::READY) {
         auto curr_state_name = ska::pst::lmc::ObsState_Name(_state);
-        spdlog::warn("Received deconfigure request but not in READY state. Currently in {} state.", curr_state_name);
+        SPDLOG_WARN("Received deconfigure request but not in READY state. Currently in {} state.", curr_state_name);
         ska::pst::lmc::Status status;
         status.set_code(ska::pst::lmc::ErrorCode::INVALID_REQUEST);
 
@@ -324,7 +324,7 @@ auto ska::pst::common::LmcService::get_scan_configuration(
         _state != ska::pst::lmc::ObsState::SCANNING
     ) {
         auto curr_state_name = ska::pst::lmc::ObsState_Name(_state);
-        spdlog::warn("Get scan configuration request but not in configured state. Currently in {} state.", curr_state_name);
+        SPDLOG_WARN("Get scan configuration request but not in configured state. Currently in {} state.", curr_state_name);
         ska::pst::lmc::Status status;
         status.set_code(ska::pst::lmc::ErrorCode::INVALID_REQUEST);
 
@@ -356,7 +356,7 @@ auto ska::pst::common::LmcService::start_scan(
 {
     SPDLOG_TRACE("ska::pst::common::LmcService::scan()");
     if (_state == ska::pst::lmc::ObsState::SCANNING) {
-        spdlog::warn("Received scan request but already in SCANNING state.");
+        SPDLOG_WARN("Received scan request but already in SCANNING state.");
         ska::pst::lmc::Status status;
         status.set_code(ska::pst::lmc::ErrorCode::ALREADY_SCANNING);
         status.set_message(_service_name + " is already scanning.");
@@ -365,7 +365,7 @@ auto ska::pst::common::LmcService::start_scan(
     if (_state != ska::pst::lmc::ObsState::READY)
     {
         auto curr_state_name = ska::pst::lmc::ObsState_Name(_state);
-        spdlog::warn("Received scan request but not in READY state. Currently in {} state.", curr_state_name);
+        SPDLOG_WARN("Received scan request but not in READY state. Currently in {} state.", curr_state_name);
         ska::pst::lmc::Status status;
         status.set_code(ska::pst::lmc::ErrorCode::INVALID_REQUEST);
 
@@ -398,7 +398,7 @@ auto ska::pst::common::LmcService::stop_scan(
     SPDLOG_TRACE("ska::pst::common::LmcService::stop_scan()");
     if (_state != ska::pst::lmc::ObsState::SCANNING) {
         auto curr_state_name = ska::pst::lmc::ObsState_Name(_state);
-        spdlog::warn("Received stop scan request but not in SCANNING state. Currently in {} state.", curr_state_name);
+        SPDLOG_WARN("Received stop scan request but not in SCANNING state. Currently in {} state.", curr_state_name);
         ska::pst::lmc::Status status;
         status.set_code(ska::pst::lmc::ErrorCode::NOT_SCANNING);
 
@@ -441,7 +441,7 @@ auto ska::pst::common::LmcService::monitor(
 {
     if (_state != ska::pst::lmc::ObsState::SCANNING) {
         auto curr_state_name = ska::pst::lmc::ObsState_Name(_state);
-        spdlog::warn("Received monitor but not in SCANNING state. Currently in {} state.", curr_state_name);
+        SPDLOG_WARN("Received monitor but not in SCANNING state. Currently in {} state.", curr_state_name);
         ska::pst::lmc::Status status;
         status.set_code(ska::pst::lmc::ErrorCode::NOT_SCANNING);
 
@@ -480,7 +480,7 @@ auto ska::pst::common::LmcService::monitor(
             break;
         }
         if (!writer->Write(response)) {
-            spdlog::warn("Writing monitor response return false. Exiting monitor.");
+            SPDLOG_WARN("Writing monitor response return false. Exiting monitor.");
             break;
         }
     }
@@ -496,7 +496,7 @@ auto ska::pst::common::LmcService::abort(
 {
     if (_state == ska::pst::lmc::ObsState::ABORTED)
     {
-        spdlog::warn("Received abort request but already in ABORTED state.");
+        SPDLOG_WARN("Received abort request but already in ABORTED state.");
         return grpc::Status::OK;
     }
 
@@ -506,7 +506,7 @@ auto ska::pst::common::LmcService::abort(
         _state == ska::pst::lmc::ObsState::SCANNING
     )) {
         auto curr_state_name = ska::pst::lmc::ObsState_Name(_state);
-        spdlog::warn("Received abort request but not in an abortable state. Currently in {} state.",
+        SPDLOG_WARN("Received abort request but not in an abortable state. Currently in {} state.",
             curr_state_name);
         ska::pst::lmc::Status status;
         status.set_code(ska::pst::lmc::ErrorCode::INVALID_REQUEST);
@@ -542,14 +542,14 @@ auto ska::pst::common::LmcService::reset(
 {
     if (_state == ska::pst::lmc::ObsState::IDLE)
     {
-        spdlog::warn("Received reset request but in IDLE state. Ignoring request.");
+        SPDLOG_WARN("Received reset request but in IDLE state. Ignoring request.");
         return grpc::Status::OK;
     }
     if (!(_state == ska::pst::lmc::ObsState::ABORTED or _state == ska::pst::lmc::ObsState::FAULT)) {
         // LMC is the source of truth, but we should have been moved to an ABORTED or FAULT state
         // before this could have been called.
         auto curr_state_name = ska::pst::lmc::ObsState_Name(_state);
-        spdlog::warn("Received reset request but not ABORTED or FAULT state. Currently in {} state.",
+        SPDLOG_WARN("Received reset request but not ABORTED or FAULT state. Currently in {} state.",
             curr_state_name);
         ska::pst::lmc::Status status;
         status.set_code(ska::pst::lmc::ErrorCode::INVALID_REQUEST);
@@ -585,12 +585,12 @@ auto ska::pst::common::LmcService::restart(
 {
     if (_state == ska::pst::lmc::ObsState::EMPTY)
     {
-        spdlog::warn("Received restart request but already in EMPTY state. Ignoring request.");
+        SPDLOG_WARN("Received restart request but already in EMPTY state. Ignoring request.");
         return grpc::Status::OK;
     }
     if (!(_state == ska::pst::lmc::ObsState::ABORTED or _state == ska::pst::lmc::ObsState::FAULT)) {
         auto curr_state_name = ska::pst::lmc::ObsState_Name(_state);
-        spdlog::warn("Received reset request but not ABORTED or FAULT state. Currently in {} state.",
+        SPDLOG_WARN("Received reset request but not ABORTED or FAULT state. Currently in {} state.",
             curr_state_name);
         ska::pst::lmc::Status status;
         status.set_code(ska::pst::lmc::ErrorCode::INVALID_REQUEST);
@@ -635,7 +635,7 @@ auto ska::pst::common::LmcService::go_to_fault(
             handler->stop_scan();
         }
     } catch (std::exception& ex) {
-        spdlog::warn("{} gRPC service tried to stop scanning but exception {} occurred.", _service_name, ex.what());
+        SPDLOG_WARN("{} gRPC service tried to stop scanning but exception {} occurred.", _service_name, ex.what());
     }
     set_state(ska::pst::lmc::ObsState::FAULT);
     return grpc::Status::OK;
