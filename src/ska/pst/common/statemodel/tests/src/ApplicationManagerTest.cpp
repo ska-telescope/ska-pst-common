@@ -374,7 +374,7 @@ namespace ska::pst::common::test
     std::string test_f;
     test_f="ska::pst::common::test::ApplicationManagerTest::test_set_config";
 
-    spdlog::trace(test_f);
+    SPDLOG_TRACE(test_f);
     beam_config.set_val("beam_config-FOO", "BAR");
     scan_config.set_val("scan_config-FOO", "BAR");
     startscan_config.set_val("startscan_config-FOO", "BAR");
