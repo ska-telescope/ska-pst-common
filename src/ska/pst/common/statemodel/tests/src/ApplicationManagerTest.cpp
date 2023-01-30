@@ -41,7 +41,6 @@
 
 auto main(int argc, char* argv[]) -> int
 {
-  spdlog::set_level(spdlog::level::trace);
   return ska::pst::common::test::gtest_main(argc, argv);
 }
 
@@ -63,7 +62,7 @@ namespace ska::pst::common::test
     SPDLOG_TRACE("ska::pst::common::test::TestApplicationManager::perform_terminate mock_function");
   }
 
-  void TestApplicationManager::validate_configure_beam(const ska::pst::common::AsciiHeader& beam_config) 
+  void TestApplicationManager::validate_configure_beam(const ska::pst::common::AsciiHeader& beam_config)
   {
     SPDLOG_TRACE("ska::pst::common::test::TestApplicationManager::validate_configure_beam");
     try
@@ -76,7 +75,7 @@ namespace ska::pst::common::test
     }
   }
 
-  void TestApplicationManager::validate_configure_scan(const ska::pst::common::AsciiHeader& scan_config) 
+  void TestApplicationManager::validate_configure_scan(const ska::pst::common::AsciiHeader& scan_config)
   {
     SPDLOG_TRACE("ska::pst::common::test::TestApplicationManager::validate_configure_scan");
     try
@@ -89,7 +88,7 @@ namespace ska::pst::common::test
     }
   }
 
-  void TestApplicationManager::validate_start_scan(const ska::pst::common::AsciiHeader& startscan_config) 
+  void TestApplicationManager::validate_start_scan(const ska::pst::common::AsciiHeader& startscan_config)
   {
     SPDLOG_TRACE("ska::pst::common::test::TestApplicationManager::validate_start_scan");
     try
@@ -107,7 +106,7 @@ namespace ska::pst::common::test
   {
   }
 
-  void ApplicationManagerTest::SetUp() 
+  void ApplicationManagerTest::SetUp()
   {
     SPDLOG_TRACE("ska::pst::common::test::ApplicationManagerTest::SetUp");
     _applicationmanager = std::make_shared<TestApplicationManager>();
@@ -146,7 +145,7 @@ namespace ska::pst::common::test
     ASSERT_TRUE(_applicationmanager->is_beam_configured());
     EXPECT_FALSE(_applicationmanager->is_scan_configured());
     EXPECT_FALSE(_applicationmanager->is_scanning());
-    
+
     // perform_configure_scan
     log_state_and_command(_applicationmanager, ("{} perform_configure_scan", test_f)); // NOLINT
     EXPECT_CALL(*_applicationmanager, perform_configure_scan());
@@ -292,7 +291,7 @@ namespace ska::pst::common::test
     EXPECT_CALL(*_applicationmanager, _set_state(ScanConfigured));
     _applicationmanager->_set_state(ScanConfigured);
     ASSERT_EQ(ScanConfigured, _applicationmanager->get_state());
-    
+
 
     // Trigger error in perform_start_scan
     _applicationmanager->force_error=true;
@@ -352,7 +351,7 @@ namespace ska::pst::common::test
     EXPECT_CALL(*_applicationmanager, _set_state(BeamConfigured));
     _applicationmanager->_set_state(BeamConfigured);
     ASSERT_EQ(BeamConfigured, _applicationmanager->get_state());
-    
+
     // Trigger error in perform_deconfigure_beam
     _applicationmanager->force_error=true;
     log_state_and_command(_applicationmanager, ("{} deconfigure_beam", test_f)); // NOLINT
@@ -387,7 +386,7 @@ namespace ska::pst::common::test
     ska::pst::common::AsciiHeader new_beam_config;
     new_beam_config = _applicationmanager->get_beam_configuration();
     ASSERT_EQ(beam_config.get_val("beam_config-FOO"), new_beam_config.get_val("beam_config-FOO"));
-    
+
     // perform_configure_scan
     log_state_and_command(_applicationmanager, ("{} perform_configure_scan", test_f)); // NOLINT
     EXPECT_CALL(*_applicationmanager, perform_configure_scan());

@@ -40,7 +40,6 @@
 
 auto main(int argc, char* argv[]) -> int
 {
-  spdlog::set_level(spdlog::level::trace);
   return ska::pst::common::test::gtest_main(argc, argv);
 }
 
