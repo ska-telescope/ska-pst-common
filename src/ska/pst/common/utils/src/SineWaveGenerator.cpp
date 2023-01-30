@@ -35,7 +35,7 @@
 
 void ska::pst::common::SineWaveGenerator::configure(const ska::pst::common::AsciiHeader& /* config */)
 {
-  spdlog::debug("ska::pst::common::SineWaveGenerator::configure");
+  SPDLOG_DEBUG("ska::pst::common::SineWaveGenerator::configure");
 
   // might parse the period / frequency of the pure tone from the AsciiHeader ?
 }
