@@ -127,7 +127,7 @@ void ska::pst::common::StateModel::set_command(Command required_cmd)
       std::string error_msg = "ska::pst::common::StateModel::set_command cmd=" + get_name(cmd) + " was not allowed for state=" + get_name(state);
       throw ska::pst::common::pst_state_transition_error(error_msg);
     }
-    else 
+    else
     {
       SPDLOG_DEBUG("ska::pst::common::StateModel::set_command command updated cmd={}", get_name(cmd));
       command = cmd;
@@ -212,7 +212,8 @@ void ska::pst::common::StateModel::set_beam_config(const AsciiHeader &config)
 void ska::pst::common::StateModel::set_scan_config(const AsciiHeader &config)
 {
   SPDLOG_DEBUG("ska::pst::common::StateModel::set_scan_config done");
-  scan_config.clone(config);
+  scan_config.clone(beam_config);
+  scan_config.append_header(config);
 }
 
 void ska::pst::common::StateModel::set_startscan_config(const AsciiHeader &config)
