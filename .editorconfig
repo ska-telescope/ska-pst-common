@@ -22,3 +22,8 @@ indent_style = tab
 [*.md]
 trim_trailing_whitespace = false
 
+[*.cpp]
+indent_size = 2
+
+[*.h]
+indent_size = 2
