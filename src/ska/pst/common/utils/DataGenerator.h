@@ -28,11 +28,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SKA_PST_COMMON_UTILS_DataGenerator_h
-#define SKA_PST_COMMON_UTILS_DataGenerator_h
+#include <memory> // std::shared_ptr
 
 #include "ska/pst/common/utils/AsciiHeader.h"
 #include "ska/pst/common/utils/DataLayout.h"
+
+#ifndef SKA_PST_COMMON_UTILS_DataGenerator_h
+#define SKA_PST_COMMON_UTILS_DataGenerator_h
 
 namespace ska::pst::common {
 
@@ -48,7 +50,7 @@ namespace ska::pst::common {
        * @brief Construct a new DataGenerator object
        *
        */
-      DataGenerator() = default;
+      explicit DataGenerator(std::shared_ptr<DataLayout> layout);
 
       /**
        * @brief Destroy the DataGenerator object
@@ -64,18 +66,11 @@ namespace ska::pst::common {
       virtual void configure(const ska::pst::common::AsciiHeader& config);
 
       /**
-       * @brief Configure the offsets and sizes of data+weights+scales in each packet
-       *
-       * @param layout DataLayout that defines the packet structure
-       */
-      void copy_layout(const ska::pst::common::DataLayout* layout);
-
-      /**
        * @brief Fill the data+weights+scales of the next UDP packet
        *
        * @param buf base memory address of the packet to be filled
        */
-      virtual void fill_block(char * buf);
+      virtual void fill_packet(char * buf);
 
       /**
        * @brief Fill the data stream in the provided buffer
@@ -104,7 +99,7 @@ namespace ska::pst::common {
        * @param buffer pointer to buffer containing received UDP packet
        * @return true if both data and weights match expectations
        */
-      virtual bool test_block(char * buf);
+      virtual bool test_packet(char * buf);
 
       /**
        * @brief Verify the data stream in the provided buffer
@@ -140,10 +135,21 @@ namespace ska::pst::common {
     protected:
 
       //! Layout of each block of data
-      DataLayout layout;
+      std::shared_ptr<DataLayout> layout;
 
-      //! flag set when block/packet memory layout has been configured
-      bool layout_configured{false};
+      //! number of bits per sample in the data stream
+      uint32_t nbit{0};
+
+      //! number of dimensions in the data stream
+      uint32_t ndim{0};
+
+      //! number of polarisations in the data stream
+      uint32_t npol{0};
+
+      //! number of channels in the data stream
+      uint32_t nchan{0};
+
+
   };
 
 } // namespace ska::pst::common

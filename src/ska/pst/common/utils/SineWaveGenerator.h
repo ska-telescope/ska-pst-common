@@ -28,7 +28,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <cmath>
+#include <complex>
+#include <spdlog/spdlog.h>
 
 #include "ska/pst/common/utils/DataGenerator.h"
 
@@ -49,7 +50,7 @@ namespace ska::pst::common {
        * @brief Construct a new SineWaveGenerator object
        *
        */
-      SineWaveGenerator() = default;
+      SineWaveGenerator(std::shared_ptr<DataLayout> layout);
 
       /**
        * @brief Destroy the SineWaveGenerator object
@@ -133,8 +134,99 @@ namespace ska::pst::common {
       /* Period of sine wave in samples (irrational number ~100, finishes ~10 cycles in 1k points) */
       double period{M_PI * M_PI * M_PI * M_PI};
 
-      /* Returns the next sample in the sequence */
-      char next_sample ();
+      template <typename T>
+      std::complex<T> next_sample(bool generate)
+      {
+        if (!generate)
+        {
+          return std::complex<T>(0, 0);
+        }
+        double phase = current_sample / period;
+        current_sample++;
+        return std::complex<T>(T(amplitude * sinf(phase)), T(amplitude * cosf(phase)));
+      }
+
+      template <typename T>
+      void fill_complex_data(char * buf, uint64_t size)
+      {
+        std::complex<T> * ptr = reinterpret_cast<std::complex<T> *>(buf);
+        static constexpr uint32_t nbits_per_byte = 8;
+        const uint32_t nsamp_per_packet = layout->get_samples_per_packet();
+        const uint32_t nchan_per_packet = layout->get_nchan_per_packet();
+        const uint32_t resolution = nsamp_per_packet * nchan_per_packet * npol * ndim * nbit / nbits_per_byte;
+        const uint32_t nblocks = size / resolution;
+        SPDLOG_DEBUG("ska::pst::common::SineWaveGenerator::fill_complex_data nsamp_per_packet={} nchan_per_packet={} size={} resolution={} nblocks={}", nsamp_per_packet, nchan_per_packet, size, resolution, nblocks);
+
+        uint64_t i = 0;
+        for (uint32_t iblock=0; iblock<nblocks; iblock++)
+        {
+          for (uint32_t ipol=0; ipol<npol; ipol++)
+          {
+            for (uint32_t ichan=0; ichan<nchan_per_packet; ichan++)
+            {
+              const uint32_t ochan = current_channel + ichan;
+              const bool active_chan = (ochan == sinusoid_channel);
+              for (uint32_t isamp=0; isamp<nsamp_per_packet; isamp++)
+              {
+                ptr[i] = next_sample<T>(active_chan);
+                i++;
+              }
+            }
+          }
+          current_channel += nchan_per_packet;
+          if (current_channel >= nchan)
+          {
+            current_channel = 0;
+          }
+        }
+      }
+
+      template <typename T>
+      bool test_complex_data(char * buf, uint64_t size)
+      {
+        std::complex<T> * ptr = reinterpret_cast<std::complex<T> *>(buf);
+        static constexpr uint32_t nbits_per_byte = 8;
+        const uint32_t nsamp_per_packet = layout->get_samples_per_packet();
+        const uint32_t nchan_per_packet = layout->get_nchan_per_packet();
+        const uint32_t resolution = nsamp_per_packet * nchan_per_packet * npol * ndim * nbit / nbits_per_byte;
+        const uint32_t nblocks = size / resolution;
+
+        SPDLOG_DEBUG("ska::pst::common::SineWaveGenerator::test_complex_data nsamp_per_packet={} nchan_per_packet={} size={} resolution={} nblocks={}", nsamp_per_packet, nchan_per_packet, size, resolution, nblocks);
+
+        uint64_t i = 0;
+        for (uint32_t iblock=0; iblock<nblocks; iblock++)
+        {
+          for (uint32_t ipol=0; ipol<npol; ipol++)
+          {
+            for (uint32_t ichan=0; ichan<nchan_per_packet; ichan++)
+            {
+              const uint32_t ochan = current_channel + ichan;
+              const bool active_chan = (ochan == sinusoid_channel);
+              for (uint32_t isamp=0; isamp<nsamp_per_packet; isamp++)
+              {
+                std::complex<T> val = next_sample<T>(active_chan);
+                if (ptr[i] != val)
+                {
+                  return false;
+                }
+                i++;
+              }
+            }
+          }
+          current_channel += nchan_per_packet;
+          if (current_channel >= nchan)
+          {
+            current_channel = 0;
+          }
+        }
+        return true;
+      }
+
+      uint32_t sinusoid_channel{0};
+
+      double amplitude{0};
+
+      uint32_t current_channel{0};
   };
 
 } // ska::pst::common

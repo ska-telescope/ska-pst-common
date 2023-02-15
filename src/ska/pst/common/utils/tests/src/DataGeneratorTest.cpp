@@ -51,54 +51,45 @@ void DataGeneratorTest::TearDown()
 {
 }
 
-TEST_P(DataGeneratorTest, test_layout_not_configured) // NOLINT
+TEST_F(DataGeneratorTest, test_factory) // NOLINT
 {
-  std::shared_ptr<ska::pst::common::DataGenerator> dg = DataGeneratorFactory(GetParam());
+  EXPECT_EQ(ska::pst::common::get_supported_data_generators_list(), "Random, Sine");
+  std::vector<std::string> data_generators = ska::pst::common::get_supported_data_generators();
+  EXPECT_EQ(data_generators[0], "Random");
+  EXPECT_EQ(data_generators[1], "Sine");
 
-  auto buffer_ptr = (&buffer[0]);
-
-  dg->configure(header);
-  EXPECT_THROW(dg->fill_block(buffer_ptr), std::runtime_error); // NOLINT
+  std::shared_ptr<TestDataLayout> layout = std::make_shared<TestDataLayout>();
+  EXPECT_THROW(DataGeneratorFactory("Garbage", layout), std::runtime_error); // NOLINT);
 }
 
-class TestDataLayout : public ska::pst::common::DataLayout
+TEST_P(DataGeneratorTest, test_configure) // NOLINT
 {
-  public:
-  TestDataLayout ()
-  {
-    unsigned offset = 0;
-    packet_header_size = 100; // NOLINT
-    offset += packet_header_size;
+  std::shared_ptr<TestDataLayout> layout = std::make_shared<TestDataLayout>();
+  std::shared_ptr<ska::pst::common::DataGenerator> dg = DataGeneratorFactory(GetParam(), layout);
+  EXPECT_NO_THROW(dg->configure(header)); // NOLINT
 
-    packet_data_size = 5000; // NOLINT
-    packet_data_offset = offset;
-    offset += packet_data_size;
+  static constexpr uint32_t bad_header_param = 3;
+  header.set("NCHAN", bad_header_param);
+  EXPECT_THROW(dg->configure(header), std::runtime_error); // NOLINT
+  header.set("NPOL", bad_header_param);
+  EXPECT_THROW(dg->configure(header), std::runtime_error); // NOLINT
+  header.set("NDIM", bad_header_param);
+  EXPECT_THROW(dg->configure(header), std::runtime_error); // NOLINT
+}
 
-    packet_weights_size = 500; // NOLINT
-    packet_weights_offset = offset;
-    offset += packet_weights_size;
-
-    packet_scales_size = 50; // NOLINT
-    packet_scales_offset = offset;
-
-    packet_size = offset + packet_scales_size;
-  }
-};
-
-TEST_P(DataGeneratorTest, test_generate_validate) // NOLINT
+TEST_P(DataGeneratorTest, test_generate_validate_packet) // NOLINT
 {
-  std::shared_ptr<ska::pst::common::DataGenerator> dg = DataGeneratorFactory(GetParam());
+  std::shared_ptr<TestDataLayout> layout = std::make_shared<TestDataLayout>();
+  std::shared_ptr<ska::pst::common::DataGenerator> dg = DataGeneratorFactory(GetParam(), layout);
+
   dg->configure(header);
 
-  TestDataLayout layout;
-  dg->copy_layout(&layout);
-
-  buffer.resize(layout.get_packet_size());
+  buffer.resize(layout->get_packet_size());
   auto buffer_ptr = (&buffer[0]);
-  dg->fill_block(buffer_ptr);
+  dg->fill_packet(buffer_ptr);
   dg->reset();
-  EXPECT_TRUE(dg->test_block(buffer_ptr));
-  EXPECT_FALSE(dg->test_block(buffer_ptr));
+  EXPECT_TRUE(dg->test_packet(buffer_ptr));
+  EXPECT_FALSE(dg->test_packet(buffer_ptr));
 
   // perform a shift of all the values in the buffer
   for (unsigned i=0; i<buffer.size()-1; i++)
@@ -107,7 +98,26 @@ TEST_P(DataGeneratorTest, test_generate_validate) // NOLINT
   }
 
   dg->reset();
-  EXPECT_FALSE(dg->test_block(buffer_ptr));
+  EXPECT_FALSE(dg->test_packet(buffer_ptr));
+}
+
+TEST_P(DataGeneratorTest, test_generate_validate_blocks) // NOLINT
+{
+  std::shared_ptr<TestDataLayout> layout = std::make_shared<TestDataLayout>();
+  std::shared_ptr<ska::pst::common::DataGenerator> dg = DataGeneratorFactory(GetParam(), layout);
+
+  // dg->copy_layout(&layout);
+  dg->configure(header);
+
+  uint32_t npackets_per_spectrum = header.get_uint32("NCHAN") / header.get_uint32("NCHAN_PP");
+  uint32_t buffer_size = layout->get_packet_data_size() * npackets_per_spectrum * 2;
+
+  buffer.resize(buffer_size);
+  auto buffer_ptr = (&buffer[0]);
+  dg->fill_data(buffer_ptr, buffer_size);
+  dg->reset();
+  EXPECT_TRUE(dg->test_data(buffer_ptr, buffer_size));
+  EXPECT_FALSE(dg->test_data(buffer_ptr, buffer_size));
 }
 
 INSTANTIATE_TEST_SUITE_P(SignalGenerators, DataGeneratorTest, testing::Values("Random", "Sine")); // NOLINT

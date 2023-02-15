@@ -35,45 +35,50 @@
 
 #include "ska/pst/common/utils/DataGenerator.h"
 
-void ska::pst::common::DataGenerator::configure(const ska::pst::common::AsciiHeader& /* config */)
+ska::pst::common::DataGenerator::DataGenerator(std::shared_ptr<ska::pst::common::DataLayout> _layout) :
+  layout(_layout)
 {
-  SPDLOG_DEBUG("ska::pst::common::DataGenerator::configure does nothing");
 }
 
-auto ska::pst::common::DataGenerator::test_block(char * buf) -> bool
+void ska::pst::common::DataGenerator::configure(const ska::pst::common::AsciiHeader& config)
 {
-  if (!layout_configured) {
-    throw std::runtime_error("ska::pst::common::DataGenerator::test_block block layout not configured");
+  nbit = config.get_uint32("NBIT");
+  ndim = config.get_uint32("NDIM");
+  npol = config.get_uint32("NPOL");
+  nchan = config.get_uint32("NCHAN");
+  SPDLOG_DEBUG("ska::pst::common::SineWaveGenerator::configure nchan={} ndim={} npol={} nbit={}", nchan, ndim, npol, nbit);
+
+  if (ndim != 2)
+  {
+    SPDLOG_ERROR("ska::pst::common::DataGenerator::configure expected NDIM=2, but found {}", ndim);
+    throw std::runtime_error("ska::pst::common::DataGenerator::configure expected valud of NDIM");
   }
 
-  return test_scales(buf + layout.get_packet_scales_offset(), layout.get_packet_scales_size()) // NOLINT
-     &&  test_weights(buf + layout.get_packet_weights_offset(), layout.get_packet_weights_size()) // NOLINT
-     &&  test_data(buf + layout.get_packet_data_offset(), layout.get_packet_data_size()); // NOLINT
-}
-
-void ska::pst::common::DataGenerator::fill_block(char * buf)
-{
-  if (!layout_configured) {
-    throw std::runtime_error("ska::pst::common::DataGenerator::fill_block block layout not configured");
+  if (npol != 2)
+  {
+    SPDLOG_ERROR("ska::pst::common::DataGenerator::configure expected NPOL=2, but found {}", npol);
+    throw std::runtime_error("ska::pst::common::DataGenerator::configure expected valud of NPOL");
   }
 
-  fill_scales(buf + layout.get_packet_scales_offset(), layout.get_packet_scales_size()); // NOLINT
-  fill_weights(buf + layout.get_packet_weights_offset(), layout.get_packet_weights_size()); // NOLINT
-  fill_data(buf + layout.get_packet_data_offset(), layout.get_packet_data_size()); // NOLINT
+  if (nchan % layout->get_nchan_per_packet() != 0)
+  {
+    SPDLOG_ERROR("ska::pst::common::SineWaveGenerator::configure NCHAN={} was not a multiple of nchan_per_packet={}", nchan, layout->get_nchan_per_packet());
+    throw std::runtime_error("ska::pst::common::SineWaveGenerator::configure invalid NCHAN");
+  }
 }
 
-void ska::pst::common::DataGenerator::copy_layout(const DataLayout* _layout)
+auto ska::pst::common::DataGenerator::test_packet(char * buf) -> bool
 {
-  layout = *_layout;
+  SPDLOG_TRACE("ska::pst::common::DataGenerator::test_packet");
+  return test_scales(buf + layout->get_packet_scales_offset(), layout->get_packet_scales_size()) // NOLINT
+     &&  test_weights(buf + layout->get_packet_weights_offset(), layout->get_packet_weights_size()) // NOLINT
+     &&  test_data(buf + layout->get_packet_data_offset(), layout->get_packet_data_size()); // NOLINT
+}
 
-  SPDLOG_DEBUG("ska::pst::common::DataGenerator::configure_format packet_weights_size={}", layout.get_packet_weights_size());
-  SPDLOG_DEBUG("ska::pst::common::DataGenerator::configure_format packet_weights_offset={}", layout.get_packet_weights_offset());
-
-  SPDLOG_DEBUG("ska::pst::common::DataGenerator::configure_format packet_scales_size={}", layout.get_packet_scales_size());
-  SPDLOG_DEBUG("ska::pst::common::DataGenerator::configure_format packet_scales_offset={}", layout.get_packet_scales_offset());
-
-  SPDLOG_DEBUG("ska::pst::common::DataGenerator::configure_format packet_data_size={}", layout.get_packet_data_size());
-  SPDLOG_DEBUG("ska::pst::common::DataGenerator::configure_format packet_data_offset={}", layout.get_packet_data_offset());
-
-  layout_configured = true;
+void ska::pst::common::DataGenerator::fill_packet(char * buf)
+{
+  SPDLOG_TRACE("ska::pst::common::DataGenerator::fill_packet");
+  fill_scales(buf + layout->get_packet_scales_offset(), layout->get_packet_scales_size()); // NOLINT
+  fill_weights(buf + layout->get_packet_weights_offset(), layout->get_packet_weights_size()); // NOLINT
+  fill_data(buf + layout->get_packet_data_offset(), layout->get_packet_data_size()); // NOLINT
 }

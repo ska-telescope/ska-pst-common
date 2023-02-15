@@ -48,7 +48,7 @@ namespace ska::pst::common {
        * @brief Construct a new RandomDataGenerator object
        *
        */
-      RandomDataGenerator() = default;
+      RandomDataGenerator(std::shared_ptr<DataLayout> layout);
 
       /**
        * @brief Destroy the RandomDataGenerator object
