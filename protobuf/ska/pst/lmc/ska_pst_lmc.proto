@@ -274,6 +274,8 @@ message ReceiveBeamConfiguration {
     string udp_format           = 23;
     // calculated bytes_per_second
     double bytes_per_second     = 24;
+    // the beam id for the scans
+    string beam_id              = 25;
 }
 
 // Message to represent configuration for the DSP.DISK of PST
