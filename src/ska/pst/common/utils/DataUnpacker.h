@@ -36,7 +36,20 @@
 #ifndef SKA_PST_COMMON_UTILS_DataUnpacker_h
 #define SKA_PST_COMMON_UTILS_DataUnpacker_h
 
-namespace ska::pst::common {
+namespace ska::pst::common
+{
+
+  /**
+   * @brief pair of complex floating point values
+   *
+   */
+  typedef struct sample_pair
+  {
+    std::complex<float> sample1;
+
+    std::complex<float> sample2;
+
+  } sample_pair_t;
 
   /**
    * @brief Unpacks data+weights+scales generation and validation
@@ -103,6 +116,22 @@ namespace ska::pst::common {
     protected:
 
     private:
+
+      /**
+       * @brief Unpack a pair of samples encoded in 8, 12 or 16 bits per sample
+       *
+       * @param data pointer to the raw data array containing the packed samples
+       * @param scale_factor scale factor to apply during unpacking
+       * @return sample_pair_t unpacked pair of complex floating-point values
+       */
+      sample_pair_t unpack_sample_pair(char * data, const float scale_factor);
+
+      /**
+       * @brief return the square-law detected power from the sample pair
+       *
+       * @return float square law detected power sum of the sample pair
+       */
+      float square_law_detection(sample_pair_t);
 
       //! Unpacked data vector
       std::vector<std::vector<std::vector<std::complex<float>>>> unpacked;

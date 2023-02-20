@@ -76,12 +76,6 @@ void ska::pst::common::DataUnpacker::configure(const ska::pst::common::AsciiHead
   }
 
   nsamp_per_weight = nsamp_per_packet; // compliant with all known ICD formats, but not robust to new formats
-
-  // determine the packet weights size and packet scales size
-  // packet_weights_size = (nsamp_per_packet / nsamp_per_weight) * nchan_per_packet * nbit) / ska::pst::common::bits_per_byte;
-  // packet_scales_size = sizeof(float);
-  // weights_packet_stride = packet_weights_size + packet_weights_size;
-
   packet_resolution = nsamp_per_packet * nchan_per_packet * npol * ndim * nbit / ska::pst::common::bits_per_byte;
   heap_resolution = nsamp_per_packet * nchan * npol * ndim * nbit / ska::pst::common::bits_per_byte;
   if (heap_resolution % packet_resolution)
@@ -142,72 +136,36 @@ std::vector<std::vector<std::vector<std::complex<float>>>>& ska::pst::common::Da
   SPDLOG_DEBUG("ska::pst::common::DataUnpacker::unpack data={} data_bufsz={} weights={} weights_bufsz={}",
     reinterpret_cast<void*>(data), data_bufsz, reinterpret_cast<void *>(weights), weights_bufsz);
 
-  // packet counter
-  uint32_t packet_number = 0;
-
-  // pointers for reading different bit-widths
-  int8_t * input8 = reinterpret_cast<int8_t *>(data);
-  int16_t * input16 = reinterpret_cast<int16_t *>(data);
-
   resize(data_bufsz);
 
-  // unpack the heaped CBF/PSR format into TFP ordered timeseries
-  const uint32_t osamp_stride = nchan * npol;
   const uint32_t nheaps = data_bufsz / heap_resolution;
-  SPDLOG_DEBUG("ska::pst::common::DataUnpacker::unpack data_bufsz={} heap_resolution={} nheaps={}", data_bufsz, heap_resolution, nheaps);
-  uint64_t i = 0;
+  const uint32_t input_step = (nbit * 4) / ska::pst::common::bits_per_byte;
+  SPDLOG_DEBUG("ska::pst::common::DataUnpacker::unpack heap_resolution={} nheaps={}", heap_resolution, nheaps);
+  SPDLOG_DEBUG("ska::pst::common::DataUnpacker::unpack packets_per_heap={} npol={} nchan_per_packet={} nsamp_per_packet={}",
+    packets_per_heap, npol, nchan_per_packet, nsamp_per_packet);
 
-  SPDLOG_DEBUG("ska::pst::common::DataUnpacker::unpack nheaps={} packets_per_heap={} npol={} nchan_per_packet={} nsamp_per_packet={}",
-    nheaps, packets_per_heap, npol, nchan_per_packet, nsamp_per_packet);
-
+  // Unpack quantised data store in heap, packet, pol, chan_block, samp_block ordering used in CBF/PSR formats
+  uint32_t packet_number = 0;
   for (uint32_t iheap=0; iheap<nheaps; iheap++)
   {
-    const uint32_t heap_osamp = iheap * nsamp_per_packet;
     for (uint32_t ipacket=0; ipacket<packets_per_heap; ipacket++)
     {
-      const uint32_t packet_ochan = ipacket * nchan_per_packet;
-
-      // read the scale factor from the weights stream
-      const float scale_factor = get_scale_factor(weights, packet_number);
-
       for (uint32_t ipol=0; ipol<npol; ipol++)
       {
         for (uint32_t ichan=0; ichan<nchan_per_packet; ichan++)
         {
-          const uint32_t ochan = packet_ochan + ichan;
-
-          // unpack 2 samples per iteration
           for (uint32_t isamp=0; isamp<nsamp_per_packet; isamp+=2)
           {
-            uint32_t osamp = heap_osamp + isamp;
+            // unpack a pair of complex samples, normalising by the scale factor
+            sample_pair_t sample_pair = unpack_sample_pair(data, get_scale_factor(weights, packet_number));
 
-            float real_s0, imag_s0, real_s1, imag_s1;
-            if (nbit == 8)
-            {
-              real_s0 = float(input8[i]);
-              imag_s0 = float(input8[i+1]);
-              real_s1 = float(input8[i+2]);
-              imag_s1 = float(input8[i+3]);
-              i += 4;
-            }
-            else if (nbit == 12)
-            {
-              real_s0 = float(input16[i] >> 4);
-              imag_s0 = float(((input16[i] & 0x000F) << 8) & (input16[i+1] >> 8));
-              real_s1 = float(((input16[i+1] & 0x00FF) << 4) & (input16[i+2] >> 12));
-              imag_s1 = float(input16[i+2] & 0x0FFF);
-              i += 3;
-            }
-            else if (nbit == 16)
-            {
-              real_s0 = float(input16[i]);
-              imag_s0 = float(input16[i+1]);
-              real_s1 = float(input16[i+2]);
-              imag_s1 = float(input16[i+3]);
-              i += 4;
-            }
-            unpacked[osamp][ochan][ipol] = std::complex<float>(real_s0 / scale_factor, imag_s0 / scale_factor);
-            unpacked[osamp+1][ochan][ipol] = std::complex<float>(real_s1 / scale_factor, imag_s1 / scale_factor);
+            // compute the output sample and channel
+            uint32_t osamp = (iheap * nsamp_per_packet) + isamp;
+            uint32_t ochan = (ipacket * nchan_per_packet) + ichan;
+            unpacked[osamp+0][ochan][ipol] = sample_pair.sample1;
+            unpacked[osamp+1][ochan][ipol] = sample_pair.sample2;
+
+            data += input_step;
           }
         }
       }
@@ -224,69 +182,32 @@ void ska::pst::common::DataUnpacker::integrate_bandpass(char * data, uint64_t da
   SPDLOG_DEBUG("ska::pst::common::DataUnpacker::unpack integrate_bandpass={} data_bufsz={} weights={} weights_bufsz={}",
     reinterpret_cast<void*>(data), data_bufsz, reinterpret_cast<void *>(weights), weights_bufsz);
 
-  // packet counter
-  uint32_t packet_number = 0;
-
-  // pointers for reading different bit-widths
-  int8_t * input8 = reinterpret_cast<int8_t *>(data);
-  int16_t * input16 = reinterpret_cast<int16_t *>(data);
-
   // unpack the heaped CBF/PSR format into TFP ordered timeseries
-  const uint32_t osamp_stride = nchan * npol;
   const uint32_t nheaps = data_bufsz / heap_resolution;
-  uint64_t i = 0;
+  const uint32_t input_step = (nbit * 4) / ska::pst::common::bits_per_byte;
 
   SPDLOG_DEBUG("ska::pst::common::DataUnpacker::integrate_bandpass nheaps={} packets_per_heap={} npol={} nchan_per_packet={} nsamp_per_packet={}",
     nheaps, packets_per_heap, npol, nchan_per_packet, nsamp_per_packet);
 
+  // Unpack quantised data store in heap, packet, pol, chan_block, samp_block ordering used in CBF/PSR formats
+  uint32_t packet_number = 0;
   for (uint32_t iheap=0; iheap<nheaps; iheap++)
   {
-    const uint32_t heap_osamp = iheap * nsamp_per_packet;
     for (uint32_t ipacket=0; ipacket<packets_per_heap; ipacket++)
     {
-      const uint32_t packet_ochan = ipacket * nchan_per_packet;
-
-      // read the scale factor from the weights stream
-      const float scale_factor = get_scale_factor(weights, packet_number);
-
       for (uint32_t ipol=0; ipol<npol; ipol++)
       {
         for (uint32_t ichan=0; ichan<nchan_per_packet; ichan++)
         {
-          const uint32_t ochan = packet_ochan + ichan;
-
-          // unpack 2 samples per iteration
           for (uint32_t isamp=0; isamp<nsamp_per_packet; isamp+=2)
           {
-            uint32_t osamp = heap_osamp + isamp;
+            // unpack a pair of complex samples, normalising by the scale factor
+            sample_pair_t sample_pair = unpack_sample_pair(data, get_scale_factor(weights, packet_number));
+            const uint32_t ochan = (ipacket * nchan_per_packet) + ichan;
 
-            float real_s0, imag_s0, real_s1, imag_s1;
-            if (nbit == 8)
-            {
-              real_s0 = float(input8[i]) / scale_factor;
-              imag_s0 = float(input8[i+1]) / scale_factor;
-              real_s1 = float(input8[i+2]) / scale_factor;
-              imag_s1 = float(input8[i+3]) / scale_factor;
-              i += 4;
-            }
-            else if (nbit == 12)
-            {
-              real_s0 = float(input16[i] >> 4) / scale_factor;
-              imag_s0 = float(((input16[i] & 0x000F) << 8) & (input16[i+1] >> 8)) / scale_factor;
-              real_s1 = float(((input16[i+1] & 0x00FF) << 4) & (input16[i+2] >> 12)) / scale_factor;
-              imag_s1 = float(input16[i+2] & 0x0FFF) / scale_factor;
-              i += 3;
-            }
-            else if (nbit == 16)
-            {
-              real_s0 = float(input16[i]) / scale_factor;
-              imag_s0 = float(input16[i+1]) / scale_factor;
-              real_s1 = float(input16[i+2]) / scale_factor;
-              imag_s1 = float(input16[i+3]) / scale_factor;
-              i += 4;
-            }
-
-            bandpass[ochan][ipol] += (real_s0 * real_s0) + (imag_s0 * imag_s0) + (real_s1 * real_s1) + (imag_s1 * imag_s1);
+            // integrate the power in each complex sample into the bandpass
+            bandpass[ochan][ipol] += square_law_detection(sample_pair);
+            data += input_step;
           }
         }
       }
@@ -295,4 +216,43 @@ void ska::pst::common::DataUnpacker::integrate_bandpass(char * data, uint64_t da
   }
 
   SPDLOG_DEBUG("ska::pst::common::DataUnpacker::integrate_bandpass unpacking complete");
+}
+
+ska::pst::common::sample_pair_t ska::pst::common::DataUnpacker::unpack_sample_pair(char * input, const float scale_factor)
+{
+  sample_pair_t unpacked;
+
+  if (nbit == 8)
+  {
+    int8_t * in = reinterpret_cast<int8_t *>(input);
+    unpacked.sample1 = std::complex<float>(float(in[0]), float(in[1]));
+    unpacked.sample2 = std::complex<float>(float(in[2]), float(in[3]));
+  }
+  else if (nbit == 12)
+  {
+    int16_t * in = reinterpret_cast<int16_t *>(input);
+    unpacked.sample1 = std::complex<float>(float(in[0] >> 4), float(((in[0] & 0x000F) << 8) & (in[1] >> 8)));
+    unpacked.sample2 = std::complex<float>(float(((in[1] & 0x00FF) << 4) & (in[2] >> 12)), float(in[2] & 0x0FFF));
+  }
+  else if (nbit == 16)
+  {
+    int16_t * in = reinterpret_cast<int16_t *>(input);
+    unpacked.sample1 = std::complex<float>(float(in[0]), float(in[1]));
+    unpacked.sample2 = std::complex<float>(float(in[2]), float(in[3]));
+  }
+
+  if (scale_factor != 0)
+  {
+    unpacked.sample1 /= scale_factor;
+    unpacked.sample2 /= scale_factor;
+  }
+  return unpacked;
+}
+
+float ska::pst::common::DataUnpacker::square_law_detection(sample_pair_t unpacked)
+{
+  return unpacked.sample1.real() * unpacked.sample1.real() +
+    unpacked.sample1.imag() * unpacked.sample1.imag() +
+    unpacked.sample2.real() * unpacked.sample2.real() +
+    unpacked.sample2.imag() * unpacked.sample2.imag();
 }
