@@ -8,6 +8,7 @@ set(public_headers
     DataLayout.h
     DataGenerator.h
     DataGeneratorFactory.h
+    DataUnpacker.h
     RandomDataGenerator.h
     Logging.h
     SineWaveGenerator.h
@@ -20,6 +21,7 @@ set(sources
     src/RandomSequence.cpp
     src/DataGenerator.cpp
     src/DataGeneratorFactory.cpp
+    src/DataUnpacker.cpp
     src/RandomDataGenerator.cpp
     src/Logging.cpp
     src/SineWaveGenerator.cpp

@@ -3,18 +3,18 @@
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice,
  * this list of conditions and the following disclaimer.
- * 
+ *
  * 2. Redistributions in binary form must reproduce the above copyright
  * notice, this list of conditions and the following disclaimer in the
  * documentation and/or other materials provided with the distribution.
- * 
+ *
  * 3. Neither the name of the copyright holder nor the names of its
  * contributors may be used to endorse or promote products derived from this
  * software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -35,7 +35,7 @@ namespace ska::pst::common {
 
   /**
    * @brief Stores the offsets and sizes of data, weights, and scales in data blocks
-   * 
+   *
    */
   class DataLayout
   {
@@ -43,57 +43,57 @@ namespace ska::pst::common {
 
       /**
        * @brief Construct a new DataLayout object
-       * 
+       *
        */
       DataLayout() = default;
 
       /**
        * @brief Destroy the DataLayout object
-       * 
+       *
        */
       ~DataLayout() = default;
 
       /**
        * @brief Get the total size of the data block
-       * 
+       *
        * @return unsigned total size of data block
        */
       unsigned get_packet_size() const { return packet_size; };
 
       /**
        * @brief Get the size of the header in each data block.
-       * 
+       *
        * @return unsigned size of header block in data block
        */
-      unsigned get_packet_header_size() const { return packet_header_size; };      
+      unsigned get_packet_header_size() const { return packet_header_size; };
 
       /**
        * @brief Get the size of the data in each data block.
-       * 
+       *
        * @return unsigned size of data samples in data block
        */
-      unsigned get_packet_data_size() const { return packet_data_size; };      
+      unsigned get_packet_data_size() const { return packet_data_size; };
 
       /**
        * @brief Get the size of the weights in each data block.
-       * 
+       *
        * @return unsigned size of the weights data in the data block
        */
       unsigned get_packet_weights_size() const { return packet_weights_size; };
 
      /**
        * @brief Get the size of the scale factor in each data block.
-       * 
+       *
        * @return unsigned size of the scale factor in the data block
        */
       unsigned get_packet_scales_size() const { return packet_scales_size; };
 
       /**
        * @brief Get the offset of the data in each data block.
-       * 
+       *
        * @return unsigned offset of data samples in data block
        */
-      unsigned get_packet_data_offset() const { return packet_data_offset; };      
+      unsigned get_packet_data_offset() const { return packet_data_offset; };
 
       /**
        * @brief Get the offset of the weights in each data block.
@@ -104,10 +104,31 @@ namespace ska::pst::common {
 
       /**
        * @brief Get the offset of the scales in each data block.
-       * 
+       *
        * @return unsigned offset of scales in data block
        */
-      unsigned get_packet_scales_offset() const { return packet_scales_offset; };   
+      unsigned get_packet_scales_offset() const { return packet_scales_offset; };
+
+      /**
+       * @brief Get the number of samples per UDP packet
+       *
+       * @return unsigned number of samples in each UDP packet
+       */
+      unsigned get_samples_per_packet() const { return nsamp_per_packet; };
+
+      /**
+       * @brief Get the number of channels per UDP packet
+       *
+       * @return unsigned number of channels in each UDP packet
+       */
+      unsigned get_nchan_per_packet() const { return nchan_per_packet; };
+
+      /**
+       * @brief Get the number of samples per weight in each UDP packet
+       *
+       * @return unsigned number of samples per weight in each UDP packet
+       */
+      unsigned get_nsamp_per_weight() const { return nsamp_per_weight; };
 
     protected:
 
@@ -134,6 +155,15 @@ namespace ska::pst::common {
 
       //! offset from first byte of each block for the scale factor
       unsigned packet_scales_offset{0};
+
+      //! Number of samples per UDP packet
+      unsigned nsamp_per_packet{0};
+
+      //! Number of channels per UDP packet
+      unsigned nchan_per_packet{0};
+
+      //! Number of samples per relative weight
+      unsigned nsamp_per_weight{0};
   };
 
 } // namespace ska::pst::common

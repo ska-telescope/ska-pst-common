@@ -28,12 +28,20 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "ska/pst/common/utils/RandomDataGenerator.h"
 #include <spdlog/spdlog.h>
+
+#include "ska/pst/common/utils/RandomDataGenerator.h"
+
+ska::pst::common::RandomDataGenerator::RandomDataGenerator(std::shared_ptr<ska::pst::common::DataLayout> _layout) :
+  DataGenerator(_layout)
+{
+}
 
 void ska::pst::common::RandomDataGenerator::configure(const ska::pst::common::AsciiHeader& config)
 {
   SPDLOG_DEBUG("ska::pst::common::RandomDataGenerator::configure");
+  ska::pst::common::DataGenerator::configure(config);
+
   dat_sequence.configure(config);
   wts_sequence.configure(config);
   scl_sequence.configure(config);
