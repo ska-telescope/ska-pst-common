@@ -51,7 +51,7 @@ author = 'PST Team'
 # The full version, including alpha/beta/rc tags
 with open('../../version.txt') as f:
     version = f.read().strip()
-release = version
+release = '0.7.0'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
