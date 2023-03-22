@@ -171,7 +171,8 @@ auto ska::pst::common::LmcService::configure_beam(
         // handle exception
         ska::pst::lmc::Status status;
         status.set_code(ska::pst::lmc::ErrorCode::INTERNAL_ERROR);
-        status.set_message("Error in configuring beam.");
+        status.set_message("Error in configuring beam. Error: " + str(exc.what()));
+        set_state(ska::pst::lmc::ObsState::FAULT);
         return grpc::Status(grpc::StatusCode::INTERNAL, status.message(), status.SerializeAsString());
     }
 }
@@ -202,7 +203,8 @@ auto ska::pst::common::LmcService::deconfigure_beam(
         // handle exception
         ska::pst::lmc::Status status;
         status.set_code(ska::pst::lmc::ErrorCode::INTERNAL_ERROR);
-        status.set_message("Error in deconfiguring beam.");
+        status.set_message("Error in deconfiguring beam. Error: " + str(exc.what()));
+        set_state(ska::pst::lmc::ObsState::FAULT);
         return grpc::Status(grpc::StatusCode::INTERNAL, status.message(), status.SerializeAsString());
     }
 }
@@ -272,7 +274,8 @@ auto ska::pst::common::LmcService::configure_scan(
         // handle exception
         ska::pst::lmc::Status status;
         status.set_code(ska::pst::lmc::ErrorCode::INTERNAL_ERROR);
-        status.set_message("Error in configuring beam.");
+        status.set_message("Error in configuring scan. Error: " + str(exc.what()));
+        set_state(ska::pst::lmc::ObsState::FAULT);
         return grpc::Status(grpc::StatusCode::INTERNAL, status.message(), status.SerializeAsString());
     }
 
@@ -308,7 +311,8 @@ auto ska::pst::common::LmcService::deconfigure_scan(
         // handle exception
         ska::pst::lmc::Status status;
         status.set_code(ska::pst::lmc::ErrorCode::INTERNAL_ERROR);
-        status.set_message("Error in configuring beam.");
+        status.set_message("Error in deconfiguring scan. Error: " + str(exc.what()));
+        set_state(ska::pst::lmc::ObsState::FAULT);
         return grpc::Status(grpc::StatusCode::INTERNAL, status.message(), status.SerializeAsString());
     }
 }
@@ -384,7 +388,8 @@ auto ska::pst::common::LmcService::start_scan(
         // handle exception
         ska::pst::lmc::Status status;
         status.set_code(ska::pst::lmc::ErrorCode::INTERNAL_ERROR);
-        status.set_message("Error in starting scan request.");
+        status.set_message("Error in starting scan request. Error: " + str(exc.what()));
+        set_state(ska::pst::lmc::ObsState::FAULT);
         return grpc::Status(grpc::StatusCode::INTERNAL, status.message(), status.SerializeAsString());
     }
 }
@@ -417,7 +422,8 @@ auto ska::pst::common::LmcService::stop_scan(
         // handle exception
         ska::pst::lmc::Status status;
         status.set_code(ska::pst::lmc::ErrorCode::INTERNAL_ERROR);
-        status.set_message("Error in stopping scan request.");
+        status.set_message("Error in stopping scan request. Error: " + str(exc.what()));
+        set_state(ska::pst::lmc::ObsState::FAULT);
         return grpc::Status(grpc::StatusCode::INTERNAL, status.message(), status.SerializeAsString());
     }
 }

@@ -1421,4 +1421,9 @@ TEST_F(LmcServiceTest, get_env_with_implementation) // NOLINT
     EXPECT_TRUE(MessageDifferencer::Equals(values.at("signed_int_value"), signed_int_value));
 }
 
+TEST_F(LmcServiceTest, go_to_fault_when_runtime_error_encountered) // NOLINT
+{
+    // TODO: implement test
+}
+
 } // namespace ska::pst::common::test
