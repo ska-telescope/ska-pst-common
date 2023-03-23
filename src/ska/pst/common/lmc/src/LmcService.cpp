@@ -35,6 +35,7 @@
 #include "ska/pst/common/lmc/LmcService.h"
 #include "ska/pst/common/lmc/LmcServiceHandler.h"
 #include <spdlog/spdlog.h>
+#include "ska/pst/common/statemodel/StateModel.h"
 
 void ska::pst::common::LmcService::start() {
     SPDLOG_TRACE("ska::pst::common::LmcService::start()");
@@ -163,15 +164,28 @@ auto ska::pst::common::LmcService::configure_beam(
 
     try {
         set_state(ska::pst::lmc::ObsState::RESOURCING);
+        if (handler->get_application_manager_state() == ska::pst::common::RuntimeError)
+        {
+            if(handler->get_application_manager_exception())
+            {
+                std::rethrow_exception(handler->get_application_manager_exception());
+            }
+            else
+            {
+                SPDLOG_WARN("handler->get_application_manager_exception() is null");
+            }
+        }
         handler->configure_beam(request->beam_configuration());
         set_state(ska::pst::lmc::ObsState::IDLE);
 
         return grpc::Status::OK;
     } catch (std::exception& exc) {
-        // handle exception
+        // handle exception        
+        std::string e = exc.what();
+        SPDLOG_WARN("Error in configuring beam. Error: " + e);
         ska::pst::lmc::Status status;
         status.set_code(ska::pst::lmc::ErrorCode::INTERNAL_ERROR);
-        status.set_message("Error in configuring beam. Error: " + str(exc.what()));
+        status.set_message("Error in configuring beam. Error: " + e);
         set_state(ska::pst::lmc::ObsState::FAULT);
         return grpc::Status(grpc::StatusCode::INTERNAL, status.message(), status.SerializeAsString());
     }
@@ -196,14 +210,19 @@ auto ska::pst::common::LmcService::deconfigure_beam(
     }
 
     try {
+        if (handler->get_application_manager_state() == ska::pst::common::RuntimeError)
+        {
+            std::rethrow_exception(handler->get_application_manager_exception());
+        }
         handler->deconfigure_beam();
         set_state(ska::pst::lmc::ObsState::EMPTY);
         return grpc::Status::OK;
     } catch (std::exception& exc) {
         // handle exception
+        std::string e = exc.what();
         ska::pst::lmc::Status status;
         status.set_code(ska::pst::lmc::ErrorCode::INTERNAL_ERROR);
-        status.set_message("Error in deconfiguring beam. Error: " + str(exc.what()));
+        status.set_message("Error in deconfiguring beam. Error: " + e);
         set_state(ska::pst::lmc::ObsState::FAULT);
         return grpc::Status(grpc::StatusCode::INTERNAL, status.message(), status.SerializeAsString());
     }
@@ -269,12 +288,17 @@ auto ska::pst::common::LmcService::configure_scan(
     }
 
     try {
+        if (handler->get_application_manager_state() == ska::pst::common::RuntimeError)
+        {
+            std::rethrow_exception(handler->get_application_manager_exception());
+        }
         handler->configure_scan(request->scan_configuration());
     } catch (std::exception& exc) {
         // handle exception
+        std::string e = exc.what();
         ska::pst::lmc::Status status;
         status.set_code(ska::pst::lmc::ErrorCode::INTERNAL_ERROR);
-        status.set_message("Error in configuring scan. Error: " + str(exc.what()));
+        status.set_message("Error in configuring scan. Error: " + e);
         set_state(ska::pst::lmc::ObsState::FAULT);
         return grpc::Status(grpc::StatusCode::INTERNAL, status.message(), status.SerializeAsString());
     }
@@ -304,14 +328,19 @@ auto ska::pst::common::LmcService::deconfigure_scan(
     }
 
     try {
+        if (handler->get_application_manager_state() == ska::pst::common::RuntimeError)
+        {
+            std::rethrow_exception(handler->get_application_manager_exception());
+        }
         handler->deconfigure_scan();
         set_state(ska::pst::lmc::ObsState::IDLE);
         return grpc::Status::OK;
     } catch (std::exception& exc) {
         // handle exception
+        std::string e = exc.what();
         ska::pst::lmc::Status status;
         status.set_code(ska::pst::lmc::ErrorCode::INTERNAL_ERROR);
-        status.set_message("Error in deconfiguring scan. Error: " + str(exc.what()));
+        status.set_message("Error in deconfiguring scan. Error: " + e);
         set_state(ska::pst::lmc::ObsState::FAULT);
         return grpc::Status(grpc::StatusCode::INTERNAL, status.message(), status.SerializeAsString());
     }
@@ -381,14 +410,19 @@ auto ska::pst::common::LmcService::start_scan(
     }
 
     try {
+        if (handler->get_application_manager_state() == ska::pst::common::RuntimeError)
+        {
+            std::rethrow_exception(handler->get_application_manager_exception());
+        }
         handler->start_scan(*request);
         set_state(ska::pst::lmc::ObsState::SCANNING);
         return grpc::Status::OK;
     } catch (std::exception& exc) {
         // handle exception
+        std::string e = exc.what();
         ska::pst::lmc::Status status;
         status.set_code(ska::pst::lmc::ErrorCode::INTERNAL_ERROR);
-        status.set_message("Error in starting scan request. Error: " + str(exc.what()));
+        status.set_message("Error in starting scan request. Error: " + e);
         set_state(ska::pst::lmc::ObsState::FAULT);
         return grpc::Status(grpc::StatusCode::INTERNAL, status.message(), status.SerializeAsString());
     }
@@ -415,14 +449,19 @@ auto ska::pst::common::LmcService::stop_scan(
     }
 
     try {
+        if (handler->get_application_manager_state() == ska::pst::common::RuntimeError)
+        {
+            std::rethrow_exception(handler->get_application_manager_exception());
+        }
         handler->stop_scan();
         set_state(ska::pst::lmc::ObsState::READY);
         return grpc::Status::OK;
     } catch (std::exception& exc) {
         // handle exception
+        std::string e = exc.what();
         ska::pst::lmc::Status status;
         status.set_code(ska::pst::lmc::ErrorCode::INTERNAL_ERROR);
-        status.set_message("Error in stopping scan request. Error: " + str(exc.what()));
+        status.set_message("Error in stopping scan request. Error: " + e);
         set_state(ska::pst::lmc::ObsState::FAULT);
         return grpc::Status(grpc::StatusCode::INTERNAL, status.message(), status.SerializeAsString());
     }

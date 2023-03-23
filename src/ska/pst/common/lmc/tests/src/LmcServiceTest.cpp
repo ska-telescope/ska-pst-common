@@ -37,6 +37,8 @@
 #include "ska/pst/common/lmc/tests/LmcServiceTest.h"
 #include "ska/pst/common/testutils/GtestMain.h"
 
+#include "ska/pst/common/statemodel/StateModel.h"
+
 using namespace google::protobuf::util;
 
 auto main(int argc, char* argv[]) -> int
@@ -84,6 +86,20 @@ auto LmcServiceTest::configure_beam() -> grpc::Status
     auto resources = request.mutable_beam_configuration();
     auto test_resources = resources->mutable_test();
     auto values = test_resources->mutable_resources();
+    
+    try
+    {
+        if (_handler->induce_configure_beam_error)
+        {
+            SPDLOG_WARN("LmcServiceTest::configure_beam induced configure_beam error");
+            _handler->set_state(ska::pst::common::RuntimeError);
+            throw std::runtime_error("induced configure_beam error");
+        }
+    }
+    catch(const std::exception& e)
+    {
+        _handler->set_exception(std::current_exception());
+    }
 
     (*values)["foo"] = "bar";
 
@@ -94,7 +110,19 @@ auto LmcServiceTest::configure_beam(ska::pst::lmc::ConfigureBeamRequest request)
 {
     grpc::ClientContext context;
     ska::pst::lmc::ConfigureBeamResponse response;
-
+    try
+    {
+        if (_handler->induce_configure_beam_error)
+        {
+            SPDLOG_WARN("LmcServiceTest::configure_beam induced configure_beam error");
+            _handler->set_state(ska::pst::common::RuntimeError);
+            throw std::runtime_error("induced configure_beam error");
+        }
+    }
+    catch(const std::exception& e)
+    {
+        _handler->set_exception(std::current_exception());
+    }
     return _stub->configure_beam(&context, request, &response);
 }
 
@@ -113,6 +141,19 @@ auto LmcServiceTest::deconfigure_beam() -> grpc::Status
     grpc::ClientContext context;
     ska::pst::lmc::DeconfigureBeamRequest request;
     ska::pst::lmc::DeconfigureBeamResponse response;
+    try
+    {
+        if (_handler->induce_deconfigure_beam_error)
+        {
+            SPDLOG_WARN("LmcServiceTest::deconfigure_beam induced deconfigure_beam error");
+            _handler->set_state(ska::pst::common::RuntimeError);
+            throw std::runtime_error("induced deconfigure_beam error");
+        }
+    }
+    catch(const std::exception& e)
+    {
+        _handler->set_exception(std::current_exception());
+    }
 
     return _stub->deconfigure_beam(&context, request, &response);
 }
@@ -299,7 +340,6 @@ TEST_F(LmcServiceTest, configure_beam) // NOLINT
     assert_state(ska::pst::lmc::ObsState::EMPTY);
 }
 
-
 TEST_F(LmcServiceTest, configure_beam_when_already_assigned) // NOLINT
 {
     EXPECT_CALL(*_handler, configure_beam).Times(1);
@@ -482,7 +522,6 @@ TEST_F(LmcServiceTest, configure_when_already_configured) // NOLINT
 
     assert_state(ska::pst::lmc::ObsState::READY);
 }
-
 
 TEST_F(LmcServiceTest, get_scan_configuration_when_not_ready_or_scanning) // NOLINT
 {
@@ -1421,9 +1460,32 @@ TEST_F(LmcServiceTest, get_env_with_implementation) // NOLINT
     EXPECT_TRUE(MessageDifferencer::Equals(values.at("signed_int_value"), signed_int_value));
 }
 
-TEST_F(LmcServiceTest, go_to_fault_when_runtime_error_encountered) // NOLINT
+TEST_F(LmcServiceTest, go_to_fault_when_runtime_error_encountered_configure_beam) // NOLINT
 {
-    // TODO: implement test
+    _handler->induce_configure_beam_error=true;
+
+    _service->start();
+    EXPECT_TRUE(_service->is_running());
+    assert_state(ska::pst::lmc::ObsState::EMPTY);
+    SPDLOG_TRACE("LmcServiceTest::configure_beam - configuring beam");
+    EXPECT_FALSE(_handler->is_beam_configured()); // NOLINT
+    auto status = configure_beam();
+    assert_state(ska::pst::lmc::ObsState::FAULT);
+}
+
+TEST_F(LmcServiceTest, go_to_fault_when_runtime_error_encountered_deconfigure_beam) // NOLINT
+{
+    EXPECT_CALL(*_handler, configure_beam);
+    _handler->induce_deconfigure_beam_error=true;
+
+    _service->start();
+    EXPECT_TRUE(_service->is_running());
+    assert_state(ska::pst::lmc::ObsState::EMPTY);
+    SPDLOG_TRACE("LmcServiceTest::configure_beam - configuring beam");
+    EXPECT_FALSE(_handler->is_beam_configured()); // NOLIN
+    auto status = configure_beam();
+    status = deconfigure_beam();
+    assert_state(ska::pst::lmc::ObsState::FAULT);
 }
 
 } // namespace ska::pst::common::test
