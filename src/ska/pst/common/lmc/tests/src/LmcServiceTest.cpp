@@ -1485,6 +1485,10 @@ TEST_F(LmcServiceTest, go_to_fault_when_runtime_error_encountered_deconfigure_be
     EXPECT_FALSE(_handler->is_beam_configured()); // NOLIN
     auto status = configure_beam();
     status = deconfigure_beam();
+    ASSERT_EQ(
+        status.error_message(),
+        "RuntimeError before deconfiguring beam. Error: induced deconfigure_beam error"
+    );
     assert_state(ska::pst::lmc::ObsState::FAULT);
 }
 

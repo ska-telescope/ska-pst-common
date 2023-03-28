@@ -133,6 +133,13 @@ namespace ska::pst::common {
             void serve();
 
             /**
+             * @brief Rethrows the error of an ApplicationManager instance if its state
+             * is in a RuntimeError
+             *
+             */
+            void rethrow_application_manager_runtime_error(std::string _base_error_message);
+
+            /**
              * @brief The SKA Observation State of the LMC service.
              *
              * Used to keep track of the state of this service. This is used to guard against having
@@ -162,6 +169,12 @@ namespace ska::pst::common {
              *
              */
             std::condition_variable _monitor_condition;
+
+            /**
+             * @brief Common variable used for appending context to error messages.
+             *
+             */
+            std::string base_error_message = "";
 
         public:
             /**
