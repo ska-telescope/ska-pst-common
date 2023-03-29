@@ -1487,7 +1487,7 @@ TEST_F(LmcServiceTest, go_to_fault_when_runtime_error_encountered_deconfigure_be
     status = deconfigure_beam();
     ASSERT_EQ(
         status.error_message(),
-        "RuntimeError before deconfiguring beam. Error: induced deconfigure_beam error"
+        "RuntimeError before deconfiguring beam: induced deconfigure_beam error"
     );
     assert_state(ska::pst::lmc::ObsState::FAULT);
 }
