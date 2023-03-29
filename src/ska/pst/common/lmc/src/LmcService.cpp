@@ -34,8 +34,8 @@
 #include <chrono>
 #include "ska/pst/common/lmc/LmcService.h"
 #include "ska/pst/common/lmc/LmcServiceHandler.h"
-#include <spdlog/spdlog.h>
 #include "ska/pst/common/statemodel/StateModel.h"
+#include <spdlog/spdlog.h>
 
 void ska::pst::common::LmcService::start() {
     SPDLOG_TRACE("ska::pst::common::LmcService::start()");
@@ -171,14 +171,13 @@ auto ska::pst::common::LmcService::configure_beam(
 
         return grpc::Status::OK;
     } catch (std::exception& exc) {
-        // handle exception        
-        std::string e = exc.what();
-        SPDLOG_WARN(base_error_message + ". Error: " + e);
+        // handle exception
+        std::string error_message = base_error_message + ": " + std::string(exc.what());
+        SPDLOG_WARN(error_message);
         ska::pst::lmc::Status status;
         status.set_code(ska::pst::lmc::ErrorCode::INTERNAL_ERROR);
-        status.set_message(base_error_message + ". Error: " + e);
+        status.set_message(error_message);
         set_state(ska::pst::lmc::ObsState::FAULT);
-        return grpc::Status(grpc::StatusCode::INTERNAL, status.message(), status.SerializeAsString());
     }
 }
 
@@ -209,13 +208,13 @@ auto ska::pst::common::LmcService::deconfigure_beam(
         return grpc::Status::OK;
     } catch (std::exception& exc) {
         // handle exception
-        std::string e = exc.what();
-        SPDLOG_WARN(base_error_message + ". Error: " + e);
+        std::string error_message = base_error_message + ": " + std::string(exc.what());
+        SPDLOG_WARN(error_message);
         ska::pst::lmc::Status status;
         status.set_code(ska::pst::lmc::ErrorCode::INTERNAL_ERROR);
-        status.set_message(base_error_message + ". Error: " + e);
+        status.set_message(error_message);
         set_state(ska::pst::lmc::ObsState::FAULT);
-        return grpc::Status(grpc::StatusCode::INTERNAL, status.message(), status.SerializeAsString());
+
     }
 }
 
@@ -284,13 +283,12 @@ auto ska::pst::common::LmcService::configure_scan(
         handler->configure_scan(request->scan_configuration());
     } catch (std::exception& exc) {
         // handle exception
-        std::string e = exc.what();
-        SPDLOG_WARN(base_error_message + ". Error: " + e);
+        std::string error_message = base_error_message + ": " + std::string(exc.what());
+        SPDLOG_WARN(error_message);
         ska::pst::lmc::Status status;
         status.set_code(ska::pst::lmc::ErrorCode::INTERNAL_ERROR);
-        status.set_message(base_error_message + ". Error: " + e);
+        status.set_message(error_message);
         set_state(ska::pst::lmc::ObsState::FAULT);
-        return grpc::Status(grpc::StatusCode::INTERNAL, status.message(), status.SerializeAsString());
     }
 
     set_state(ska::pst::lmc::ObsState::READY);
@@ -325,13 +323,12 @@ auto ska::pst::common::LmcService::deconfigure_scan(
         return grpc::Status::OK;
     } catch (std::exception& exc) {
         // handle exception
-        std::string e = exc.what();
-        SPDLOG_WARN(base_error_message + ". Error: " + e);
+        std::string error_message = base_error_message + ": " + std::string(exc.what());
+        SPDLOG_WARN(error_message);
         ska::pst::lmc::Status status;
         status.set_code(ska::pst::lmc::ErrorCode::INTERNAL_ERROR);
-        status.set_message(base_error_message + ". Error: " + e);
+        status.set_message(error_message);
         set_state(ska::pst::lmc::ObsState::FAULT);
-        return grpc::Status(grpc::StatusCode::INTERNAL, status.message(), status.SerializeAsString());
     }
 }
 
@@ -406,13 +403,12 @@ auto ska::pst::common::LmcService::start_scan(
         return grpc::Status::OK;
     } catch (std::exception& exc) {
         // handle exception
-        std::string e = exc.what();
-        SPDLOG_WARN(base_error_message + ". Error: " + e);
+        std::string error_message = base_error_message + ": " + std::string(exc.what());
+        SPDLOG_WARN(error_message);
         ska::pst::lmc::Status status;
         status.set_code(ska::pst::lmc::ErrorCode::INTERNAL_ERROR);
-        status.set_message(base_error_message + ". Error: " + e);
+        status.set_message(error_message);
         set_state(ska::pst::lmc::ObsState::FAULT);
-        return grpc::Status(grpc::StatusCode::INTERNAL, status.message(), status.SerializeAsString());
     }
 }
 
@@ -684,12 +680,12 @@ auto ska::pst::common::LmcService::get_env(
 }
 
 auto ska::pst::common::LmcService::rethrow_application_manager_runtime_error(
-    std::string _base_error_message
+    const std::string& _base_error_message
 ) -> void
 {
     if (handler->get_application_manager_state() == ska::pst::common::RuntimeError)
     {
-        if(handler->get_application_manager_exception())
+        if (handler->get_application_manager_exception())
         {
             base_error_message = _base_error_message;
             std::rethrow_exception(handler->get_application_manager_exception());

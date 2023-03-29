@@ -137,7 +137,7 @@ namespace ska::pst::common {
              * is in a RuntimeError
              *
              */
-            void rethrow_application_manager_runtime_error(std::string _base_error_message);
+            void rethrow_application_manager_runtime_error(const std::string& _base_error_message);
 
             /**
              * @brief The SKA Observation State of the LMC service.
