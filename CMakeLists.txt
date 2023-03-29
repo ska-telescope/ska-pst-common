@@ -1,12 +1,15 @@
 cmake_minimum_required(VERSION 3.5)
 
-message(STATUS "Building ...")
+file(READ ".release" ver)
+string(REGEX MATCH "release=([0-9]+.[0-9]+.[0-9]+)" _ ${ver})
+set(SkaPstCommon_VERSION ${CMAKE_MATCH_1})
+
+message(STATUS "Building SkaPstCommon version ${SkaPstCommon_VERSION}")
 
 # Project configuration, specifying version, languages,
 # and the C++ standard to use for the whole project
 set(PACKAGE_NAME SkaPstCommon)
 set(DESCRIPTION "Common C++ code for the SKA Pulsar Timing instrument")
-file(STRINGS version.txt SkaPstCommon_VERSION)
 
 project(${PACKAGE_NAME} VERSION ${SkaPstCommon_VERSION} DESCRIPTION ${DESCRIPTION} LANGUAGES CXX )
 set(CMAKE_CXX_STANDARD 17)

@@ -49,9 +49,9 @@ copyright = 'Copyright (c) 2022 Square Kilometre Array Observatory'
 author = 'PST Team'
 
 # The full version, including alpha/beta/rc tags
-with open('../../version.txt') as f:
-    version = f.read().strip()
-release = version
+with open('../../.release') as f:
+    version = f.readline().strip().split("=")[1]
+release = '0.8.0'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
