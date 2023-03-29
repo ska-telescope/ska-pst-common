@@ -92,8 +92,12 @@ class TestLmcServiceHandler : public ska::pst::common::LmcServiceHandler {
         bool beam_configured{false};
         bool scan_configured{false};
         bool scanning{false};
+        bool induce_configure_beam_error{false};
+        bool induce_deconfigure_beam_error{false};
         ska::pst::lmc::BeamConfiguration resources{};
         ska::pst::lmc::ScanConfiguration scan_configuration{};
+        ska::pst::common::State _state = ska::pst::common::Unknown;
+        std::exception_ptr _exception = nullptr;
 
         // Resources
         MOCK_METHOD(void, configure_beam, (const ska::pst::lmc::BeamConfiguration &resources), (override));
@@ -121,6 +125,12 @@ class TestLmcServiceHandler : public ska::pst::common::LmcServiceHandler {
         // Monitor
         MOCK_METHOD(void, get_monitor_data, (ska::pst::lmc::MonitorData *data), (override));
         MOCK_METHOD(void, get_env, (ska::pst::lmc::GetEnvironmentResponse *data), (noexcept, override));
+
+        // Get ApplicationManager details
+        ska::pst::common::State get_application_manager_state() { return _state; }
+        std::exception_ptr get_application_manager_exception() { return _exception; }
+        void set_state(ska::pst::common::State desired_state) { _state=desired_state; }
+        void set_exception(std::exception_ptr desired_exception ) { _exception=desired_exception; }
 };
 
 
