@@ -86,6 +86,18 @@ class TestLmcServiceHandler : public ska::pst::common::LmcServiceHandler {
             ON_CALL(*this, get_env).WillByDefault([this](ska::pst::lmc::GetEnvironmentResponse *data) {
                 ska::pst::common::LmcServiceHandler::get_env(data);
             });
+
+            ON_CALL(*this, reset).WillByDefault([this]() {
+                if (is_scan_configured())
+                {
+                    deconfigure_scan();
+                }
+                if (is_beam_configured())
+                {
+                    deconfigure_beam();
+                }
+                set_state(ska::pst::common::State::Idle);
+            });
         }
 
         // testing fields
@@ -126,6 +138,9 @@ class TestLmcServiceHandler : public ska::pst::common::LmcServiceHandler {
         MOCK_METHOD(void, get_monitor_data, (ska::pst::lmc::MonitorData *data), (override));
         MOCK_METHOD(void, get_env, (ska::pst::lmc::GetEnvironmentResponse *data), (noexcept, override));
 
+        // ERROR HANDLING
+        MOCK_METHOD(void, reset, (), (override));
+    
         // Get ApplicationManager details
         ska::pst::common::State get_application_manager_state() { return _state; }
         std::exception_ptr get_application_manager_exception() { return _exception; }
