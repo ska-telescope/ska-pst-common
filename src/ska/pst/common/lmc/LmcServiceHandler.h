@@ -242,6 +242,13 @@ namespace ska::pst::common {
              virtual void get_env(ska::pst::lmc::GetEnvironmentResponse *data) noexcept {}
 
             /**
+             * @brief Implements the resetting of the ApplicationManager.
+             *
+             * This method will set the state of an ApplicationManager into IDLE
+             */
+            virtual void reset() = 0;
+
+            /**
              * @brief Return State of an ApplicationManager
              * 
              */

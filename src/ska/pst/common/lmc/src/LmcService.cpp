@@ -572,33 +572,22 @@ auto ska::pst::common::LmcService::reset(
     ska::pst::lmc::ResetResponse* /*response*/
 ) -> grpc::Status
 {
-    if (_state == ska::pst::lmc::ObsState::IDLE)
+    if (_state == ska::pst::lmc::ObsState::EMPTY)
     {
-        SPDLOG_WARN("Received reset request but in IDLE state. Ignoring request.");
+        SPDLOG_WARN("Received reset request but in EMPTY state. Ignoring request.");
         return grpc::Status::OK;
     }
-    if (!(_state == ska::pst::lmc::ObsState::ABORTED or _state == ska::pst::lmc::ObsState::FAULT)) {
-        // LMC is the source of truth, but we should have been moved to an ABORTED or FAULT state
-        // before this could have been called.
-        auto curr_state_name = ska::pst::lmc::ObsState_Name(_state);
-        SPDLOG_WARN("Received reset request but not ABORTED or FAULT state. Currently in {} state.",
-            curr_state_name);
-        ska::pst::lmc::Status status;
-        status.set_code(ska::pst::lmc::ErrorCode::INVALID_REQUEST);
-
-        std::ostringstream ss;
-        ss << _service_name << " is not in ABORTED or FAULT state. Currently in " << curr_state_name << " state.";
-
-        status.set_message(ss.str());
-        return grpc::Status(grpc::StatusCode::FAILED_PRECONDITION, status.message(), status.SerializeAsString());
-    }
-
     try {
+        handler->reset();
         if (handler->is_scan_configured())
         {
             handler->deconfigure_scan();
         }
-        set_state(ska::pst::lmc::ObsState::IDLE);
+        if (handler->is_beam_configured())
+        {
+            handler->deconfigure_beam();
+        }
+        set_state(ska::pst::lmc::ObsState::EMPTY);
         return grpc::Status::OK;
     } catch (std::exception& exc) {
         // handle exception
