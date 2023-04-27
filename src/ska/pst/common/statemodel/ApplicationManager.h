@@ -46,7 +46,7 @@ namespace ska::pst::common
 {
   /**
    * @brief The ApplicationManager
-   * 
+   *
    */
   class ApplicationManager : public StateModel
   {
@@ -110,14 +110,14 @@ namespace ska::pst::common
 
       /**
        * @brief Get the previous state before being in a RuntimeError state
-       * 
-       * @return State 
+       *
+       * @return State
        */
       State get_previous_state() const;
 
       /**
        * @brief Utility method to enforce that required is true or else an exception is thrown.
-       * 
+       *
        * @param required boolean value that must be true.
        * @param contextual_message Runtime error message describing the calling context.
        * @throws std::runtime_error if required is false
@@ -126,12 +126,22 @@ namespace ska::pst::common
 
       /**
        * @brief Mandate the application manager is in the required state
-       * 
+       *
        * @param required_state required state for the state model
        * @param contextual_message Runtime error message describing the calling context
        * @throws std::runtime_error if the state does not match the required_state
        */
       void enforce_state(ska::pst::common::State required_state, const std::string& contextual_message) const;
+
+      /**
+       * @brief Utility method to move application manager to RuntimeError state.
+       *
+       * This method is used by the gRPC interface to make sure that the application is
+       * in a faulted state, this could be because an error from the LMC.
+       *
+       * @param exception exception to store as most recently received exception.
+       */
+      void go_to_runtime_error(std::exception exception);
 
     protected:
       /**
@@ -143,7 +153,7 @@ namespace ska::pst::common
 
       /**
        * @brief Beam configuration callback that is called by \ref main to transition the state from Idle to BeamConfigured.
-       * 
+       *
        */
       virtual void perform_configure_beam() = 0;
 
@@ -159,7 +169,7 @@ namespace ska::pst::common
        *
        */
       virtual void perform_scan() = 0;
-  
+
       /**
        * @brief Scan callback that is called by \ref main to transition the state from StartingScan to Scanning.
        * This method is expected to block until the scan is complete.
@@ -170,21 +180,21 @@ namespace ska::pst::common
       /**
        * @brief StopScan callback that is called by \ref main to transition the state from Scanning to ScanConfigured.
        * This method is expected to block until state transitions to ScanConfigured
-       * 
+       *
        */
       virtual void perform_stop_scan() = 0;
 
       /**
        * @brief Scan callback that is called by \ref main to transition the state from ScanConfigured to BeamConfigured.
        * This method is expected to block until state transitions to BeamConfigured
-       * 
+       *
        */
-    
+
       virtual void perform_deconfigure_scan() = 0;
       /**
        * @brief Scan callback that is called by \ref main to transition the state from BeamConfigured to Idle.
        * This method is expected to block until state transitions to Idle
-       * 
+       *
        */
       virtual void perform_deconfigure_beam() = 0;
 
@@ -194,10 +204,10 @@ namespace ska::pst::common
        *
        */
       virtual void perform_reset() = 0;
-      
+
       /**
        * @brief Terminate callback that is called by \ref main to transition the state from Idle to Terminating.
-       * 
+       *
        */
       virtual void perform_terminate() = 0;
 
@@ -212,16 +222,13 @@ namespace ska::pst::common
 
       /**
        * @brief Wait for the command to complete.
-       *
-       * @param required command to wait for.
-       * TBD
        */
       ska::pst::common::Command wait_for_command();
 
       /**
        * @brief Transition the state.
        *
-       * @param required state to transition.
+       * @param exception the exception to store as most recently received exception
        */
       void set_exception(std::exception exception);
 

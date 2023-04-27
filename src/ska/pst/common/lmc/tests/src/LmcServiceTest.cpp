@@ -38,6 +38,7 @@
 #include "ska/pst/common/testutils/GtestMain.h"
 
 #include "ska/pst/common/statemodel/StateModel.h"
+#include "ska/pst/common/statemodel/StateModelException.h"
 
 using namespace google::protobuf::util;
 
@@ -86,7 +87,7 @@ auto LmcServiceTest::configure_beam() -> grpc::Status
     auto resources = request.mutable_beam_configuration();
     auto test_resources = resources->mutable_test();
     auto values = test_resources->mutable_resources();
-    
+
     try
     {
         if (_handler->induce_configure_beam_error)
@@ -238,10 +239,11 @@ auto LmcServiceTest::restart() -> grpc::Status
     return _stub->restart(&context, request, &response);
 }
 
-auto LmcServiceTest::go_to_fault() -> grpc::Status
+auto LmcServiceTest::go_to_fault(std::string error_message) -> grpc::Status
 {
     grpc::ClientContext context;
     ska::pst::lmc::GoToFaultRequest request;
+    request.set_error_message(error_message);
     ska::pst::lmc::GoToFaultResponse response;
 
     return _stub->go_to_fault(&context, request, &response);
@@ -361,6 +363,29 @@ TEST_F(LmcServiceTest, configure_beam_when_already_assigned) // NOLINT
     ska::pst::lmc::Status lmc_status;
     lmc_status.ParseFromString(status.error_details());
     EXPECT_EQ(ska::pst::lmc::ErrorCode::CONFIGURED_FOR_BEAM_ALREADY, lmc_status.code()); // NOLINT
+    EXPECT_EQ(status.error_message(), lmc_status.message()); // NOLINT
+}
+
+TEST_F(LmcServiceTest, configure_beam_with_invalid_request) // NOLINT
+{
+    EXPECT_CALL(*_handler, configure_beam)
+      .Times(1)
+      .WillRepeatedly(testing::Throw(ska::pst::common::pst_validation_error("oops the request was invalid")));
+
+    _service->start();
+    EXPECT_TRUE(_service->is_running());
+    assert_state(ska::pst::lmc::ObsState::EMPTY);
+
+    auto status = configure_beam();
+    EXPECT_FALSE(status.ok()); // NOLINT
+    EXPECT_EQ(grpc::StatusCode::FAILED_PRECONDITION, status.error_code()); // NOLINT
+    EXPECT_EQ("Error in configuring beam: validation error - oops the request was invalid",
+        status.error_message());  // NOLINT
+    assert_state(ska::pst::lmc::ObsState::EMPTY);
+
+    ska::pst::lmc::Status lmc_status;
+    lmc_status.ParseFromString(status.error_details());
+    EXPECT_EQ(ska::pst::lmc::ErrorCode::INVALID_REQUEST, lmc_status.code()); // NOLINT
     EXPECT_EQ(status.error_message(), lmc_status.message()); // NOLINT
 }
 
@@ -521,6 +546,40 @@ TEST_F(LmcServiceTest, configure_when_already_configured) // NOLINT
     EXPECT_EQ(status.error_message(), lmc_status.message()); // NOLINT
 
     assert_state(ska::pst::lmc::ObsState::READY);
+}
+
+TEST_F(LmcServiceTest, configure_scan_with_invalid_request) // NOLINT
+{
+    EXPECT_CALL(*_handler, configure_beam);
+    EXPECT_CALL(*_handler, configure_scan)
+      .Times(1)
+      .WillRepeatedly(testing::Throw(ska::pst::common::pst_validation_error("this is a bad scan config")));
+
+    _service->start();
+    EXPECT_TRUE(_service->is_running());
+    assert_state(ska::pst::lmc::ObsState::EMPTY);
+
+    SPDLOG_TRACE("LmcServiceTest::configure_scan_with_invalid_request - configuring beam");
+    auto status = configure_beam();
+    EXPECT_TRUE(status.ok()); // NOLINT
+    assert_state(ska::pst::lmc::ObsState::IDLE);
+    SPDLOG_TRACE("LmcServiceTest::configure_scan_with_invalid_request - beam configured");
+
+    SPDLOG_TRACE("LmcServiceTest::configure_scan_with_invalid_request - configuring scan");
+    EXPECT_FALSE(_handler->is_scan_configured()); // NOLINT
+    status = configure_scan();
+    EXPECT_FALSE(status.ok()); // NOLINT
+    EXPECT_FALSE(_handler->is_scan_configured()); // NOLINT
+    assert_state(ska::pst::lmc::ObsState::IDLE);
+
+    EXPECT_EQ(grpc::StatusCode::FAILED_PRECONDITION, status.error_code()); // NOLINT
+    EXPECT_EQ("Error in configuring scan: validation error - this is a bad scan config",
+        status.error_message());  // NOLINT
+
+    ska::pst::lmc::Status lmc_status;
+    lmc_status.ParseFromString(status.error_details());
+    EXPECT_EQ(ska::pst::lmc::ErrorCode::INVALID_REQUEST, lmc_status.code()); // NOLINT
+    EXPECT_EQ(status.error_message(), lmc_status.message()); // NOLINT
 }
 
 TEST_F(LmcServiceTest, get_scan_configuration_when_not_ready_or_scanning) // NOLINT
@@ -722,6 +781,42 @@ TEST_F(LmcServiceTest, scan_when_not_ready) // NOLINT
     EXPECT_EQ(status.error_message(), lmc_status.message()); // NOLINT
 }
 
+TEST_F(LmcServiceTest, scan_when_validation_fails) // NOLINT
+{
+    EXPECT_CALL(*_handler, start_scan)
+      .Times(1)
+      .WillRepeatedly(testing::Throw(ska::pst::common::pst_validation_error("this is not a valid scan request")));
+
+    EXPECT_TRUE(_service->is_running()); // NOLINT
+    assert_state(ska::pst::lmc::ObsState::EMPTY);
+
+    SPDLOG_TRACE("LmcServiceTest::scan_when_validation_fails - configuring beam");
+    auto status = configure_beam();
+
+    EXPECT_TRUE(status.ok()); // NOLINT
+    EXPECT_TRUE(_handler->is_beam_configured()); // NOLINT
+    assert_state(ska::pst::lmc::ObsState::IDLE);
+    SPDLOG_TRACE("LmcServiceTest::scan_when_validation_fails - beam configured");
+
+    SPDLOG_TRACE("LmcServiceTest::scan_when_validation_fails - configuring scan");
+    status = configure_scan();
+    EXPECT_TRUE(_handler->is_scan_configured()); // NOLINT
+    EXPECT_TRUE(status.ok()); // NOLINT
+    assert_state(ska::pst::lmc::ObsState::READY);
+    SPDLOG_TRACE("LmcServiceTest::scan_when_validation_fails - scan configured");
+
+    SPDLOG_TRACE("LmcServiceTest::scan_when_validation_fails - starting scan");
+    status = start_scan();
+    EXPECT_FALSE(status.ok()); // NOLINT
+    EXPECT_EQ(grpc::StatusCode::FAILED_PRECONDITION, status.error_code()); // NOLINT
+    EXPECT_EQ("Error in starting scan: validation error - this is not a valid scan request", status.error_message()); // NOLINT
+
+    ska::pst::lmc::Status lmc_status;
+    lmc_status.ParseFromString(status.error_details());
+    EXPECT_EQ(ska::pst::lmc::ErrorCode::INVALID_REQUEST, lmc_status.code()); // NOLINT
+    EXPECT_EQ(status.error_message(), lmc_status.message()); // NOLINT
+}
+
 TEST_F(LmcServiceTest, stop_scan_when_not_scanning) // NOLINT
 {
     EXPECT_CALL(*_handler, stop_scan).Times(0);
@@ -892,6 +987,8 @@ TEST_F(LmcServiceTest, abort_when_already_in_aborted_state) // NOLINT
 TEST_F(LmcServiceTest, reset_when_aborted) // NOLINT
 {
     EXPECT_CALL(*_handler, configure_beam);
+    EXPECT_CALL(*_handler, reset);
+    EXPECT_CALL(*_handler, deconfigure_beam);
 
     SPDLOG_TRACE("LmcServiceTest::reset_when_aborted");
     _service->start();
@@ -922,7 +1019,8 @@ TEST_F(LmcServiceTest, reset_when_aborted_and_scan_configured) // NOLINT
 {
     EXPECT_CALL(*_handler, configure_beam);
     EXPECT_CALL(*_handler, configure_scan);
-    // EXPECT_CALL(*_handler, deconfigure_scan);
+    EXPECT_CALL(*_handler, deconfigure_scan);
+    EXPECT_CALL(*_handler, deconfigure_beam);
     EXPECT_CALL(*_handler, reset);
 
     SPDLOG_TRACE("LmcServiceTest::reset_when_aborted_and_scan_configured");
@@ -962,6 +1060,8 @@ TEST_F(LmcServiceTest, reset_when_aborted_and_scan_configured) // NOLINT
 
 TEST_F(LmcServiceTest, reset_when_empty) // NOLINT
 {
+    EXPECT_CALL(*_handler, reset);
+
     SPDLOG_TRACE("LmcServiceTest::reset_when_empty");
     _service->start();
     EXPECT_TRUE(_service->is_running()); // NOLINT
@@ -976,11 +1076,12 @@ TEST_F(LmcServiceTest, reset_when_empty) // NOLINT
 }
 
 TEST_F(LmcServiceTest, reset_when_not_aborted_or_fault) // NOLINT
-{   
+{
     EXPECT_CALL(*_handler, configure_beam);
     EXPECT_CALL(*_handler, configure_scan);
     EXPECT_CALL(*_handler, deconfigure_scan);
     EXPECT_CALL(*_handler, deconfigure_beam);
+    EXPECT_CALL(*_handler, reset).Times(2);
 
     SPDLOG_TRACE("LmcServiceTest::reset_when_not_aborted_or_fault");
     _service->start();
@@ -1312,6 +1413,7 @@ TEST_F(LmcServiceTest, go_to_fault_when_not_scanning) // NOLINT
     EXPECT_CALL(*_handler, configure_beam);
     EXPECT_CALL(*_handler, configure_scan);
     EXPECT_CALL(*_handler, stop_scan).Times(0);
+    EXPECT_CALL(*_handler, go_to_runtime_error);
 
     _service->start();
     EXPECT_TRUE(_service->is_running()); // NOLINT
@@ -1334,7 +1436,7 @@ TEST_F(LmcServiceTest, go_to_fault_when_not_scanning) // NOLINT
 
     SPDLOG_TRACE("LmcServiceTest::go_to_fault_when_not_scanning - starting scan");
     EXPECT_FALSE(_handler->is_scanning()); // NOLINT
-    status = go_to_fault();
+    status = go_to_fault("test fault message");
     EXPECT_TRUE(status.ok()); // NOLINT
     assert_state(ska::pst::lmc::ObsState::FAULT);
 }
@@ -1345,6 +1447,7 @@ TEST_F(LmcServiceTest, go_to_fault_when_scanning) // NOLINT
     EXPECT_CALL(*_handler, configure_scan);
     EXPECT_CALL(*_handler, start_scan);
     EXPECT_CALL(*_handler, stop_scan);
+    EXPECT_CALL(*_handler, go_to_runtime_error);
 
     _service->start();
     EXPECT_TRUE(_service->is_running()); // NOLINT
@@ -1374,7 +1477,7 @@ TEST_F(LmcServiceTest, go_to_fault_when_scanning) // NOLINT
     SPDLOG_TRACE("LmcServiceTest::go_to_fault_when_scanning - scanning");
 
     SPDLOG_TRACE("LmcServiceTest::go_to_fault_when_scanning - go to fault");
-    status = go_to_fault();
+    status = go_to_fault("test going to a fault state");
     EXPECT_FALSE(_handler->is_scanning()); // NOLINT
     EXPECT_TRUE(status.ok()); // NOLINT
     assert_state(ska::pst::lmc::ObsState::FAULT);
@@ -1388,6 +1491,7 @@ TEST_F(LmcServiceTest, go_to_fault_when_scanning_throws_exception) // NOLINT
     EXPECT_CALL(*_handler, stop_scan)
         .Times(1)
         .WillRepeatedly(testing::Throw(std::exception()));
+    EXPECT_CALL(*_handler, go_to_runtime_error);
 
     _service->start();
     EXPECT_TRUE(_service->is_running()); // NOLINT
@@ -1417,7 +1521,7 @@ TEST_F(LmcServiceTest, go_to_fault_when_scanning_throws_exception) // NOLINT
     SPDLOG_TRACE("LmcServiceTest::go_to_fault_when_scanning_throws_exception - scanning");
 
     SPDLOG_TRACE("LmcServiceTest::go_to_fault_when_scanning_throws_exception - go to fault");
-    status = go_to_fault();
+    status = go_to_fault("test going to fault when scanning");
     EXPECT_TRUE(_handler->is_scanning()); // NOLINT
     EXPECT_TRUE(status.ok()); // NOLINT
     assert_state(ska::pst::lmc::ObsState::FAULT);

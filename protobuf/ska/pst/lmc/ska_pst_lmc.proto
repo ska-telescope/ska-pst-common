@@ -747,7 +747,11 @@ message RestartRequest {}
 message RestartResponse {}
 
 // An empty request message for the go_to_fault command.
-message GoToFaultRequest {}
+message GoToFaultRequest {
+    // the message relating to the fault and why the
+    // go_to_fault message was called.
+    string error_message = 1;
+}
 
 // An emptry response message for the go_to_fault command.
 message GoToFaultResponse {}

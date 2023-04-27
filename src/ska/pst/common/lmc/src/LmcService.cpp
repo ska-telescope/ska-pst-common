@@ -35,6 +35,7 @@
 #include "ska/pst/common/lmc/LmcService.h"
 #include "ska/pst/common/lmc/LmcServiceHandler.h"
 #include "ska/pst/common/statemodel/StateModel.h"
+#include "ska/pst/common/statemodel/StateModelException.h"
 #include <spdlog/spdlog.h>
 
 void ska::pst::common::LmcService::start() {
@@ -170,6 +171,14 @@ auto ska::pst::common::LmcService::configure_beam(
         set_state(ska::pst::lmc::ObsState::IDLE);
 
         return grpc::Status::OK;
+    } catch (ska::pst::common::pst_validation_error& exc) {
+        std::string error_message = base_error_message + ": validation error - " + std::string(exc.what());
+        set_state(ska::pst::lmc::ObsState::EMPTY);
+        SPDLOG_WARN(error_message);
+        ska::pst::lmc::Status status;
+        status.set_code(ska::pst::lmc::ErrorCode::INVALID_REQUEST);
+        status.set_message(error_message);
+        return grpc::Status(grpc::StatusCode::FAILED_PRECONDITION, status.message(), status.SerializeAsString());
     } catch (std::exception& exc) {
         // handle exception
         std::string error_message = base_error_message + ": " + std::string(exc.what());
@@ -282,6 +291,14 @@ auto ska::pst::common::LmcService::configure_scan(
     try {
         rethrow_application_manager_runtime_error("RuntimeError before configuring scan");
         handler->configure_scan(request->scan_configuration());
+    } catch (ska::pst::common::pst_validation_error& exc) {
+        std::string error_message = base_error_message + ": validation error - " + std::string(exc.what());
+        set_state(ska::pst::lmc::ObsState::IDLE);
+        SPDLOG_WARN(error_message);
+        ska::pst::lmc::Status status;
+        status.set_code(ska::pst::lmc::ErrorCode::INVALID_REQUEST);
+        status.set_message(error_message);
+        return grpc::Status(grpc::StatusCode::FAILED_PRECONDITION, status.message(), status.SerializeAsString());
     } catch (std::exception& exc) {
         // handle exception
         std::string error_message = base_error_message + ": " + std::string(exc.what());
@@ -404,6 +421,14 @@ auto ska::pst::common::LmcService::start_scan(
         handler->start_scan(*request);
         set_state(ska::pst::lmc::ObsState::SCANNING);
         return grpc::Status::OK;
+    } catch (ska::pst::common::pst_validation_error& exc) {
+        std::string error_message = base_error_message + ": validation error - " + std::string(exc.what());
+        set_state(ska::pst::lmc::ObsState::READY);
+        SPDLOG_WARN(error_message);
+        ska::pst::lmc::Status status;
+        status.set_code(ska::pst::lmc::ErrorCode::INVALID_REQUEST);
+        status.set_message(error_message);
+        return grpc::Status(grpc::StatusCode::FAILED_PRECONDITION, status.message(), status.SerializeAsString());
     } catch (std::exception& exc) {
         // handle exception
         std::string error_message = base_error_message + ": " + std::string(exc.what());
@@ -572,11 +597,6 @@ auto ska::pst::common::LmcService::reset(
     ska::pst::lmc::ResetResponse* /*response*/
 ) -> grpc::Status
 {
-    if (_state == ska::pst::lmc::ObsState::EMPTY)
-    {
-        SPDLOG_WARN("Received reset request but in EMPTY state. Ignoring request.");
-        return grpc::Status::OK;
-    }
     try {
         handler->reset();
         if (handler->is_scan_configured())
@@ -645,7 +665,7 @@ auto ska::pst::common::LmcService::restart(
 
 auto ska::pst::common::LmcService::go_to_fault(
     grpc::ServerContext* /*context*/,
-    const ska::pst::lmc::GoToFaultRequest* /*request*/,
+    const ska::pst::lmc::GoToFaultRequest* request,
     ska::pst::lmc::GoToFaultResponse* /*response*/
 ) -> grpc::Status
 {
@@ -655,8 +675,14 @@ auto ska::pst::common::LmcService::go_to_fault(
         {
             handler->stop_scan();
         }
+        auto message = request->error_message();
+        if (message.empty()) {
+          message = "gRPC forced update to runtime";
+        }
+        handler->go_to_runtime_error(std::runtime_error(message));
     } catch (std::exception& ex) {
         SPDLOG_WARN("{} gRPC service tried to stop scanning but exception {} occurred.", _service_name, ex.what());
+        handler->go_to_runtime_error(ex);
     }
     set_state(ska::pst::lmc::ObsState::FAULT);
     return grpc::Status::OK;

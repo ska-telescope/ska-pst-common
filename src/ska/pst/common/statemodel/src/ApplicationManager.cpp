@@ -76,20 +76,18 @@ void ska::pst::common::ApplicationManager::main()
       catch(const std::exception& exc)
       {
         SPDLOG_WARN("{} {} exception during command [{}] {}", method_name, entity, get_name(cmd), exc.what());
-        set_exception(exc);
-        SPDLOG_DEBUG("ska::pst::common::ApplicationManager::set_exception done");
-        set_state(RuntimeError);
+        go_to_runtime_error(exc);
         SPDLOG_DEBUG("{} {} [{}] state={}", method_name, entity, get_name(cmd), state_names[get_state()]);
         return;
       }
-      
+
     }
     if(cmd == Terminate)
     {
       return;
     }
   }
-  
+
   // thread to execute the perform_scan method asynchronously to the ApplicationManager
   std::unique_ptr<std::thread> scan_thread{nullptr};
 
@@ -112,7 +110,7 @@ void ska::pst::common::ApplicationManager::main()
           set_state(BeamConfigured);
           SPDLOG_TRACE("{} {} [{}] state={}", method_name, entity, get_name(cmd), state_names[get_state()]);
           break;
-          
+
         case ConfigureScan:
           SPDLOG_TRACE("{} {} {} perform_configure_scan", method_name, entity, get_name(cmd));
           previous_state = BeamConfigured;
@@ -122,7 +120,7 @@ void ska::pst::common::ApplicationManager::main()
           set_state(ScanConfigured);
           SPDLOG_TRACE("{} {} [{}] state={}", method_name, entity, get_name(cmd), state_names[get_state()]);
           break;
-          
+
         case StartScan:
           previous_state = ScanConfigured;
           SPDLOG_TRACE("{} {} {} perform_start_scan", method_name, entity, get_name(cmd));
@@ -133,7 +131,7 @@ void ska::pst::common::ApplicationManager::main()
           scan_thread = std::make_unique<std::thread>(std::thread(&ska::pst::common::ApplicationManager::perform_scan, this));
           SPDLOG_TRACE("{} {} [{}] state={}", method_name, entity, get_name(cmd), state_names[get_state()]);
           break;
-          
+
         case StopScan:
           SPDLOG_TRACE("{} {} {} perform_stop_scan", method_name, entity, get_name(cmd));
           previous_state = Scanning;
@@ -146,7 +144,7 @@ void ska::pst::common::ApplicationManager::main()
           set_state(ScanConfigured);
           SPDLOG_TRACE("{} {} [{}] state={}", method_name, entity, get_name(cmd), state_names[get_state()]);
           break;
-          
+
         case DeconfigureScan:
           SPDLOG_TRACE("{} {} {} perform_deconfigure_scan", method_name, entity, get_name(cmd));
           previous_state = ScanConfigured;
@@ -166,7 +164,7 @@ void ska::pst::common::ApplicationManager::main()
           set_state(Idle);
           SPDLOG_TRACE("{} {} [{}] state={}", method_name, entity, get_name(cmd), state_names[get_state()]);
           break;
-          
+
         case Reset:
           SPDLOG_TRACE("{} {} {} perform_configure_beam", method_name, entity, get_name(cmd));
           perform_reset();
@@ -204,9 +202,7 @@ void ska::pst::common::ApplicationManager::main()
     catch (const std::exception& exc)
     {
       SPDLOG_WARN("{} {} exception during command [{}] {}", method_name, entity, get_name(cmd), exc.what());
-      set_exception(exc);
-      SPDLOG_DEBUG("ska::pst::common::ApplicationManager::set_exception done");
-      set_state(RuntimeError);
+      go_to_runtime_error(exc);
       SPDLOG_DEBUG("{} {} [{}] state={}", method_name, entity, get_name(cmd), state_names[get_state()]);
     }
   }
@@ -287,6 +283,14 @@ void ska::pst::common::ApplicationManager::set_state(ska::pst::common::State new
     state_cond.notify_one();
   }
   SPDLOG_DEBUG("ska::pst::common::ApplicationManager::set_state done state={}", get_name(get_state()));
+}
+
+void ska::pst::common::ApplicationManager::go_to_runtime_error(std::exception exc)
+{
+  SPDLOG_DEBUG("ska::pst::common::ApplicationManager::go_to_runtime_error");
+  set_exception(exc);
+  SPDLOG_DEBUG("ska::pst::common::ApplicationManager::go_to_runtime_error done");
+  set_state(RuntimeError);
 }
 
 void ska::pst::common::ApplicationManager::set_exception(std::exception exception)

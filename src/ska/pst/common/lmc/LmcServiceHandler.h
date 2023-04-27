@@ -250,15 +250,22 @@ namespace ska::pst::common {
 
             /**
              * @brief Return State of an ApplicationManager
-             * 
+             *
              */
              virtual ska::pst::common::State get_application_manager_state() = 0;
              /**
               * @brief Get the exception object
-              * 
-              * @return std::exception_ptr 
+              *
+              * @return std::exception_ptr
               */
              virtual std::exception_ptr get_application_manager_exception() = 0;
+
+             /**
+              * @brief Put application into a runtime error state.
+              *
+              * @param exception the exception to store on the application manager.
+              */
+             virtual void go_to_runtime_error(std::exception exception) = 0;
     };
 
 } // namespace ska::pst::common
