@@ -158,7 +158,7 @@ class LmcServiceTest : public ::testing::Test
 
         // beam resources methods
         grpc::Status configure_beam();
-        grpc::Status configure_beam(ska::pst::lmc::ConfigureBeamRequest request);
+        grpc::Status configure_beam(const ska::pst::lmc::ConfigureBeamRequest& request);
         grpc::Status get_beam_configuration(ska::pst::lmc::GetBeamConfigurationResponse* response);
         grpc::Status deconfigure_beam();
 
@@ -175,7 +175,7 @@ class LmcServiceTest : public ::testing::Test
         grpc::Status abort();
         grpc::Status reset();
         grpc::Status restart();
-        grpc::Status go_to_fault(std::string fault_message);
+        grpc::Status go_to_fault(const std::string& fault_message);
 
         // get environment
         grpc::Status get_env(ska::pst::lmc::GetEnvironmentResponse* response);

@@ -107,7 +107,7 @@ auto LmcServiceTest::configure_beam() -> grpc::Status
     return configure_beam(request);
 }
 
-auto LmcServiceTest::configure_beam(ska::pst::lmc::ConfigureBeamRequest request) -> grpc::Status
+auto LmcServiceTest::configure_beam(const ska::pst::lmc::ConfigureBeamRequest& request) -> grpc::Status
 {
     grpc::ClientContext context;
     ska::pst::lmc::ConfigureBeamResponse response;
@@ -239,7 +239,7 @@ auto LmcServiceTest::restart() -> grpc::Status
     return _stub->restart(&context, request, &response);
 }
 
-auto LmcServiceTest::go_to_fault(std::string error_message) -> grpc::Status
+auto LmcServiceTest::go_to_fault(const std::string& error_message) -> grpc::Status
 {
     grpc::ClientContext context;
     ska::pst::lmc::GoToFaultRequest request;
