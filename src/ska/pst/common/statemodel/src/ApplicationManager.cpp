@@ -248,6 +248,28 @@ void ska::pst::common::ApplicationManager::quit()
   SPDLOG_TRACE("ska::pst::common::ApplicationManager::quit done");
 }
 
+void ska::pst::common::ApplicationManager::perform_reset()
+{
+  if (get_state() == ska::pst::common::State::RuntimeError)
+  {
+    if(get_previous_state() == ska::pst::common::State::Scanning)
+    {
+      perform_stop_scan();
+      perform_deconfigure_scan();
+      perform_deconfigure_beam();
+    }
+    if(get_previous_state() == ska::pst::common::State::ScanConfigured)
+    {
+      perform_deconfigure_scan();
+      perform_deconfigure_beam();
+    }
+    if(get_previous_state() == ska::pst::common::State::BeamConfigured)
+    {
+      perform_deconfigure_beam();
+    }
+  }
+}
+
 auto ska::pst::common::ApplicationManager::wait_for_command() -> ska::pst::common::Command
 {
   SPDLOG_TRACE("ska::pst::common::ApplicationManager::wait_for_command [{}]", entity);
