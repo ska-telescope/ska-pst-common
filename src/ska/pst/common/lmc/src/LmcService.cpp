@@ -679,10 +679,10 @@ auto ska::pst::common::LmcService::go_to_fault(
         if (message.empty()) {
           message = "gRPC forced update to runtime";
         }
-        handler->go_to_runtime_error(std::runtime_error(message));
+        throw std::runtime_error(message);
     } catch (std::exception& ex) {
         SPDLOG_WARN("{} gRPC service tried to stop scanning but exception {} occurred.", _service_name, ex.what());
-        handler->go_to_runtime_error(ex);
+        handler->go_to_runtime_error(std::current_exception());
     }
     set_state(ska::pst::lmc::ObsState::FAULT);
     return grpc::Status::OK;

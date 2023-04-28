@@ -88,20 +88,6 @@ auto LmcServiceTest::configure_beam() -> grpc::Status
     auto test_resources = resources->mutable_test();
     auto values = test_resources->mutable_resources();
 
-    try
-    {
-        if (_handler->induce_configure_beam_error)
-        {
-            SPDLOG_WARN("LmcServiceTest::configure_beam induced configure_beam error");
-            _handler->set_state(ska::pst::common::RuntimeError);
-            throw std::runtime_error("induced configure_beam error");
-        }
-    }
-    catch(const std::exception& e)
-    {
-        _handler->set_exception(std::current_exception());
-    }
-
     (*values)["foo"] = "bar";
 
     return configure_beam(request);
@@ -122,7 +108,7 @@ auto LmcServiceTest::configure_beam(const ska::pst::lmc::ConfigureBeamRequest& r
     }
     catch(const std::exception& e)
     {
-        _handler->set_exception(std::current_exception());
+        _handler->go_to_runtime_error(std::current_exception());
     }
     return _stub->configure_beam(&context, request, &response);
 }
@@ -153,7 +139,7 @@ auto LmcServiceTest::deconfigure_beam() -> grpc::Status
     }
     catch(const std::exception& e)
     {
-        _handler->set_exception(std::current_exception());
+        _handler->go_to_runtime_error(std::current_exception());
     }
 
     return _stub->deconfigure_beam(&context, request, &response);
@@ -1577,6 +1563,7 @@ TEST_F(LmcServiceTest, get_env_with_implementation) // NOLINT
 
 TEST_F(LmcServiceTest, go_to_fault_when_runtime_error_encountered_configure_beam) // NOLINT
 {
+    EXPECT_CALL(*_handler, go_to_runtime_error);
     _handler->induce_configure_beam_error=true;
 
     _service->start();
@@ -1591,6 +1578,7 @@ TEST_F(LmcServiceTest, go_to_fault_when_runtime_error_encountered_configure_beam
 TEST_F(LmcServiceTest, go_to_fault_when_runtime_error_encountered_deconfigure_beam) // NOLINT
 {
     EXPECT_CALL(*_handler, configure_beam);
+    EXPECT_CALL(*_handler, go_to_runtime_error);
     _handler->induce_deconfigure_beam_error=true;
 
     _service->start();
@@ -1605,6 +1593,17 @@ TEST_F(LmcServiceTest, go_to_fault_when_runtime_error_encountered_deconfigure_be
         "RuntimeError before deconfiguring beam: induced deconfigure_beam error"
     );
     assert_state(ska::pst::lmc::ObsState::FAULT);
+}
+
+TEST_F(LmcServiceTest, rethrow_application_manager_runtime_error) // NOLINT
+{
+    EXPECT_CALL(*_handler, go_to_runtime_error);
+
+    _service->start();
+    EXPECT_TRUE(_service->is_running());
+    assert_state(ska::pst::lmc::ObsState::EMPTY);
+
+    auto status = go_to_fault("test going to fault when scanning");
 }
 
 } // namespace ska::pst::common::test

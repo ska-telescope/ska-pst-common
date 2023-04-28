@@ -139,9 +139,9 @@ namespace ska::pst::common
        * This method is used by the gRPC interface to make sure that the application is
        * in a faulted state, this could be because an error from the LMC.
        *
-       * @param exception exception to store as most recently received exception.
+       * @param exception an exception pointer to store as most recently received exception.
        */
-      void go_to_runtime_error(std::exception exception);
+      void go_to_runtime_error(std::exception_ptr exception);
 
     protected:
       /**
@@ -203,7 +203,7 @@ namespace ska::pst::common
        * This method is expected to block until state transitions to Idle
        *
        */
-      virtual void perform_reset() = 0;
+      virtual void perform_reset();
 
       /**
        * @brief Terminate callback that is called by \ref main to transition the state from Idle to Terminating.
@@ -228,9 +228,9 @@ namespace ska::pst::common
       /**
        * @brief Transition the state.
        *
-       * @param exception the exception to store as most recently received exception
+       * @param exception an exception pointer to store as most recently received exception
        */
-      void set_exception(std::exception exception);
+      void set_exception(std::exception_ptr exception);
 
       //! Main thread of execution for the state model interface
       std::unique_ptr<std::thread> main_thread{nullptr};

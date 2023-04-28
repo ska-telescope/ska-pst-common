@@ -76,7 +76,7 @@ void ska::pst::common::ApplicationManager::main()
       catch(const std::exception& exc)
       {
         SPDLOG_WARN("{} {} exception during command [{}] {}", method_name, entity, get_name(cmd), exc.what());
-        go_to_runtime_error(exc);
+        go_to_runtime_error(std::current_exception());
         SPDLOG_DEBUG("{} {} [{}] state={}", method_name, entity, get_name(cmd), state_names[get_state()]);
         return;
       }
@@ -202,7 +202,7 @@ void ska::pst::common::ApplicationManager::main()
     catch (const std::exception& exc)
     {
       SPDLOG_WARN("{} {} exception during command [{}] {}", method_name, entity, get_name(cmd), exc.what());
-      go_to_runtime_error(exc);
+      go_to_runtime_error(std::current_exception());
       SPDLOG_DEBUG("{} {} [{}] state={}", method_name, entity, get_name(cmd), state_names[get_state()]);
     }
   }
@@ -285,18 +285,18 @@ void ska::pst::common::ApplicationManager::set_state(ska::pst::common::State new
   SPDLOG_DEBUG("ska::pst::common::ApplicationManager::set_state done state={}", get_name(get_state()));
 }
 
-void ska::pst::common::ApplicationManager::go_to_runtime_error(std::exception exc)
+void ska::pst::common::ApplicationManager::go_to_runtime_error(std::exception_ptr exc)
 {
   SPDLOG_DEBUG("ska::pst::common::ApplicationManager::go_to_runtime_error");
-  set_exception(exc);
+  set_exception(std::move(exc));
   SPDLOG_DEBUG("ska::pst::common::ApplicationManager::go_to_runtime_error done");
   set_state(RuntimeError);
 }
 
-void ska::pst::common::ApplicationManager::set_exception(std::exception exception)
+void ska::pst::common::ApplicationManager::set_exception(std::exception_ptr exception)
 {
   SPDLOG_DEBUG("ska::pst::common::ApplicationManager::set_exception");
-  last_exception = std::make_exception_ptr(std::move(exception));
+  last_exception = std::move(exception);
 }
 
 auto ska::pst::common::ApplicationManager::get_previous_state() const -> ska::pst::common::State

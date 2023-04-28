@@ -92,6 +92,11 @@ class TestLmcServiceHandler : public ska::pst::common::LmcServiceHandler {
                 // but done directly to allow assertions against the mock
                 set_state(ska::pst::common::State::Idle);
             });
+
+            ON_CALL(*this, go_to_runtime_error).WillByDefault([this](std::exception_ptr exc) {
+                _exception = exc;
+                set_state(ska::pst::common::State::RuntimeError);
+            });
         }
 
         // testing fields
@@ -134,7 +139,7 @@ class TestLmcServiceHandler : public ska::pst::common::LmcServiceHandler {
 
         // ERROR HANDLING
         MOCK_METHOD(void, reset, (), (override));
-        MOCK_METHOD(void, go_to_runtime_error, (std::exception), (override));
+        MOCK_METHOD(void, go_to_runtime_error, (std::exception_ptr), (override));
 
         // Get ApplicationManager details
         ska::pst::common::State get_application_manager_state() { return _state; }

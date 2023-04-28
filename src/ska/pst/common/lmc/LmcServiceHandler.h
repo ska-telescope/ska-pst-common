@@ -263,9 +263,9 @@ namespace ska::pst::common {
              /**
               * @brief Put application into a runtime error state.
               *
-              * @param exception the exception to store on the application manager.
+              * @param exception an exception pointer to store on the application manager.
               */
-             virtual void go_to_runtime_error(std::exception exception) = 0;
+             virtual void go_to_runtime_error(std::exception_ptr exception) = 0;
     };
 
 } // namespace ska::pst::common
