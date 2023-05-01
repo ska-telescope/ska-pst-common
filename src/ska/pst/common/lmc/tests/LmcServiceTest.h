@@ -88,15 +88,14 @@ class TestLmcServiceHandler : public ska::pst::common::LmcServiceHandler {
             });
 
             ON_CALL(*this, reset).WillByDefault([this]() {
-                if (is_scan_configured())
-                {
-                    deconfigure_scan();
-                }
-                if (is_beam_configured())
-                {
-                    deconfigure_beam();
-                }
+                // this is the same as a deconfigure_scan and beam
+                // but done directly to allow assertions against the mock
                 set_state(ska::pst::common::State::Idle);
+            });
+
+            ON_CALL(*this, go_to_runtime_error).WillByDefault([this](std::exception_ptr exc) {
+                _exception = exc;
+                set_state(ska::pst::common::State::RuntimeError);
             });
         }
 
@@ -140,7 +139,8 @@ class TestLmcServiceHandler : public ska::pst::common::LmcServiceHandler {
 
         // ERROR HANDLING
         MOCK_METHOD(void, reset, (), (override));
-    
+        MOCK_METHOD(void, go_to_runtime_error, (std::exception_ptr), (override));
+
         // Get ApplicationManager details
         ska::pst::common::State get_application_manager_state() { return _state; }
         std::exception_ptr get_application_manager_exception() { return _exception; }
@@ -163,7 +163,7 @@ class LmcServiceTest : public ::testing::Test
 
         // beam resources methods
         grpc::Status configure_beam();
-        grpc::Status configure_beam(ska::pst::lmc::ConfigureBeamRequest request);
+        grpc::Status configure_beam(const ska::pst::lmc::ConfigureBeamRequest& request);
         grpc::Status get_beam_configuration(ska::pst::lmc::GetBeamConfigurationResponse* response);
         grpc::Status deconfigure_beam();
 
@@ -180,7 +180,7 @@ class LmcServiceTest : public ::testing::Test
         grpc::Status abort();
         grpc::Status reset();
         grpc::Status restart();
-        grpc::Status go_to_fault();
+        grpc::Status go_to_fault(const std::string& fault_message);
 
         // get environment
         grpc::Status get_env(ska::pst::lmc::GetEnvironmentResponse* response);
