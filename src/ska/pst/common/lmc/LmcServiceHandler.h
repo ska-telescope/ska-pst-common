@@ -65,9 +65,12 @@ namespace ska::pst::common {
              *
              * @param configuration the configuration for the beam. This message has oneof field and should
              *      match that of the service.
-             * @throw std::exception if there is a validation issue or problem with the beam configuration of the service.
+             * @param dry_run just peform validation on the request but not perform the configuration process.
+             *      If validation fails this should throw a ska::pst::common::pst_validation_error
+             * @throw std::exception if there is a problem with the beam configuration of the service.
+             * @throw ska::pst::common::pst_validation_error if there is a validation issue of the request.
              */
-            virtual void configure_beam(const ska::pst::lmc::BeamConfiguration &configuration) = 0;
+            virtual void configure_beam(const ska::pst::lmc::BeamConfiguration &configuration, bool dry_run = false) = 0;
 
             /**
              * @brief Handle deconfiguring the service from a beam.
@@ -118,11 +121,12 @@ namespace ska::pst::common {
              * methods has asserted that no scan is currently configured and the server is in
              * the IDLE ObsState.
              *
-             * @param configuration the scan configuration to use. This message has oneof field and should
-             *      match that of the service.
-             * @throw std::exception if there is a validation issue or problem with configuring a scan.
+             * @param dry_run just peform validation on the request but not perform the configuration process.
+             *      If validation fails this should throw a ska::pst::common::pst_validation_error.
+             * @throw std::exception if there is a problem with the beam configuration of the service.
+             * @throw ska::pst::common::pst_validation_error if there is a validation issue of the request.
              */
-            virtual void configure_scan(const ska::pst::lmc::ScanConfiguration &configuration) = 0;
+            virtual void configure_scan(const ska::pst::lmc::ScanConfiguration &configuration, bool dry_run = false) = 0;
 
             /**
              * @brief Handle deconfiguring service for a scan.

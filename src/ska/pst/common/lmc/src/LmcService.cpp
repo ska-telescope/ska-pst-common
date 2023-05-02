@@ -165,11 +165,14 @@ auto ska::pst::common::LmcService::configure_beam(
 
     base_error_message = "Error in configuring beam";
     try {
-        set_state(ska::pst::lmc::ObsState::RESOURCING);
-        rethrow_application_manager_runtime_error("RuntimeError before configuring beam");
-        handler->configure_beam(request->beam_configuration());
-        set_state(ska::pst::lmc::ObsState::IDLE);
-
+        if (request->dry_run()) {
+          handler->configure_beam(request->beam_configuration(), true);
+        } else {
+          set_state(ska::pst::lmc::ObsState::RESOURCING);
+          rethrow_application_manager_runtime_error("RuntimeError before configuring beam");
+          handler->configure_beam(request->beam_configuration(), false);
+          set_state(ska::pst::lmc::ObsState::IDLE);
+        }
         return grpc::Status::OK;
     } catch (ska::pst::common::pst_validation_error& exc) {
         std::string error_message = base_error_message + ": validation error - " + std::string(exc.what());
@@ -289,8 +292,13 @@ auto ska::pst::common::LmcService::configure_scan(
 
     base_error_message = "Error in configuring scan";
     try {
-        rethrow_application_manager_runtime_error("RuntimeError before configuring scan");
-        handler->configure_scan(request->scan_configuration());
+        if (request->dry_run()) {
+          handler->configure_scan(request->scan_configuration(), true);
+        } else {
+          rethrow_application_manager_runtime_error("RuntimeError before configuring scan");
+          handler->configure_scan(request->scan_configuration(), false);
+          set_state(ska::pst::lmc::ObsState::READY);
+        }
     } catch (ska::pst::common::pst_validation_error& exc) {
         std::string error_message = base_error_message + ": validation error - " + std::string(exc.what());
         set_state(ska::pst::lmc::ObsState::IDLE);
@@ -309,8 +317,6 @@ auto ska::pst::common::LmcService::configure_scan(
         set_state(ska::pst::lmc::ObsState::FAULT);
         return grpc::Status(grpc::StatusCode::INTERNAL, status.message(), status.SerializeAsString());
     }
-
-    set_state(ska::pst::lmc::ObsState::READY);
     return grpc::Status::OK;
 }
 

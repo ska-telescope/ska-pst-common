@@ -213,7 +213,7 @@ namespace ska::pst::common
 
       /**
        * @brief Raise the stored exception from the ApplicationManager's main thread
-       * 
+       *
        */
       void raise_exception();
 
@@ -244,7 +244,7 @@ namespace ska::pst::common
 
       /**
        * @brief Get the beam configuration parameters.
-       * 
+       *
        * @return ska::pst::common::AsciiHeader& beam configuration parameters
        */
       virtual ska::pst::common::AsciiHeader& get_beam_configuration() {
@@ -253,7 +253,7 @@ namespace ska::pst::common
 
       /**
        * @brief Get the scan configuration parameters.
-       * 
+       *
        * @return ska::pst::common::AsciiHeader& scan configuration parameters
        */
       virtual ska::pst::common::AsciiHeader& get_scan_configuration() {
@@ -262,14 +262,13 @@ namespace ska::pst::common
 
       /**
        * @brief Get the start scan configuration parameters
-       * 
+       *
        * @return ska::pst::common::AsciiHeader& start scan configuration parameters
        */
       virtual ska::pst::common::AsciiHeader& get_startscan_configuration() {
         return startscan_config;
       }
 
-    protected:
       /**
        * @brief Validates Beam configuration. Specific validation errors must be set when throwing exceptions.
        *
@@ -294,24 +293,25 @@ namespace ska::pst::common
        */
       virtual void validate_start_scan(const AsciiHeader& config) = 0;
 
+    protected:
       /**
        * @brief Set the beam config object
        *
-       * @param config 
+       * @param config
        */
       void set_beam_config(const AsciiHeader &config);
 
       /**
        * @brief Set the scan config object
        *
-       * @param config 
+       * @param config
        */
       void set_scan_config(const AsciiHeader &config);
 
       /**
        * @brief Set the startscan config object
        *
-       * @param config 
+       * @param config
        */
       void set_startscan_config(const AsciiHeader &config);
 
@@ -354,7 +354,7 @@ namespace ska::pst::common
       /**
        * @brief Wait for the state model to achieve any state other than the required state, within the timeout.
        *
-       * @param required the required state for the state model to 
+       * @param required the required state for the state model to
        * @param milliseconds timeout in milliseconds
        * @return true if the state model did achieve any state other than the required state within the timeout.
        * @return false if the state model did not achieve any state other than the required state within the timeout

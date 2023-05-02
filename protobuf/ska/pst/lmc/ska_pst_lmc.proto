@@ -337,6 +337,13 @@ message ConfigureBeamRequest {
     // uses a BeamConfiguration message that has
     // specific fields for the difference services.
     BeamConfiguration beam_configuration = 1;
+    // Whether to perform a validation of the configuration
+    // without performing the actual configuration process
+    // on the service.
+    //
+    // If not set or the default value of false then the
+    // request will be performed.
+    bool dry_run = 2;
 }
 
 // An empty response message that is used to define
@@ -492,7 +499,17 @@ message ScanConfiguration {
 // Request message to configure a server to
 // be ready for a scan request.
 message ConfigureScanRequest {
+    // The scan configuration for the service. This
+    // uses a ScanConfiguration message that has
+    // specific fields for the difference services.
     ScanConfiguration scan_configuration = 3;
+    // Whether to perform a validation of the configuration
+    // without performing the actual configuration process
+    // on the service.
+    //
+    // If not set or the default value of false then the
+    // request will be performed.
+    bool dry_run = 4;
 }
 
 // An empty message used as a response for
