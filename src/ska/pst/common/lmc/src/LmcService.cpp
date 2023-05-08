@@ -35,7 +35,6 @@
 #include "ska/pst/common/lmc/LmcService.h"
 #include "ska/pst/common/lmc/LmcServiceHandler.h"
 #include "ska/pst/common/statemodel/StateModel.h"
-#include "ska/pst/common/statemodel/StateModelException.h"
 #include <spdlog/spdlog.h>
 
 void ska::pst::common::LmcService::start() {
@@ -140,42 +139,44 @@ auto ska::pst::common::LmcService::configure_beam(
 {
     SPDLOG_TRACE("ska::pst::common::LmcService::configure_beam()");
 
-    // check if handler has already have had beam configured
-    if (handler->is_beam_configured()) {
-        SPDLOG_WARN("Received configure beam request but beam configured already.");
-        ska::pst::lmc::Status status;
-        status.set_code(ska::pst::lmc::ErrorCode::CONFIGURED_FOR_BEAM_ALREADY);
-        status.set_message(_service_name + " beam configured already. Beam configuation needs to be deconfigured before reconfiguring.");
-        return grpc::Status(grpc::StatusCode::FAILED_PRECONDITION, status.message(), status.SerializeAsString());
+    if (!request->dry_run())
+    {
+        // check if handler has already have had beam configured
+        if (handler->is_beam_configured()) {
+            SPDLOG_WARN("Received configure beam request but beam configured already.");
+            ska::pst::lmc::Status status;
+            status.set_code(ska::pst::lmc::ErrorCode::CONFIGURED_FOR_BEAM_ALREADY);
+            status.set_message(_service_name + " beam configured already. Beam configuation needs to be deconfigured before reconfiguring.");
+            return grpc::Status(grpc::StatusCode::FAILED_PRECONDITION, status.message(), status.SerializeAsString());
+        }
+
+        if (_state != ska::pst::lmc::ObsState::EMPTY) {
+            auto curr_state_name = ska::pst::lmc::ObsState_Name(_state);
+            SPDLOG_WARN("Received configure beam request but not in EMPTY state. Currently in {} state.", curr_state_name);
+
+            ska::pst::lmc::Status status;
+            status.set_code(ska::pst::lmc::ErrorCode::INVALID_REQUEST);
+
+            std::ostringstream ss;
+            ss << _service_name << " is not in EMPTY state. Currently in " << curr_state_name << " state.";
+
+            status.set_message(ss.str());
+            return grpc::Status(grpc::StatusCode::FAILED_PRECONDITION, status.message(), status.SerializeAsString());
+        }
     }
 
-    if (_state != ska::pst::lmc::ObsState::EMPTY) {
-        auto curr_state_name = ska::pst::lmc::ObsState_Name(_state);
-        SPDLOG_WARN("Received configure beam request but not in EMPTY state. Currently in {} state.", curr_state_name);
-
-        ska::pst::lmc::Status status;
-        status.set_code(ska::pst::lmc::ErrorCode::INVALID_REQUEST);
-
-        std::ostringstream ss;
-        ss << _service_name << " is not in EMPTY state. Currently in " << curr_state_name << " state.";
-
-        status.set_message(ss.str());
-        return grpc::Status(grpc::StatusCode::FAILED_PRECONDITION, status.message(), status.SerializeAsString());
-    }
-
-    base_error_message = "Error in configuring beam";
     try {
         if (request->dry_run()) {
-          handler->configure_beam(request->beam_configuration(), true);
+          handler->validate_beam_configuration(request->beam_configuration());
         } else {
           set_state(ska::pst::lmc::ObsState::RESOURCING);
           rethrow_application_manager_runtime_error("RuntimeError before configuring beam");
-          handler->configure_beam(request->beam_configuration(), false);
+          handler->configure_beam(request->beam_configuration());
           set_state(ska::pst::lmc::ObsState::IDLE);
         }
         return grpc::Status::OK;
     } catch (ska::pst::common::pst_validation_error& exc) {
-        std::string error_message = base_error_message + ": validation error - " + std::string(exc.what());
+        std::string error_message = "Error in validating beam configuration: " + std::string(exc.what());
         set_state(ska::pst::lmc::ObsState::EMPTY);
         SPDLOG_WARN(error_message);
         ska::pst::lmc::Status status;
@@ -184,7 +185,7 @@ auto ska::pst::common::LmcService::configure_beam(
         return grpc::Status(grpc::StatusCode::FAILED_PRECONDITION, status.message(), status.SerializeAsString());
     } catch (std::exception& exc) {
         // handle exception
-        std::string error_message = base_error_message + ": " + std::string(exc.what());
+        std::string error_message = "Error in configuring beam: " + std::string(exc.what());
         SPDLOG_WARN(error_message);
         ska::pst::lmc::Status status;
         status.set_code(ska::pst::lmc::ErrorCode::INTERNAL_ERROR);
@@ -267,40 +268,41 @@ auto ska::pst::common::LmcService::configure_scan(
     ska::pst::lmc::ConfigureScanResponse* /*response*/
 ) -> grpc::Status
 {
-    // check if handler has already been configured
-    if (handler->is_scan_configured()) {
-        SPDLOG_WARN("Received configure scan request but handler already has scan configured.");
-        ska::pst::lmc::Status status;
-        status.set_code(ska::pst::lmc::ErrorCode::CONFIGURED_FOR_SCAN_ALREADY);
-        status.set_message(_service_name + " already configured for scan. Scan needs to be deconfigured before reconfiguring.");
-        return grpc::Status(grpc::StatusCode::FAILED_PRECONDITION, status.message(), status.SerializeAsString());
+    if (!request->dry_run()) {
+        // check if handler has already been configured
+        if (handler->is_scan_configured()) {
+            SPDLOG_WARN("Received configure scan request but handler already has scan configured.");
+            ska::pst::lmc::Status status;
+            status.set_code(ska::pst::lmc::ErrorCode::CONFIGURED_FOR_SCAN_ALREADY);
+            status.set_message(_service_name + " already configured for scan. Scan needs to be deconfigured before reconfiguring.");
+            return grpc::Status(grpc::StatusCode::FAILED_PRECONDITION, status.message(), status.SerializeAsString());
+        }
+
+        // ensure in IDLE state
+        if (_state != ska::pst::lmc::ObsState::IDLE) {
+            auto curr_state_name = ska::pst::lmc::ObsState_Name(_state);
+            SPDLOG_WARN("Received configure request but not in IDLE state. Currently in {} state.", curr_state_name);
+            ska::pst::lmc::Status status;
+            status.set_code(ska::pst::lmc::ErrorCode::INVALID_REQUEST);
+
+            std::ostringstream ss;
+            ss << _service_name << " is not in IDLE state. Currently in " << curr_state_name << " state.";
+
+            status.set_message(ss.str());
+            return grpc::Status(grpc::StatusCode::FAILED_PRECONDITION, status.message(), status.SerializeAsString());
+        }
     }
 
-    // ensure in IDLE state
-    if (_state != ska::pst::lmc::ObsState::IDLE) {
-        auto curr_state_name = ska::pst::lmc::ObsState_Name(_state);
-        SPDLOG_WARN("Received configure request but not in IDLE state. Currently in {} state.", curr_state_name);
-        ska::pst::lmc::Status status;
-        status.set_code(ska::pst::lmc::ErrorCode::INVALID_REQUEST);
-
-        std::ostringstream ss;
-        ss << _service_name << " is not in IDLE state. Currently in " << curr_state_name << " state.";
-
-        status.set_message(ss.str());
-        return grpc::Status(grpc::StatusCode::FAILED_PRECONDITION, status.message(), status.SerializeAsString());
-    }
-
-    base_error_message = "Error in configuring scan";
     try {
         if (request->dry_run()) {
-          handler->configure_scan(request->scan_configuration(), true);
+          handler->validate_scan_configuration(request->scan_configuration());
         } else {
           rethrow_application_manager_runtime_error("RuntimeError before configuring scan");
-          handler->configure_scan(request->scan_configuration(), false);
+          handler->configure_scan(request->scan_configuration());
           set_state(ska::pst::lmc::ObsState::READY);
         }
     } catch (ska::pst::common::pst_validation_error& exc) {
-        std::string error_message = base_error_message + ": validation error - " + std::string(exc.what());
+        std::string error_message = "Error in validating scan configuration: " + std::string(exc.what());
         set_state(ska::pst::lmc::ObsState::IDLE);
         SPDLOG_WARN(error_message);
         ska::pst::lmc::Status status;
@@ -309,7 +311,7 @@ auto ska::pst::common::LmcService::configure_scan(
         return grpc::Status(grpc::StatusCode::FAILED_PRECONDITION, status.message(), status.SerializeAsString());
     } catch (std::exception& exc) {
         // handle exception
-        std::string error_message = base_error_message + ": " + std::string(exc.what());
+        std::string error_message = "Error in configuring scan: " + std::string(exc.what());
         SPDLOG_WARN(error_message);
         ska::pst::lmc::Status status;
         status.set_code(ska::pst::lmc::ErrorCode::INTERNAL_ERROR);

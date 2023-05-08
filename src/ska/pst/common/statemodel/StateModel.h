@@ -37,6 +37,7 @@
 #include <map>
 #include <condition_variable>
 #include "ska/pst/common/utils/AsciiHeader.h"
+#include "ska/pst/common/utils/ValidationContext.h"
 
 #ifndef SKA_PST_COMMON_StateModel_h
 #define SKA_PST_COMMON_StateModel_h
@@ -270,20 +271,28 @@ namespace ska::pst::common
       }
 
       /**
-       * @brief Validates Beam configuration. Specific validation errors must be set when throwing exceptions.
+       * @brief Validates Beam configuration.
+       *
+       * Validation errors should not be raise as exceptions but added to the
+       * validation context.  The client of the method can decide what to do with
+       * the validation errors.
        *
        * @param config Beam configuration to validate
-       *
+       * @param context A validation context where errors should be added.
        */
-      virtual void validate_configure_beam(const AsciiHeader& config) = 0;
+      virtual void validate_configure_beam(const AsciiHeader& config, ValidationContext *context) = 0;
 
       /**
-       * @brief Validates Scan configuration. Specific validation errors must be set when throwing exceptions.
+       * @brief Validates Scan configuration.
+       *
+       * Validation errors should not be raise as exceptions but added to the
+       * validation context.  The client of the method can decide what to do with
+       * the validation errors.
        *
        * @param config Scan configuration to validate
-       *
+       * @param context A validation context where errors should be added.
        */
-      virtual void validate_configure_scan(const AsciiHeader& config) = 0;
+      virtual void validate_configure_scan(const AsciiHeader& config, ValidationContext *context) = 0;
 
       /**
        * @brief Validates StartScan configuration. Specific validation errors must be set when throwing exceptions.

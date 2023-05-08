@@ -12,6 +12,7 @@ set(public_headers
     RandomDataGenerator.h
     Logging.h
     SineWaveGenerator.h
+    ValidationContext.h
 )
 
 set(sources
@@ -25,6 +26,7 @@ set(sources
     src/RandomDataGenerator.cpp
     src/Logging.cpp
     src/SineWaveGenerator.cpp
+    src/ValidationContext.cpp
 )
 
 set(private_headers

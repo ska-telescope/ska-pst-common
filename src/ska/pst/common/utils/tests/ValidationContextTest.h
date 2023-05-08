@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Square Kilometre Array Observatory
+ * Copyright 2023 Square Kilometre Array Observatory
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -28,28 +28,33 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <stdexcept>
-#include <string>
+#include <gtest/gtest.h>
 
-#ifndef __SKA_PST_COMMON_StateModelException_h
-#define __SKA_PST_COMMON_StateModelException_h
+#ifndef SKA_PST_COMMON_UTILS_TESTS_ValidationContextTest_h
+#define SKA_PST_COMMON_UTILS_TESTS_ValidationContextTest_h
 
-namespace ska::pst::common
+namespace ska::pst::common::test {
+
+/**
+ * @brief Test the Time class
+ *
+ * @details
+ *
+ */
+class ValidationContextTest : public ::testing::Test
 {
+    protected:
+        void SetUp() override;
+        void TearDown() override;
 
-  /**
-   * @brief Exception thrown when an invalid state transition occurs
-   *
-   */
-  class pst_state_transition_error : public std::logic_error
-  {
     public:
+        ValidationContextTest();
 
-      explicit pst_state_transition_error(const std::string& msg) : logic_error(msg) {};
-      explicit pst_state_transition_error(const char* msg) : logic_error(msg) {};
-      virtual ~pst_state_transition_error() = default;
-  };
+        ~ValidationContextTest() = default;
 
-} // namespace ska::pst::common
+    private:
+};
 
-#endif // __SKA_PST_COMMON_StateModelException_h
+} // namespace ska::pst::common::test
+
+#endif // SKA_PST_COMMON_UTILS_TESTS_ValidationContextTest_h

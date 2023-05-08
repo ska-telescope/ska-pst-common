@@ -38,7 +38,6 @@
 #include "ska/pst/common/testutils/GtestMain.h"
 
 #include "ska/pst/common/statemodel/StateModel.h"
-#include "ska/pst/common/statemodel/StateModelException.h"
 
 using namespace google::protobuf::util;
 
@@ -332,7 +331,8 @@ TEST_F(LmcServiceTest, configure_beam) // NOLINT
 
 TEST_F(LmcServiceTest, configure_beam_during_dry_run) // NOLINT
 {
-    EXPECT_CALL(*_handler, configure_beam);
+    EXPECT_CALL(*_handler, validate_beam_configuration);
+    EXPECT_CALL(*_handler, configure_beam).Times(0);
 
     _service->start();
     EXPECT_TRUE(_service->is_running());
@@ -385,7 +385,7 @@ TEST_F(LmcServiceTest, configure_beam_with_invalid_request) // NOLINT
     auto status = configure_beam();
     EXPECT_FALSE(status.ok()); // NOLINT
     EXPECT_EQ(grpc::StatusCode::FAILED_PRECONDITION, status.error_code()); // NOLINT
-    EXPECT_EQ("Error in configuring beam: validation error - oops the request was invalid",
+    EXPECT_EQ("Error in validating beam configuration: oops the request was invalid",
         status.error_message());  // NOLINT
     assert_state(ska::pst::lmc::ObsState::EMPTY);
 
@@ -397,7 +397,7 @@ TEST_F(LmcServiceTest, configure_beam_with_invalid_request) // NOLINT
 
 TEST_F(LmcServiceTest, configure_beam_with_invalid_request_during_dry_run) // NOLINT
 {
-    EXPECT_CALL(*_handler, configure_beam)
+    EXPECT_CALL(*_handler, validate_beam_configuration)
       .Times(1)
       .WillRepeatedly(testing::Throw(ska::pst::common::pst_validation_error("oops the request was invalid")));
 
@@ -408,7 +408,7 @@ TEST_F(LmcServiceTest, configure_beam_with_invalid_request_during_dry_run) // NO
     auto status = configure_beam(true);
     EXPECT_FALSE(status.ok()); // NOLINT
     EXPECT_EQ(grpc::StatusCode::FAILED_PRECONDITION, status.error_code()); // NOLINT
-    EXPECT_EQ("Error in configuring beam: validation error - oops the request was invalid",
+    EXPECT_EQ("Error in validating beam configuration: oops the request was invalid",
         status.error_message());  // NOLINT
     assert_state(ska::pst::lmc::ObsState::EMPTY);
 
@@ -509,8 +509,47 @@ TEST_F(LmcServiceTest, configure_deconfigure) // NOLINT
     SPDLOG_TRACE("LmcServiceTest::configure_deconfigure - beam deconfigured");
 }
 
-// TODO - handle the error states of scan configuration methods.
-// configure when not IDLE
+TEST_F(LmcServiceTest, configure_scan_during_dry_run) // NOLINT
+{
+    EXPECT_CALL(*_handler, configure_beam);
+    EXPECT_CALL(*_handler, validate_scan_configuration);
+    EXPECT_CALL(*_handler, configure_scan).Times(0);
+
+    _service->start();
+    EXPECT_TRUE(_service->is_running());
+    assert_state(ska::pst::lmc::ObsState::EMPTY);
+
+    SPDLOG_TRACE("LmcServiceTest::configure_scan_during_dry_run - configuring beam");
+    auto status = configure_beam();
+    EXPECT_TRUE(status.ok()); // NOLINT
+    assert_state(ska::pst::lmc::ObsState::IDLE);
+    SPDLOG_TRACE("LmcServiceTest::configure_scan_during_dry_run - beam configured");
+
+
+    SPDLOG_TRACE("LmcServiceTest::configure_scan_during_dry_run - validating scan config");
+    status = configure_scan(true);
+    EXPECT_TRUE(status.ok()); // NOLINT
+    assert_state(ska::pst::lmc::ObsState::IDLE);
+    SPDLOG_TRACE("LmcServiceTest::configure_scan_during_dry_run - scan config validated");
+}
+
+
+TEST_F(LmcServiceTest, configure_scan_during_dry_run_even_when_not_beam_configured) // NOLINT
+{
+    EXPECT_CALL(*_handler, validate_scan_configuration);
+    EXPECT_CALL(*_handler, configure_scan).Times(0);
+
+    _service->start();
+    EXPECT_TRUE(_service->is_running());
+    assert_state(ska::pst::lmc::ObsState::EMPTY);
+
+    SPDLOG_TRACE("LmcServiceTest::configure_scan_during_dry_run_even_when_not_beam_configured - validating scan config");
+    auto status = configure_scan(true);
+    EXPECT_TRUE(status.ok()); // NOLINT
+    assert_state(ska::pst::lmc::ObsState::EMPTY);
+    SPDLOG_TRACE("LmcServiceTest::configure_scan_during_dry_run_even_when_not_beam_configured - scan config validated");
+}
+
 
 TEST_F(LmcServiceTest, configure_when_not_idle) // NOLINT
 {
@@ -603,7 +642,7 @@ TEST_F(LmcServiceTest, configure_scan_with_invalid_request) // NOLINT
     assert_state(ska::pst::lmc::ObsState::IDLE);
 
     EXPECT_EQ(grpc::StatusCode::FAILED_PRECONDITION, status.error_code()); // NOLINT
-    EXPECT_EQ("Error in configuring scan: validation error - this is a bad scan config",
+    EXPECT_EQ("Error in validating scan configuration: this is a bad scan config",
         status.error_message());  // NOLINT
 
     ska::pst::lmc::Status lmc_status;
@@ -813,6 +852,8 @@ TEST_F(LmcServiceTest, scan_when_not_ready) // NOLINT
 
 TEST_F(LmcServiceTest, scan_when_validation_fails) // NOLINT
 {
+    EXPECT_CALL(*_handler, configure_beam);
+    EXPECT_CALL(*_handler, configure_scan);
     EXPECT_CALL(*_handler, start_scan)
       .Times(1)
       .WillRepeatedly(testing::Throw(ska::pst::common::pst_validation_error("this is not a valid scan request")));

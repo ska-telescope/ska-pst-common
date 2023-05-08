@@ -52,7 +52,13 @@ void ska::pst::common::StateModel::initialise()
 void ska::pst::common::StateModel::configure_beam(const AsciiHeader& config)
 {
   SPDLOG_DEBUG("ska::pst::common::StateModel::configure_beam()");
-  validate_configure_beam(config);
+
+  // enforce valid request. This ensures the validation had happened before
+  // attempting to perform configure beam on the service.
+  ValidationContext validation_context;
+  validate_configure_beam(config, &validation_context);
+  validation_context.throw_error_if_not_empty();
+
   set_beam_config(config);
   set_command(ConfigureBeam);
   wait_for_state(BeamConfigured);
@@ -61,7 +67,13 @@ void ska::pst::common::StateModel::configure_beam(const AsciiHeader& config)
 void ska::pst::common::StateModel::configure_scan(const AsciiHeader& config)
 {
   SPDLOG_DEBUG("ska::pst::common::StateModel::configure_scan()");
-  validate_configure_scan(config);
+
+  // enforce valid request. This ensures the validation had happened before
+  // attempting to perform configure scan on the service.
+  ValidationContext validation_context;
+  validate_configure_scan(config, &validation_context);
+  validation_context.throw_error_if_not_empty();
+
   set_scan_config(config);
   set_command(ConfigureScan);
   wait_for_state(ScanConfigured);

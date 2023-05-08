@@ -58,8 +58,8 @@ class TestStateModel : public StateModel
     }
     ~TestStateModel() = default;
 
-    void validate_configure_beam(const ska::pst::common::AsciiHeader& config) {; };
-    void validate_configure_scan(const ska::pst::common::AsciiHeader& config) {; };
+    void validate_configure_beam(const ska::pst::common::AsciiHeader& config, ska::pst::common::ValidationContext *context) {; };
+    void validate_configure_scan(const ska::pst::common::AsciiHeader& config, ska::pst::common::ValidationContext *context) {; };
     void validate_start_scan(const ska::pst::common::AsciiHeader& config) {; };
 
     // Resources
