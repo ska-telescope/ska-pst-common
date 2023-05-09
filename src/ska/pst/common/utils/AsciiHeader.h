@@ -70,7 +70,7 @@ namespace ska::pst::common {
        *
        * @param obj AsciiHeader from which to copy the size and content
        */
-      explicit AsciiHeader(const AsciiHeader &obj);
+      AsciiHeader(const AsciiHeader &obj);
 
       /**
        * @brief Destroy the Ascii Header object

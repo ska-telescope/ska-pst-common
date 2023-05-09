@@ -37,6 +37,7 @@
 #include <map>
 #include <condition_variable>
 #include "ska/pst/common/utils/AsciiHeader.h"
+#include "ska/pst/common/utils/ValidationContext.h"
 
 #ifndef SKA_PST_COMMON_StateModel_h
 #define SKA_PST_COMMON_StateModel_h
@@ -213,7 +214,7 @@ namespace ska::pst::common
 
       /**
        * @brief Raise the stored exception from the ApplicationManager's main thread
-       * 
+       *
        */
       void raise_exception();
 
@@ -244,7 +245,7 @@ namespace ska::pst::common
 
       /**
        * @brief Get the beam configuration parameters.
-       * 
+       *
        * @return ska::pst::common::AsciiHeader& beam configuration parameters
        */
       virtual ska::pst::common::AsciiHeader& get_beam_configuration() {
@@ -253,7 +254,7 @@ namespace ska::pst::common
 
       /**
        * @brief Get the scan configuration parameters.
-       * 
+       *
        * @return ska::pst::common::AsciiHeader& scan configuration parameters
        */
       virtual ska::pst::common::AsciiHeader& get_scan_configuration() {
@@ -262,29 +263,36 @@ namespace ska::pst::common
 
       /**
        * @brief Get the start scan configuration parameters
-       * 
+       *
        * @return ska::pst::common::AsciiHeader& start scan configuration parameters
        */
       virtual ska::pst::common::AsciiHeader& get_startscan_configuration() {
         return startscan_config;
       }
 
-    protected:
       /**
-       * @brief Validates Beam configuration. Specific validation errors must be set when throwing exceptions.
+       * @brief Validates Beam configuration.
+       *
+       * Validation errors should not be raise as exceptions but added to the
+       * validation context.  The client of the method can decide what to do with
+       * the validation errors.
        *
        * @param config Beam configuration to validate
-       *
+       * @param context A validation context where errors should be added.
        */
-      virtual void validate_configure_beam(const AsciiHeader& config) = 0;
+      virtual void validate_configure_beam(const AsciiHeader& config, ValidationContext *context) = 0;
 
       /**
-       * @brief Validates Scan configuration. Specific validation errors must be set when throwing exceptions.
+       * @brief Validates Scan configuration.
+       *
+       * Validation errors should not be raise as exceptions but added to the
+       * validation context.  The client of the method can decide what to do with
+       * the validation errors.
        *
        * @param config Scan configuration to validate
-       *
+       * @param context A validation context where errors should be added.
        */
-      virtual void validate_configure_scan(const AsciiHeader& config) = 0;
+      virtual void validate_configure_scan(const AsciiHeader& config, ValidationContext *context) = 0;
 
       /**
        * @brief Validates StartScan configuration. Specific validation errors must be set when throwing exceptions.
@@ -294,24 +302,25 @@ namespace ska::pst::common
        */
       virtual void validate_start_scan(const AsciiHeader& config) = 0;
 
+    protected:
       /**
        * @brief Set the beam config object
        *
-       * @param config 
+       * @param config
        */
       void set_beam_config(const AsciiHeader &config);
 
       /**
        * @brief Set the scan config object
        *
-       * @param config 
+       * @param config
        */
       void set_scan_config(const AsciiHeader &config);
 
       /**
        * @brief Set the startscan config object
        *
-       * @param config 
+       * @param config
        */
       void set_startscan_config(const AsciiHeader &config);
 
@@ -354,7 +363,7 @@ namespace ska::pst::common
       /**
        * @brief Wait for the state model to achieve any state other than the required state, within the timeout.
        *
-       * @param required the required state for the state model to 
+       * @param required the required state for the state model to
        * @param milliseconds timeout in milliseconds
        * @return true if the state model did achieve any state other than the required state within the timeout.
        * @return false if the state model did not achieve any state other than the required state within the timeout

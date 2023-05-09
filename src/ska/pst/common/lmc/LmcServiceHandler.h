@@ -51,6 +51,37 @@ namespace ska::pst::common {
      */
     class LmcServiceHandler {
         public:
+
+            // validation methods
+            /**
+             * @brief Validate a beam configuration.
+             *
+             * Validate a beam configuration for correctness but does not apply the configuration.
+             *
+             * Implementations of this method should check for correctness of the configuration
+             * as well as enforcing that the correct sub-field in the ska::pst::lmc::BeamConfiguration
+             * message is set, (e.g. that for SMRB the smrb field is set, and similarly for RECV the
+             * receive field is set.)
+             *
+             * @throw std::exception if there is a problem with the beam configuration of the service.
+             * @throw ska::pst::common::pst_validation_error if there are validation errors in the request.
+             */
+            virtual void validate_beam_configuration(const ska::pst::lmc::BeamConfiguration &configuration) = 0;
+
+            /**
+             * @brief Validate a scan configuration.
+             *
+             * Validate a scan configuration for correctness but does not apply the configuration.
+             *
+             * Implementations of this method should enforce check and enforce that the correct
+             * sub-field in the ska::pst::lmc::ScanConfiguration message is set, (e.g. that
+             * for SMRB the smrb field is set, and similarly for RECV the receive field is set.)
+             *
+             * @throw std::exception if there is a problem with the beam configuration of the service.
+             * @throw ska::pst::common::pst_validation_error if there are validation errors in the request.
+             */
+            virtual void validate_scan_configuration(const ska::pst::lmc::ScanConfiguration &configuration) = 0;
+
             // beam resourcing methods
             /**
              * @brief Handle the beam configuration for the service.
@@ -65,7 +96,8 @@ namespace ska::pst::common {
              *
              * @param configuration the configuration for the beam. This message has oneof field and should
              *      match that of the service.
-             * @throw std::exception if there is a validation issue or problem with the beam configuration of the service.
+             * @throw std::exception if there is a problem with the beam configuration of the service.
+             * @throw ska::pst::common::pst_validation_error if there is a validation issue of the request.
              */
             virtual void configure_beam(const ska::pst::lmc::BeamConfiguration &configuration) = 0;
 
@@ -118,11 +150,11 @@ namespace ska::pst::common {
              * methods has asserted that no scan is currently configured and the server is in
              * the IDLE ObsState.
              *
-             * @param configuration the scan configuration to use. This message has oneof field and should
-             *      match that of the service.
-             * @throw std::exception if there is a validation issue or problem with configuring a scan.
+             * @throw std::exception if there is a problem with the beam configuration of the service.
+             * @throw ska::pst::common::pst_validation_error if there is a validation issue of the request.
              */
             virtual void configure_scan(const ska::pst::lmc::ScanConfiguration &configuration) = 0;
+
 
             /**
              * @brief Handle deconfiguring service for a scan.
