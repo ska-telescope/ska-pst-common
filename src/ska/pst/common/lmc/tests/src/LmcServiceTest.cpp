@@ -39,6 +39,8 @@
 
 #include "ska/pst/common/statemodel/StateModel.h"
 
+#define DRY_RUN true
+
 using namespace google::protobuf::util;
 
 auto main(int argc, char* argv[]) -> int
@@ -340,7 +342,7 @@ TEST_F(LmcServiceTest, configure_beam_during_dry_run) // NOLINT
 
     SPDLOG_TRACE("LmcServiceTest::configure_beam_during_dry_run - configuring beam");
     EXPECT_FALSE(_handler->is_beam_configured()); // NOLINT
-    auto status = configure_beam(true);
+    auto status = configure_beam(DRY_RUN);
 
     EXPECT_TRUE(status.ok()); // NOLINT
     EXPECT_FALSE(_handler->is_beam_configured()); // NOLINT
@@ -405,7 +407,7 @@ TEST_F(LmcServiceTest, configure_beam_with_invalid_request_during_dry_run) // NO
     EXPECT_TRUE(_service->is_running());
     assert_state(ska::pst::lmc::ObsState::EMPTY);
 
-    auto status = configure_beam(true);
+    auto status = configure_beam(DRY_RUN);
     EXPECT_FALSE(status.ok()); // NOLINT
     EXPECT_EQ(grpc::StatusCode::FAILED_PRECONDITION, status.error_code()); // NOLINT
     EXPECT_EQ("Error in validating beam configuration: oops the request was invalid",
@@ -527,7 +529,7 @@ TEST_F(LmcServiceTest, configure_scan_during_dry_run) // NOLINT
 
 
     SPDLOG_TRACE("LmcServiceTest::configure_scan_during_dry_run - validating scan config");
-    status = configure_scan(true);
+    status = configure_scan(DRY_RUN);
     EXPECT_TRUE(status.ok()); // NOLINT
     assert_state(ska::pst::lmc::ObsState::IDLE);
     SPDLOG_TRACE("LmcServiceTest::configure_scan_during_dry_run - scan config validated");
@@ -544,7 +546,7 @@ TEST_F(LmcServiceTest, configure_scan_during_dry_run_even_when_not_beam_configur
     assert_state(ska::pst::lmc::ObsState::EMPTY);
 
     SPDLOG_TRACE("LmcServiceTest::configure_scan_during_dry_run_even_when_not_beam_configured - validating scan config");
-    auto status = configure_scan(true);
+    auto status = configure_scan(DRY_RUN);
     EXPECT_TRUE(status.ok()); // NOLINT
     assert_state(ska::pst::lmc::ObsState::EMPTY);
     SPDLOG_TRACE("LmcServiceTest::configure_scan_during_dry_run_even_when_not_beam_configured - scan config validated");
