@@ -95,12 +95,37 @@ void DataUnpackerTest::GeneratePackedData()
     }
   }
 
-  float * scales = reinterpret_cast<float *>(&weights[0]);
-  uint32_t nscales = weights_header.get_uint32("RESOLUTION") / sizeof(float);
-  for (uint32_t i=0; i<nscales; i++)
+  // the weights stream consists of the scale and weights array from each UDP packet
+  uint32_t packet_scales_size = weights_header.get_uint32("PACKET_SCALES_SIZE");
+  uint32_t packet_weights_size = weights_header.get_uint32("PACKET_WEIGHTS_SIZE");
+  uint32_t weight_nbit = weights_header.get_uint32("NBIT");
+
+  uint64_t wdx = 0;
+  uint32_t npackets = weights_header.get_uint32("RESOLUTION") / (packet_scales_size + packet_weights_size);
+  uint32_t weights_per_packet = weights_per_packet / weight_nbit;
+
+  for (uint32_t i=0; i<npackets; i++)
   {
-    scales[i] = 1.0f;
+    float * scales = reinterpret_cast<float *>(&weights[wdx]);
+    *scales = get_weight_for_channel(i * nchan_pp, nchan_pp);
+    wdx += packet_scales_size;
+
+    uint16_t * weights = reinterpret_cast<uint16_t *>(&weights[wdx]);
+    for (uint32_t j=0; j<weights_per_packet; j++)
+    {
+      weights[j] = 65535;
+    }
+    wdx += packet_weights_size;
   }
+}
+
+auto DataUnpackerTest::get_weight_for_channel(uint32_t channel, uint32_t nchan_per_packet) -> float
+{
+  if (channel / nchan_per_packet == 0)
+  {
+    return std::nanf("dropped");
+  }
+  return 1.0f;
 }
 
 TEST_F(DataUnpackerTest, test_configure) // NOLINT
@@ -130,11 +155,11 @@ TEST_F(DataUnpackerTest, test_unpack) // NOLINT
   const uint32_t nsamp = unpacked.size();
   const uint32_t nchan = unpacked[0].size();
   const uint32_t npol = unpacked[0][0].size();
+  const uint32_t nchan_per_packet = weights_header.get_uint32("UDP_NCHAN");
 
   std::vector<std::vector<float>> expected_bandpass;
   expected_bandpass.resize(nchan);
 
-  bool correct = true;
   for (unsigned isamp=0; isamp<nsamp; isamp++)
   {
     for (unsigned ichan=0; ichan<nchan; ichan++)
@@ -145,6 +170,10 @@ TEST_F(DataUnpackerTest, test_unpack) // NOLINT
       {
         uint32_t ochanpol = ipol * nchan + ichan;
         float value = float((ochanpol * nsamp) + isamp);
+        if (std::isnan(get_weight_for_channel(ichan, nchan_per_packet)))
+        {
+          value = 0;
+        }
         expected_bandpass[ichan][ipol] += (value * value) + (value * value);
         ASSERT_EQ(unpacked[isamp][ichan][ipol].real(), value);
         ASSERT_EQ(unpacked[isamp][ichan][ipol].imag(), value * -1);
@@ -163,6 +192,7 @@ TEST_F(DataUnpackerTest, test_integrate_bandpass) // NOLINT
   const uint32_t nsamp = data_header.get_uint32("UDP_NSAMP");
   const uint32_t nchan = bandpass.size();
   const uint32_t npol = bandpass[0].size();
+  const uint32_t nchan_per_packet = weights_header.get_uint32("UDP_NCHAN");
 
   for (unsigned ichan=0; ichan<nchan; ichan++)
   {
@@ -174,6 +204,10 @@ TEST_F(DataUnpackerTest, test_integrate_bandpass) // NOLINT
       {
         float value = float((ochanpol * nsamp) + isamp);
         power += (value * value) + (value * value);
+      }
+      if (std::isnan(get_weight_for_channel(ichan, nchan_per_packet)))
+      {
+        power = 0;
       }
       float allowed_error = power / 100000;
       EXPECT_NEAR(power, bandpass[ichan][ipol], allowed_error);
