@@ -1724,30 +1724,35 @@ TEST_F(LmcServiceTest, set_and_get_log_levels) // NOLINT
     ASSERT_EQ(spdlog::level::debug, spdlog::get_level());
     auto status = get_log_level(response);
     EXPECT_TRUE(status.ok());
+    ASSERT_EQ(ska::pst::lmc::LogLevel::DEBUG, response.log_level());
 
     request.set_log_level(ska::pst::lmc::LogLevel::INFO);
     set_log_level(request);
     ASSERT_EQ(spdlog::level::info, spdlog::get_level());
     status = get_log_level(response);
     EXPECT_TRUE(status.ok());
+    ASSERT_EQ(ska::pst::lmc::LogLevel::INFO, response.log_level());
 
     request.set_log_level(ska::pst::lmc::LogLevel::WARNING);
     set_log_level(request);
     ASSERT_EQ(spdlog::level::warn, spdlog::get_level());
     status = get_log_level(response);
     EXPECT_TRUE(status.ok());
+    ASSERT_EQ(ska::pst::lmc::LogLevel::WARNING, response.log_level());
 
     request.set_log_level(ska::pst::lmc::LogLevel::CRITICAL);
     set_log_level(request);
     ASSERT_EQ(spdlog::level::critical, spdlog::get_level());
     status = get_log_level(response);
     EXPECT_TRUE(status.ok());
+    ASSERT_EQ(ska::pst::lmc::LogLevel::CRITICAL, response.log_level());
     
     request.set_log_level(ska::pst::lmc::LogLevel::ERROR);
     set_log_level(request);
     ASSERT_EQ(spdlog::level::err, spdlog::get_level());
     status = get_log_level(response);
     EXPECT_TRUE(status.ok());
+    ASSERT_EQ(ska::pst::lmc::LogLevel::ERROR, response.log_level());
 }
 
 } // namespace ska::pst::common::test
