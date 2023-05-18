@@ -723,38 +723,58 @@ auto ska::pst::common::LmcService::rethrow_application_manager_runtime_error(
 
 auto ska::pst::common::LmcService::get_log_level(
     grpc::ServerContext* /*context*/,
-    const ska::pst::lmc::LogLevelRequest* /*request*/,
-    ska::pst::lmc::LogLevelResponse* response
+    const ska::pst::lmc::GetLogLevelRequest* /*request*/,
+    ska::pst::lmc::GetLogLevelResponse* response
 ) -> grpc::Status
 {
+    if(spdlog::get_level() == spdlog::level::info)
+    {
+        response->set_log_level(ska::pst::lmc::LogLevel::INFO);
+    }
+    if(spdlog::get_level() == spdlog::level::debug)
+    {
+        response->set_log_level(ska::pst::lmc::LogLevel::DEBUG);
+    }
+    if(spdlog::get_level() == spdlog::level::warn)
+    {
+        response->set_log_level(ska::pst::lmc::LogLevel::WARNING);
+    }
+    if(spdlog::get_level() == spdlog::level::critical)
+    {
+        response->set_log_level(ska::pst::lmc::LogLevel::CRITICAL);
+    }
+    if(spdlog::get_level() == spdlog::level::err)
+    {
+        response->set_log_level(ska::pst::lmc::LogLevel::ERROR);
+    }
     return grpc::Status::OK;
 }
 
 auto ska::pst::common::LmcService::set_log_level(
     grpc::ServerContext* /*context*/,
-    const ska::pst::lmc::LogLevelRequest* request,
-    ska::pst::lmc::LogLevelResponse* /*response*/
+    const ska::pst::lmc::SetLogLevelRequest* request,
+    ska::pst::lmc::SetLogLevelResponse* /*response*/
 ) -> grpc::Status
 {
     if(request->log_level() == ska::pst::lmc::LogLevel::INFO)
     {
-    spdlog::set_level(spdlog::level::info);
+        spdlog::set_level(spdlog::level::info);
     }
     if(request->log_level() == ska::pst::lmc::LogLevel::DEBUG)
     {
-    spdlog::set_level(spdlog::level::debug);
+        spdlog::set_level(spdlog::level::debug);
     }
     if(request->log_level() == ska::pst::lmc::LogLevel::WARNING)
     {
-    spdlog::set_level(spdlog::level::warn);
+        spdlog::set_level(spdlog::level::warn);
     }
     if(request->log_level() == ska::pst::lmc::LogLevel::CRITICAL)
     {
-    spdlog::set_level(spdlog::level::critical);
+        spdlog::set_level(spdlog::level::critical);
     }
     if(request->log_level() == ska::pst::lmc::LogLevel::ERROR)
     {
-    spdlog::set_level(spdlog::level::err);
+        spdlog::set_level(spdlog::level::err);
     }
     return grpc::Status::OK;
 }
