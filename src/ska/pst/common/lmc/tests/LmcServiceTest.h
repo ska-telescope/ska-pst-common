@@ -140,7 +140,7 @@ class TestLmcServiceHandler : public ska::pst::common::LmcServiceHandler {
         // Monitor
         MOCK_METHOD(void, get_monitor_data, (ska::pst::lmc::MonitorData *data), (override));
         MOCK_METHOD(void, get_env, (ska::pst::lmc::GetEnvironmentResponse *data), (noexcept, override));
-        MOCK_METHOD(void, set_log_level,(const ska::pst::lmc::LogLevelRequest *request, ska::pst::lmc::LogLevelResponse *response), (noexcept));
+        MOCK_METHOD(void, set_log_level, (const ska::pst::lmc::LogLevelRequest *request, ska::pst::lmc::LogLevelResponse *response), (noexcept));
 
         // ERROR HANDLING
         MOCK_METHOD(void, reset, (), (override));

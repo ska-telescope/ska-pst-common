@@ -153,10 +153,15 @@ enum ObservationMode {
 
 // Enum representing the LogLevel
 enum LogLevel {
+    // The least verbose loglevel.
     INFO                = 0;
+    //  Information that is diagnostically helpful to people more than just developers.
     DEBUG               = 1;
+    //  Anything that can potentially cause application oddities.
     WARNING             = 2;
+    // Overall application or system failure that should be investigated immediately.
     CRITICAL            = 3;
+    // Logs that highlight when the current flow of execution is stopped due to a failure.
     ERROR               = 4;
 }
 
@@ -819,11 +824,13 @@ message GetEnvironmentResponse {
 
 // The request message for the set_loglevel and get_loglevel command.
 message LogLevelRequest {
+    // Enum containing the LogLevel to be implemented
     LogLevel log_level = 1;
 }
 
 // The response message for the set_loglevel and get_loglevel command.
 message LogLevelResponse {
+    // Enum containing the current LogLevel of the service
     LogLevel log_level = 1;
 }
 
@@ -947,10 +954,10 @@ service PstLmcService {
       *
       * The client may call this many times to dynamically change the LogLevel.
       */
-      rpc set_loglevel(LogLevelRequest) returns (LogLevelResponse);
+      rpc set_log_level(LogLevelRequest) returns (LogLevelResponse);
 
       /**
        * Used by a client to get LogLevel of the service.
        */
-      rpc get_loglevel(LogLevelRequest) returns (LogLevelResponse);
+      rpc get_log_level(LogLevelRequest) returns (LogLevelResponse);
 }
