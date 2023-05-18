@@ -258,13 +258,13 @@ auto LmcServiceTest::get_env(
     return _stub->get_env(&context, request, response);
 }
 
-auto LmcServiceTest::set_loglevel(
+auto LmcServiceTest::set_log_level(
     const ska::pst::lmc::LogLevelRequest& request
 ) -> grpc::Status
 {
     grpc::ClientContext context;
     ska::pst::lmc::LogLevelResponse response;
-    return _stub->set_loglevel(&context, request, &response);
+    return _stub->set_log_level(&context, request, &response);
 }
 
 void LmcServiceTest::assert_state(
@@ -1702,29 +1702,29 @@ TEST_F(LmcServiceTest, rethrow_application_manager_runtime_error) // NOLINT
     auto status = go_to_fault("test going to fault when scanning");
 }
 
-TEST_F(LmcServiceTest, set_loglevels) // NOLINT
+TEST_F(LmcServiceTest, set_log_levels) // NOLINT
 {
     _service->start();
     ska::pst::lmc::LogLevelRequest request;
 
     request.set_log_level(ska::pst::lmc::LogLevel::DEBUG);
-    set_loglevel(request);
+    set_log_level(request);
     ASSERT_EQ(spdlog::level::debug,spdlog::get_level());
 
     request.set_log_level(ska::pst::lmc::LogLevel::INFO);
-    set_loglevel(request);
+    set_log_level(request);
     ASSERT_EQ(spdlog::level::info,spdlog::get_level());
 
     request.set_log_level(ska::pst::lmc::LogLevel::WARNING);
-    set_loglevel(request);
+    set_log_level(request);
     ASSERT_EQ(spdlog::level::warn,spdlog::get_level());
 
     request.set_log_level(ska::pst::lmc::LogLevel::CRITICAL);
-    set_loglevel(request);
+    set_log_level(request);
     ASSERT_EQ(spdlog::level::critical,spdlog::get_level());
     
     request.set_log_level(ska::pst::lmc::LogLevel::ERROR);
-    set_loglevel(request);
+    set_log_level(request);
     ASSERT_EQ(spdlog::level::err,spdlog::get_level());
 }
 

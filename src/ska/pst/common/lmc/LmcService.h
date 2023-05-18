@@ -372,12 +372,12 @@ namespace ska::pst::common {
             /**
              * @brief Implements setting the log level of the service.
              */
-            grpc::Status set_loglevel(grpc::ServerContext* context, const ska::pst::lmc::LogLevelRequest* request, ska::pst::lmc::LogLevelResponse* response);
+            grpc::Status set_log_level(grpc::ServerContext* context, const ska::pst::lmc::LogLevelRequest* request, ska::pst::lmc::LogLevelResponse* response);
 
             /**
              * @brief Implements getting the log level of the service.
              */
-            grpc::Status get_loglevel(grpc::ServerContext* context, const ska::pst::lmc::LogLevelRequest* request, ska::pst::lmc::LogLevelResponse* response) override;
+            grpc::Status get_log_level(grpc::ServerContext* context, const ska::pst::lmc::LogLevelRequest* request, ska::pst::lmc::LogLevelResponse* response) override;
     };
 
 } // namespace ska::pst::common
