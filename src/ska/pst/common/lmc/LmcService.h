@@ -368,6 +368,16 @@ namespace ska::pst::common {
              * as the IP addresses and ports that the service exposes.
              */
             grpc::Status get_env(grpc::ServerContext* context, const ska::pst::lmc::GetEnvironmentRequest* request, ska::pst::lmc::GetEnvironmentResponse* response) override;
+
+            /**
+             * @brief Implements setting the log level of the service.
+             */
+            grpc::Status set_loglevel(grpc::ServerContext* context, const ska::pst::lmc::LogLevelRequest* request, ska::pst::lmc::LogLevelResponse* response);
+
+            /**
+             * @brief Implements getting the log level of the service.
+             */
+            grpc::Status get_loglevel(grpc::ServerContext* context, const ska::pst::lmc::LogLevelRequest* request, ska::pst::lmc::LogLevelResponse* response) override;
     };
 
 } // namespace ska::pst::common

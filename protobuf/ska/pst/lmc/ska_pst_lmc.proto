@@ -151,6 +151,15 @@ enum ObservationMode {
     FLOW_THROUGH        = 2;
 }
 
+// Enum representing the LogLevel
+enum LogLevel {
+    INFO                = 0;
+    DEBUG               = 1;
+    WARNING             = 2;
+    CRITICAL            = 3;
+    ERROR               = 4;
+}
+
 // A status message that will be returned by the services
 // Only valid if there is an error
 message Status {
@@ -808,6 +817,16 @@ message GetEnvironmentResponse {
     map<string, EnvValue> values = 1;
 }
 
+// The request message for the set_loglevel and get_loglevel command.
+message LogLevelRequest {
+    LogLevel log_level = 1;
+}
+
+// The response message for the set_loglevel and get_loglevel command.
+message LogLevelResponse {
+    LogLevel log_level = 1;
+}
+
 /*
  Service to expose the local monitoring and control functionality
  of a process.
@@ -922,4 +941,16 @@ service PstLmcService {
       * to return an empty map of values.
       */
       rpc get_env(GetEnvironmentRequest) returns (GetEnvironmentResponse);
+
+     /**
+      * Used by a client to set LogLevel of the service.
+      *
+      * The client may call this many times to dynamically change the LogLevel.
+      */
+      rpc set_loglevel(LogLevelRequest) returns (LogLevelResponse);
+
+      /**
+       * Used by a client to get LogLevel of the service.
+       */
+      rpc get_loglevel(LogLevelRequest) returns (LogLevelResponse);
 }

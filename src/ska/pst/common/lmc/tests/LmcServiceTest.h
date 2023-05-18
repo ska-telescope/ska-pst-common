@@ -140,6 +140,7 @@ class TestLmcServiceHandler : public ska::pst::common::LmcServiceHandler {
         // Monitor
         MOCK_METHOD(void, get_monitor_data, (ska::pst::lmc::MonitorData *data), (override));
         MOCK_METHOD(void, get_env, (ska::pst::lmc::GetEnvironmentResponse *data), (noexcept, override));
+        MOCK_METHOD(void, set_loglevel,(const ska::pst::lmc::LogLevelRequest *request, ska::pst::lmc::LogLevelResponse *response), (noexcept));
 
         // ERROR HANDLING
         MOCK_METHOD(void, reset, (), (override));
@@ -188,6 +189,9 @@ class LmcServiceTest : public ::testing::Test
 
         // get environment
         grpc::Status get_env(ska::pst::lmc::GetEnvironmentResponse* response);
+
+        // set log level
+        // grpc::Status set_loglevel(ska::pst::lmc::LogLevelRequest* request, ska::pst::lmc::LogLevelResponse* response);
 
         grpc::Status get_state(ska::pst::lmc::GetStateResponse*);
         void assert_state(ska::pst::lmc::ObsState);

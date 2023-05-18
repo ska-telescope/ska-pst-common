@@ -719,3 +719,50 @@ auto ska::pst::common::LmcService::rethrow_application_manager_runtime_error(
         }
     }
 }
+
+
+auto ska::pst::common::LmcService::get_loglevel(
+    grpc::ServerContext* /*context*/,
+    const ska::pst::lmc::LogLevelRequest* /*request*/,
+    ska::pst::lmc::LogLevelResponse* response
+) -> grpc::Status
+{
+    /**
+     * @brief confirm where to pass loglevel
+     * spdlog::get_level();
+     */
+    return grpc::Status::OK;
+}
+
+auto ska::pst::common::LmcService::set_loglevel(
+    grpc::ServerContext* /*context*/,
+    const ska::pst::lmc::LogLevelRequest* request,
+    ska::pst::lmc::LogLevelResponse* /*response*/
+) -> grpc::Status
+{
+    /**
+     * @brief pseudocode for updating loglevel
+     * 
+    */
+    if(request->log_level()==ska::pst::lmc::LogLevel::INFO)
+    {
+    spdlog::set_level(spdlog::level::info);
+    }
+    if(request->log_level()==ska::pst::lmc::LogLevel::DEBUG)
+    {
+    spdlog::set_level(spdlog::level::debug);
+    }
+    if(request->log_level()==ska::pst::lmc::LogLevel::WARNING)
+    {
+    spdlog::set_level(spdlog::level::warn);
+    }
+    if(request->log_level()==ska::pst::lmc::LogLevel::CRITICAL)
+    {
+    spdlog::set_level(spdlog::level::critical);
+    }
+    if(request->log_level()==ska::pst::lmc::LogLevel::ERROR)
+    {
+    spdlog::set_level(spdlog::level::err);
+    }
+    return grpc::Status::OK;
+}

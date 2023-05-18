@@ -1693,4 +1693,32 @@ TEST_F(LmcServiceTest, rethrow_application_manager_runtime_error) // NOLINT
     auto status = go_to_fault("test going to fault when scanning");
 }
 
+TEST_F(LmcServiceTest, set_loglevels) // NOLINT
+{
+    _service->start();
+    grpc::ServerContext context;
+    ska::pst::lmc::LogLevelRequest request;
+    ska::pst::lmc::LogLevelResponse response;
+
+    request.set_log_level(ska::pst::lmc::LogLevel::DEBUG);
+    _service->set_loglevel(&context, &request, &response);
+    ASSERT_EQ(spdlog::level::debug,spdlog::get_level());
+
+    request.set_log_level(ska::pst::lmc::LogLevel::INFO);
+    _service->set_loglevel(&context, &request, &response);
+    ASSERT_EQ(spdlog::level::info,spdlog::get_level());
+
+    request.set_log_level(ska::pst::lmc::LogLevel::WARNING);
+    _service->set_loglevel(&context, &request, &response);
+    ASSERT_EQ(spdlog::level::warn,spdlog::get_level());
+
+    request.set_log_level(ska::pst::lmc::LogLevel::CRITICAL);
+    _service->set_loglevel(&context, &request, &response);
+    ASSERT_EQ(spdlog::level::critical,spdlog::get_level());
+    
+    request.set_log_level(ska::pst::lmc::LogLevel::ERROR);
+    _service->set_loglevel(&context, &request, &response);
+    ASSERT_EQ(spdlog::level::err,spdlog::get_level());
+}
+
 } // namespace ska::pst::common::test
