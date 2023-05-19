@@ -189,6 +189,10 @@ class LmcServiceTest : public ::testing::Test
         // get environment
         grpc::Status get_env(ska::pst::lmc::GetEnvironmentResponse* response);
 
+        // set log level
+        grpc::Status set_log_level(const ska::pst::lmc::SetLogLevelRequest& request);
+        grpc::Status get_log_level(ska::pst::lmc::GetLogLevelResponse& response);
+
         grpc::Status get_state(ska::pst::lmc::GetStateResponse*);
         void assert_state(ska::pst::lmc::ObsState);
 

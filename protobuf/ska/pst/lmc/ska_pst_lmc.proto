@@ -151,6 +151,20 @@ enum ObservationMode {
     FLOW_THROUGH        = 2;
 }
 
+// Enum representing the LogLevel
+enum LogLevel {
+    // The least verbose loglevel.
+    INFO                = 0;
+    //  Information that is diagnostically helpful to people more than just developers.
+    DEBUG               = 1;
+    //  Anything that can potentially cause application oddities.
+    WARNING             = 2;
+    // Overall application or system failure that should be investigated immediately.
+    CRITICAL            = 3;
+    // Logs that highlight when the current flow of execution is stopped due to a failure.
+    ERROR               = 4;
+}
+
 // A status message that will be returned by the services
 // Only valid if there is an error
 message Status {
@@ -808,6 +822,24 @@ message GetEnvironmentResponse {
     map<string, EnvValue> values = 1;
 }
 
+// The request message for the set_log_level command.
+message SetLogLevelRequest {
+    // Enum containing the LogLevel to be implemented
+    LogLevel log_level = 1;
+}
+
+// An empty response message for the set_log_level command
+message SetLogLevelResponse {}
+
+// An empty request message for the get_log_level command.
+message GetLogLevelRequest {}
+
+// The response message for the get_log_level command.
+message GetLogLevelResponse {
+    // Enum containing the current LogLevel of the service
+    LogLevel log_level = 1;
+}
+
 /*
  Service to expose the local monitoring and control functionality
  of a process.
@@ -922,4 +954,16 @@ service PstLmcService {
       * to return an empty map of values.
       */
       rpc get_env(GetEnvironmentRequest) returns (GetEnvironmentResponse);
+
+     /**
+      * Used by a client to set LogLevel of the service.
+      *
+      * The client may call this many times to dynamically change the LogLevel.
+      */
+      rpc set_log_level(SetLogLevelRequest) returns (SetLogLevelResponse);
+
+      /**
+       * Used by a client to get LogLevel of the service.
+       */
+      rpc get_log_level(GetLogLevelRequest) returns (GetLogLevelResponse);
 }
