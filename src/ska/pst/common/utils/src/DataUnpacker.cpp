@@ -98,10 +98,6 @@ float ska::pst::common::DataUnpacker::get_scale_factor(char * weights, uint32_t 
   SPDLOG_TRACE("ska::pst::common::DataUnpacker::get_scale_factor weights={}, packet_number={} weights_packet_stride={}",
     reinterpret_cast<void *>(weights), packet_number, weights_packet_stride);
   float * weights_ptr = reinterpret_cast<float *>(weights + (packet_number * weights_packet_stride));
-  if (isnanf(weights_ptr[0]))
-  {
-    SPDLOG_WARN("ska::pst::common::DataUnpacker::get_scale_factor scale factor for packet {} was NaN", packet_number);
-  }
   return weights_ptr[0];
 }
 
@@ -213,6 +209,7 @@ void ska::pst::common::DataUnpacker::integrate_bandpass(char * data, uint64_t da
       {
         invalid_packets++;
       }
+
       for (uint32_t ipol=0; ipol<npol; ipol++)
       {
         for (uint32_t ichan=0; ichan<nchan_per_packet; ichan++)
