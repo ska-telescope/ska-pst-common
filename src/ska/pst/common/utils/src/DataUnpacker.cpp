@@ -98,10 +98,6 @@ float ska::pst::common::DataUnpacker::get_scale_factor(char * weights, uint32_t 
   SPDLOG_TRACE("ska::pst::common::DataUnpacker::get_scale_factor weights={}, packet_number={} weights_packet_stride={}",
     reinterpret_cast<void *>(weights), packet_number, weights_packet_stride);
   float * weights_ptr = reinterpret_cast<float *>(weights + (packet_number * weights_packet_stride));
-  if (isnanf(weights_ptr[0]))
-  {
-    SPDLOG_WARN("ska::pst::common::DataUnpacker::get_scale_factor scale factor for packet {} was NaN", packet_number);
-  }
   return weights_ptr[0];
 }
 
@@ -129,6 +125,8 @@ void ska::pst::common::DataUnpacker::reset()
   {
     std::fill(bandpass[ichan].begin(), bandpass[ichan].end(), 0);
   }
+  invalid_packets = 0;
+  invalid_samples = 0;
 }
 
 std::vector<std::vector<std::vector<std::complex<float>>>>& ska::pst::common::DataUnpacker::unpack(char * data, uint64_t data_bufsz, char *weights, uint64_t weights_bufsz)
@@ -150,6 +148,12 @@ std::vector<std::vector<std::vector<std::complex<float>>>>& ska::pst::common::Da
   {
     for (uint32_t ipacket=0; ipacket<packets_per_heap; ipacket++)
     {
+      const float scale_factor = get_scale_factor(weights, packet_number);
+      if (std::isnan(scale_factor))
+      {
+        invalid_packets++;
+      }
+
       for (uint32_t ipol=0; ipol<npol; ipol++)
       {
         for (uint32_t ichan=0; ichan<nchan_per_packet; ichan++)
@@ -157,7 +161,7 @@ std::vector<std::vector<std::vector<std::complex<float>>>>& ska::pst::common::Da
           for (uint32_t isamp=0; isamp<nsamp_per_packet; isamp+=2)
           {
             // unpack a pair of complex samples, normalising by the scale factor
-            sample_pair_t sample_pair = unpack_sample_pair(data, get_scale_factor(weights, packet_number));
+            sample_pair_t sample_pair = unpack_sample_pair(data, scale_factor);
 
             // compute the output sample and channel
             uint32_t osamp = (iheap * nsamp_per_packet) + isamp;
@@ -171,6 +175,11 @@ std::vector<std::vector<std::vector<std::complex<float>>>>& ska::pst::common::Da
       }
       packet_number++;
     }
+  }
+
+  if (invalid_packets > 0)
+  {
+    SPDLOG_WARN("ska::pst::common::DataUnpacker::unpack found {} dropped packets resulting in {} invalid samples", invalid_packets, invalid_samples);
   }
 
   SPDLOG_DEBUG("ska::pst::common::DataUnpacker::unpack unpacking complete");
@@ -195,6 +204,12 @@ void ska::pst::common::DataUnpacker::integrate_bandpass(char * data, uint64_t da
   {
     for (uint32_t ipacket=0; ipacket<packets_per_heap; ipacket++)
     {
+      const float scale_factor = get_scale_factor(weights, packet_number);
+      if (std::isnan(scale_factor))
+      {
+        invalid_packets++;
+      }
+
       for (uint32_t ipol=0; ipol<npol; ipol++)
       {
         for (uint32_t ichan=0; ichan<nchan_per_packet; ichan++)
@@ -202,7 +217,7 @@ void ska::pst::common::DataUnpacker::integrate_bandpass(char * data, uint64_t da
           for (uint32_t isamp=0; isamp<nsamp_per_packet; isamp+=2)
           {
             // unpack a pair of complex samples, normalising by the scale factor
-            sample_pair_t sample_pair = unpack_sample_pair(data, get_scale_factor(weights, packet_number));
+            sample_pair_t sample_pair = unpack_sample_pair(data, scale_factor);
             const uint32_t ochan = (ipacket * nchan_per_packet) + ichan;
 
             // integrate the power in each complex sample into the bandpass
@@ -215,12 +230,26 @@ void ska::pst::common::DataUnpacker::integrate_bandpass(char * data, uint64_t da
     }
   }
 
+  if (invalid_packets > 0)
+  {
+    SPDLOG_WARN("ska::pst::common::DataUnpacker::integrate_bandpass found {} dropped packets resulting in {} invalid samples", invalid_packets, invalid_samples);
+  }
+
   SPDLOG_DEBUG("ska::pst::common::DataUnpacker::integrate_bandpass unpacking complete");
 }
 
 ska::pst::common::sample_pair_t ska::pst::common::DataUnpacker::unpack_sample_pair(char * input, const float scale_factor)
 {
   sample_pair_t unpacked;
+
+  // A NAN scale factor can occur if the drop packets were encountered
+  if (std::isnan(scale_factor))
+  {
+    invalid_samples++;
+    unpacked.sample1 = std::complex<float>(0, 0);
+    unpacked.sample2 = std::complex<float>(0, 0);
+    return unpacked;
+  }
 
   if (nbit == 8)
   {

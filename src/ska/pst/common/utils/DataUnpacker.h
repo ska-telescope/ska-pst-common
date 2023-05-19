@@ -180,6 +180,12 @@ namespace ska::pst::common
 
       //! Number of UDP packets per heap in the data stream
       uint32_t packets_per_heap{0};
+
+      //! Number of dropped packets (scale factor = NaN) encountered
+      uint64_t invalid_packets{0};
+
+      //! Number of invalid samples, arising from invalid packets
+      uint64_t invalid_samples{0};
   };
 
 } // namespace ska::pst::common
