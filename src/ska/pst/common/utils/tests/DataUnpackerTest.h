@@ -54,6 +54,8 @@ namespace ska::pst::common::test {
 
       void GeneratePackedData();
 
+      float get_weight_for_channel(uint32_t ichan, uint32_t nchan_per_packet);
+
     public:
       DataUnpackerTest() = default;
 
