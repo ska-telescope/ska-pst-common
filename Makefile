@@ -96,7 +96,6 @@ protobuf-docs:
 		$(PWD)/protobuf/ska/pst/lmc/ska_pst_lmc.proto
 
 docs-pre-build: protobuf-docs
-	curl -sSL https://install.python-poetry.org | POETRY_HOME=/usr/local/bin python3 -	
 
 .PHONY: protobuf-docs
 
