@@ -163,13 +163,13 @@ test_debug_build:
 
 docs-build:
   stage: build
-  image: registry.gitlab.com/ska-telescope/pst/ska-pst-common/ska-pst-common-builder:$(grep -m 1 -o '[0-9].*' .release)-dev.c${CI_COMMIT_SHORT_SHA}
+  image: registry.gitlab.com/ska-telescope/pst/ska-pst-common/ska-pst-common-builder:0.8.8-dev.c${CI_COMMIT_SHORT_SHA}
   needs:
   - oci-image-build
 
 docs-pages:
   stage: pages
-  image: registry.gitlab.com/ska-telescope/pst/ska-pst-common/ska-pst-common-builder:$(grep -m 1 -o '[0-9].*' .release)-dev.c${CI_COMMIT_SHORT_SHA}
+  image: registry.gitlab.com/ska-telescope/pst/ska-pst-common/ska-pst-common-builder:0.8.8-dev.c${CI_COMMIT_SHORT_SHA}
   needs:
   - oci-image-build
 
