@@ -35,6 +35,7 @@
 #include "ska/pst/common/lmc/LmcService.h"
 #include "ska/pst/common/lmc/LmcServiceHandler.h"
 #include "ska/pst/common/statemodel/StateModel.h"
+#include "ska/pst/common/utils/Logging.h"
 #include <spdlog/spdlog.h>
 
 void ska::pst::common::LmcService::start() {
@@ -727,26 +728,16 @@ auto ska::pst::common::LmcService::get_log_level(
     ska::pst::lmc::GetLogLevelResponse* response
 ) -> grpc::Status
 {
-    if(spdlog::get_level() == spdlog::level::info)
-    {
-        response->set_log_level(ska::pst::lmc::LogLevel::INFO);
+    try {
+        response->set_log_level(ska::pst::common::get_lmclog_level(spdlog::get_level()));
+    } catch (std::exception& ex) {
+        SPDLOG_WARN("Error getting the log level: {}", ex.what());
+        ska::pst::lmc::Status status;
+        status.set_code(ska::pst::lmc::ErrorCode::INTERNAL_ERROR);
+        status.set_message("Error getting the log level");
+        return grpc::Status(grpc::StatusCode::INTERNAL, status.message(), status.SerializeAsString());
     }
-    if(spdlog::get_level() == spdlog::level::debug)
-    {
-        response->set_log_level(ska::pst::lmc::LogLevel::DEBUG);
-    }
-    if(spdlog::get_level() == spdlog::level::warn)
-    {
-        response->set_log_level(ska::pst::lmc::LogLevel::WARNING);
-    }
-    if(spdlog::get_level() == spdlog::level::critical)
-    {
-        response->set_log_level(ska::pst::lmc::LogLevel::CRITICAL);
-    }
-    if(spdlog::get_level() == spdlog::level::err)
-    {
-        response->set_log_level(ska::pst::lmc::LogLevel::ERROR);
-    }
+
     return grpc::Status::OK;
 }
 
@@ -756,25 +747,25 @@ auto ska::pst::common::LmcService::set_log_level(
     ska::pst::lmc::SetLogLevelResponse* /*response*/
 ) -> grpc::Status
 {
-    if(request->log_level() == ska::pst::lmc::LogLevel::INFO)
-    {
+    spdlog::level::level_enum old_level = spdlog::get_level();
+    try {
+
+        spdlog::level::level_enum new_level = ska::pst::common::get_spdlog_level(request->log_level());
+
+        // set level to info to ensure the change of log level is always logged
         spdlog::set_level(spdlog::level::info);
+        SPDLOG_INFO("Changing log level from {} to {}",
+            spdlog::level::to_string_view(old_level),
+            spdlog::level::to_string_view(new_level));
+        // set to the requested log level
+        spdlog::set_level(new_level);
+    } catch (std::exception& ex) {
+        SPDLOG_WARN("Error setting the log level: {}", ex.what());
+        ska::pst::lmc::Status status;
+        status.set_code(ska::pst::lmc::ErrorCode::INTERNAL_ERROR);
+        status.set_message("Error setting the log level");
+        return grpc::Status(grpc::StatusCode::INTERNAL, status.message(), status.SerializeAsString());
     }
-    if(request->log_level() == ska::pst::lmc::LogLevel::DEBUG)
-    {
-        spdlog::set_level(spdlog::level::debug);
-    }
-    if(request->log_level() == ska::pst::lmc::LogLevel::WARNING)
-    {
-        spdlog::set_level(spdlog::level::warn);
-    }
-    if(request->log_level() == ska::pst::lmc::LogLevel::CRITICAL)
-    {
-        spdlog::set_level(spdlog::level::critical);
-    }
-    if(request->log_level() == ska::pst::lmc::LogLevel::ERROR)
-    {
-        spdlog::set_level(spdlog::level::err);
-    }
+
     return grpc::Status::OK;
 }

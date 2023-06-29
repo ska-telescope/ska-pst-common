@@ -28,6 +28,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <map>
+#include <spdlog/spdlog.h>
+
+#include "ska/pst/lmc/ska_pst_lmc.pb.h"
+
 #ifndef SKA_PST_COMMON_UTILS_Logging_h
 #define SKA_PST_COMMON_UTILS_Logging_h
 
@@ -35,10 +40,35 @@
 
 namespace ska::pst::common {
 
-/**
- * Used to set up the spdlog logging framework
- */
-void setup_spdlog();
+    static std::map<ska::pst::lmc::LogLevel, spdlog::level::level_enum> log_level_map
+    {
+      { ska::pst::lmc::LogLevel::INFO, spdlog::level::info },
+      { ska::pst::lmc::LogLevel::DEBUG, spdlog::level::debug},
+      { ska::pst::lmc::LogLevel::WARNING, spdlog::level::warn},
+      { ska::pst::lmc::LogLevel::CRITICAL, spdlog::level::critical},
+      { ska::pst::lmc::LogLevel::ERROR, spdlog::level::err},
+    };
+
+    /**
+     * Used to set up the spdlog logging framework
+     */
+    void setup_spdlog();
+
+    /**
+     * @brief Get the spdlog level corresponding to a lmclog level
+     *
+     * @param level lmclog level
+     * @return spdlog::level::level_enum mapped spdlog level
+     */
+    spdlog::level::level_enum get_spdlog_level(ska::pst::lmc::LogLevel level);
+
+    /**
+     * @brief Get the lmclog level corresponding to a spdlog level
+     *
+     * @param level spdlog level
+     * @return ska::pst::lmc::LogLevel mapped lmclog level
+     */
+    ska::pst::lmc::LogLevel get_lmclog_level(spdlog::level::level_enum level);
 
 } // namespace ska::pst::common
 

@@ -38,6 +38,7 @@ add_library(
     ${sources}
     ${private_headers}
     ${public_headers}
+    $<TARGET_OBJECTS:ska_pst_lmc_generated>
 )
 
 target_include_directories(
@@ -51,6 +52,7 @@ target_include_directories(
 target_link_libraries(
     ska_pst_common-utils
     PUBLIC
+    ska_pst_lmc_generated
     spdlog::spdlog
 )
 
