@@ -149,7 +149,6 @@ namespace ska::pst::common {
       //! number of channels in the data stream
       uint32_t nchan{0};
 
-
   };
 
 } // namespace ska::pst::common
