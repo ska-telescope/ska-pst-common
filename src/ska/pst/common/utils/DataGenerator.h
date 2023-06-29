@@ -75,28 +75,31 @@ namespace ska::pst::common {
       /**
        * @brief Fill the data stream in the provided buffer
        *
-       * @param buffer pointer to buffer to be filled with sequence of data elements
+       * @param buf pointer to buffer to be filled with sequence of data elements
+       * @param size number of bytes to be written to buffer
        */
       virtual void fill_data(char * buf, uint64_t size) = 0;
 
       /**
        * @brief Fill the weights stream in the provided buffer
        *
-       * @param buffer pointer to buffer to be filled with sequence of weight elements
+       * @param buf pointer to buffer to be filled with sequence of weight elements
+       * @param size number of bytes to be written to buffer
        */
       virtual void fill_weights(char * buf, uint64_t size) = 0;
 
       /**
        * @brief Fill the scales stream in the provided buffer
        *
-       * @param buffer pointer to buffer to be filled with sequence of scale elements
+       * @param buf pointer to buffer to be filled with sequence of scale elements
+       * @param size number of bytes to be written to buffer
        */
       virtual void fill_scales(char * buf, uint64_t size) = 0;
 
       /**
        * @brief Verify the data+weights+scales of the received UDP packet
        *
-       * @param buffer pointer to buffer containing received UDP packet
+       * @param buf pointer to buffer containing received UDP packet
        * @return true if both data and weights match expectations
        */
       virtual bool test_packet(char * buf);
@@ -104,7 +107,8 @@ namespace ska::pst::common {
       /**
        * @brief Verify the data stream in the provided buffer
        *
-       * @param buffer pointer to buffer containing sequence of data elements
+       * @param buf pointer to buffer containing sequence of data elements
+       * @param size number of bytes in buffer to be tested
        * @return true if data match expectations
        */
       virtual bool test_data(char * buf, uint64_t size) = 0;
@@ -112,7 +116,8 @@ namespace ska::pst::common {
       /**
        * @brief Verify the weights stream in the provided buffer
        *
-       * @param buffer pointer to buffer containing sequence of weight elements
+       * @param buf pointer to buffer containing sequence of weight elements
+       * @param size number of bytes in buffer to be tested
        * @return true if weights match expectations
        */
       virtual bool test_weights(char * buf, uint64_t size) = 0;
@@ -120,7 +125,8 @@ namespace ska::pst::common {
       /**
        * @brief Verify the scales stream in the provided buffer
        *
-       * @param buffer pointer to buffer containing sequence of scale elements
+       * @param buf pointer to buffer containing sequence of scale elements
+       * @param size number of bytes in buffer to be tested
        * @return true if scales match expectations
        */
       virtual bool test_scales(char * buf, uint64_t size) = 0;

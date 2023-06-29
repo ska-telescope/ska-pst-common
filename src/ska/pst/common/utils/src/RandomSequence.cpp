@@ -72,6 +72,17 @@ void ska::pst::common::RandomSequence::generate(uint8_t * buffer, uint64_t bufsz
   byte_offset += bufsz;
 }
 
+void ska::pst::common::RandomSequence::generate_block(uint8_t * buffer, uint64_t bufsz, uint64_t block_offset, uint64_t block_size, uint64_t block_stride)
+{
+  SPDLOG_DEBUG("ska::pst::common::RandomSequence::generate_block generate {} bytes of data with block offset={}, size={} stride={}", bufsz, block_offset, block_size, block_stride);
+  uint64_t offset = block_offset;
+  while (offset + block_size < bufsz)
+  {
+    generate(buffer + offset, offset + block_size);
+    offset += block_stride;
+  }
+}
+
 void ska::pst::common::RandomSequence::seek(uint64_t bufsz)
 {
   // advances the internal state of the generator bufsz steps
@@ -81,6 +92,20 @@ void ska::pst::common::RandomSequence::seek(uint64_t bufsz)
   {
     distribution(generator);
   }
+}
+
+auto ska::pst::common::RandomSequence::validate_block(uint8_t * buffer, uint64_t bufsz, uint64_t block_offset, uint64_t block_size, uint64_t block_stride) -> bool
+{
+  SPDLOG_DEBUG("ska::pst::common::RandomSequence::validate_block validate {} bytes of data with block offset={}, size={} and stride={}", bufsz, block_offset, block_size, block_stride);
+  uint64_t offset = block_offset;
+  bool valid = true;
+  while (offset + block_size < bufsz)
+  {
+    valid &= validate(buffer + offset, offset + block_size);
+    offset += block_stride;
+  }
+  SPDLOG_DEBUG("ska::pst::common::RandomSequence::validate_block valid={}", valid);
+  return valid;
 }
 
 auto ska::pst::common::RandomSequence::validate(uint8_t * buffer, uint64_t bufsz) -> bool
@@ -127,6 +152,7 @@ auto ska::pst::common::RandomSequence::validate(uint8_t * buffer, uint64_t bufsz
   if (i == bufsz)
   {
     // sequence was not broken (data valid)
+    SPDLOG_TRACE("ska::pst::common::RandomSequence::validate valid=true");
     return true;
   }
 
@@ -149,6 +175,7 @@ auto ska::pst::common::RandomSequence::validate(uint8_t * buffer, uint64_t bufsz
   }
 
   // sequence was broken (data invalid)
+  SPDLOG_TRACE("ska::pst::common::RandomSequence::validate valid=false");
   return false;
 }
 
@@ -241,5 +268,3 @@ auto ska::pst::common::RandomSequence::search_expected_sequence_for_buffer(
 
   return -1;
 }
-
-

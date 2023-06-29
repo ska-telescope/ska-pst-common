@@ -42,9 +42,11 @@ namespace ska::pst::common::test {
 
 void DataUnpackerTest::SetUp()
 {
+  SPDLOG_TRACE("ska::pst::common::test::DataUnpackerTest::SetUp loading data and weights headers");
   data_header.load_from_file(test_data_file("DataUnpacker_data_header.txt"));
   weights_header.load_from_file(test_data_file("DataUnpacker_weights_header.txt"));
 
+  SPDLOG_TRACE("DataUnpackerTest::SetUp generating packed data");
   GeneratePackedData();
 }
 
@@ -68,6 +70,7 @@ void DataUnpackerTest::GeneratePackedData()
 
   int16_t * data_ptr = reinterpret_cast<int16_t *>(&data[0]);
 
+  SPDLOG_TRACE("ska::pst::common::test::DataUnpackerTest::GeneratePackedData generating data into {}", reinterpret_cast<void *>(data_ptr));
   uint32_t osamp = 0;
   for (uint32_t j=0; j<packets_per_heap; j++)
   {
@@ -102,18 +105,20 @@ void DataUnpackerTest::GeneratePackedData()
 
   uint64_t wdx = 0;
   uint32_t npackets = weights_header.get_uint32("RESOLUTION") / (packet_scales_size + packet_weights_size);
-  uint32_t weights_per_packet = weights_per_packet / weight_nbit;
+  uint32_t weights_per_packet = (packet_weights_size * 8) / weight_nbit;
 
+  SPDLOG_TRACE("ska::pst::common::test::DataUnpackerTest::GeneratePackedData generating weights weights.size()={} npackets={} weights+scales={} weights_per_packet={}",
+    weights.size(), npackets, packet_scales_size + packet_weights_size, weights_per_packet);
   for (uint32_t i=0; i<npackets; i++)
   {
-    float * scales = reinterpret_cast<float *>(&weights[wdx]);
-    *scales = get_weight_for_channel(i * nchan_pp, nchan_pp);
+    float * scl = reinterpret_cast<float *>(&weights[wdx]);
+    *scl = get_weight_for_channel(i * nchan_pp, nchan_pp);
     wdx += packet_scales_size;
 
-    uint16_t * weights = reinterpret_cast<uint16_t *>(&weights[wdx]);
+    uint16_t * wts = reinterpret_cast<uint16_t *>(&weights[wdx]);
     for (uint32_t j=0; j<weights_per_packet; j++)
     {
-      weights[j] = 65535;
+      wts[j] = 65535;
     }
     wdx += packet_weights_size;
   }

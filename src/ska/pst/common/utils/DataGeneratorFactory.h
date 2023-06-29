@@ -43,6 +43,7 @@ namespace ska::pst::common {
  * @brief Construct a DataGenerator from the name
  *
  * @param name string representation of the DataGenerator
+ * @param layout data layout that describes the data, weights and scale sizes
  * @return DataGenerator* new DataGenerator object
  */
 

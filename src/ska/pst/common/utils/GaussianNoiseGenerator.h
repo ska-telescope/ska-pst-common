@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Square Kilometre Array Observatory
+ * Copyright 2023 Square Kilometre Array Observatory
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -29,11 +29,12 @@
  */
 
 #include "ska/pst/common/utils/DataGenerator.h"
-#include "ska/pst/common/utils/RandomSequence.h"
+#include "ska/pst/common/utils/NormalSequence.h"
 #include "ska/pst/common/utils/UniformSequence.h"
+#include "ska/pst/common/utils/RandomSequence.h"
 
-#ifndef SKA_PST_COMMON_UTILS_RandomDataGenerator_h
-#define SKA_PST_COMMON_UTILS_RandomDataGenerator_h
+#ifndef SKA_PST_COMMON_UTILS_GaussianNoiseGenerator_h
+#define SKA_PST_COMMON_UTILS_GaussianNoiseGenerator_h
 
 namespace ska::pst::common {
 
@@ -41,21 +42,21 @@ namespace ska::pst::common {
    * @brief Generates and validates data + weights using a RandomSequence for each
    *
    */
-  class RandomDataGenerator : public DataGenerator
+  class GaussianNoiseGenerator : public DataGenerator
   {
     public:
 
       /**
-       * @brief Construct a new RandomDataGenerator object
+       * @brief Construct a new GaussianNoiseGenerator object
        *
        */
-      RandomDataGenerator(std::shared_ptr<DataLayout> layout);
+      GaussianNoiseGenerator(std::shared_ptr<DataLayout> layout);
 
       /**
-       * @brief Destroy the RandomDataGenerator object
+       * @brief Destroy the GaussianNoiseGenerator object
        *
        */
-      ~RandomDataGenerator() = default;
+      ~GaussianNoiseGenerator() = default;
 
       /**
        * @brief Configure the streams written to data + weights
@@ -127,8 +128,8 @@ namespace ska::pst::common {
 
     private:
 
-      //! sequence of randomly distributed values for the data samples
-      ska::pst::common::RandomSequence dat_sequence;
+      //! sequence of normally distributed values for the data samples
+      ska::pst::common::NormalSequence dat_sequence;
 
       //! sequence of uniform values for the weights
       ska::pst::common::UniformSequence wts_sequence;
@@ -154,5 +155,5 @@ namespace ska::pst::common {
 
 } // namespace ska::pst::common
 
-#endif // SKA_PST_COMMON_UTILS_RandomDataGenerator_h
+#endif // SKA_PST_COMMON_UTILS_GaussianNoiseGenerator_h
 

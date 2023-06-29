@@ -92,7 +92,7 @@ namespace ska::pst::common {
       /**
        * @brief Verify the data stream in the provided buffer
        *
-       * @param buffer pointer to buffer containing sequence of data to be verified
+       * @param buf pointer to buffer containing sequence of data to be verified
        * @param size number of bytes in buffer to be tested
        *
        * @return true if data match expectations
@@ -102,7 +102,7 @@ namespace ska::pst::common {
       /**
        * @brief Verify the weights stream in the provided buffer
        *
-       * @param buffer pointer to buffer containing sequence of weights to be verified
+       * @param buf pointer to buffer containing sequence of weights to be verified
        * @param size number of bytes in buffer to be tested
        *
        * @return true if weights match expectations
@@ -112,7 +112,7 @@ namespace ska::pst::common {
       /**
        * @brief Verify the scales stream in the provided buffer
        *
-       * @param buffer pointer to buffer containing sequence of scale factors to be verified
+       * @param buf pointer to buffer containing sequence of scale factors to be verified
        * @param size number of bytes in buffer to be tested
        *
        * @return true if scales match expectations

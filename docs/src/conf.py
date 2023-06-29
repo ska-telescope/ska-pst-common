@@ -124,7 +124,7 @@ exhale_args = {
     "rootFileName":          "library_root.rst",
     "rootFileTitle":         "Application Programming Interface",
     "afterTitleDescription": textwrap.dedent('''
-    The ska-pst-recv library provides and API that is used by the applications. This API is described below.
+    The ska-pst-common library provides and API that is used by the applications. This API is described below.
     '''),
     "doxygenStripFromPath":  "../", #"/home/calgray/Code/icrar/leap-accelerate/src", # use src dir
     # Suggested optional arguments

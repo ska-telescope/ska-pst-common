@@ -45,8 +45,10 @@ namespace ska::pst::common
    */
   typedef struct sample_pair
   {
+    //! first sample in the pair
     std::complex<float> sample1;
 
+    //! second sample in the pair
     std::complex<float> sample2;
 
   } sample_pair_t;
