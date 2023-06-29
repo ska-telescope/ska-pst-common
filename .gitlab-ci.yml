@@ -161,6 +161,18 @@ test_debug_build:
     paths:
       - build/
 
+docs-build:
+  stage: build
+  image: registry.gitlab.com/ska-telescope/pst/ska-pst-common/ska-pst-common-builder:0.8.8
+  needs:
+  - oci-image-build
+
+docs-pages:
+  stage: pages
+  image: registry.gitlab.com/ska-telescope/pst/ska-pst-common/ska-pst-common-builder:0.8.8
+  needs:
+  - oci-image-build
+
 dynamic_vars:
   stage: build
   variables:
