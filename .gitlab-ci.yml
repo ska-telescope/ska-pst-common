@@ -223,6 +223,7 @@ include:
 
   # Docs pages
   - project: 'ska-telescope/templates-repository'
+    ref: at3-504-update-readthedocs-yaml
     file: 'gitlab-ci/includes/docs.gitlab-ci.yml'
 
   # Common runtime tests
