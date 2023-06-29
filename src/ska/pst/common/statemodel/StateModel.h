@@ -353,7 +353,7 @@ namespace ska::pst::common
       /**
        * @brief Wait for the state model to achieve the required state within the timeout
        *
-       * @param required target state for the state model to achieve.
+       * @param expected target state for the state model to achieve.
        * @param milliseconds timeout in milliseconds.
        * @return true if the state model did achieve the required state before the timeout
        * @return false if the state model did not achieve the required state before the timeout

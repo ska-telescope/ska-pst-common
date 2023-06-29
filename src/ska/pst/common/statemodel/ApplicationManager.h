@@ -214,7 +214,7 @@ namespace ska::pst::common
       /**
        * @brief Transition the state.
        *
-       * @param required state to transition.
+       * @param state state to transition to.
        */
       void set_state(State state);
 

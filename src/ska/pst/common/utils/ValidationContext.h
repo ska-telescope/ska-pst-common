@@ -37,22 +37,49 @@
 namespace ska::pst::common
 {
   /**
-   * @brief The pst_validation_error intended to be constructed and thrown form a ValidationContext.
+   * @brief The pst_validation_error intended to be constructed and thrown from a ValidationContext.
    *
    */
   class pst_validation_error : public std::logic_error
   {
     public:
 
+      /**
+       * @brief Construct a new pst validation error object
+       *
+       * @param msg error messsage describing the pst validation error
+       */
       explicit pst_validation_error(const std::string& msg) : logic_error(msg) {};
+
+      /**
+       * @brief Construct a new pst validation error object
+       *
+       * @param msg error messsage describing the pst validation error
+       */
       explicit pst_validation_error(const char* msg) : logic_error(msg) {};
+
+      /**
+       * @brief Destroy the pst validation error object
+       *
+       */
       virtual ~pst_validation_error() = default;
   };
 
-  typedef struct validation_error_record {
+  /**
+   * @brief structure that describes a validation error and it's source.
+   *
+   */
+  typedef struct validation_error_record
+  {
+    //! the name of the field/key that failed validation
     std::string field_name;
+
+    //! the value of the field that was invalid
     std::string value;
+
+    //! the message that describes the error
     std::string message;
+
   } validation_error_record_t;
 
   /**
@@ -93,7 +120,7 @@ namespace ska::pst::common
       /**
        * @brief Add validation error based on a value
        *
-       * @param field_name the name the field/key that failed validation
+       * @param field_name the name of the field/key that failed validation
        * @param value the value of the field that was invalid
        * @param message the message that describes the error, this could
        *   be decribing that the field is required, numeric, needs to

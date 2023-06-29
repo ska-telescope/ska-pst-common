@@ -191,6 +191,11 @@ namespace ska::pst::common {
              */
             virtual ~LmcService() = default;
 
+            /**
+             * @brief Return the name of the LMC service
+             *
+             * @return std::string the name of the LMC service set in the constructor
+             */
             std::string service_name() { return _service_name; }
 
             /**

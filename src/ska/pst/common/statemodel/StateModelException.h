@@ -45,8 +45,24 @@ namespace ska::pst::common
   {
     public:
 
+      /**
+       * @brief Construct a new pst state transition error object
+       *
+       * @param msg error messsage describing the invalid state transition
+       */
       explicit pst_state_transition_error(const std::string& msg) : logic_error(msg) {};
+
+      /**
+       * @brief Construct a new pst state transition error object
+       *
+       * @param msg error messsage describing the invalid state transition
+       */
       explicit pst_state_transition_error(const char* msg) : logic_error(msg) {};
+
+      /**
+       * @brief Destroy the pst state transition error object
+       *
+       */
       virtual ~pst_state_transition_error() = default;
   };
 

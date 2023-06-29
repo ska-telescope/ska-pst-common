@@ -50,7 +50,10 @@ namespace ska::pst::common {
 
     public:
 
+      //! number of atto seconds in a second as a double
       static constexpr double attoseconds_per_second = 1000000000000000000;
+
+      //! number of atto seconds in a second as 64-bit unsigned integer
       static constexpr uint64_t attoseconds_per_second_u64 = 1000000000000000000;
 
       /**
@@ -103,14 +106,14 @@ namespace ska::pst::common {
       /**
        * @brief Set the fractional seconds part of the timestamp
        *
-       * @param double seconds of the fractional part of the timestamp
+       * @param seconds of the fractional part of the timestamp
        */
       void set_fractional_time(double seconds);
 
       /**
        * @brief Set the fractional seconds part of the timestamp
        *
-       * @param uint64_t attoseconds of the fractional part of the timestamp
+       * @param attoseconds of the fractional part of the timestamp
        */
       void set_fractional_time(uint64_t attoseconds);
 
