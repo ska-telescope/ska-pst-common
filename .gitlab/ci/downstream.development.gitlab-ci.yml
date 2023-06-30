@@ -42,7 +42,7 @@ trigger-development-ska-pst-dsp:
     project: ska-telescope/pst/ska-pst-dsp
   when: manual
 
-trigger-development-ska-pst-integration:
+trigger-development-ska-pst:
   extends: .downstream_development_common_config
   variables:
     PST_SMRB_OCI_REGISTRY: registry.gitlab.com/ska-telescope/pst/ska-pst-smrb
@@ -52,5 +52,5 @@ trigger-development-ska-pst-integration:
     - trigger-development-ska-pst-recv
     - trigger-development-ska-pst-dsp
   trigger:
-    project: ska-telescope/pst/ska-pst-integration
+    project: ska-telescope/pst/ska-pst
   when: manual

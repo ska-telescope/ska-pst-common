@@ -41,7 +41,7 @@ trigger-merge-ska-pst-dsp:
     project: ska-telescope/pst/ska-pst-dsp
   when: manual
 
-trigger-merge-ska-pst-integration:
+trigger-merge-ska-pst:
   extends: .downstream_merge_common_config
   variables:
     PST_SMRB_OCI_REGISTRY: registry.gitlab.com/ska-telescope/pst/ska-pst-smrb
@@ -51,5 +51,5 @@ trigger-merge-ska-pst-integration:
     - trigger-merge-ska-pst-recv
     - trigger-merge-ska-pst-dsp
   trigger:
-    project: ska-telescope/pst/ska-pst-integration
+    project: ska-telescope/pst/ska-pst
   when: manual
