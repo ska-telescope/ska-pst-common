@@ -18,5 +18,9 @@ RUN cmake /mnt/ska-pst-common-builder/ -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTING=
     && cmake /mnt/ska-pst-common-builder/ -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF \
     && make -j$(nproc) && make install
 
+# Install Poetry
+RUN curl -sSL https://install.python-poetry.org | python3 -
+ENV PATH="${PATH}:/root/.local/bin/"
+
 WORKDIR /usr/local/bin
 CMD ["/bin/bash"]
