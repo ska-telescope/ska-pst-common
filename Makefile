@@ -88,6 +88,14 @@ local-grpc-do-installation:
 local-grpc-post-installation:
 local-grpc-installation: local-grpc-pre-installation local-grpc-do-installation local-grpc-post-installation
 
+# Extend pipeline machinery targets
+.PHONY: docs-pre-build
+docs-pre-build:
+	@rm -rf docs/build/*
+	apt-get update -y
+	apt-get install -y doxygen fontconfig-config
+	pip3 install -r docs/requirements.txt
+
 protobuf-docs:
 	@echo 'Generating protobuf docs'
 	@protoc -I=$(PWD)/protobuf \

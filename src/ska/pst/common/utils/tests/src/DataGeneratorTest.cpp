@@ -115,14 +115,24 @@ TEST_P(DataGeneratorTest, test_generate_validate_blocks) // NOLINT
 
   buffer.resize(buffer_size);
   auto buffer_ptr = (&buffer[0]);
+
+  SPDLOG_TRACE("ska::pst::common::test::DataGeneratorTest::test_generate_validate_blocks dg->fill_data()");
   dg->fill_data(buffer_ptr, buffer_size);
   dg->reset();
   EXPECT_TRUE(dg->test_data(buffer_ptr, buffer_size));
 
+  // reuse the buffer for the weights and scales
+  buffer.resize(weights_scales_size);
   dg->reset();
+  SPDLOG_TRACE("ska::pst::common::test::DataGeneratorTest::test_generate_validate_blocks dg->fill_weights()");
   dg->fill_weights(buffer_ptr, weights_scales_size);
+  SPDLOG_TRACE("ska::pst::common::test::DataGeneratorTest::test_generate_validate_blocks dg->fill_scales()");
+  dg->fill_scales(buffer_ptr, weights_scales_size);
   dg->reset();
+  SPDLOG_TRACE("ska::pst::common::test::DataGeneratorTest::test_generate_validate_blocks dg->test_weights()");
   EXPECT_TRUE(dg->test_weights(buffer_ptr, weights_scales_size));
+  SPDLOG_TRACE("ska::pst::common::test::DataGeneratorTest::test_generate_validate_blocks dg->test_scales()");
+  EXPECT_TRUE(dg->test_scales(buffer_ptr, weights_scales_size));
 }
 
 INSTANTIATE_TEST_SUITE_P(SignalGenerators, DataGeneratorTest, testing::Values("Random", "Sine", "GaussianNoise")); // NOLINT

@@ -78,7 +78,7 @@ void ska::pst::common::RandomSequence::generate_block(uint8_t * buffer, uint64_t
   uint64_t offset = block_offset;
   while (offset + block_size < bufsz)
   {
-    generate(buffer + offset, offset + block_size);
+    generate(buffer + offset, block_size);
     offset += block_stride;
   }
 }
@@ -101,7 +101,7 @@ auto ska::pst::common::RandomSequence::validate_block(uint8_t * buffer, uint64_t
   bool valid = true;
   while (offset + block_size < bufsz)
   {
-    valid &= validate(buffer + offset, offset + block_size);
+    valid &= validate(buffer + offset, block_size);
     offset += block_stride;
   }
   SPDLOG_DEBUG("ska::pst::common::RandomSequence::validate_block valid={}", valid);

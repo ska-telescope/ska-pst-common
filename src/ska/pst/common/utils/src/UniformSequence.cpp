@@ -78,7 +78,7 @@ void ska::pst::common::UniformSequence<T>::generate_block(char * buffer, uint64_
   uint64_t offset = block_offset;
   while (offset + block_size < bufsz)
   {
-    generate(buffer + offset, offset + block_size);
+    generate(buffer + offset, block_size);
     offset += block_stride;
   }
 }
@@ -106,7 +106,7 @@ auto ska::pst::common::UniformSequence<T>::validate_block(char * buffer, uint64_
   bool valid = true;
   while (offset + block_size < bufsz)
   {
-    valid &= validate(buffer + offset, offset + block_size);
+    valid &= validate(buffer + offset, block_size);
     offset += block_stride;
   }
   SPDLOG_DEBUG("ska::pst::common::UniformSequence<T>::validate_block valid={}", valid);
