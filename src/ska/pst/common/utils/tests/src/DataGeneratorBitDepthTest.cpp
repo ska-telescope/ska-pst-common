@@ -80,28 +80,19 @@ TEST_P(DataGeneratorBitDepthTest, test_generate_validate_packet) // NOLINT
   ska::pst::common::SineWaveGenerator swg(layout);
   swg.configure(header);
 
-  // no 12-bit support in the SineWave Generator
-  if (GetParam() == 12)
-  {
-    EXPECT_THROW(swg.fill_data(buffer_ptr, layout->get_packet_size()), std::runtime_error); // NOLINT
-    EXPECT_THROW(swg.test_data(buffer_ptr, layout->get_packet_size()), std::runtime_error); // NOLINT
-  }
-  else
-  {
-    swg.fill_packet(buffer_ptr);
-    swg.reset();
-    EXPECT_TRUE(swg.test_packet(buffer_ptr));
-    EXPECT_FALSE(swg.test_packet(buffer_ptr));
+  swg.fill_packet(buffer_ptr);
+  swg.reset();
+  EXPECT_TRUE(swg.test_packet(buffer_ptr));
+  EXPECT_FALSE(swg.test_packet(buffer_ptr));
 
-    // perform a shift of all the values in the buffer
-    for (unsigned i=0; i<buffer.size()-1; i++)
-    {
-      buffer_ptr[i] = buffer_ptr[i+1]; // NOLINT
-    }
-
-    swg.reset();
-    EXPECT_FALSE(swg.test_packet(buffer_ptr));
+  // perform a shift of all the values in the buffer
+  for (unsigned i=0; i<buffer.size()-1; i++)
+  {
+    buffer_ptr[i] = buffer_ptr[i+1]; // NOLINT
   }
+
+  swg.reset();
+  EXPECT_FALSE(swg.test_packet(buffer_ptr));
 }
 
 TEST_P(DataGeneratorBitDepthTest, test_generate_validate_blocks) // NOLINT
@@ -122,25 +113,14 @@ TEST_P(DataGeneratorBitDepthTest, test_generate_validate_blocks) // NOLINT
   EXPECT_TRUE(gnd.test_data(buffer_ptr, buffer_size));
   EXPECT_FALSE(gnd.test_data(buffer_ptr, buffer_size));
 
-  if (GetParam() == 12)
-  {
-    gnd.reset();
-    buffer.resize(buffer_size + 1);
-    EXPECT_THROW(gnd.fill_data(buffer_ptr, buffer_size + 1), std::runtime_error); // NOLINT
-  }
-
-  // no 12-bit support in the SineWave Generator
-  if (GetParam() != 12)
-  {
-    ska::pst::common::SineWaveGenerator swg(layout);
-    swg.configure(header);
-    swg.fill_data(buffer_ptr, buffer_size);
-    swg.reset();
-    EXPECT_TRUE(swg.test_data(buffer_ptr, buffer_size));
-    EXPECT_FALSE(swg.test_data(buffer_ptr, buffer_size));
-  }
+  ska::pst::common::SineWaveGenerator swg(layout);
+  swg.configure(header);
+  swg.fill_data(buffer_ptr, buffer_size);
+  swg.reset();
+  EXPECT_TRUE(swg.test_data(buffer_ptr, buffer_size));
+  EXPECT_FALSE(swg.test_data(buffer_ptr, buffer_size));
 }
 
-INSTANTIATE_TEST_SUITE_P(SignalGenerators, DataGeneratorBitDepthTest, testing::Values(8, 12, 16)); // NOLINT
+INSTANTIATE_TEST_SUITE_P(SignalGenerators, DataGeneratorBitDepthTest, testing::Values(8, 16)); // NOLINT
 
 } // namespace ska::pst::common::test

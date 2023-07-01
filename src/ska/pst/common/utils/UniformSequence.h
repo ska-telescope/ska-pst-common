@@ -42,6 +42,7 @@ namespace ska::pst::common {
    * @brief Generates a uniform sequence of char values.
    *
    */
+  template <typename T>
   class UniformSequence {
 
     public:
@@ -50,7 +51,7 @@ namespace ska::pst::common {
        * @brief Construct a new Uniform Sequence object
        *
        */
-      UniformSequence(const char value);
+      UniformSequence(const T value);
 
       /**
        * @brief Destroy the Uniform Sequence object
@@ -72,6 +73,13 @@ namespace ska::pst::common {
        *
        */
       void reset();
+
+      /**
+       * @brief Set the uniform value to be used
+       *
+       * @param value uniform value to be used
+       */
+      void set_uniform_value(const T value);
 
       /**
        * @brief Generate a uniform data sequence.
@@ -120,9 +128,12 @@ namespace ska::pst::common {
 
     private:
 
-      //! char value to write to all bytes
-      const char uniform_value;
+      //! uniform value to write to all bytes
+      T uniform_value;
   };
+
+  template class UniformSequence<char>;
+  template class UniformSequence<float>;
 
 } // namespace ska::pst::common
 

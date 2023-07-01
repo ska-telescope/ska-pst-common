@@ -35,7 +35,7 @@
 #include "ska/pst/common/utils/SineWaveGenerator.h"
 
 ska::pst::common::SineWaveGenerator::SineWaveGenerator(std::shared_ptr<ska::pst::common::DataLayout> _layout) :
-  DataGenerator(_layout)
+  DataGenerator(_layout), wts_sequence('\xff'), scl_sequence(1.0)
 {
 }
 
@@ -75,6 +75,13 @@ void ska::pst::common::SineWaveGenerator::configure(const ska::pst::common::Asci
       }
     }
   }
+
+  wts_block_offset = layout->get_packet_scales_size();
+  wts_block_size = layout->get_packet_weights_size();
+  scl_block_offset = 0;
+  scl_block_size = layout->get_packet_scales_size();
+  block_stride = layout->get_packet_weights_size() + layout->get_packet_scales_size();
+
   SPDLOG_DEBUG("ska::pst::common::SineWaveGenerator::configure sinusoid_channel={}", sinusoid_channel);
 }
 
@@ -85,10 +92,6 @@ void ska::pst::common::SineWaveGenerator::fill_data(char * buf, uint64_t size)
   {
     fill_complex_data<int8_t>(buf, size);
   }
-  else if (nbit == 12)
-  {
-    throw std::runtime_error("ska::pst::common::SineWaveGenerator::fill_data no support for 12-bit data yet");
-  }
   else if (nbit == 16)
   {
     SPDLOG_TRACE("ska::pst::common::SineWaveGenerator::fill_data fill_complex_data<int16_t>(buf, size)");
@@ -96,23 +99,14 @@ void ska::pst::common::SineWaveGenerator::fill_data(char * buf, uint64_t size)
   }
 }
 
-static const char all_ones = '\xff';
-
 void ska::pst::common::SineWaveGenerator::fill_weights(char * buf, uint64_t size)
 {
-  std::fill(buf, buf+size, all_ones); // NOLINT
+  wts_sequence.generate_block(buf, size, wts_block_offset, wts_block_size, block_stride);
 }
 
 void ska::pst::common::SineWaveGenerator::fill_scales(char * buf, uint64_t size)
 {
-  float * scales = reinterpret_cast<float *>(buf);
-  uint64_t scales_size = size / sizeof(float);
-  if (size % sizeof(float) != 0)
-  {
-    SPDLOG_ERROR("ska::pst::common::SineWaveGenerator::fill_scales scales_size[{}] was not a multiple of sizeof(float)", size);
-    throw std::runtime_error("ska::pst::common::SineWaveGenerator::fill_scales invalid scales buffer size");
-  }
-  std::fill(scales, scales + scales_size, 1.0f); // NOLINT
+  scl_sequence.generate_block(buf, size, scl_block_offset, scl_block_size, block_stride);
 }
 
 auto ska::pst::common::SineWaveGenerator::test_data(char * buf, uint64_t size) -> bool
@@ -122,10 +116,6 @@ auto ska::pst::common::SineWaveGenerator::test_data(char * buf, uint64_t size) -
   {
     SPDLOG_TRACE("ska::pst::common::SineWaveGenerator::test_data test_complex_data<int8_t>(buf, size)");
     return test_complex_data<int8_t>(buf, size);
-  }
-  else if (nbit == 12)
-  {
-    throw std::runtime_error("ska::pst::common::SineWaveGenerator::test_data no support for 12-bit data yet");
   }
   else if (nbit == 16)
   {
@@ -140,41 +130,18 @@ auto ska::pst::common::SineWaveGenerator::test_data(char * buf, uint64_t size) -
 
 auto ska::pst::common::SineWaveGenerator::test_weights(char * buf, uint64_t size) -> bool
 {
-  for (uint64_t i=0; i<size; i++)
-  {
-    if (buf[i] != all_ones) // NOLINT
-    {
-      SPDLOG_WARN("ska::pst::common::SineWaveGenerator::test_weights failed on buf[{}] != all_ones");
-      return false;
-    }
-  }
-  return true;
+  return wts_sequence.validate_block(buf, size, wts_block_offset, wts_block_size, block_stride);
 }
 
 auto ska::pst::common::SineWaveGenerator::test_scales(char * buf, uint64_t size) -> bool
 {
-  float * scales = reinterpret_cast<float *>(buf);
-  uint64_t scales_size = size / sizeof(float);
-  if (size % sizeof(float) != 0)
-  {
-    SPDLOG_ERROR("ska::pst::common::SineWaveGenerator::test_scales scales_size[{}] was not a multiple of sizeof(float)", size);
-    throw std::runtime_error("ska::pst::common::SineWaveGenerator::test_scales invalid scales buffer size");
-  }
-
-  for (uint64_t i=0; i<scales_size; i++)
-  {
-    if (scales[i] != 1.0f) // NOLINT
-    {
-      SPDLOG_WARN("ska::pst::common::SineWaveGenerator::test_scales failed on scales[{}]={} != 1.0", i, scales[i]);
-      return false;
-    }
-  }
-  return true;
+  return scl_sequence.validate_block(buf, size, scl_block_offset, scl_block_size, block_stride);
 }
 
 void ska::pst::common::SineWaveGenerator::reset()
 {
   current_sample = 0;
   current_channel = 0;
+  wts_sequence.reset();
+  scl_sequence.reset();
 }
-

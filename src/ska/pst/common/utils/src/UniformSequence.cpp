@@ -38,30 +38,43 @@
 #include <stdio.h>
 #endif
 
-ska::pst::common::UniformSequence::UniformSequence(const char value) :
+template <typename T>
+ska::pst::common::UniformSequence<T>::UniformSequence(const T value) :
   uniform_value(value)
 {
-  SPDLOG_DEBUG("ska::pst::common::UniformSequence::UniformSequence uniform_value={}", uniform_value);
+  SPDLOG_DEBUG("ska::pst::common::UniformSequence<T>::UniformSequence uniform_value={}", uniform_value);
 }
 
-void ska::pst::common::UniformSequence::configure(const ska::pst::common::AsciiHeader& header)
+template <typename T>
+void ska::pst::common::UniformSequence<T>::configure(const ska::pst::common::AsciiHeader& header)
 {
   reset();
 }
 
-void ska::pst::common::UniformSequence::reset()
+template <typename T>
+void ska::pst::common::UniformSequence<T>::reset()
 {
 }
 
-void ska::pst::common::UniformSequence::generate(char * buffer, uint64_t bufsz)
+template <typename T>
+void ska::pst::common::UniformSequence<T>::set_uniform_value(const T value)
 {
-  SPDLOG_DEBUG("ska::pst::common::UniformSequence::generate generate {} bytes of normal data", bufsz);
-  std::fill(buffer, buffer + bufsz, uniform_value);
+  uniform_value = value;
 }
 
-void ska::pst::common::UniformSequence::generate_block(char * buffer, uint64_t bufsz, uint64_t block_offset, uint64_t block_size, uint64_t block_stride)
+template <typename T>
+void ska::pst::common::UniformSequence<T>::generate(char * buffer, uint64_t bufsz)
 {
-  SPDLOG_DEBUG("ska::pst::common::UniformSequence::generate_block generate {} bytes of normal data with block offset={}, size={} and stride={}", bufsz, block_offset, block_size, block_stride);
+  SPDLOG_DEBUG("ska::pst::common::UniformSequence<T>::generate generate {} bytes of uniform data", bufsz);
+  T * uniform_buffer = reinterpret_cast<T *>(buffer);
+  uint64_t uniform_bufsz = bufsz / sizeof(T);
+  std::fill(uniform_buffer, uniform_buffer + uniform_bufsz, uniform_value);
+}
+
+template <typename T>
+void ska::pst::common::UniformSequence<T>::generate_block(char * buffer, uint64_t bufsz, uint64_t block_offset, uint64_t block_size, uint64_t block_stride)
+{
+  SPDLOG_DEBUG("ska::pst::common::UniformSequence<T>::generate_block generate {} bytes of uniform data with block offset={}, size={} and stride={}", bufsz, block_offset, block_size, block_stride);
   uint64_t offset = block_offset;
   while (offset + block_size < bufsz)
   {
@@ -70,11 +83,14 @@ void ska::pst::common::UniformSequence::generate_block(char * buffer, uint64_t b
   }
 }
 
-auto ska::pst::common::UniformSequence::validate(char * buffer, uint64_t bufsz) -> bool
+template <typename T>
+auto ska::pst::common::UniformSequence<T>::validate(char * buffer, uint64_t bufsz) -> bool
 {
-  for (unsigned i=0; i<bufsz; i++)
+  T * uniform_buffer = reinterpret_cast<T *>(buffer);
+  uint64_t uniform_bufsz = bufsz / sizeof(T);
+  for (uint64_t i=0; i<uniform_bufsz; i++)
   {
-    if (buffer[i] != uniform_value)
+    if (uniform_buffer[i] != uniform_value)
     {
       return false;
     }
@@ -82,9 +98,10 @@ auto ska::pst::common::UniformSequence::validate(char * buffer, uint64_t bufsz) 
   return true;
 }
 
-auto ska::pst::common::UniformSequence::validate_block(char * buffer, uint64_t bufsz, uint64_t block_offset, uint64_t block_size, uint64_t block_stride) -> bool
+template <typename T>
+auto ska::pst::common::UniformSequence<T>::validate_block(char * buffer, uint64_t bufsz, uint64_t block_offset, uint64_t block_size, uint64_t block_stride) -> bool
 {
-  SPDLOG_DEBUG("ska::pst::common::UniformSequence::validate_block validate {} bytes of normal data with block offset={}, size={} stride={}", bufsz, block_offset, block_size, block_stride);
+  SPDLOG_DEBUG("ska::pst::common::UniformSequence<T>::validate_block validate {} bytes of uniform data with block offset={}, size={} stride={}", bufsz, block_offset, block_size, block_stride);
   uint64_t offset = block_offset;
   bool valid = true;
   while (offset + block_size < bufsz)
@@ -92,6 +109,6 @@ auto ska::pst::common::UniformSequence::validate_block(char * buffer, uint64_t b
     valid &= validate(buffer + offset, offset + block_size);
     offset += block_stride;
   }
-  SPDLOG_DEBUG("ska::pst::common::UniformSequence::validate_block valid={}", valid);
+  SPDLOG_DEBUG("ska::pst::common::UniformSequence<T>::validate_block valid={}", valid);
   return valid;
 }

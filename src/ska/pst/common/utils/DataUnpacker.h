@@ -38,21 +38,6 @@
 
 namespace ska::pst::common
 {
-
-  /**
-   * @brief pair of complex floating point values
-   *
-   */
-  typedef struct sample_pair
-  {
-    //! first sample in the pair
-    std::complex<float> sample1;
-
-    //! second sample in the pair
-    std::complex<float> sample2;
-
-  } sample_pair_t;
-
   /**
    * @brief Unpacks data+weights+scales generation and validation
    *
@@ -119,21 +104,88 @@ namespace ska::pst::common
 
     private:
 
-      /**
-       * @brief Unpack a pair of samples encoded in 8, 12 or 16 bits per sample
-       *
-       * @param data pointer to the raw data array containing the packed samples
-       * @param scale_factor scale factor to apply during unpacking
-       * @return sample_pair_t unpacked pair of complex floating-point values
-       */
-      sample_pair_t unpack_sample_pair(char * data, const float scale_factor);
+      template <typename T>
+      void unpack_samples(const T* in, char * weights, uint32_t nheaps)
+      {
+        // Unpack quantised data store in heap, packet, pol, chan_block, samp_block ordering used in CBF/PSR formats
+        uint32_t packet_number = 0;
+        for (uint32_t iheap=0; iheap<nheaps; iheap++)
+        {
+          for (uint32_t ipacket=0; ipacket<packets_per_heap; ipacket++)
+          {
+            const float scale_factor = get_scale_factor(weights, packet_number);
+            if (std::isnan(scale_factor))
+            {
+              invalid_packets++;
+            }
+            for (uint32_t ipol=0; ipol<npol; ipol++)
+            {
+              for (uint32_t ichan=0; ichan<nchan_per_packet; ichan++)
+              {
+                const uint32_t ochan = (ipacket * nchan_per_packet) + ichan;
+                for (uint32_t isamp=0; isamp<nsamp_per_packet; isamp++)
+                {
+                  if (std::isnan(scale_factor))
+                  {
+                    invalid_samples++;
+                  }
+                  else
+                  {
+                    uint32_t osamp = (iheap * nsamp_per_packet) + isamp;
+                    unpacked[osamp][ochan][ipol] = std::complex<float>(float(in[0]), float(in[1])) / scale_factor;
+                  }
+                  in += 2;
+                }
+              }
+            }
+            packet_number++;
+          }
+        }
+      }
 
-      /**
-       * @brief return the square-law detected power from the sample pair
-       *
-       * @return float square law detected power sum of the sample pair
-       */
-      float square_law_detection(sample_pair_t);
+      template <typename T>
+      void integrate_samples(const T* in, char * weights, uint32_t nheaps)
+      {
+        // Unpack quantised data store in heap, packet, pol, chan_block, samp_block ordering
+        // used in CBF/PSR formats
+        uint32_t packet_number = 0;
+        std::complex<float> sample{0,0};
+        for (uint32_t iheap=0; iheap<nheaps; iheap++)
+        {
+          for (uint32_t ipacket=0; ipacket<packets_per_heap; ipacket++)
+          {
+            const float scale_factor = get_scale_factor(weights, packet_number);
+            if (std::isnan(scale_factor))
+            {
+              invalid_packets++;
+            }
+
+            for (uint32_t ipol=0; ipol<npol; ipol++)
+            {
+              for (uint32_t ichan=0; ichan<nchan_per_packet; ichan++)
+              {
+                const uint32_t ochan = (ipacket * nchan_per_packet) + ichan;
+                for (uint32_t isamp=0; isamp<nsamp_per_packet; isamp++)
+                {
+                  if (std::isnan(scale_factor))
+                  {
+                    invalid_samples++;
+                  }
+                  else
+                  {
+                    sample = std::complex<float>(float(in[0]), float(in[1])) / scale_factor;
+                    // integrate the power in each complex sample into the bandpass
+                    float power = sample.real() * sample.real() + sample.imag() * sample.imag();
+                    bandpass[ochan][ipol] += power;
+                  }
+                  in += 2;
+                }
+              }
+            }
+            packet_number++;
+          }
+        }
+      }
 
       //! Unpacked data vector
       std::vector<std::vector<std::vector<std::complex<float>>>> unpacked;

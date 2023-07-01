@@ -32,6 +32,7 @@
 #include <random>
 
 #include "ska/pst/common/utils/AsciiHeader.h"
+#include "ska/pst/common/definitions.h"
 
 #ifndef SKA_PST_COMMON_UTILS_NormalSequence_h
 #define SKA_PST_COMMON_UTILS_NormalSequence_h
@@ -102,11 +103,30 @@ namespace ska::pst::common {
 
     private:
 
+      template <typename T>
+      void generate_samples(T * out, uint64_t nval)
+      {
+        std::normal_distribution<float> distribution(mean, stddev);
+        for (uint64_t i=0; i<nval; i++)
+        {
+          out[i] = T(get_val(distribution));
+        }
+      }
+
       //! mean of the normal distribution
       float mean{0};
 
       //! standard deviation of the normal distribution
       float stddev{10};
+
+      //! standard deviation of a red noise process
+      float red_stddev{0};
+
+      //! current red noise factor to be applied
+      float red_noise_factor{1};
+
+      //! new red noise factor to apply when generating the timeseries
+      float new_red_noise_factor{0};
 
       //! get a 16-bit integer value from the normal distribution that is limited to min_val and max_val
       inline int16_t get_val(std::normal_distribution<float>& distribution);
@@ -128,6 +148,9 @@ namespace ska::pst::common {
 
       //! random number engine based on Mersenne Twister algorithm
       std::mt19937 generator;
+
+      //! random number engine based on Mersenne Twister algorithm
+      std::mt19937 red_noise_generator;
   };
 
 } // namespace ska::pst::common

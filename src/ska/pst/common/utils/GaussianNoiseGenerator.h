@@ -132,7 +132,7 @@ namespace ska::pst::common {
       ska::pst::common::NormalSequence dat_sequence;
 
       //! sequence of uniform values for the weights
-      ska::pst::common::UniformSequence wts_sequence;
+      ska::pst::common::UniformSequence<char> wts_sequence;
 
       //! sequence of randomly distributed values for the scales
       ska::pst::common::RandomSequence scl_sequence;

@@ -161,25 +161,20 @@ TEST_F(DataUnpackerTest, test_unpack) // NOLINT
   const uint32_t nchan = unpacked[0].size();
   const uint32_t npol = unpacked[0][0].size();
   const uint32_t nchan_per_packet = weights_header.get_uint32("UDP_NCHAN");
-
-  std::vector<std::vector<float>> expected_bandpass;
-  expected_bandpass.resize(nchan);
+  const uint32_t nsamp_per_packet = weights_header.get_uint32("UDP_NSAMP");
 
   for (unsigned isamp=0; isamp<nsamp; isamp++)
   {
     for (unsigned ichan=0; ichan<nchan; ichan++)
     {
-      expected_bandpass[ichan].resize(npol);
-      std::fill(expected_bandpass[ichan].begin(), expected_bandpass[ichan].end(), 0);
       for (unsigned ipol=0; ipol<npol; ipol++)
       {
         uint32_t ochanpol = ipol * nchan + ichan;
-        float value = float((ochanpol * nsamp) + isamp);
+        float value = float((ochanpol * nsamp_per_packet) + isamp);
         if (std::isnan(get_weight_for_channel(ichan, nchan_per_packet)))
         {
           value = 0;
         }
-        expected_bandpass[ichan][ipol] += (value * value) + (value * value);
         ASSERT_EQ(unpacked[isamp][ichan][ipol].real(), value);
         ASSERT_EQ(unpacked[isamp][ichan][ipol].imag(), value * -1);
       }
