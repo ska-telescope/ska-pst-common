@@ -132,9 +132,6 @@ namespace ska::pst::common {
       T uniform_value;
   };
 
-  template class UniformSequence<char>;
-  template class UniformSequence<float>;
-
 } // namespace ska::pst::common
 
 #endif // SKA_PST_COMMON_UTILS_UniformSequence_h

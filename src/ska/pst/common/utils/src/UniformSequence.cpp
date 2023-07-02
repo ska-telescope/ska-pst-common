@@ -34,10 +34,6 @@
 #include "ska/pst/common/utils/Time.h"
 #include "ska/pst/common/utils/UniformSequence.h"
 
-#ifdef DEBUG
-#include <stdio.h>
-#endif
-
 template <typename T>
 ska::pst::common::UniformSequence<T>::UniformSequence(const T value) :
   uniform_value(value)
@@ -54,6 +50,7 @@ void ska::pst::common::UniformSequence<T>::configure(const ska::pst::common::Asc
 template <typename T>
 void ska::pst::common::UniformSequence<T>::reset()
 {
+  SPDLOG_TRACE("ska::pst::common::UniformSequence<T>::reset is null operation");
 }
 
 template <typename T>
@@ -112,3 +109,6 @@ auto ska::pst::common::UniformSequence<T>::validate_block(char * buffer, uint64_
   SPDLOG_DEBUG("ska::pst::common::UniformSequence<T>::validate_block valid={}", valid);
   return valid;
 }
+
+template class ska::pst::common::UniformSequence<char>;
+template class ska::pst::common::UniformSequence<float>;
