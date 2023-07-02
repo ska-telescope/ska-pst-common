@@ -28,17 +28,30 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <sstream>
-#include <string>
+#include <gtest/gtest.h>
+#include <gmock/gmock.h>
 
-#include "ska/pst/common/version.h"
-#include "ska/pst/common/config.h"
+#include "ska/pst/common/statemodel/StateModelException.h"
+#include "ska/pst/common/statemodel/StateModel.h"
 
-auto ska::pst::common::get_version_string() -> std::string
+#ifndef SKA_PST_COMMON_STATEMODEL_TESTS_versionTest_h
+#define SKA_PST_COMMON_STATEMODEL_TESTS_versionTest_h
+
+namespace ska::pst::common::test {
+
+class versionTest : public ::testing::Test
 {
-  std::stringstream ss;
-  ss << SkaPstCommon_VERSION_MAJOR << ":"
-     << SkaPstCommon_VERSION_MINOR << ":"
-     << SkaPstCommon_VERSION_PATCH;
-  return ss.str();
-}
+  protected:
+    void SetUp() override;
+    void TearDown() override;
+  public:
+    versionTest() = default;
+    ~versionTest() = default;
+
+    std::string release_version;
+  private:
+};
+
+} // namespace ska::pst::common::test
+
+#endif // SKA_PST_COMMON_STATEMODEL_TESTS_versionTest_h
