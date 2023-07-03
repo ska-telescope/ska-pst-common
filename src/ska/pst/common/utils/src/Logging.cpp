@@ -34,36 +34,38 @@
 #include "ska/pst/common/utils/Logging.h"
 
 void ska::pst::common::setup_spdlog() {
-    spdlog::logger * logger = spdlog::default_logger_raw();
-    logger->set_pattern(SKA_LOGGING_FORMAT, spdlog::pattern_time_type::utc);
+  spdlog::logger * logger = spdlog::default_logger_raw();
+  logger->set_pattern(SKA_LOGGING_FORMAT, spdlog::pattern_time_type::utc);
 }
 
 spdlog::level::level_enum ska::pst::common::get_spdlog_level(ska::pst::lmc::LogLevel level)
 {
-    bool found = (ska::pst::common::log_level_map.find(level) != log_level_map.end());
-    if (!found)
-    {
-        throw std::runtime_error("ska::pst::common::get_spdlog_level lmclog level did not map to spdlog level");
-    }
-    return ska::pst::common::log_level_map[level];
+  bool found = (ska::pst::common::log_level_map.find(level) != log_level_map.end());
+  if (!found)
+  {
+    throw std::runtime_error("ska::pst::common::get_spdlog_level lmclog level did not map to spdlog level");
+  }
+  return ska::pst::common::log_level_map[level];
 }
 
 ska::pst::lmc::LogLevel ska::pst::common::get_lmclog_level(spdlog::level::level_enum level)
 {
-    bool found = false;
-    ska::pst::lmc::LogLevel mapped_level;
-    std::for_each(log_level_map.begin(), log_level_map.end(),
-        [&level, &mapped_level, &found](const std::pair<ska::pst::lmc::LogLevel, spdlog::level::level_enum> &p) {
-            if (p.second == level)
-            {
-                found = true;
-                mapped_level = p.first;
-            }
-        }
-    );
-    if (!found)
-    {
-        throw std::runtime_error("ska::pst::common::get_lmclog_level spdlog level did not map to lmclog level");
+  bool found = false;
+  ska::pst::lmc::LogLevel mapped_level;
+  std::for_each(
+    log_level_map.begin(),
+    log_level_map.end(),
+    [&level, &mapped_level, &found](const auto &p) {
+      if (p.second == level)
+      {
+        found = true;
+        mapped_level = p.first;
+      }
     }
-    return mapped_level;
+  );
+  if (!found)
+  {
+    throw std::runtime_error("ska::pst::common::get_lmclog_level spdlog level did not map to lmclog level");
+  }
+  return mapped_level;
 }
