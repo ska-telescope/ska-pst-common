@@ -52,6 +52,7 @@ namespace ska::pst::common::test {
 
       void TearDown() override;
 
+      void compute_mean_stddev(const std::vector<float>& values, float * mean, float *stddev);
       void assert_mean_stddev(const std::vector<float>& values, float expected_mean, float expected_stddev);
 
     public:

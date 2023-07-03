@@ -56,13 +56,18 @@ void NormalSequenceTest::TearDown()
 {
 }
 
-void NormalSequenceTest::assert_mean_stddev(const std::vector<float>& values, float expected_mean, float expected_stddev)
+void NormalSequenceTest::compute_mean_stddev(const std::vector<float>& values, float * mean, float *stddev)
 {
   float sum = std::accumulate(values.begin(), values.end(), 0.0);
-  float mean = sum / values.size();
+  *mean = sum / values.size();
   float sq_sum = std::inner_product(values.begin(), values.end(), values.begin(), 0.0);
-  float stddev = std::sqrt(sq_sum / values.size() - mean * mean);
+  *stddev = std::sqrt(sq_sum / values.size() - *mean * *mean);
+}
 
+void NormalSequenceTest::assert_mean_stddev(const std::vector<float>& values, float expected_mean, float expected_stddev)
+{
+  float mean{0}, stddev{0};
+  compute_mean_stddev(values, &mean, &stddev);
   ASSERT_NEAR(expected_mean, mean, 1e-1);
   ASSERT_NEAR(expected_stddev, stddev, 1e-1);
 }
@@ -139,6 +144,44 @@ TEST_F(NormalSequenceTest, test_generate_16bit) // NOLINT
 
   // measure the mean and standard deviation of the generated timeseries
   assert_mean_stddev(unpacked, expected_mean, expected_stddev);
+}
+
+TEST_F(NormalSequenceTest, test_generate_red_noise) // NOLINT
+{
+  data_header.load_from_file(test_data_file("16bit_data_header.txt"));
+  weights_header.load_from_file(test_data_file("16bit_weights_header.txt"));
+
+  NormalSequence ns;
+
+  // set the header parameter that configures the red noise stddev
+  static constexpr float expected_mean = 0.0;
+  static constexpr float expected_stddev = 10.0;
+  static constexpr float red_stddev = 1.0;
+  data_header.set("NORMAL_DIST_MEAN", expected_mean);
+  data_header.set("NORMAL_DIST_STDDEV", expected_stddev);
+  data_header.set("NORMAL_DIST_RED_STDDEV", red_stddev);
+
+  uint32_t nbit = data_header.get_uint32("NBIT");
+
+  ns.configure(data_header);
+  SPDLOG_TRACE("ska::pst::common::test::NormalSequenceTest::test_generate_red_noise generating {} bytes of data", buffer.size());
+  ns.generate(&buffer[0], buffer.size());
+
+  auto buffer_int16 = reinterpret_cast<int16_t*>(&buffer[0]);
+  const unsigned buffer_nval = (buffer.size() * ska::pst::common::bits_per_byte) / nbit;
+  std::vector<float> unpacked(buffer_nval);
+  for (unsigned i=0; i<buffer_nval; i++)
+  {
+    unpacked[i] = float(buffer_int16[i]);
+  }
+
+  float mean{0}, stddev{0};
+  compute_mean_stddev(unpacked, &mean, &stddev);
+  SPDLOG_TRACE("ska::pst::common::test::NormalSequenceTest::test_generate_red_noise mean={} stddev={}", mean, stddev);
+
+  // mean should remain at 0 in the presence of red noise
+  ASSERT_NEAR(expected_mean, mean, 1e-1);
+  ASSERT_NEAR(expected_stddev, stddev, 99);
 }
 
 } // namespace ska::pst::common::test

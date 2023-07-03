@@ -86,7 +86,7 @@ auto ska::pst::common::NormalSequence::get_val(std::normal_distribution<float>& 
   // apply an optional red noise process
   if (red_stddev > 0)
   {
-    red_noise_factor = (0.9 * red_noise_factor) + (0.1 * new_red_noise_factor);
+    red_noise_factor = (0.999 * red_noise_factor) + (0.001 * new_red_noise_factor);
     value *= red_noise_factor;
   }
 
@@ -101,7 +101,7 @@ void ska::pst::common::NormalSequence::generate(char * buffer, uint64_t bufsz)
   {
     // update the new red noise factor once per buffer
     std::normal_distribution<float> red_noise_distribution(0, red_stddev);
-    new_red_noise_factor = red_noise_distribution(red_noise_generator);
+    new_red_noise_factor = std::abs(red_noise_distribution(red_noise_generator));
   }
 
   uint64_t nval = bufsz * ska::pst::common::bits_per_byte / nbit;
