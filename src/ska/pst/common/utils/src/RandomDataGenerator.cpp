@@ -35,7 +35,7 @@
 #include "ska/pst/common/utils/RandomDataGenerator.h"
 
 ska::pst::common::RandomDataGenerator::RandomDataGenerator(std::shared_ptr<ska::pst::common::DataLayout> _layout) :
-  DataGenerator(std::move(_layout)), wts_sequence('\xff')
+  DataGenerator(std::move(_layout)), wts_sequence(unity_weight)
 {
 }
 

@@ -36,7 +36,7 @@
 #include "ska/pst/common/utils/SineWaveGenerator.h"
 
 ska::pst::common::SineWaveGenerator::SineWaveGenerator(std::shared_ptr<ska::pst::common::DataLayout> _layout) :
-  DataGenerator(std::move(_layout)), wts_sequence('\xff'), scl_sequence(1.0)
+  DataGenerator(std::move(_layout)), wts_sequence(unity_weight), scl_sequence(unity_scale)
 {
 }
 

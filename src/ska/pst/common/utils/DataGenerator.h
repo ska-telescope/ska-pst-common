@@ -140,6 +140,12 @@ namespace ska::pst::common {
 
     protected:
 
+      //! char value that represents a unity weight value
+      static constexpr char unity_weight = '\xff';
+
+      //! floating value that represents a unity scale factor
+      static constexpr float unity_scale = 1.0;
+
       //! Layout of each block of data
       std::shared_ptr<DataLayout> layout;
 
