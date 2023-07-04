@@ -63,7 +63,7 @@ namespace ska::pst::common
        * @brief Destroy the pst state transition error object
        *
        */
-      virtual ~pst_state_transition_error() = default;
+      ~pst_state_transition_error() override = default;
   };
 
 } // namespace ska::pst::common

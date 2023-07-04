@@ -40,7 +40,7 @@ namespace ska::pst::common
   static constexpr unsigned bits_per_byte = 8;
 
   //! number of giga bits (10^9 bits) in a byte
-  static constexpr double gigabits_per_byte = double(bits_per_byte) / double(1e9);
+  static constexpr double gigabits_per_byte = static_cast<double>(bits_per_byte) / static_cast<double>(1e9);
 
   //! number of deciseconds in a second
   static constexpr unsigned deciseconds_per_second = 10;

@@ -35,9 +35,9 @@
 #ifndef SKA_PST_COMMON_UTIL_Time_h
 #define SKA_PST_COMMON_UTIL_Time_h
 
-#define MJD_1970_01_01 40587
-#define UNIX_TIME_TO_MJD(t) ( MJD_1970_01_01 + ((t) / 86400.0) )
-#define MJD_TO_UNIX_TIME(m) ( (long) (((m) - MJD_1970_01_01) * 86400.0) )
+#define MJD_1970_01_01 40587  // NOLINT
+#define UNIX_TIME_TO_MJD(t) ( MJD_1970_01_01 + ((t) / 86400.0) )   // NOLINT
+#define MJD_TO_UNIX_TIME(m) ( (long) (((m) - MJD_1970_01_01) * 86400.0) )   // NOLINT
 #define STRUCT_TM_INIT {0, 0, 0, 0, 0, 0, 0, 0}
 
 namespace ska::pst::common {
@@ -51,7 +51,7 @@ namespace ska::pst::common {
     public:
 
       //! number of atto seconds in a second as a double
-      static constexpr double attoseconds_per_second = 1000000000000000000;
+      static constexpr double attoseconds_per_second = 1.0e18;
 
       //! number of atto seconds in a second as 64-bit unsigned integer
       static constexpr uint64_t attoseconds_per_second_u64 = 1000000000000000000;
@@ -101,7 +101,7 @@ namespace ska::pst::common {
        *
        * @return time_t epoch to return
        */
-      time_t get_time() { return epoch; };
+      auto get_time() -> time_t { return epoch; };
 
       /**
        * @brief Set the fractional seconds part of the timestamp
@@ -122,35 +122,35 @@ namespace ska::pst::common {
        *
        * @return double fractional time in seconds
        */
-      double get_fractional_time();
+      auto get_fractional_time() -> double;
 
       /**
        * @brief Get the fractional time of the timestamp in attoseconds
        *
        * @return double fractional time in attoseconds
        */
-      uint64_t get_fractional_time_attoseconds();
+      auto get_fractional_time_attoseconds() -> uint64_t;
 
       /**
        * @brief Return the timestamp as a Modified Julian Day
        * The return value is an integer day
        * @return int
        */
-      int get_mjd_day() { return (int) UNIX_TIME_TO_MJD (epoch); };
+      auto get_mjd_day() -> int { return static_cast<int>UNIX_TIME_TO_MJD (epoch); };
 
       /**
        * @brief Return the year of the object
        *
        * @return int
        */
-      int get_gm_year();
+      auto get_gm_year() -> int;
 
       /**
        * @brief Return the month of the object
        *
        * @return int
        */
-      int get_gm_month();
+      auto get_gm_month() -> int;
 
       /**
        * @brief Convert an MJD to the time_t
@@ -158,7 +158,7 @@ namespace ska::pst::common {
        * @param mjd
        * @return time_t
        */
-      static time_t mjd2utctm(double mjd);
+      static auto mjd2utctm(double mjd) -> time_t;
 
       /**
        * @brief Add the specified seconds to the object
@@ -179,14 +179,14 @@ namespace ska::pst::common {
        *
        * @return std::string localtime timestamp in YYYY-MM-DD-HH:MM:SS format
        */
-      std::string get_localtime();
+      auto get_localtime() -> std::string;
 
       /**
        * @brief Return a string representation of the timestamp in the UTC time zone
        *
        * @return std::string gmtime timestamp in YYYY-MM-DD-HH:MM:SS format
        */
-      std::string get_gmtime();
+      auto get_gmtime() -> std::string;
 
       /**
        * @brief Convert the provided epoch into a string timestamp in the local time zone
@@ -194,7 +194,7 @@ namespace ska::pst::common {
        * @param e epoch to convert
        * @return std::string timestamp in local time zone
        */
-      static std::string format_localtime(time_t e);
+      static auto format_localtime(time_t e) -> std::string;
 
       /**
        * @brief Converted the provided epoch into a string timestamp in the UTC time zone
@@ -202,7 +202,7 @@ namespace ska::pst::common {
        * @param e epoch to convert
        * @return std::string timestamp in the UTC time zone
        */
-      static std::string format_gmtime(time_t e);
+      static auto format_gmtime(time_t e) -> std::string;
 
     private:
 

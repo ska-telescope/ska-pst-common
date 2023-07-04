@@ -50,13 +50,13 @@ namespace ska::pst::common {
        * @brief Construct a new GaussianNoiseGenerator object
        *
        */
-      GaussianNoiseGenerator(std::shared_ptr<DataLayout> layout);
+      explicit GaussianNoiseGenerator(std::shared_ptr<DataLayout> layout);
 
       /**
        * @brief Destroy the GaussianNoiseGenerator object
        *
        */
-      ~GaussianNoiseGenerator() = default;
+      ~GaussianNoiseGenerator() override = default;
 
       /**
        * @brief Configure the streams written to data + weights
@@ -97,7 +97,7 @@ namespace ska::pst::common {
        *
        * @return true if data match expectations
        */
-      virtual bool test_data(char * buf, uint64_t size) override;
+      auto test_data(char * buf, uint64_t size) -> bool override;
 
       /**
        * @brief Verify the weights stream in the provided buffer
@@ -107,7 +107,7 @@ namespace ska::pst::common {
        *
        * @return true if weights match expectations
        */
-      virtual bool test_weights(char * buf, uint64_t size) override;
+      auto test_weights(char * buf, uint64_t size) -> bool override;
 
       /**
        * @brief Verify the scales stream in the provided buffer
@@ -117,14 +117,14 @@ namespace ska::pst::common {
        *
        * @return true if scales match expectations
        */
-      virtual bool test_scales(char * buf, uint64_t size) override;
+      auto test_scales(char * buf, uint64_t size) -> bool override;
 
       /**
        * @brief Reset all sequences (data, weights, and scales)
        * The next call to fill_block or test_block will behave as per the first call to these functions.
        *
        */
-      virtual void reset() override;
+      void reset() override;
 
     private:
 

@@ -39,29 +39,28 @@
 
 namespace ska::pst::common {
 
-/**
- * @brief Construct a DataGenerator from the name
- *
- * @param name string representation of the DataGenerator
- * @param layout data layout that describes the data, weights and scale sizes
- * @return DataGenerator* new DataGenerator object
- */
+  /**
+   * @brief Construct a DataGenerator from the name
+   *
+   * @param name string representation of the DataGenerator
+   * @param layout data layout that describes the data, weights and scale sizes
+   * @return DataGenerator* new DataGenerator object
+   */
+  auto DataGeneratorFactory(const std::string &name, const std::shared_ptr<DataLayout>& layout) -> std::shared_ptr<DataGenerator>;
 
-std::shared_ptr<DataGenerator> DataGeneratorFactory(const std::string &name, std::shared_ptr<DataLayout> layout);
+  /**
+   * @brief Return a vector of the supported data generator names
+   *
+   * @return std::vector<std::string> names of supported data generators
+   */
+  auto get_supported_data_generators() -> std::vector<std::string>;
 
-/**
- * @brief Return a vector of the supported data generator names
- *
- * @return std::vector<std::string> names of supported data generators
- */
-std::vector<std::string> get_supported_data_generators();
-
-/**
- * @brief Return a comma delimited string of supported data generator names
- *
- * @return std::string supported data generator names
- */
-std::string get_supported_data_generators_list();
+  /**
+   * @brief Return a comma delimited string of supported data generator names
+   *
+   * @return std::string supported data generator names
+   */
+  auto get_supported_data_generators_list() -> std::string;
 
 } // namespace ska::pst::common
 

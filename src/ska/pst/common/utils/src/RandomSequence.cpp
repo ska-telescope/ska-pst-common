@@ -44,7 +44,7 @@ void ska::pst::common::RandomSequence::configure(const ska::pst::common::AsciiHe
   SPDLOG_DEBUG("ska::pst::common::RandomSequence::configure UTC_START={}", utc_start_str);
 
   ska::pst::common::Time utc_start(utc_start_str.c_str());
-  seed_value = uint64_t(utc_start.get_time());
+  seed_value = static_cast<uint64_t>(utc_start.get_time());
   SPDLOG_DEBUG("ska::pst::common::RandomSequence::configure seed_value={}", seed_value);
 
   reset();
@@ -78,7 +78,7 @@ void ska::pst::common::RandomSequence::generate_block(uint8_t * buffer, uint64_t
   uint64_t offset = block_offset;
   while (offset + block_size < bufsz)
   {
-    generate(buffer + offset, block_size);
+    generate(buffer + offset, block_size); // NOLINT
     offset += block_stride;
   }
 }
@@ -101,7 +101,7 @@ auto ska::pst::common::RandomSequence::validate_block(uint8_t * buffer, uint64_t
   bool valid = true;
   while (offset + block_size < bufsz)
   {
-    valid &= validate(buffer + offset, block_size);
+    valid &= validate(buffer + offset, block_size); // NOLINT
     offset += block_stride;
   }
   SPDLOG_DEBUG("ska::pst::common::RandomSequence::validate_block valid={}", valid);
@@ -224,8 +224,9 @@ auto ska::pst::common::RandomSequence::search_buffer_for_expected_sequence(
     return -1;
   }
 
-  SPDLOG_WARN("ska::pst::common::RandomSequence::search_buffer_for_expected_sequence found at offset={}", i-seqlen);
-  return i - seqlen;
+  int64_t offset = static_cast<int64_t>(i) - static_cast<int64_t>(seqlen);
+  SPDLOG_WARN("ska::pst::common::RandomSequence::search_buffer_for_expected_sequence found at offset={}", offset);
+  return offset;
 }
 
 auto ska::pst::common::RandomSequence::search_expected_sequence_for_buffer(
@@ -259,8 +260,9 @@ auto ska::pst::common::RandomSequence::search_expected_sequence_for_buffer(
 
   if (matched == bufsz)
   {
-    SPDLOG_WARN("ska::pst::common::RandomSequence::search_expected_sequence_for_buffer match found at offset={}", offset-bufsz);
-    return offset - bufsz;
+    int64_t result = static_cast<int64_t>(offset) - static_cast<int64_t>(bufsz);
+    SPDLOG_WARN("ska::pst::common::RandomSequence::search_expected_sequence_for_buffer match found at offset={}", result);
+    return result;
   }
 
   SPDLOG_WARN("ska::pst::common::RandomSequence::search_expected_sequence_for_buffer match not found in first {} samples of expected sequence", max_offset);

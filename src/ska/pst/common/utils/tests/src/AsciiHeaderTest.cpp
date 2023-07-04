@@ -197,7 +197,7 @@ TEST_F(AsciiHeaderTest, test_get_size) // NOLINT
 TEST_F(AsciiHeaderTest, get_header_size) // NOLINT
 {
   AsciiHeader header;
-  EXPECT_EQ(header.get_header_size(), DEFAULT_HEADER_SIZE);
+  EXPECT_EQ(header.get_header_size(), ska::pst::common::AsciiHeader::default_header_size);
 }
 
 TEST_F(AsciiHeaderTest, get_val) // NOLINT

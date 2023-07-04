@@ -102,7 +102,7 @@ namespace ska::pst::common {
        * @param buf pointer to buffer containing received UDP packet
        * @return true if both data and weights match expectations
        */
-      virtual bool test_packet(char * buf);
+      virtual auto test_packet(char * buf) -> bool;
 
       /**
        * @brief Verify the data stream in the provided buffer
@@ -111,7 +111,7 @@ namespace ska::pst::common {
        * @param size number of bytes in buffer to be tested
        * @return true if data match expectations
        */
-      virtual bool test_data(char * buf, uint64_t size) = 0;
+      virtual auto test_data(char * buf, uint64_t size) -> bool = 0;
 
       /**
        * @brief Verify the weights stream in the provided buffer
@@ -120,7 +120,7 @@ namespace ska::pst::common {
        * @param size number of bytes in buffer to be tested
        * @return true if weights match expectations
        */
-      virtual bool test_weights(char * buf, uint64_t size) = 0;
+      virtual auto test_weights(char * buf, uint64_t size) -> bool = 0;
 
       /**
        * @brief Verify the scales stream in the provided buffer
@@ -129,7 +129,7 @@ namespace ska::pst::common {
        * @param size number of bytes in buffer to be tested
        * @return true if scales match expectations
        */
-      virtual bool test_scales(char * buf, uint64_t size) = 0;
+      virtual auto test_scales(char * buf, uint64_t size) -> bool = 0;
 
       /**
        * @brief Reset all sequences (data, weights, and scales)

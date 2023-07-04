@@ -74,14 +74,14 @@ namespace ska::pst::common
        *
        * @return double elapsed time in microseconds
        */
-      double get_elapsed_microseconds();
+      auto get_elapsed_microseconds() -> double;
 
       /**
        * @brief Get the elapsed time since the last reset in milliseconds
        *
        * @return int elapsed time in milliseconds
        */
-      int get_elapsed_milliseconds();
+      auto get_elapsed_milliseconds() -> int;
 
       /**
        * @brief Print information about the data transfer performance

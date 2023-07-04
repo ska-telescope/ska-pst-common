@@ -53,7 +53,7 @@ auto ska::pst::common::get_supported_data_generators_list() -> std::string
   );
 }
 
-auto ska::pst::common::DataGeneratorFactory(const std::string &name, std::shared_ptr<ska::pst::common::DataLayout> layout) -> std::shared_ptr<ska::pst::common::DataGenerator>
+auto ska::pst::common::DataGeneratorFactory(const std::string &name, const std::shared_ptr<ska::pst::common::DataLayout>& layout) -> std::shared_ptr<ska::pst::common::DataGenerator>
 {
   if (name == "Random") {
     return std::shared_ptr<ska::pst::common::DataGenerator>(new ska::pst::common::RandomDataGenerator(layout));

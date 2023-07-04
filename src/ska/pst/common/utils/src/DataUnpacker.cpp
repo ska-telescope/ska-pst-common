@@ -62,7 +62,7 @@ void ska::pst::common::DataUnpacker::configure(const ska::pst::common::AsciiHead
     throw std::runtime_error("ska::pst::common::DataUnpacker::configure invalid NPOL");
   }
 
-  if (nbit != 8 && nbit != 16)
+  if (nbit != 8 && nbit != 16) // NOLINT
   {
     SPDLOG_ERROR("ska::pst::common::DataUnpacker::configure expected NBIT=8 or 16, but found {}", nbit);
     throw std::runtime_error("ska::pst::common::DataUnpacker::configure invalid NBIT");
@@ -93,16 +93,17 @@ void ska::pst::common::DataUnpacker::configure(const ska::pst::common::AsciiHead
   reset();
 }
 
-float ska::pst::common::DataUnpacker::get_scale_factor(char * weights, uint32_t packet_number)
+auto ska::pst::common::DataUnpacker::get_scale_factor(char * weights, uint32_t packet_number) -> float
 {
   SPDLOG_TRACE("ska::pst::common::DataUnpacker::get_scale_factor weights={}, packet_number={} weights_packet_stride={}",
     reinterpret_cast<void *>(weights), packet_number, weights_packet_stride);
-  float * weights_ptr = reinterpret_cast<float *>(weights + (packet_number * weights_packet_stride));
-  float scale_factor = weights_ptr[0];
-  if (scale_factor == 0)
+  auto * weights_ptr = reinterpret_cast<float *>(weights + (packet_number * weights_packet_stride)); // NOLINT
+  // return the scale factor, ignoring invalid value of 0
+  if (*weights_ptr == 0) {
     return 1;
-  else
-    return scale_factor;
+  } else {
+    return *weights_ptr;
+  }
 }
 
 void ska::pst::common::DataUnpacker::resize(uint64_t data_bufsz)
@@ -133,7 +134,7 @@ void ska::pst::common::DataUnpacker::reset()
   invalid_samples = 0;
 }
 
-std::vector<std::vector<std::vector<std::complex<float>>>>& ska::pst::common::DataUnpacker::unpack(char * data, uint64_t data_bufsz, char *weights, uint64_t weights_bufsz)
+auto ska::pst::common::DataUnpacker::unpack(char * data, uint64_t data_bufsz, char *weights, uint64_t weights_bufsz) -> std::vector<std::vector<std::vector<std::complex<float>>>>&
 {
   SPDLOG_DEBUG("ska::pst::common::DataUnpacker::unpack data={} data_bufsz={} weights={} weights_bufsz={}",
     reinterpret_cast<void*>(data), data_bufsz, reinterpret_cast<void *>(weights), weights_bufsz);
@@ -147,11 +148,11 @@ std::vector<std::vector<std::vector<std::complex<float>>>>& ska::pst::common::Da
     packets_per_heap, npol, nchan_per_packet, nsamp_per_packet);
 
   // unpack the 8 or 16 bit signed integers
-  if (nbit == 8)
+  if (nbit == 8) // NOLINT
   {
     unpack_samples(reinterpret_cast<int8_t*>(data), weights, nheaps);
   }
-  else if (nbit == 16)
+  else if (nbit == 16) // NOLINT
   {
     unpack_samples(reinterpret_cast<int16_t*>(data), weights, nheaps);
   }
@@ -177,11 +178,11 @@ void ska::pst::common::DataUnpacker::integrate_bandpass(char * data, uint64_t da
     nheaps, packets_per_heap, npol, nchan_per_packet, nsamp_per_packet);
 
   // integerate the 8 or 16 bit signed integers
-  if (nbit == 8)
+  if (nbit == 8) // NOLINT
   {
     integrate_samples(reinterpret_cast<int8_t*>(data), weights, nheaps);
   }
-  else if (nbit == 16)
+  else if (nbit == 16) // NOLINT
   {
     integrate_samples(reinterpret_cast<int16_t*>(data), weights, nheaps);
   }

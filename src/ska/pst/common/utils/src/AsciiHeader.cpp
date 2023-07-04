@@ -43,22 +43,19 @@
 
 #include "ska/pst/common/utils/AsciiHeader.h"
 
-ska::pst::common::AsciiHeader::AsciiHeader()
+ska::pst::common::AsciiHeader::AsciiHeader() : header_size(default_header_size)
 {
-  header_size = DEFAULT_HEADER_SIZE;
   params.resize(0);
 }
 
-ska::pst::common::AsciiHeader::AsciiHeader(size_t nbytes)
+ska::pst::common::AsciiHeader::AsciiHeader(size_t nbytes) : header_size(nbytes)
 {
-  header_size = nbytes;
   params.resize(0);
 }
 
-ska::pst::common::AsciiHeader::AsciiHeader(const ska::pst::common::AsciiHeader &obj)
+ska::pst::common::AsciiHeader::AsciiHeader(const ska::pst::common::AsciiHeader &obj) :
+  header_size(obj.get_header_size()), params(obj.params)
 {
-  header_size = obj.get_header_size();
-  params = obj.params;
 }
 
 void ska::pst::common::AsciiHeader::clone(const ska::pst::common::AsciiHeader &obj)
@@ -106,8 +103,8 @@ auto ska::pst::common::AsciiHeader::raw() const -> std::string
   for (auto & param : params)
   {
     std::ostringstream line;
-    const auto key_length = uint32_t(param.first.size());
-    int min_width = std::max(key_padding, key_length + 1);
+    const auto key_length = static_cast<uint32_t>(param.first.size());
+    auto min_width = static_cast<int32_t>(std::max(key_padding, key_length + 1));
     line << std::left << std::setw(min_width) << param.first << param.second << std::endl;
     output.append(line.str());
   }
@@ -126,7 +123,7 @@ auto ska::pst::common::AsciiHeader::get_header_size() const -> size_t
 
 auto ska::pst::common::AsciiHeader::get_header_length() const -> size_t
 {
-  return size_t(raw().length());
+  return static_cast<size_t>(raw().length());
 }
 
 void ska::pst::common::AsciiHeader::load_from_file(const std::string &filename)
@@ -339,7 +336,7 @@ auto ska::pst::common::AsciiHeader::compute_bytes_per_second() const -> double
   double tsamp{};
   get("TSAMP", &tsamp);
 
-  auto nbit_per_sample = double(compute_bits_per_sample());
+  auto nbit_per_sample = static_cast<double>(compute_bits_per_sample());
   double nsamp_per_second =  microseconds_per_second / tsamp;
   double nbit_per_second = nbit_per_sample * nsamp_per_second;
   double bytes_ps = nbit_per_second / nbits_per_byte;

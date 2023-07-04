@@ -38,7 +38,7 @@ void ska::pst::common::setup_spdlog() {
   logger->set_pattern(SKA_LOGGING_FORMAT, spdlog::pattern_time_type::utc);
 }
 
-spdlog::level::level_enum ska::pst::common::get_spdlog_level(ska::pst::lmc::LogLevel level)
+auto ska::pst::common::get_spdlog_level(ska::pst::lmc::LogLevel level) -> spdlog::level::level_enum
 {
   bool found = (ska::pst::common::log_level_map.find(level) != log_level_map.end());
   if (!found)
@@ -48,10 +48,10 @@ spdlog::level::level_enum ska::pst::common::get_spdlog_level(ska::pst::lmc::LogL
   return ska::pst::common::log_level_map[level];
 }
 
-ska::pst::lmc::LogLevel ska::pst::common::get_lmclog_level(spdlog::level::level_enum level)
+auto ska::pst::common::get_lmclog_level(spdlog::level::level_enum level) -> ska::pst::lmc::LogLevel
 {
   bool found = false;
-  ska::pst::lmc::LogLevel mapped_level;
+  ska::pst::lmc::LogLevel mapped_level{ska::pst::lmc::LogLevel::INFO};
   std::for_each(
     log_level_map.begin(),
     log_level_map.end(),

@@ -30,12 +30,13 @@
 
 #include <cmath>
 #include <algorithm>
+#include <utility>
 #include <spdlog/spdlog.h>
 
 #include "ska/pst/common/utils/SineWaveGenerator.h"
 
 ska::pst::common::SineWaveGenerator::SineWaveGenerator(std::shared_ptr<ska::pst::common::DataLayout> _layout) :
-  DataGenerator(_layout), wts_sequence('\xff'), scl_sequence(1.0)
+  DataGenerator(std::move(_layout)), wts_sequence('\xff'), scl_sequence(1.0)
 {
 }
 
@@ -62,7 +63,7 @@ void ska::pst::common::SineWaveGenerator::configure(const ska::pst::common::Asci
     double sinusoid_freq = config.get_double("SINUSOID_FREQ"); // MHz
     double freq = config.get_double("FREQ"); // MHz
     double bw = config.get_double("BW"); // MHz
-    double chan_bw = fabs(bw / double(nchan));
+    double chan_bw = fabs(bw / static_cast<double>(nchan));
     double sfreq = freq - (bw / 2);
     SPDLOG_DEBUG("ska::pst::common::SineWaveGenerator::configure freq={} bw={} nchan={} chan_bw={}", freq, bw, nchan, chan_bw);
     for (unsigned ichan=0; ichan<nchan; ichan++)
@@ -88,11 +89,11 @@ void ska::pst::common::SineWaveGenerator::configure(const ska::pst::common::Asci
 void ska::pst::common::SineWaveGenerator::fill_data(char * buf, uint64_t size)
 {
   SPDLOG_TRACE("ska::pst::common::SineWaveGenerator::fill_data nbit={} buf={} size={}", nbit, reinterpret_cast<void *>(buf), size);
-  if (nbit == 8)
+  if (nbit == 8) // NOLINT
   {
     fill_complex_data<int8_t>(buf, size);
   }
-  else if (nbit == 16)
+  else if (nbit == 16) // NOLINT
   {
     SPDLOG_TRACE("ska::pst::common::SineWaveGenerator::fill_data fill_complex_data<int16_t>(buf, size)");
     fill_complex_data<int16_t>(buf, size);
@@ -112,12 +113,12 @@ void ska::pst::common::SineWaveGenerator::fill_scales(char * buf, uint64_t size)
 auto ska::pst::common::SineWaveGenerator::test_data(char * buf, uint64_t size) -> bool
 {
   SPDLOG_DEBUG("ska::pst::common::SineWaveGenerator::test_data nbit={} buf={} size={}", nbit, reinterpret_cast<void *>(buf), size);
-  if (nbit == 8)
+  if (nbit == 8) // NOLINT
   {
     SPDLOG_TRACE("ska::pst::common::SineWaveGenerator::test_data test_complex_data<int8_t>(buf, size)");
     return test_complex_data<int8_t>(buf, size);
   }
-  else if (nbit == 16)
+  else if (nbit == 16) // NOLINT
   {
     SPDLOG_TRACE("ska::pst::common::SineWaveGenerator::test_data test_complex_data<int16_t>(buf, size)");
     return test_complex_data<int16_t>(buf, size);

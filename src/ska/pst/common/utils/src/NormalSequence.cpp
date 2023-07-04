@@ -46,8 +46,9 @@ void ska::pst::common::NormalSequence::configure(const ska::pst::common::AsciiHe
   nbit = header.get_uint32("NBIT");
   SPDLOG_DEBUG("ska::pst::common::NormalSequence::configure NBIT={}", nbit);
 
-  min_val = powf(2, nbit-1) * -1;
-  max_val = powf(2, nbit-1) - 1;
+  auto exponent = static_cast<float>(nbit-1);
+  min_val = powf(2, exponent) * -1;
+  max_val = powf(2, exponent) - 1;
 
   if (header.has("NORMAL_DIST_MEAN"))
   {
@@ -65,7 +66,7 @@ void ska::pst::common::NormalSequence::configure(const ska::pst::common::AsciiHe
   SPDLOG_DEBUG("ska::pst::common::NormalSequence::configure mean={} stddev={} red_stddev={}", mean, stddev, red_stddev);
 
   ska::pst::common::Time utc_start(utc_start_str.c_str());
-  seed_value = uint64_t(utc_start.get_time());
+  seed_value = static_cast<uint64_t>(utc_start.get_time());
   SPDLOG_DEBUG("ska::pst::common::NormalSequence::configure seed_value={}", seed_value);
 
   reset();
@@ -86,11 +87,11 @@ auto ska::pst::common::NormalSequence::get_val(std::normal_distribution<float>& 
   // apply an optional red noise process
   if (red_stddev > 0)
   {
-    red_noise_factor = (0.999 * red_noise_factor) + (0.001 * new_red_noise_factor);
+    red_noise_factor = (red_noise_percent_prev * red_noise_factor) + (red_noise_percent_new * new_red_noise_factor);
     value *= red_noise_factor;
   }
 
-  return int16_t(rintf(std::min(std::max(value, min_val), max_val)));
+  return static_cast<int16_t>(rintf(std::min(std::max(value, min_val), max_val)));
 }
 
 void ska::pst::common::NormalSequence::generate(char * buffer, uint64_t bufsz)
@@ -106,11 +107,11 @@ void ska::pst::common::NormalSequence::generate(char * buffer, uint64_t bufsz)
 
   uint64_t nval = bufsz * ska::pst::common::bits_per_byte / nbit;
   // floating point values are requantised to signed integers at 8 or 16 bits per sample
-  if (nbit == 8)
+  if (nbit == 8) // NOLINT
   {
     generate_samples(reinterpret_cast<int8_t *>(buffer), nval);
   }
-  else if (nbit == 16)
+  else if (nbit == 16) // NOLINT
   {
     generate_samples(reinterpret_cast<int16_t *>(buffer), nval);
   }
@@ -125,7 +126,7 @@ auto ska::pst::common::NormalSequence::validate(char * buffer, uint64_t bufsz) -
 
   for (unsigned i=0; i<bufsz; i++)
   {
-    if (buffer[i] != data[i])
+    if (buffer[i] != data[i]) // NOLINT
     {
       return false;
     }

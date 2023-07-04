@@ -31,12 +31,13 @@
 #include <cstring>
 #include <cmath>
 #include <stdexcept>
+#include <utility>
 #include <spdlog/spdlog.h>
 
 #include "ska/pst/common/utils/DataGenerator.h"
 
 ska::pst::common::DataGenerator::DataGenerator(std::shared_ptr<ska::pst::common::DataLayout> _layout) :
-  layout(_layout)
+  layout(std::move(std::move(_layout)))
 {
 }
 

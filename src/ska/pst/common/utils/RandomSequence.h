@@ -28,7 +28,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <inttypes.h>
+#include <cinttypes>
 #include <random>
 
 #include "ska/pst/common/utils/AsciiHeader.h"
@@ -105,7 +105,7 @@ namespace ska::pst::common {
        * @return true if all samples are valid
        * @return false if any samples are invalid
        */
-      bool validate(uint8_t * buffer, uint64_t bufsz);
+      auto validate(uint8_t * buffer, uint64_t bufsz) -> bool;
 
       /**
        * @brief Validate the n data sequence written to the provided buffer in blocks
@@ -118,7 +118,7 @@ namespace ska::pst::common {
        * @return true if all samples are valid
        * @return false if any samples are invalid
        */
-      bool validate_block(uint8_t * buffer, uint64_t bufsz, uint64_t block_offset, uint64_t block_size, uint64_t block_stride);
+      auto validate_block(uint8_t * buffer, uint64_t bufsz, uint64_t block_offset, uint64_t block_size, uint64_t block_stride) -> bool;
 
       /**
        * @brief Seek forward through the random sequence.
@@ -126,9 +126,6 @@ namespace ska::pst::common {
        * @param nelements the number of elements in the sequence to skip over
        */
       void seek(uint64_t nelements);
-
-      //! verbosity flag used during debugging
-      bool verbose{false};
 
     private:
 
@@ -141,7 +138,7 @@ namespace ska::pst::common {
        * @return offset from start of buffer at which expected sequence match is found
        * @return -1 if no match is found
        */
-      int64_t search_buffer_for_expected_sequence(uint8_t * buffer, uint64_t bufsz, uint64_t seqlen);
+      auto search_buffer_for_expected_sequence(uint8_t * buffer, uint64_t bufsz, uint64_t seqlen) -> int64_t;
 
       /**
        * @brief Search the random sequence for the buffer contents
@@ -152,7 +149,7 @@ namespace ska::pst::common {
        * @return offset from current point in random sequence ath which a match is found
        * @return -1 if no match is found
        */
-      int64_t search_expected_sequence_for_buffer(uint8_t * buffer, uint64_t bufsz, uint64_t max_offset);
+      auto search_expected_sequence_for_buffer(uint8_t * buffer, uint64_t bufsz, uint64_t max_offset) -> int64_t;
 
       //! the seed used to initialise the generator
       uint64_t seed_value{0};

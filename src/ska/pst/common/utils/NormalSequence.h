@@ -28,7 +28,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <inttypes.h>
+#include <cinttypes>
 #include <random>
 
 #include "ska/pst/common/utils/AsciiHeader.h"
@@ -96,12 +96,18 @@ namespace ska::pst::common {
        * @return true if all samples are valid
        * @return false if any samples are invalid
        */
-      bool validate(char * buffer, uint64_t bufsz);
-
-      //! verbosity flag used during debugging
-      bool verbose{false};
+      auto validate(char * buffer, uint64_t bufsz) -> bool;
 
     private:
+
+      //! default stddev
+      static constexpr float default_stddev = 10;
+
+      //! fraction of the previous red noise factor to use when computing new factor
+      static constexpr float red_noise_percent_prev = 0.999;
+
+      //! fraction of the new red noise factor to use when computing new factor
+      static constexpr float red_noise_percent_new = 0.001;
 
       template <typename T>
       void generate_samples(T * out, uint64_t nval)
@@ -109,7 +115,7 @@ namespace ska::pst::common {
         std::normal_distribution<float> distribution(mean, stddev);
         for (uint64_t i=0; i<nval; i++)
         {
-          out[i] = T(get_val(distribution));
+          out[i] = static_cast<T>(get_val(distribution)); // NOLINT
         }
       }
 
@@ -117,7 +123,7 @@ namespace ska::pst::common {
       float mean{0};
 
       //! standard deviation of the normal distribution
-      float stddev{10};
+      float stddev{default_stddev};
 
       //! standard deviation of a red noise process
       float red_stddev{0};
@@ -129,7 +135,7 @@ namespace ska::pst::common {
       float new_red_noise_factor{0};
 
       //! get a 16-bit integer value from the normal distribution that is limited to min_val and max_val
-      inline int16_t get_val(std::normal_distribution<float>& distribution);
+      inline auto get_val(std::normal_distribution<float>& distribution) -> int16_t;
 
       //! number of bits per sample
       uint32_t nbit{0};

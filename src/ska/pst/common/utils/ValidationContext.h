@@ -62,14 +62,14 @@ namespace ska::pst::common
        * @brief Destroy the pst validation error object
        *
        */
-      virtual ~pst_validation_error() = default;
+      ~pst_validation_error() override = default;
   };
 
   /**
    * @brief structure that describes a validation error and it's source.
    *
    */
-  typedef struct validation_error_record
+  using validation_error_record_t = struct validation_error_record
   {
     //! the name of the field/key that failed validation
     std::string field_name;
@@ -80,7 +80,7 @@ namespace ska::pst::common
     //! the message that describes the error
     std::string message;
 
-  } validation_error_record_t;
+  };
 
   /**
    * @brief Provides a context to push validation errors
@@ -106,14 +106,14 @@ namespace ska::pst::common
        * @brief Copy constructor for ValidationContext
        */
       ValidationContext(const ValidationContext& other) {
-        errors = other.errors;
+        copy_errors(other);
       }
 
       /**
        * @brief Check if empty
        *
        */
-      bool is_empty() const noexcept {
+      [[nodiscard]] auto is_empty() const noexcept -> bool {
         return errors.empty();
       }
 
@@ -174,6 +174,9 @@ namespace ska::pst::common
       void throw_error_if_not_empty();
 
     private:
+
+      //! precision of floating point values when converting to strings
+      static constexpr uint32_t value_precision = 20;
 
       std::vector<validation_error_record_t> errors;
 

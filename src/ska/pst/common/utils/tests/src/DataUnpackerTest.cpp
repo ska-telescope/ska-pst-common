@@ -64,7 +64,6 @@ void DataUnpackerTest::GeneratePackedData()
   const uint32_t npol = data_header.get_uint32("NPOL");
   const uint32_t nsamp_pp = data_header.get_uint32("UDP_NSAMP");
   const uint32_t nchan_pp = data_header.get_uint32("UDP_NCHAN");
-  const uint32_t nbit = data_header.get_uint32("NBIT");
   const uint32_t ndim = data_header.get_uint32("NDIM");
   const uint32_t nchan = data_header.get_uint32("NCHAN");
 

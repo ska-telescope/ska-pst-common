@@ -42,7 +42,7 @@ ska::pst::common::UniformSequence<T>::UniformSequence(const T value) :
 }
 
 template <typename T>
-void ska::pst::common::UniformSequence<T>::configure(const ska::pst::common::AsciiHeader& header)
+void ska::pst::common::UniformSequence<T>::configure(const ska::pst::common::AsciiHeader&  /*header*/)
 {
   reset();
 }
@@ -65,7 +65,7 @@ void ska::pst::common::UniformSequence<T>::generate(char * buffer, uint64_t bufs
   SPDLOG_DEBUG("ska::pst::common::UniformSequence<T>::generate generate {} bytes of uniform data", bufsz);
   T * uniform_buffer = reinterpret_cast<T *>(buffer);
   uint64_t uniform_bufsz = bufsz / sizeof(T);
-  std::fill(uniform_buffer, uniform_buffer + uniform_bufsz, uniform_value);
+  std::fill(uniform_buffer, uniform_buffer + uniform_bufsz, uniform_value); // NOLINT
 }
 
 template <typename T>
@@ -75,7 +75,7 @@ void ska::pst::common::UniformSequence<T>::generate_block(char * buffer, uint64_
   uint64_t offset = block_offset;
   while (offset + block_size < bufsz)
   {
-    generate(buffer + offset, block_size);
+    generate(buffer + offset, block_size); // NOLINT
     offset += block_stride;
   }
 }
@@ -87,7 +87,7 @@ auto ska::pst::common::UniformSequence<T>::validate(char * buffer, uint64_t bufs
   uint64_t uniform_bufsz = bufsz / sizeof(T);
   for (uint64_t i=0; i<uniform_bufsz; i++)
   {
-    if (uniform_buffer[i] != uniform_value)
+    if (uniform_buffer[i] != uniform_value) // NOLINT
     {
       return false;
     }
@@ -103,7 +103,7 @@ auto ska::pst::common::UniformSequence<T>::validate_block(char * buffer, uint64_
   bool valid = true;
   while (offset + block_size < bufsz)
   {
-    valid &= validate(buffer + offset, block_size);
+    valid &= validate(buffer + offset, block_size); // NOLINT
     offset += block_stride;
   }
   SPDLOG_DEBUG("ska::pst::common::UniformSequence<T>::validate_block valid={}", valid);

@@ -30,10 +30,12 @@
 
 #include <spdlog/spdlog.h>
 
+#include <utility>
+
 #include "ska/pst/common/utils/RandomDataGenerator.h"
 
 ska::pst::common::RandomDataGenerator::RandomDataGenerator(std::shared_ptr<ska::pst::common::DataLayout> _layout) :
-  DataGenerator(_layout), wts_sequence('\xff')
+  DataGenerator(std::move(_layout)), wts_sequence('\xff')
 {
 }
 

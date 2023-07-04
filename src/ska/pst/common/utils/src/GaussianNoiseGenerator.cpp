@@ -30,10 +30,12 @@
 
 #include <spdlog/spdlog.h>
 
+#include <utility>
+
 #include "ska/pst/common/utils/GaussianNoiseGenerator.h"
 
 ska::pst::common::GaussianNoiseGenerator::GaussianNoiseGenerator(std::shared_ptr<ska::pst::common::DataLayout> _layout) :
-  DataGenerator(_layout), wts_sequence('\xff')
+  DataGenerator(std::move(_layout)), wts_sequence('\xff')
 {
 }
 

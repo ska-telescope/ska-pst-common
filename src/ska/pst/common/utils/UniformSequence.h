@@ -28,7 +28,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <inttypes.h>
+#include <cinttypes>
 #include <random>
 
 #include "ska/pst/common/utils/AsciiHeader.h"
@@ -51,7 +51,7 @@ namespace ska::pst::common {
        * @brief Construct a new Uniform Sequence object
        *
        */
-      UniformSequence(const T value);
+      explicit UniformSequence(const T value);
 
       /**
        * @brief Destroy the Uniform Sequence object
@@ -108,7 +108,7 @@ namespace ska::pst::common {
        * @return true if all samples are valid
        * @return false if any samples are invalid
        */
-      bool validate(char * buffer, uint64_t bufsz);
+      auto validate(char * buffer, uint64_t bufsz) -> bool;
 
       /**
        * @brief Validate the uniform data sequence written to the provided buffer in blocks
@@ -121,10 +121,7 @@ namespace ska::pst::common {
        * @return true if all samples are valid
        * @return false if any samples are invalid
        */
-      bool validate_block(char * buffer, uint64_t bufsz, uint64_t block_offset, uint64_t block_size, uint64_t block_stride);
-
-      //! verbosity flag used during debugging
-      bool verbose{false};
+      auto validate_block(char * buffer, uint64_t bufsz, uint64_t block_offset, uint64_t block_size, uint64_t block_stride) -> bool;
 
     private:
 

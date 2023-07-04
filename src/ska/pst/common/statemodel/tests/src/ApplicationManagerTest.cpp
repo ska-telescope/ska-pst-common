@@ -84,7 +84,7 @@ namespace ska::pst::common::test
     SPDLOG_TRACE("ska::pst::common::test::TestApplicationManager::validate_start_scan");
     try
     {
-      startscan_config.get_val("startscan_config-FOO");
+      ASSERT_EQ(startscan_config.get_val("startscan_config-FOO"), "BAR");
     }
     catch (const std::exception& exc)
     {

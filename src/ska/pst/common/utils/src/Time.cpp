@@ -3,18 +3,18 @@
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice,
  * this list of conditions and the following disclaimer.
- * 
+ *
  * 2. Redistributions in binary form must reproduce the above copyright
  * notice, this list of conditions and the following disclaimer in the
  * documentation and/or other materials provided with the distribution.
- * 
+ *
  * 3. Neither the name of the copyright holder nor the names of its
  * contributors may be used to endorse or promote products derived from this
  * software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -77,12 +77,12 @@ void ska::pst::common::Time::set_time(const std::string &timestamp)
 
   if (std::getline(iss, token, delim))
   {
-    int num_decimal = token.size();
+    auto num_decimal = static_cast<int32_t>(token.size());
     static constexpr int base10 = 10;
-    double seconds_conversion = pow(double(base10), num_decimal);
+    double seconds_conversion = pow(static_cast<double>(base10), num_decimal);
     try
     {
-      double fractional_seconds = double(std::stoi(token)) / seconds_conversion;
+      double fractional_seconds = static_cast<double>(std::stoi(token)) / seconds_conversion;
       set_fractional_time(fractional_seconds);
     }
     catch  (std::exception& exc)
@@ -100,14 +100,14 @@ auto ska::pst::common::Time::mjd2utctm(double mjd) -> time_t
   static constexpr int seconds_per_hour = minutes_per_hour * seconds_per_minute;
   static constexpr int julian_day_epoch = 2400001;
 
-  auto days = int(mjd);
-  double fdays = mjd - double(days);
-  double seconds = fdays * double(seconds_in_day);
-  auto secs = int(seconds);
-  double fracsec = seconds - double(secs);
+  auto days = static_cast<int>(mjd);
+  double fdays = mjd - static_cast<double>(days);
+  double seconds = fdays * static_cast<double>(seconds_in_day);
+  auto secs = static_cast<int>(seconds);
+  double fracsec = seconds - static_cast<double>(secs);
 
   static constexpr int milliseconds_in_second = 1000;
-  if (int(rint(fracsec*milliseconds_in_second)) >= milliseconds_in_second/2)
+  if (static_cast<int>(rint(fracsec*milliseconds_in_second)) >= milliseconds_in_second/2)
   {
     secs++;
   }
@@ -147,7 +147,7 @@ auto ska::pst::common::Time::get_gmtime() -> std::string
 
 auto ska::pst::common::Time::get_fractional_time() -> double
 {
-  return double(attoseconds) / attoseconds_per_second;
+  return static_cast<double>(attoseconds) / attoseconds_per_second;
 }
 
 auto ska::pst::common::Time::get_fractional_time_attoseconds() -> uint64_t
@@ -166,7 +166,7 @@ void ska::pst::common::Time::set_fractional_time(double fractional_seconds)
     throw std::runtime_error("ska::pst::common::Time::set_fractional_time seconds was >= 1");
   }
   double fractional_attoseconds = fractional_seconds * attoseconds_per_second;
-  attoseconds = uint64_t(roundl(fractional_attoseconds));
+  attoseconds = static_cast<uint64_t>(roundl(fractional_attoseconds));
 }
 
 void ska::pst::common::Time::set_fractional_time(uint64_t _attoseconds)

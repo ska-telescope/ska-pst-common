@@ -75,7 +75,7 @@ namespace ska::pst::common
        * @param weights_bufsz size of the raw weights array in bytes
        * @return std::vector<std::vector<std::vector<std::complex<float>>>>& unpacked data ordered by time, freqeuncy then polarisation
        */
-      std::vector<std::vector<std::vector<std::complex<float>>>> & unpack(char * data, uint64_t data_bufsz, char *weights, uint64_t weights_bufsz);
+      auto unpack(char * data, uint64_t data_bufsz, char *weights, uint64_t weights_bufsz) -> std::vector<std::vector<std::vector<std::complex<float>>>> &;
 
       /**
        * @brief Integrate the data and weights streams into an internal floating point bandpass vector
@@ -92,7 +92,7 @@ namespace ska::pst::common
        *
        * @return std::vector<std::vector<float>>&o upacked bandpass vector ordered by frequency then polarisation
        */
-      std::vector<std::vector<float>>& get_bandpass() { return bandpass; };
+      auto get_bandpass() -> std::vector<std::vector<float>>& { return bandpass; };
 
       /**
        * @brief Reset the integrated bandpass vector to zero
@@ -132,9 +132,9 @@ namespace ska::pst::common
                   else
                   {
                     uint32_t osamp = (iheap * nsamp_per_packet) + isamp;
-                    unpacked[osamp][ochan][ipol] = std::complex<float>(float(in[0]), float(in[1])) / scale_factor;
+                    unpacked[osamp][ochan][ipol] = std::complex<float>(static_cast<float>(in[0]), static_cast<float>(in[1])) / scale_factor; // NOLINT
                   }
-                  in += 2;
+                  in += 2; // NOLINT
                 }
               }
             }
@@ -173,12 +173,12 @@ namespace ska::pst::common
                   }
                   else
                   {
-                    sample = std::complex<float>(float(in[0]), float(in[1])) / scale_factor;
+                    sample = std::complex<float>(static_cast<float>(in[0]), static_cast<float>(in[1])) / scale_factor;  // NOLINT
                     // integrate the power in each complex sample into the bandpass
                     float power = sample.real() * sample.real() + sample.imag() * sample.imag();
                     bandpass[ochan][ipol] += power;
                   }
-                  in += 2;
+                  in += 2; // NOLINT
                 }
               }
             }
@@ -197,7 +197,7 @@ namespace ska::pst::common
       void resize(uint64_t data_bufsz);
 
       //! Return the scale factor packed into the weights array, corresponding to the provided packet number
-      float get_scale_factor(char * weights, uint32_t packet_number);
+      auto get_scale_factor(char * weights, uint32_t packet_number) -> float;
 
       //! Number of polarisations in the data stream
       uint32_t npol{0};

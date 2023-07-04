@@ -58,77 +58,77 @@ namespace ska::pst::common {
        *
        * @return unsigned total size of data block
        */
-      unsigned get_packet_size() const { return packet_size; };
+      [[nodiscard]] auto get_packet_size() const -> unsigned { return packet_size; };
 
       /**
        * @brief Get the size of the header in each data block.
        *
        * @return unsigned size of header block in data block
        */
-      unsigned get_packet_header_size() const { return packet_header_size; };
+      [[nodiscard]] auto get_packet_header_size() const -> unsigned { return packet_header_size; };
 
       /**
        * @brief Get the size of the data in each data block.
        *
        * @return unsigned size of data samples in data block
        */
-      unsigned get_packet_data_size() const { return packet_data_size; };
+      [[nodiscard]] auto get_packet_data_size() const -> unsigned { return packet_data_size; };
 
       /**
        * @brief Get the size of the weights in each data block.
        *
        * @return unsigned size of the weights data in the data block
        */
-      unsigned get_packet_weights_size() const { return packet_weights_size; };
+      [[nodiscard]] auto get_packet_weights_size() const -> unsigned { return packet_weights_size; };
 
      /**
        * @brief Get the size of the scale factor in each data block.
        *
        * @return unsigned size of the scale factor in the data block
        */
-      unsigned get_packet_scales_size() const { return packet_scales_size; };
+      [[nodiscard]] auto get_packet_scales_size() const -> unsigned { return packet_scales_size; };
 
       /**
        * @brief Get the offset of the data in each data block.
        *
        * @return unsigned offset of data samples in data block
        */
-      unsigned get_packet_data_offset() const { return packet_data_offset; };
+      [[nodiscard]] auto get_packet_data_offset() const -> unsigned { return packet_data_offset; };
 
       /**
        * @brief Get the offset of the weights in each data block.
        *
        * @return unsigned offset of the weights data in the data block
        */
-      unsigned get_packet_weights_offset() const { return packet_weights_offset; };
+      [[nodiscard]] auto get_packet_weights_offset() const -> unsigned { return packet_weights_offset; };
 
       /**
        * @brief Get the offset of the scales in each data block.
        *
        * @return unsigned offset of scales in data block
        */
-      unsigned get_packet_scales_offset() const { return packet_scales_offset; };
+      [[nodiscard]] auto get_packet_scales_offset() const -> unsigned { return packet_scales_offset; };
 
       /**
        * @brief Get the number of samples per UDP packet
        *
        * @return unsigned number of samples in each UDP packet
        */
-      unsigned get_samples_per_packet() const { return nsamp_per_packet; };
+      [[nodiscard]] auto get_samples_per_packet() const -> unsigned { return nsamp_per_packet; };
 
       /**
        * @brief Get the number of channels per UDP packet
        *
        * @return unsigned number of channels in each UDP packet
        */
-      unsigned get_nchan_per_packet() const { return nchan_per_packet; };
+      [[nodiscard]] auto get_nchan_per_packet() const -> unsigned { return nchan_per_packet; };
 
       /**
        * @brief Get the number of samples per weight in each UDP packet
        *
        * @return unsigned number of samples per weight in each UDP packet
        */
-      unsigned get_nsamp_per_weight() const { return nsamp_per_weight; };
+      [[nodiscard]] auto get_nsamp_per_weight() const -> unsigned { return nsamp_per_weight; };
 
     protected:
 

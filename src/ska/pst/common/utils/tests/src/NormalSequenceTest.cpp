@@ -112,7 +112,8 @@ TEST_F(NormalSequenceTest, test_generate_8bit) // NOLINT
   // measure the mean and standard deviation of the generated timeseries
   std::vector<float> unpacked(buffer.size());
   auto buffer_int8 = reinterpret_cast<int8_t*>(&buffer[0]);
-  for (unsigned i=0; i<buffer.size(); i++)
+  const unsigned buffer_nval = (buffer.size() * ska::pst::common::bits_per_byte) / nbit;
+  for (unsigned i=0; i<buffer_nval; i++)
   {
     unpacked[i] = float(buffer_int8[i]);
   }
