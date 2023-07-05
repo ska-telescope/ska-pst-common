@@ -32,6 +32,7 @@
 #include <spdlog/spdlog.h>
 
 #include "ska/pst/common/utils/DataGenerator.h"
+#include "ska/pst/common/utils/UniformSequence.h"
 
 #ifndef SKA_PST_COMMON_UTILS_SineWaveGenerator_h
 #define SKA_PST_COMMON_UTILS_SineWaveGenerator_h
@@ -50,13 +51,13 @@ namespace ska::pst::common {
        * @brief Construct a new SineWaveGenerator object
        *
        */
-      SineWaveGenerator(std::shared_ptr<DataLayout> layout);
+      explicit SineWaveGenerator(std::shared_ptr<DataLayout> layout);
 
       /**
        * @brief Destroy the SineWaveGenerator object
        *
        */
-      ~SineWaveGenerator() = default;
+      ~SineWaveGenerator() override = default;
 
       /**
        * @brief Configure the streams written to data + weights
@@ -92,39 +93,39 @@ namespace ska::pst::common {
       /**
        * @brief Verify the data stream in the provided buffer
        *
-       * @param buffer pointer to buffer containing sequence of data to be verified
+       * @param buf pointer to buffer containing sequence of data to be verified
        * @param size number of bytes in buffer to be tested
        *
        * @return true if data match expectations
        */
-      virtual bool test_data(char * buf, uint64_t size) override;
+      auto test_data(char * buf, uint64_t size) -> bool override;
 
       /**
        * @brief Verify the weights stream in the provided buffer
        *
-       * @param buffer pointer to buffer containing sequence of weights to be verified
+       * @param buf pointer to buffer containing sequence of weights to be verified
        * @param size number of bytes in buffer to be tested
        *
        * @return true if weights match expectations
        */
-      virtual bool test_weights(char * buf, uint64_t size) override;
+      auto test_weights(char * buf, uint64_t size) -> bool override;
 
       /**
        * @brief Verify the scales stream in the provided buffer
        *
-       * @param buffer pointer to buffer containing sequence of scale factors to be verified
+       * @param buf pointer to buffer containing sequence of scale factors to be verified
        * @param size number of bytes in buffer to be tested
        *
        * @return true if scales match expectations
        */
-      virtual bool test_scales(char * buf, uint64_t size) override;
+      auto test_scales(char * buf, uint64_t size) -> bool override;
 
       /**
        * @brief Reset all sequences (data, weights, and scales)
        * The next call to fill_block or test_block will behave as per the first call to these functions.
        *
        */
-      virtual void reset() override;
+      void reset() override;
 
     private:
 
@@ -135,21 +136,21 @@ namespace ska::pst::common {
       double period{M_PI * M_PI * M_PI * M_PI};
 
       template <typename T>
-      std::complex<T> next_sample(bool generate)
+      auto next_sample(bool generate) -> std::complex<T>
       {
         if (!generate)
         {
           return std::complex<T>(0, 0);
         }
-        double phase = current_sample / period;
+        double phase = static_cast<double>(current_sample) / period;
         current_sample++;
-        return std::complex<T>(T(amplitude * sinf(phase)), T(amplitude * cosf(phase)));
+        return std::complex<T>(static_cast<T>(amplitude * sin(phase)), static_cast<T>(amplitude * cos(phase)));
       }
 
       template <typename T>
       void fill_complex_data(char * buf, uint64_t size)
       {
-        std::complex<T> * ptr = reinterpret_cast<std::complex<T> *>(buf);
+        auto * ptr = reinterpret_cast<std::complex<T> *>(buf);
         static constexpr uint32_t nbits_per_byte = 8;
         const uint32_t nsamp_per_packet = layout->get_samples_per_packet();
         const uint32_t nchan_per_packet = layout->get_nchan_per_packet();
@@ -168,7 +169,7 @@ namespace ska::pst::common {
               const bool active_chan = (ochan == sinusoid_channel);
               for (uint32_t isamp=0; isamp<nsamp_per_packet; isamp++)
               {
-                ptr[i] = next_sample<T>(active_chan);
+                ptr[i] = next_sample<T>(active_chan); // NOLINT
                 i++;
               }
             }
@@ -182,9 +183,9 @@ namespace ska::pst::common {
       }
 
       template <typename T>
-      bool test_complex_data(char * buf, uint64_t size)
+      auto test_complex_data(char * buf, uint64_t size) -> bool
       {
-        std::complex<T> * ptr = reinterpret_cast<std::complex<T> *>(buf);
+        auto * ptr = reinterpret_cast<std::complex<T> *>(buf);
         static constexpr uint32_t nbits_per_byte = 8;
         const uint32_t nsamp_per_packet = layout->get_samples_per_packet();
         const uint32_t nchan_per_packet = layout->get_nchan_per_packet();
@@ -205,7 +206,7 @@ namespace ska::pst::common {
               for (uint32_t isamp=0; isamp<nsamp_per_packet; isamp++)
               {
                 std::complex<T> val = next_sample<T>(active_chan);
-                if (ptr[i] != val)
+                if (ptr[i] != val) // NOLINT
                 {
                   return false;
                 }
@@ -227,9 +228,15 @@ namespace ska::pst::common {
       double amplitude{0};
 
       uint32_t current_channel{0};
+
+      //! sequence of uniform values for the weights
+      UniformSequence<char> wts_sequence;
+
+      //! sequence of uniform values for the scales
+      UniformSequence<float> scl_sequence;
+
   };
 
-} // ska::pst::common
+}  // namespace ska::pst::common
 
 #endif // SKA_PST_COMMON_UTILS_SineWaveGenerator_h
-

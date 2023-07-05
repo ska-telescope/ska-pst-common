@@ -31,6 +31,7 @@
 #include <spdlog/spdlog.h>
 #include <vector>
 
+#include "ska/pst/common/definitions.h"
 #include "ska/pst/common/utils/tests/AsciiHeaderTest.h"
 #include "ska/pst/common/utils/AsciiHeader.h"
 #include "ska/pst/common/testutils/GtestMain.h"
@@ -197,7 +198,7 @@ TEST_F(AsciiHeaderTest, test_get_size) // NOLINT
 TEST_F(AsciiHeaderTest, get_header_size) // NOLINT
 {
   AsciiHeader header;
-  EXPECT_EQ(header.get_header_size(), DEFAULT_HEADER_SIZE);
+  EXPECT_EQ(header.get_header_size(), ska::pst::common::AsciiHeader::default_header_size);
 }
 
 TEST_F(AsciiHeaderTest, get_val) // NOLINT
@@ -418,10 +419,9 @@ TEST_F(AsciiHeaderTest, test_compute_bytes_per_second) // NOLINT
   EXPECT_EQ(config.compute_bits_per_sample(), expected_bits_per_sample);
 
   static constexpr double tsamp = 1.28;
-  static constexpr double microseconds_per_second = 1000000;
   static constexpr double bits_per_byte = 8;
   config.set("TSAMP", tsamp);
-  double expected_bytes_per_second = expected_bits_per_sample * microseconds_per_second / tsamp / bits_per_byte;
+  double expected_bytes_per_second = expected_bits_per_sample * ska::pst::common::microseconds_per_second / tsamp / bits_per_byte;
   EXPECT_EQ(config.compute_bytes_per_second(), expected_bytes_per_second);
 }
 

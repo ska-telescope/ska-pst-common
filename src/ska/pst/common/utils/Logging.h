@@ -36,7 +36,7 @@
 #ifndef SKA_PST_COMMON_UTILS_Logging_h
 #define SKA_PST_COMMON_UTILS_Logging_h
 
-#define SKA_LOGGING_FORMAT "1|%Y-%m-%dT%T.%eZ|%l|Thread-%t|%!|%s#%#||%v"
+#define SKA_LOGGING_FORMAT "1|%Y-%m-%dT%T.%eZ|%l|Thread-%t|%!|%s#%#||%v" // NOLINT
 
 namespace ska::pst::common {
 
@@ -60,7 +60,7 @@ namespace ska::pst::common {
    * @param level lmclog level
    * @return spdlog::level::level_enum mapped spdlog level
    */
-  spdlog::level::level_enum get_spdlog_level(ska::pst::lmc::LogLevel level);
+  auto get_spdlog_level(ska::pst::lmc::LogLevel level) -> spdlog::level::level_enum;
 
   /**
    * @brief Get the lmclog level corresponding to a spdlog level
@@ -68,7 +68,7 @@ namespace ska::pst::common {
    * @param level spdlog level
    * @return ska::pst::lmc::LogLevel mapped lmclog level
    */
-  ska::pst::lmc::LogLevel get_lmclog_level(spdlog::level::level_enum level);
+  auto get_lmclog_level(spdlog::level::level_enum level) -> ska::pst::lmc::LogLevel;
 
 } // namespace ska::pst::common
 

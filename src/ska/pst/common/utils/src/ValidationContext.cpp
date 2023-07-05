@@ -41,7 +41,7 @@ void ska::pst::common::ValidationContext::add_validation_error(
 )
 {
   std::ostringstream out;
-  out.precision(20);
+  out.precision(value_precision);
   out << value;
 
   auto str_val = out.str();

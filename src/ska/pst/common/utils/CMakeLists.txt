@@ -9,9 +9,12 @@ set(public_headers
     DataGenerator.h
     DataGeneratorFactory.h
     DataUnpacker.h
+    GaussianNoiseGenerator.h
+    NormalSequence.h
     RandomDataGenerator.h
     Logging.h
     SineWaveGenerator.h
+    UniformSequence.h
     ValidationContext.h
 )
 
@@ -19,13 +22,16 @@ set(sources
     src/AsciiHeader.cpp
     src/Time.cpp
     src/Timer.cpp
+    src/NormalSequence.cpp
     src/RandomSequence.cpp
     src/DataGenerator.cpp
     src/DataGeneratorFactory.cpp
     src/DataUnpacker.cpp
+    src/GaussianNoiseGenerator.cpp
     src/RandomDataGenerator.cpp
     src/Logging.cpp
     src/SineWaveGenerator.cpp
+    src/UniformSequence.cpp
     src/ValidationContext.cpp
 )
 

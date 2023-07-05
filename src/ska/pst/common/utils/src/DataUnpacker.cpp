@@ -62,9 +62,9 @@ void ska::pst::common::DataUnpacker::configure(const ska::pst::common::AsciiHead
     throw std::runtime_error("ska::pst::common::DataUnpacker::configure invalid NPOL");
   }
 
-  if (nbit != 8 && nbit != 12 && nbit != 16)
+  if (nbit != 8 && nbit != 16) // NOLINT
   {
-    SPDLOG_ERROR("ska::pst::common::DataUnpacker::configure expected NBIT=8, 12 or 16, but found {}", nbit);
+    SPDLOG_ERROR("ska::pst::common::DataUnpacker::configure expected NBIT=8 or 16, but found {}", nbit);
     throw std::runtime_error("ska::pst::common::DataUnpacker::configure invalid NBIT");
   }
 
@@ -93,12 +93,17 @@ void ska::pst::common::DataUnpacker::configure(const ska::pst::common::AsciiHead
   reset();
 }
 
-float ska::pst::common::DataUnpacker::get_scale_factor(char * weights, uint32_t packet_number)
+auto ska::pst::common::DataUnpacker::get_scale_factor(char * weights, uint32_t packet_number) -> float
 {
   SPDLOG_TRACE("ska::pst::common::DataUnpacker::get_scale_factor weights={}, packet_number={} weights_packet_stride={}",
     reinterpret_cast<void *>(weights), packet_number, weights_packet_stride);
-  float * weights_ptr = reinterpret_cast<float *>(weights + (packet_number * weights_packet_stride));
-  return weights_ptr[0];
+  auto * weights_ptr = reinterpret_cast<float *>(weights + (packet_number * weights_packet_stride)); // NOLINT
+  // return the scale factor, ignoring invalid value of 0
+  if (*weights_ptr == 0) {
+    return 1;
+  } else {
+    return *weights_ptr;
+  }
 }
 
 void ska::pst::common::DataUnpacker::resize(uint64_t data_bufsz)
@@ -129,7 +134,7 @@ void ska::pst::common::DataUnpacker::reset()
   invalid_samples = 0;
 }
 
-std::vector<std::vector<std::vector<std::complex<float>>>>& ska::pst::common::DataUnpacker::unpack(char * data, uint64_t data_bufsz, char *weights, uint64_t weights_bufsz)
+auto ska::pst::common::DataUnpacker::unpack(char * data, uint64_t data_bufsz, char *weights, uint64_t weights_bufsz) -> std::vector<std::vector<std::vector<std::complex<float>>>>&
 {
   SPDLOG_DEBUG("ska::pst::common::DataUnpacker::unpack data={} data_bufsz={} weights={} weights_bufsz={}",
     reinterpret_cast<void*>(data), data_bufsz, reinterpret_cast<void *>(weights), weights_bufsz);
@@ -137,44 +142,19 @@ std::vector<std::vector<std::vector<std::complex<float>>>>& ska::pst::common::Da
   resize(data_bufsz);
 
   const uint32_t nheaps = data_bufsz / heap_resolution;
-  const uint32_t input_step = (nbit * 4) / ska::pst::common::bits_per_byte;
   SPDLOG_DEBUG("ska::pst::common::DataUnpacker::unpack heap_resolution={} nheaps={}", heap_resolution, nheaps);
+
   SPDLOG_DEBUG("ska::pst::common::DataUnpacker::unpack packets_per_heap={} npol={} nchan_per_packet={} nsamp_per_packet={}",
     packets_per_heap, npol, nchan_per_packet, nsamp_per_packet);
 
-  // Unpack quantised data store in heap, packet, pol, chan_block, samp_block ordering used in CBF/PSR formats
-  uint32_t packet_number = 0;
-  for (uint32_t iheap=0; iheap<nheaps; iheap++)
+  // unpack the 8 or 16 bit signed integers
+  if (nbit == 8) // NOLINT
   {
-    for (uint32_t ipacket=0; ipacket<packets_per_heap; ipacket++)
-    {
-      const float scale_factor = get_scale_factor(weights, packet_number);
-      if (std::isnan(scale_factor))
-      {
-        invalid_packets++;
-      }
-
-      for (uint32_t ipol=0; ipol<npol; ipol++)
-      {
-        for (uint32_t ichan=0; ichan<nchan_per_packet; ichan++)
-        {
-          for (uint32_t isamp=0; isamp<nsamp_per_packet; isamp+=2)
-          {
-            // unpack a pair of complex samples, normalising by the scale factor
-            sample_pair_t sample_pair = unpack_sample_pair(data, scale_factor);
-
-            // compute the output sample and channel
-            uint32_t osamp = (iheap * nsamp_per_packet) + isamp;
-            uint32_t ochan = (ipacket * nchan_per_packet) + ichan;
-            unpacked[osamp+0][ochan][ipol] = sample_pair.sample1;
-            unpacked[osamp+1][ochan][ipol] = sample_pair.sample2;
-
-            data += input_step;
-          }
-        }
-      }
-      packet_number++;
-    }
+    unpack_samples(reinterpret_cast<int8_t*>(data), weights, nheaps);
+  }
+  else if (nbit == 16) // NOLINT
+  {
+    unpack_samples(reinterpret_cast<int16_t*>(data), weights, nheaps);
   }
 
   if (invalid_packets > 0)
@@ -193,41 +173,18 @@ void ska::pst::common::DataUnpacker::integrate_bandpass(char * data, uint64_t da
 
   // unpack the heaped CBF/PSR format into TFP ordered timeseries
   const uint32_t nheaps = data_bufsz / heap_resolution;
-  const uint32_t input_step = (nbit * 4) / ska::pst::common::bits_per_byte;
 
   SPDLOG_DEBUG("ska::pst::common::DataUnpacker::integrate_bandpass nheaps={} packets_per_heap={} npol={} nchan_per_packet={} nsamp_per_packet={}",
     nheaps, packets_per_heap, npol, nchan_per_packet, nsamp_per_packet);
 
-  // Unpack quantised data store in heap, packet, pol, chan_block, samp_block ordering used in CBF/PSR formats
-  uint32_t packet_number = 0;
-  for (uint32_t iheap=0; iheap<nheaps; iheap++)
+  // integerate the 8 or 16 bit signed integers
+  if (nbit == 8) // NOLINT
   {
-    for (uint32_t ipacket=0; ipacket<packets_per_heap; ipacket++)
-    {
-      const float scale_factor = get_scale_factor(weights, packet_number);
-      if (std::isnan(scale_factor))
-      {
-        invalid_packets++;
-      }
-
-      for (uint32_t ipol=0; ipol<npol; ipol++)
-      {
-        for (uint32_t ichan=0; ichan<nchan_per_packet; ichan++)
-        {
-          for (uint32_t isamp=0; isamp<nsamp_per_packet; isamp+=2)
-          {
-            // unpack a pair of complex samples, normalising by the scale factor
-            sample_pair_t sample_pair = unpack_sample_pair(data, scale_factor);
-            const uint32_t ochan = (ipacket * nchan_per_packet) + ichan;
-
-            // integrate the power in each complex sample into the bandpass
-            bandpass[ochan][ipol] += square_law_detection(sample_pair);
-            data += input_step;
-          }
-        }
-      }
-      packet_number++;
-    }
+    integrate_samples(reinterpret_cast<int8_t*>(data), weights, nheaps);
+  }
+  else if (nbit == 16) // NOLINT
+  {
+    integrate_samples(reinterpret_cast<int16_t*>(data), weights, nheaps);
   }
 
   if (invalid_packets > 0)
@@ -236,52 +193,4 @@ void ska::pst::common::DataUnpacker::integrate_bandpass(char * data, uint64_t da
   }
 
   SPDLOG_DEBUG("ska::pst::common::DataUnpacker::integrate_bandpass unpacking complete");
-}
-
-ska::pst::common::sample_pair_t ska::pst::common::DataUnpacker::unpack_sample_pair(char * input, const float scale_factor)
-{
-  sample_pair_t unpacked;
-
-  // A NAN scale factor can occur if the drop packets were encountered
-  if (std::isnan(scale_factor))
-  {
-    invalid_samples++;
-    unpacked.sample1 = std::complex<float>(0, 0);
-    unpacked.sample2 = std::complex<float>(0, 0);
-    return unpacked;
-  }
-
-  if (nbit == 8)
-  {
-    int8_t * in = reinterpret_cast<int8_t *>(input);
-    unpacked.sample1 = std::complex<float>(float(in[0]), float(in[1]));
-    unpacked.sample2 = std::complex<float>(float(in[2]), float(in[3]));
-  }
-  else if (nbit == 12)
-  {
-    int16_t * in = reinterpret_cast<int16_t *>(input);
-    unpacked.sample1 = std::complex<float>(float(in[0] >> 4), float(((in[0] & 0x000F) << 8) & (in[1] >> 8)));
-    unpacked.sample2 = std::complex<float>(float(((in[1] & 0x00FF) << 4) & (in[2] >> 12)), float(in[2] & 0x0FFF));
-  }
-  else if (nbit == 16)
-  {
-    int16_t * in = reinterpret_cast<int16_t *>(input);
-    unpacked.sample1 = std::complex<float>(float(in[0]), float(in[1]));
-    unpacked.sample2 = std::complex<float>(float(in[2]), float(in[3]));
-  }
-
-  if (scale_factor != 0)
-  {
-    unpacked.sample1 /= scale_factor;
-    unpacked.sample2 /= scale_factor;
-  }
-  return unpacked;
-}
-
-float ska::pst::common::DataUnpacker::square_law_detection(sample_pair_t unpacked)
-{
-  return unpacked.sample1.real() * unpacked.sample1.real() +
-    unpacked.sample1.imag() * unpacked.sample1.imag() +
-    unpacked.sample2.real() * unpacked.sample2.real() +
-    unpacked.sample2.imag() * unpacked.sample2.imag();
 }

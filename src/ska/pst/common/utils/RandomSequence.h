@@ -28,7 +28,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <inttypes.h>
+#include <cinttypes>
 #include <random>
 
 #include "ska/pst/common/utils/AsciiHeader.h"
@@ -38,26 +38,34 @@
 
 namespace ska::pst::common {
 
+  /**
+   * @brief Generates a sequence of randomly distributed unsigned 8-bit integer values.
+   * The configuration of the distribution is controlled by header supplied in the
+   * configure method, through the following parameters:
+   *   UTC_START: sees the random number generator from which the sequence is generated
+   *   OBS_OFFSET: byte offset into the random sequence
+   *
+   */
   class RandomSequence {
 
     public:
 
       /**
        * @brief Construct a new Random Sequence object
-       * 
+       *
        */
       RandomSequence() = default;
 
       /**
        * @brief Destroy the Random Sequence object
-       * 
+       *
        */
       ~RandomSequence() = default;
 
       /**
-       * @brief Configure the Random Sequence using the meta data present in the 
+       * @brief Configure the Random Sequence using the meta data present in the
        * AsciiHeader.
-       * 
+       *
        * @param header header containing a UTC_START and OBS_OFFSET key/val pair
        */
       void configure(const ska::pst::common::AsciiHeader& header);
@@ -65,43 +73,64 @@ namespace ska::pst::common {
       /**
        * @brief Reset the internal state of the Random Sequence.
        * The next call to generate or validate will behave as per the first call to these functions.
-       * 
+       *
        */
       void reset();
 
       /**
        * @brief Generate a random sequence of uniformly distributed unsigned 8-bit integers.
        * Each random number generated advances the sequence of random numbers.
-       * 
+       *
        * @param buffer pointer to memory to which the random sequence should be written
        * @param bufsz number of elements to write to the buffer
        */
       void generate(uint8_t * buffer, uint64_t bufsz);
 
       /**
+       * @brief Generate a random data sequence written to the provided buffer in blocks
+       *
+       * @param buffer buffer to write the random sequence to
+       * @param bufsz size of the buffer in bytes
+       * @param block_offset offset from the start of the buffer for the first block
+       * @param block_size size of each block of random data to write in bytes
+       * @param block_stride separate between each block of random data in bytes
+       */
+      void generate_block(uint8_t * buffer, uint64_t bufsz, uint64_t block_offset, uint64_t block_size, uint64_t block_stride);
+
+      /**
        * @brief Compare contents of buffer to expected random sequence
-       * 
+       *
        * @param buffer pointer to buffer containing samples to be validated
        * @param bufsz size of the buffer to be validated
        * @return true if all samples are valid
        * @return false if any samples are invalid
        */
-      bool validate(uint8_t * buffer, uint64_t bufsz);
+      auto validate(uint8_t * buffer, uint64_t bufsz) -> bool;
+
+      /**
+       * @brief Validate the n data sequence written to the provided buffer in blocks
+       *
+       * @param buffer pointer to buffer containing samples to be validated
+       * @param bufsz size of the buffer to be validated
+       * @param block_offset offset from the start of the buffer for the first block
+       * @param block_size size of each block of n data to write in bytes
+       * @param block_stride separate between each block of n data in bytes
+       * @return true if all samples are valid
+       * @return false if any samples are invalid
+       */
+      auto validate_block(uint8_t * buffer, uint64_t bufsz, uint64_t block_offset, uint64_t block_size, uint64_t block_stride) -> bool;
 
       /**
        * @brief Seek forward through the random sequence.
-       * 
+       *
        * @param nelements the number of elements in the sequence to skip over
        */
       void seek(uint64_t nelements);
 
-      //! verbosity flag used during debugging
-      bool verbose{false};
-      
     private:
 
       /**
-       * @brief Search the buffer for the expected random sequence 
+       * @brief Search the buffer for the expected random sequence
        *
        * @param buffer pointer to buffer containing samples to be searched
        * @param bufsz size of the buffer to be searched
@@ -109,7 +138,7 @@ namespace ska::pst::common {
        * @return offset from start of buffer at which expected sequence match is found
        * @return -1 if no match is found
        */
-      int64_t search_buffer_for_expected_sequence(uint8_t * buffer, uint64_t bufsz, uint64_t seqlen);
+      auto search_buffer_for_expected_sequence(uint8_t * buffer, uint64_t bufsz, uint64_t seqlen) -> int64_t;
 
       /**
        * @brief Search the random sequence for the buffer contents
@@ -120,7 +149,7 @@ namespace ska::pst::common {
        * @return offset from current point in random sequence ath which a match is found
        * @return -1 if no match is found
        */
-      int64_t search_expected_sequence_for_buffer(uint8_t * buffer, uint64_t bufsz, uint64_t max_offset);
+      auto search_expected_sequence_for_buffer(uint8_t * buffer, uint64_t bufsz, uint64_t max_offset) -> int64_t;
 
       //! the seed used to initialise the generator
       uint64_t seed_value{0};

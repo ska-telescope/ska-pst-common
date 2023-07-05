@@ -146,8 +146,8 @@ class TestLmcServiceHandler : public ska::pst::common::LmcServiceHandler {
         MOCK_METHOD(void, go_to_runtime_error, (std::exception_ptr), (override));
 
         // Get ApplicationManager details
-        ska::pst::common::State get_application_manager_state() { return _state; }
-        std::exception_ptr get_application_manager_exception() { return _exception; }
+        ska::pst::common::State get_application_manager_state() override { return _state; }
+        std::exception_ptr get_application_manager_exception() override { return _exception; }
         void set_state(ska::pst::common::State desired_state) { _state=desired_state; }
         void set_exception(std::exception_ptr desired_exception ) { _exception=desired_exception; }
 };

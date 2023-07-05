@@ -131,11 +131,11 @@ class TestApplicationManager : public ska::pst::common::ApplicationManager
     MOCK_METHOD(void, perform_reset, (), (override));
 
     void logs_state_and_command(std::shared_ptr<TestApplicationManager> _applicationmanager, std::string method_name);
-    void perform_initialise();
-    void perform_terminate();
-    void validate_configure_beam(const ska::pst::common::AsciiHeader& config, ska::pst::common::ValidationContext *context);
-    void validate_configure_scan(const ska::pst::common::AsciiHeader& config, ska::pst::common::ValidationContext *context);
-    void validate_start_scan(const ska::pst::common::AsciiHeader& config);
+    void perform_initialise() override;
+    void perform_terminate() override;
+    void validate_configure_beam(const ska::pst::common::AsciiHeader& config, ska::pst::common::ValidationContext *context) override;
+    void validate_configure_scan(const ska::pst::common::AsciiHeader& config, ska::pst::common::ValidationContext *context) override;
+    void validate_start_scan(const ska::pst::common::AsciiHeader& config) override;
 
     bool force_error=false;
   private:

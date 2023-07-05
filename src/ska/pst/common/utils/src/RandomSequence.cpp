@@ -44,7 +44,7 @@ void ska::pst::common::RandomSequence::configure(const ska::pst::common::AsciiHe
   SPDLOG_DEBUG("ska::pst::common::RandomSequence::configure UTC_START={}", utc_start_str);
 
   ska::pst::common::Time utc_start(utc_start_str.c_str());
-  seed_value = uint64_t(utc_start.get_time());
+  seed_value = static_cast<uint64_t>(utc_start.get_time());
   SPDLOG_DEBUG("ska::pst::common::RandomSequence::configure seed_value={}", seed_value);
 
   reset();
@@ -72,6 +72,17 @@ void ska::pst::common::RandomSequence::generate(uint8_t * buffer, uint64_t bufsz
   byte_offset += bufsz;
 }
 
+void ska::pst::common::RandomSequence::generate_block(uint8_t * buffer, uint64_t bufsz, uint64_t block_offset, uint64_t block_size, uint64_t block_stride)
+{
+  SPDLOG_DEBUG("ska::pst::common::RandomSequence::generate_block generate {} bytes of data with block offset={}, size={} stride={}", bufsz, block_offset, block_size, block_stride);
+  uint64_t offset = block_offset;
+  while (offset + block_size < bufsz)
+  {
+    generate(buffer + offset, block_size); // NOLINT
+    offset += block_stride;
+  }
+}
+
 void ska::pst::common::RandomSequence::seek(uint64_t bufsz)
 {
   // advances the internal state of the generator bufsz steps
@@ -81,6 +92,20 @@ void ska::pst::common::RandomSequence::seek(uint64_t bufsz)
   {
     distribution(generator);
   }
+}
+
+auto ska::pst::common::RandomSequence::validate_block(uint8_t * buffer, uint64_t bufsz, uint64_t block_offset, uint64_t block_size, uint64_t block_stride) -> bool
+{
+  SPDLOG_DEBUG("ska::pst::common::RandomSequence::validate_block validate {} bytes of data with block offset={}, size={} and stride={}", bufsz, block_offset, block_size, block_stride);
+  uint64_t offset = block_offset;
+  bool valid = true;
+  while (offset + block_size < bufsz)
+  {
+    valid &= validate(buffer + offset, block_size); // NOLINT
+    offset += block_stride;
+  }
+  SPDLOG_DEBUG("ska::pst::common::RandomSequence::validate_block valid={}", valid);
+  return valid;
 }
 
 auto ska::pst::common::RandomSequence::validate(uint8_t * buffer, uint64_t bufsz) -> bool
@@ -127,6 +152,7 @@ auto ska::pst::common::RandomSequence::validate(uint8_t * buffer, uint64_t bufsz
   if (i == bufsz)
   {
     // sequence was not broken (data valid)
+    SPDLOG_TRACE("ska::pst::common::RandomSequence::validate valid=true");
     return true;
   }
 
@@ -149,6 +175,7 @@ auto ska::pst::common::RandomSequence::validate(uint8_t * buffer, uint64_t bufsz
   }
 
   // sequence was broken (data invalid)
+  SPDLOG_TRACE("ska::pst::common::RandomSequence::validate valid=false");
   return false;
 }
 
@@ -197,8 +224,9 @@ auto ska::pst::common::RandomSequence::search_buffer_for_expected_sequence(
     return -1;
   }
 
-  SPDLOG_WARN("ska::pst::common::RandomSequence::search_buffer_for_expected_sequence found at offset={}", i-seqlen);
-  return i - seqlen;
+  int64_t offset = static_cast<int64_t>(i) - static_cast<int64_t>(seqlen);
+  SPDLOG_WARN("ska::pst::common::RandomSequence::search_buffer_for_expected_sequence found at offset={}", offset);
+  return offset;
 }
 
 auto ska::pst::common::RandomSequence::search_expected_sequence_for_buffer(
@@ -232,8 +260,9 @@ auto ska::pst::common::RandomSequence::search_expected_sequence_for_buffer(
 
   if (matched == bufsz)
   {
-    SPDLOG_WARN("ska::pst::common::RandomSequence::search_expected_sequence_for_buffer match found at offset={}", offset-bufsz);
-    return offset - bufsz;
+    int64_t result = static_cast<int64_t>(offset) - static_cast<int64_t>(bufsz);
+    SPDLOG_WARN("ska::pst::common::RandomSequence::search_expected_sequence_for_buffer match found at offset={}", result);
+    return result;
   }
 
   SPDLOG_WARN("ska::pst::common::RandomSequence::search_expected_sequence_for_buffer match not found in first {} samples of expected sequence", max_offset);
@@ -241,5 +270,3 @@ auto ska::pst::common::RandomSequence::search_expected_sequence_for_buffer(
 
   return -1;
 }
-
-

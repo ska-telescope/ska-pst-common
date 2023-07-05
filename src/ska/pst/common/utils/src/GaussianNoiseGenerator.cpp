@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Square Kilometre Array Observatory
+ * Copyright 2023 Square Kilometre Array Observatory
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -32,58 +32,60 @@
 
 #include <utility>
 
-#include "ska/pst/common/utils/RandomDataGenerator.h"
+#include "ska/pst/common/utils/GaussianNoiseGenerator.h"
 
-ska::pst::common::RandomDataGenerator::RandomDataGenerator(std::shared_ptr<ska::pst::common::DataLayout> _layout) :
+ska::pst::common::GaussianNoiseGenerator::GaussianNoiseGenerator(std::shared_ptr<ska::pst::common::DataLayout> _layout) :
   DataGenerator(std::move(_layout)), wts_sequence(unity_weight)
 {
 }
 
-void ska::pst::common::RandomDataGenerator::configure(const ska::pst::common::AsciiHeader& config)
+void ska::pst::common::GaussianNoiseGenerator::configure(const ska::pst::common::AsciiHeader& config)
 {
-  SPDLOG_DEBUG("ska::pst::common::RandomDataGenerator::configure");
+  SPDLOG_DEBUG("ska::pst::common::GaussianNoiseGenerator::configure");
   ska::pst::common::DataGenerator::configure(config);
 
   dat_sequence.configure(config);
   wts_sequence.configure(config);
   scl_sequence.configure(config);
-
-#ifdef DEBUG
-  dat_sequence.verbose = true;
-#endif
 }
 
-void ska::pst::common::RandomDataGenerator::fill_data(char * buf, uint64_t size)
+void ska::pst::common::GaussianNoiseGenerator::fill_data(char * buf, uint64_t size)
 {
-  dat_sequence.generate(reinterpret_cast<uint8_t*> (buf), size);
+  SPDLOG_TRACE("ska::pst::common::GaussianNoiseGenerator::fill_data buf={} size={}", reinterpret_cast<void*>(buf), size);
+  dat_sequence.generate(buf, size);
 }
 
-void ska::pst::common::RandomDataGenerator::fill_weights(char * buf, uint64_t size)
+void ska::pst::common::GaussianNoiseGenerator::fill_weights(char * buf, uint64_t size)
 {
+  SPDLOG_TRACE("ska::pst::common::GaussianNoiseGenerator::fill_weights buf={} size={}", reinterpret_cast<void*>(buf), size);
   wts_sequence.generate_block(buf, size, wts_block_offset, wts_block_size, block_stride);
 }
 
-void ska::pst::common::RandomDataGenerator::fill_scales(char * buf, uint64_t size)
+void ska::pst::common::GaussianNoiseGenerator::fill_scales(char * buf, uint64_t size)
 {
+  SPDLOG_TRACE("ska::pst::common::GaussianNoiseGenerator::fill_scales buf={} size={}", reinterpret_cast<void*>(buf), size);
   scl_sequence.generate_block(reinterpret_cast<uint8_t *>(buf), size, scl_block_offset, scl_block_size, block_stride);
 }
 
-auto ska::pst::common::RandomDataGenerator::test_data(char * buf, uint64_t size) -> bool
+auto ska::pst::common::GaussianNoiseGenerator::test_data(char * buf, uint64_t size) -> bool
 {
-  return dat_sequence.validate(reinterpret_cast<uint8_t*> (buf), size);
+  SPDLOG_TRACE("ska::pst::common::GaussianNoiseGenerator::test_data buf={} size={}", reinterpret_cast<void*>(buf), size);
+  return dat_sequence.validate(buf, size);
 }
 
-auto ska::pst::common::RandomDataGenerator::test_weights(char * buf, uint64_t size) -> bool
+auto ska::pst::common::GaussianNoiseGenerator::test_weights(char * buf, uint64_t size) -> bool
 {
+  SPDLOG_TRACE("ska::pst::common::GaussianNoiseGenerator::test_weights buf={} size={}", reinterpret_cast<void*>(buf), size);
   return wts_sequence.validate_block(buf, size, wts_block_offset, wts_block_size, block_stride);
 }
 
-auto ska::pst::common::RandomDataGenerator::test_scales(char * buf, uint64_t size) -> bool
+auto ska::pst::common::GaussianNoiseGenerator::test_scales(char * buf, uint64_t size) -> bool
 {
-  return scl_sequence.validate_block(reinterpret_cast<uint8_t*>(buf), size, scl_block_offset, scl_block_size, block_stride);
+  SPDLOG_TRACE("ska::pst::common::GaussianNoiseGenerator::test_scales buf={} size={}", reinterpret_cast<void*>(buf), size);
+  return scl_sequence.validate_block(reinterpret_cast<uint8_t *>(buf), size, scl_block_offset, scl_block_size, block_stride);
 }
 
-void ska::pst::common::RandomDataGenerator::reset ()
+void ska::pst::common::GaussianNoiseGenerator::reset()
 {
   dat_sequence.reset();
   wts_sequence.reset();

@@ -19,6 +19,7 @@ set(private_headers
 
 if (BUILD_TESTING)
   add_subdirectory(testutils)
+  add_subdirectory(tests)
 endif()
 
 add_library(ska_pst_common

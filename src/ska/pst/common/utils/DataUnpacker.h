@@ -38,19 +38,6 @@
 
 namespace ska::pst::common
 {
-
-  /**
-   * @brief pair of complex floating point values
-   *
-   */
-  typedef struct sample_pair
-  {
-    std::complex<float> sample1;
-
-    std::complex<float> sample2;
-
-  } sample_pair_t;
-
   /**
    * @brief Unpacks data+weights+scales generation and validation
    *
@@ -80,7 +67,9 @@ namespace ska::pst::common
       virtual void configure(const ska::pst::common::AsciiHeader& data_config, const ska::pst::common::AsciiHeader& weights_config);
 
       /**
-       * @brief Unpack the data and weights streams into a floating point vector
+       * @brief Unpack the data and weights streams into the unpacked class attribute.
+       * unpacked is a three dimensional floating point vector, that is resized within this
+       * method to ensure it can store the data.
        *
        * @param data pointer to raw data array
        * @param data_bufsz size of the raw data array in bytes
@@ -88,10 +77,12 @@ namespace ska::pst::common
        * @param weights_bufsz size of the raw weights array in bytes
        * @return std::vector<std::vector<std::vector<std::complex<float>>>>& unpacked data ordered by time, freqeuncy then polarisation
        */
-      std::vector<std::vector<std::vector<std::complex<float>>>> & unpack(char * data, uint64_t data_bufsz, char *weights, uint64_t weights_bufsz);
+      auto unpack(char * data, uint64_t data_bufsz, char *weights, uint64_t weights_bufsz) -> std::vector<std::vector<std::vector<std::complex<float>>>> &;
 
       /**
-       * @brief Integrate the data and weights streams into an internal floating point bandpass vector
+       * @brief Integrate the data and weights streams into the bandpass member attribute.
+       * bandpass is a two dimensional floating point vector that is resized within this
+       * method to ensure it can store the data.
        *
        * @param data pointer to raw data array
        * @param data_bufsz size of the raw data array in bytes
@@ -105,7 +96,7 @@ namespace ska::pst::common
        *
        * @return std::vector<std::vector<float>>&o upacked bandpass vector ordered by frequency then polarisation
        */
-      std::vector<std::vector<float>>& get_bandpass() { return bandpass; };
+      auto get_bandpass() -> std::vector<std::vector<float>>& { return bandpass; };
 
       /**
        * @brief Reset the integrated bandpass vector to zero
@@ -118,20 +109,135 @@ namespace ska::pst::common
     private:
 
       /**
-       * @brief Unpack a pair of samples encoded in 8, 12 or 16 bits per sample
+       * @brief Templated method to unpack 8 or 16 bit integers from data and weights pointers into the unpacked vector.
+       * The unpacked vector (private member attribute) must have been resized through a call to resize() before caling
+       * this method.
        *
-       * @param data pointer to the raw data array containing the packed samples
-       * @param scale_factor scale factor to apply during unpacking
-       * @return sample_pair_t unpacked pair of complex floating-point values
+       * @tparam T type of input data to unpack [int8_t or int16_t]
+       * @param in pointer to the input data array
+       * @param weights  pointer to the input weights array
+       * @param nheaps number of packed heaps to unpack.
        */
-      sample_pair_t unpack_sample_pair(char * data, const float scale_factor);
+      template <typename T>
+      void unpack_samples(const T* in, char * weights, uint32_t nheaps)
+      {
+        const uint32_t nsamp = nheaps * nsamp_per_packet;
+        if (unpacked.size() != nsamp)
+        {
+          SPDLOG_ERROR("ska::pst::common::DataUnpacker::unpack_samples unpacked.size() [{}] did not match the number of samples to unpack [{}]", unpacked.size(), nsamp);
+          throw std::runtime_error("ska::pst::common::DataUnpacker::unpack_samples size of unpacked did not match nsamp");
+        }
+        if (unpacked[0].size() != nchan)
+        {
+          SPDLOG_ERROR("ska::pst::common::DataUnpacker::unpack_samples unpacked[0].size() [{}] did not match the number of channels to unpack [{}]", unpacked[0].size(), nchan);
+          throw std::runtime_error("ska::pst::common::DataUnpacker::unpack_samples size of unpacked[0] did not match nchan");
+        }
+        if (unpacked[0][0].size() != npol)
+        {
+          SPDLOG_ERROR("ska::pst::common::DataUnpacker::unpack_samples unpacked[0][0].size() [{}] did not match the number of polarisations to unpack [{}]", unpacked[0][0].size(), npol);
+          throw std::runtime_error("ska::pst::common::DataUnpacker::unpack_samples size of unpacked[0][0] did not match npol");
+        }
+
+        // Unpack quantised data store in heap, packet, pol, chan_block, samp_block ordering used in CBF/PSR formats
+        uint32_t packet_number = 0;
+        for (uint32_t iheap=0; iheap<nheaps; iheap++)
+        {
+          for (uint32_t ipacket=0; ipacket<packets_per_heap; ipacket++)
+          {
+            const float scale_factor = get_scale_factor(weights, packet_number);
+            if (std::isnan(scale_factor))
+            {
+              invalid_packets++;
+            }
+            for (uint32_t ipol=0; ipol<npol; ipol++)
+            {
+              for (uint32_t ichan=0; ichan<nchan_per_packet; ichan++)
+              {
+                const uint32_t ochan = (ipacket * nchan_per_packet) + ichan;
+                for (uint32_t isamp=0; isamp<nsamp_per_packet; isamp++)
+                {
+                  if (std::isnan(scale_factor))
+                  {
+                    invalid_samples++;
+                  }
+                  else
+                  {
+                    uint32_t osamp = (iheap * nsamp_per_packet) + isamp;
+                    unpacked[osamp][ochan][ipol] = std::complex<float>(static_cast<float>(in[0]), static_cast<float>(in[1])) / scale_factor; // NOLINT
+                  }
+                  in += 2; // NOLINT
+                }
+              }
+            }
+            packet_number++;
+          }
+        }
+      }
 
       /**
-       * @brief return the square-law detected power from the sample pair
+       * @brief Templated method to unpack 8 or 16 bit integers from data and weights pointers into the bandpass vector.
+       * The bandpass vector (private member attribute) must have been resized through a call to resize() before caling
+       * this method.
        *
-       * @return float square law detected power sum of the sample pair
+       * @tparam T type of input data to unpack [int8_t or int16_t]
+       * @param in pointer to the input data array
+       * @param weights  pointer to the input weights array
+       * @param nheaps number of packed heaps to unpack.
        */
-      float square_law_detection(sample_pair_t);
+      template <typename T>
+      void integrate_samples(const T* in, char * weights, uint32_t nheaps)
+      {
+        if (bandpass.size() != nchan)
+        {
+          SPDLOG_ERROR("ska::pst::common::DataUnpacker::integrate_samples bandpass.size() [{}] did not match the number of channels to unpack [{}]", bandpass.size(), nchan);
+          throw std::runtime_error("ska::pst::common::DataUnpacker::integrate_samples size of bandpass did not match nchan");
+        }
+        if (bandpass[0].size() != npol)
+        {
+          SPDLOG_ERROR("ska::pst::common::DataUnpacker::integrate_samples bandpass[0].size() [{}] did not match the number of polarisations to unpack [{}]", bandpass[0].size(), npol);
+          throw std::runtime_error("ska::pst::common::DataUnpacker::integrate_samples size of bandpass[0] did not match npol");
+        }
+
+        // Unpack quantised data store in heap, packet, pol, chan_block, samp_block ordering
+        // used in CBF/PSR formats
+        uint32_t packet_number = 0;
+        std::complex<float> sample{0,0};
+        for (uint32_t iheap=0; iheap<nheaps; iheap++)
+        {
+          for (uint32_t ipacket=0; ipacket<packets_per_heap; ipacket++)
+          {
+            const float scale_factor = get_scale_factor(weights, packet_number);
+            if (std::isnan(scale_factor))
+            {
+              invalid_packets++;
+            }
+
+            for (uint32_t ipol=0; ipol<npol; ipol++)
+            {
+              for (uint32_t ichan=0; ichan<nchan_per_packet; ichan++)
+              {
+                const uint32_t ochan = (ipacket * nchan_per_packet) + ichan;
+                for (uint32_t isamp=0; isamp<nsamp_per_packet; isamp++)
+                {
+                  if (std::isnan(scale_factor))
+                  {
+                    invalid_samples++;
+                  }
+                  else
+                  {
+                    sample = std::complex<float>(static_cast<float>(in[0]), static_cast<float>(in[1])) / scale_factor;  // NOLINT
+                    // integrate the power in each complex sample into the bandpass
+                    float power = sample.real() * sample.real() + sample.imag() * sample.imag();
+                    bandpass[ochan][ipol] += power;
+                  }
+                  in += 2; // NOLINT
+                }
+              }
+            }
+            packet_number++;
+          }
+        }
+      }
 
       //! Unpacked data vector
       std::vector<std::vector<std::vector<std::complex<float>>>> unpacked;
@@ -143,7 +249,7 @@ namespace ska::pst::common
       void resize(uint64_t data_bufsz);
 
       //! Return the scale factor packed into the weights array, corresponding to the provided packet number
-      float get_scale_factor(char * weights, uint32_t packet_number);
+      auto get_scale_factor(char * weights, uint32_t packet_number) -> float;
 
       //! Number of polarisations in the data stream
       uint32_t npol{0};

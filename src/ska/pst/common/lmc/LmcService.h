@@ -191,6 +191,11 @@ namespace ska::pst::common {
              */
             virtual ~LmcService() = default;
 
+            /**
+             * @brief Return the name of the LMC service
+             *
+             * @return std::string the name of the LMC service set in the constructor
+             */
             std::string service_name() { return _service_name; }
 
             /**
@@ -372,7 +377,7 @@ namespace ska::pst::common {
             /**
              * @brief Implements setting the log level of the service.
              */
-            grpc::Status set_log_level(grpc::ServerContext* context, const ska::pst::lmc::SetLogLevelRequest* request, ska::pst::lmc::SetLogLevelResponse* response);
+            grpc::Status set_log_level(grpc::ServerContext* context, const ska::pst::lmc::SetLogLevelRequest* request, ska::pst::lmc::SetLogLevelResponse* response) override;
 
             /**
              * @brief Implements getting the log level of the service.

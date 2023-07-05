@@ -42,9 +42,11 @@ namespace ska::pst::common::test {
 
 void DataUnpackerTest::SetUp()
 {
+  SPDLOG_TRACE("ska::pst::common::test::DataUnpackerTest::SetUp loading data and weights headers");
   data_header.load_from_file(test_data_file("DataUnpacker_data_header.txt"));
   weights_header.load_from_file(test_data_file("DataUnpacker_weights_header.txt"));
 
+  SPDLOG_TRACE("DataUnpackerTest::SetUp generating packed data");
   GeneratePackedData();
 }
 
@@ -62,12 +64,12 @@ void DataUnpackerTest::GeneratePackedData()
   const uint32_t npol = data_header.get_uint32("NPOL");
   const uint32_t nsamp_pp = data_header.get_uint32("UDP_NSAMP");
   const uint32_t nchan_pp = data_header.get_uint32("UDP_NCHAN");
-  const uint32_t nbit = data_header.get_uint32("NBIT");
   const uint32_t ndim = data_header.get_uint32("NDIM");
   const uint32_t nchan = data_header.get_uint32("NCHAN");
 
   int16_t * data_ptr = reinterpret_cast<int16_t *>(&data[0]);
 
+  SPDLOG_TRACE("ska::pst::common::test::DataUnpackerTest::GeneratePackedData generating data into {}", reinterpret_cast<void *>(data_ptr));
   uint32_t osamp = 0;
   for (uint32_t j=0; j<packets_per_heap; j++)
   {
@@ -102,18 +104,21 @@ void DataUnpackerTest::GeneratePackedData()
 
   uint64_t wdx = 0;
   uint32_t npackets = weights_header.get_uint32("RESOLUTION") / (packet_scales_size + packet_weights_size);
-  uint32_t weights_per_packet = weights_per_packet / weight_nbit;
+  uint32_t weights_per_packet = (packet_weights_size * 8) / weight_nbit;
+  ASSERT_EQ((packet_weights_size * 8) % weight_nbit, 0);
 
+  SPDLOG_TRACE("ska::pst::common::test::DataUnpackerTest::GeneratePackedData generating weights weights.size()={} npackets={} weights+scales={} weights_per_packet={}",
+    weights.size(), npackets, packet_scales_size + packet_weights_size, weights_per_packet);
   for (uint32_t i=0; i<npackets; i++)
   {
-    float * scales = reinterpret_cast<float *>(&weights[wdx]);
-    *scales = get_weight_for_channel(i * nchan_pp, nchan_pp);
+    float * scl = reinterpret_cast<float *>(&weights[wdx]);
+    *scl = get_weight_for_channel(i * nchan_pp, nchan_pp);
     wdx += packet_scales_size;
 
-    uint16_t * weights = reinterpret_cast<uint16_t *>(&weights[wdx]);
+    uint16_t * wts = reinterpret_cast<uint16_t *>(&weights[wdx]);
     for (uint32_t j=0; j<weights_per_packet; j++)
     {
-      weights[j] = 65535;
+      wts[j] = 65535;
     }
     wdx += packet_weights_size;
   }
@@ -156,25 +161,20 @@ TEST_F(DataUnpackerTest, test_unpack) // NOLINT
   const uint32_t nchan = unpacked[0].size();
   const uint32_t npol = unpacked[0][0].size();
   const uint32_t nchan_per_packet = weights_header.get_uint32("UDP_NCHAN");
-
-  std::vector<std::vector<float>> expected_bandpass;
-  expected_bandpass.resize(nchan);
+  const uint32_t nsamp_per_packet = weights_header.get_uint32("UDP_NSAMP");
 
   for (unsigned isamp=0; isamp<nsamp; isamp++)
   {
     for (unsigned ichan=0; ichan<nchan; ichan++)
     {
-      expected_bandpass[ichan].resize(npol);
-      std::fill(expected_bandpass[ichan].begin(), expected_bandpass[ichan].end(), 0);
       for (unsigned ipol=0; ipol<npol; ipol++)
       {
         uint32_t ochanpol = ipol * nchan + ichan;
-        float value = float((ochanpol * nsamp) + isamp);
+        float value = float((ochanpol * nsamp_per_packet) + isamp);
         if (std::isnan(get_weight_for_channel(ichan, nchan_per_packet)))
         {
           value = 0;
         }
-        expected_bandpass[ichan][ipol] += (value * value) + (value * value);
         ASSERT_EQ(unpacked[isamp][ichan][ipol].real(), value);
         ASSERT_EQ(unpacked[isamp][ichan][ipol].imag(), value * -1);
       }

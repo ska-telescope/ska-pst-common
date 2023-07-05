@@ -22,3 +22,7 @@ SCAN_ID           12345
 SINUSOID_FREQ     99.7722185185
 FREQ              100
 BW                0.462962962944
+
+# configuration for the Normal Sequence
+DISTRIBUTION_MEAN  0
+DISTRIBTION_STDDEV 10

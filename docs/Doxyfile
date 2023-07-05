@@ -3,7 +3,7 @@
 DOXYFILE_ENCODING      = UTF-8
 PROJECT_NAME           = "ska-pst-common"
 PROJECT_BRIEF          = "Common framework code for SKA Pulsar Timing pipeline applications"
-INPUT                  = ../src/ska/pst/common
+INPUT                  = ../src/ska/pst/common ../src/ska/pst/common/lmc ../src/ska/pst/common/statemodel  ../src/ska/pst/common/utils
 FILE_PATTERNS          = *.h
 INPUT_ENCODING         = UTF-8
 GENERATE_LATEX         = NO

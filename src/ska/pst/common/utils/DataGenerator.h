@@ -75,55 +75,61 @@ namespace ska::pst::common {
       /**
        * @brief Fill the data stream in the provided buffer
        *
-       * @param buffer pointer to buffer to be filled with sequence of data elements
+       * @param buf pointer to buffer to be filled with sequence of data elements
+       * @param size number of bytes to be written to buffer
        */
       virtual void fill_data(char * buf, uint64_t size) = 0;
 
       /**
        * @brief Fill the weights stream in the provided buffer
        *
-       * @param buffer pointer to buffer to be filled with sequence of weight elements
+       * @param buf pointer to buffer to be filled with sequence of weight elements
+       * @param size number of bytes to be written to buffer
        */
       virtual void fill_weights(char * buf, uint64_t size) = 0;
 
       /**
        * @brief Fill the scales stream in the provided buffer
        *
-       * @param buffer pointer to buffer to be filled with sequence of scale elements
+       * @param buf pointer to buffer to be filled with sequence of scale elements
+       * @param size number of bytes to be written to buffer
        */
       virtual void fill_scales(char * buf, uint64_t size) = 0;
 
       /**
        * @brief Verify the data+weights+scales of the received UDP packet
        *
-       * @param buffer pointer to buffer containing received UDP packet
+       * @param buf pointer to buffer containing received UDP packet
        * @return true if both data and weights match expectations
        */
-      virtual bool test_packet(char * buf);
+      virtual auto test_packet(char * buf) -> bool;
 
       /**
        * @brief Verify the data stream in the provided buffer
        *
-       * @param buffer pointer to buffer containing sequence of data elements
+       * @param buf pointer to buffer containing sequence of data elements
+       * @param size number of bytes in buffer to be tested
        * @return true if data match expectations
        */
-      virtual bool test_data(char * buf, uint64_t size) = 0;
+      virtual auto test_data(char * buf, uint64_t size) -> bool = 0;
 
       /**
        * @brief Verify the weights stream in the provided buffer
        *
-       * @param buffer pointer to buffer containing sequence of weight elements
+       * @param buf pointer to buffer containing sequence of weight elements
+       * @param size number of bytes in buffer to be tested
        * @return true if weights match expectations
        */
-      virtual bool test_weights(char * buf, uint64_t size) = 0;
+      virtual auto test_weights(char * buf, uint64_t size) -> bool = 0;
 
       /**
        * @brief Verify the scales stream in the provided buffer
        *
-       * @param buffer pointer to buffer containing sequence of scale elements
+       * @param buf pointer to buffer containing sequence of scale elements
+       * @param size number of bytes in buffer to be tested
        * @return true if scales match expectations
        */
-      virtual bool test_scales(char * buf, uint64_t size) = 0;
+      virtual auto test_scales(char * buf, uint64_t size) -> bool = 0;
 
       /**
        * @brief Reset all sequences (data, weights, and scales)
@@ -133,6 +139,12 @@ namespace ska::pst::common {
       virtual void reset() = 0;
 
     protected:
+
+      //! char value that represents a unity weight value
+      static constexpr char unity_weight = '\xff';
+
+      //! floating value that represents a unity scale factor
+      static constexpr float unity_scale = 1.0;
 
       //! Layout of each block of data
       std::shared_ptr<DataLayout> layout;
@@ -149,6 +161,20 @@ namespace ska::pst::common {
       //! number of channels in the data stream
       uint32_t nchan{0};
 
+      //! offset of the first scale heap in a weights+scales block in bytes
+      uint64_t scl_block_offset{0};
+
+      //! size of the scale heap in a weights+scales block in bytes
+      uint64_t scl_block_size{0};
+
+      //! offset of the first weight heap in a weights+scales block in bytes
+      uint64_t wts_block_offset{0};
+
+      //! size of a weight heap in a weights+scales block in bytes
+      uint64_t wts_block_size{0};
+
+      //! size of a scale and weights heap in bytes
+      uint64_t block_stride{0};
 
   };
 

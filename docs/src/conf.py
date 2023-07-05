@@ -51,7 +51,7 @@ author = 'PST Team'
 # The full version, including alpha/beta/rc tags
 with open('../../.release') as f:
     version = f.readline().strip().split("=")[1]
-release = '0.8.6'
+release = '0.8.9'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
@@ -124,7 +124,7 @@ exhale_args = {
     "rootFileName":          "library_root.rst",
     "rootFileTitle":         "Application Programming Interface",
     "afterTitleDescription": textwrap.dedent('''
-    The ska-pst-recv library provides and API that is used by the applications. This API is described below.
+    The ska-pst-common library provides an API that is used by the applications. This API is described below.
     '''),
     "doxygenStripFromPath":  "../", #"/home/calgray/Code/icrar/leap-accelerate/src", # use src dir
     # Suggested optional arguments

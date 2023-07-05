@@ -28,42 +28,30 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "ska/pst/common/utils/DataGeneratorFactory.h"
-#include "ska/pst/common/utils/RandomDataGenerator.h"
-#include "ska/pst/common/utils/SineWaveGenerator.h"
-#include "ska/pst/common/utils/GaussianNoiseGenerator.h"
+#include <gtest/gtest.h>
+#include <gmock/gmock.h>
 
-auto ska::pst::common::get_supported_data_generators() -> std::vector<std::string>
+#include "ska/pst/common/statemodel/StateModelException.h"
+#include "ska/pst/common/statemodel/StateModel.h"
+
+#ifndef SKA_PST_COMMON_STATEMODEL_TESTS_versionTest_h
+#define SKA_PST_COMMON_STATEMODEL_TESTS_versionTest_h
+
+namespace ska::pst::common::test {
+
+class versionTest : public ::testing::Test
 {
-  std::vector<std::string> supported;
-  supported.emplace_back("Random");
-  supported.emplace_back("Sine");
-  supported.emplace_back("GaussianNoise");
-  return supported;
-}
+  protected:
+    void SetUp() override;
+    void TearDown() override;
+  public:
+    versionTest() = default;
+    ~versionTest() = default;
 
-auto ska::pst::common::get_supported_data_generators_list() -> std::string
-{
-  std::vector<std::string> supported = ska::pst::common::get_supported_data_generators();
-  std::string delim = ", ";
-  return std::accumulate(supported.begin() + 1, supported.end(), supported[0],
-    [&delim](const std::string& x, const std::string& y) {
-      return x + delim + y;
-    }
-  );
-}
+    std::string release_version;
+  private:
+};
 
-auto ska::pst::common::DataGeneratorFactory(const std::string &name, const std::shared_ptr<ska::pst::common::DataLayout>& layout) -> std::shared_ptr<ska::pst::common::DataGenerator>
-{
-  if (name == "Random") {
-    return std::shared_ptr<ska::pst::common::DataGenerator>(new ska::pst::common::RandomDataGenerator(layout));
-  }
-  if (name == "Sine") {
-    return std::shared_ptr<ska::pst::common::DataGenerator>(new ska::pst::common::SineWaveGenerator(layout));
-  }
-  if (name == "GaussianNoise") {
-    return std::shared_ptr<ska::pst::common::DataGenerator>(new ska::pst::common::GaussianNoiseGenerator(layout));
-  }
+} // namespace ska::pst::common::test
 
-  throw std::runtime_error("ska::pst::common::DataGeneratorFactory unrecognized name");
-}
+#endif // SKA_PST_COMMON_STATEMODEL_TESTS_versionTest_h

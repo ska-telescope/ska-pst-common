@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Square Kilometre Array Observatory
+ * Copyright 2023 Square Kilometre Array Observatory
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -32,20 +32,20 @@
 #include <vector>
 
 #include "ska/pst/common/utils/AsciiHeader.h"
-#include "ska/pst/common/utils/RandomSequence.h"
+#include "ska/pst/common/utils/DataGenerator.h"
 
-#ifndef SKA_PST_COMMON_UTILS_TESTS_RandomSequenceTest_h
-#define SKA_PST_COMMON_UTILS_TESTS_RandomSequenceTest_h
+#ifndef SKA_PST_COMMON_UTILS_TESTS_DataGeneratorBitDepthTest_h
+#define SKA_PST_COMMON_UTILS_TESTS_DataGeneratorBitDepthTest_h
 
 namespace ska::pst::common::test {
 
   /**
-   * @brief Test the RandomSequence class
+   * @brief Test the DataGenerator class
    *
    * @details
    *
    */
-  class RandomSequenceTest : public ::testing::Test
+  class DataGeneratorBitDepthTest : public ::testing::TestWithParam<int>
   {
     protected:
       void SetUp() override;
@@ -53,9 +53,9 @@ namespace ska::pst::common::test {
       void TearDown() override;
 
     public:
-      RandomSequenceTest();
+      DataGeneratorBitDepthTest() = default;
 
-      ~RandomSequenceTest() = default;
+      ~DataGeneratorBitDepthTest() = default;
 
       ska::pst::common::AsciiHeader header;
 
@@ -67,6 +67,45 @@ namespace ska::pst::common::test {
 
   };
 
+  class TestDataLayout : public ska::pst::common::DataLayout
+  {
+    public:
+    TestDataLayout ()
+    {
+      header.load_from_file(test_data_file("data_header.txt"));
+      nsamp_per_packet = header.get_uint32("NSAMP_PP");
+      nchan_per_packet = header.get_uint32("NCHAN_PP");
+      compute_packet_properties(header.get_uint32("NBIT"));
+    }
+
+    void compute_packet_properties(uint32_t nbit)
+    {
+      uint32_t ndim = header.get_uint32("NDIM");
+      uint32_t npol = header.get_uint32("NPOL");
+
+      unsigned offset = 0;
+      packet_header_size = 128; // NOLINT
+      offset += packet_header_size;
+
+      packet_weights_size = 512; // NOLINT
+      packet_weights_offset = offset;
+      offset += packet_weights_size;
+
+      packet_scales_size = 32; // NOLINT
+      packet_scales_offset = offset;
+      offset += packet_scales_size;
+
+      static constexpr uint32_t nbits_per_byte = 8;
+      packet_data_size = nsamp_per_packet * nchan_per_packet * ndim * npol * nbit / nbits_per_byte;
+      packet_data_offset = offset;
+      offset += packet_data_size;
+
+      packet_size = offset + packet_scales_size;
+    }
+
+    ska::pst::common::AsciiHeader header;
+  };
+
 } // namespace ska::pst::common::test
 
-#endif // SKA_PST_COMMON_UTILS_TESTS_RandomSequenceTest_h
+#endif // SKA_PST_COMMON_UTILS_TESTS_DataGeneratorBitDepthTest_h
