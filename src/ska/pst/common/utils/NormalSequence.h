@@ -103,10 +103,10 @@ namespace ska::pst::common {
       //! default stddev
       static constexpr float default_stddev = 10;
 
-      //! fraction of the previous red noise factor to use when computing new factor
+      //! fraction of the previous red noise factor to use when computing the factor to apply to the next sample
       static constexpr float red_noise_percent_prev = 0.999;
 
-      //! fraction of the new red noise factor to use when computing new factor
+      //! fraction of the current red noise factor to use when computing the factor to apply to the next sample
       static constexpr float red_noise_percent_new = 0.001;
 
       template <typename T>

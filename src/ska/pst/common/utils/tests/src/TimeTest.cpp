@@ -30,6 +30,7 @@
 
 #include <spdlog/spdlog.h>
 
+#include "ska/pst/common/definitions.h"
 #include "ska/pst/common/utils/tests/TimeTest.h"
 #include "ska/pst/common/utils/Time.h"
 #include "ska/pst/common/testutils/GtestMain.h"
@@ -102,15 +103,14 @@ TEST_F(TimeTest, mjd2utctm) // NOLINT
   static constexpr double base_mjd = 51544;
   static constexpr time_t base_epoch = 946684800;
   static constexpr double seconds_per_day  = 86400;
-  static constexpr unsigned milliseconds_per_second = 1000;
-  static constexpr double milliseconds_per_day = seconds_per_day * milliseconds_per_second;
+  static constexpr double milliseconds_per_day = seconds_per_day * ska::pst::common::milliseconds_per_second;
   static constexpr unsigned seconds_to_test = 10;
 
   auto ntests = unsigned(seconds_to_test * milliseconds_per_second);
   for (unsigned i=0; i<ntests; i++)
   {
     double fractional_day = double(i) / milliseconds_per_day;
-    double fractional_seconds = double(i) / milliseconds_per_second;
+    double fractional_seconds = double(i) / ska::pst::common::milliseconds_per_second;
     time_t epoch = Time::mjd2utctm(base_mjd + fractional_day);
     time_t expected_epoch = base_epoch + int(floor(fractional_seconds));
     if (i % milliseconds_per_second >= (milliseconds_per_second/2))
@@ -158,7 +158,7 @@ TEST_F(TimeTest, get_localtime) // NOLINT
 TEST_F(TimeTest, test_set_fractional_time) // NOLINT
 {
   Time epoch("2000-01-01-00:00:00");
-  static constexpr uint64_t attoseconds_per_decisecond = 100000000000000000;
+  uint64_t attoseconds_per_decisecond = ska::pst::common::attoseconds_per_second / ska::pst::common::deciseconds_per_second;
   epoch.set_fractional_time(attoseconds_per_decisecond);
   EXPECT_EQ(epoch.get_fractional_time(), 0.1);
   EXPECT_EQ(epoch.get_fractional_time_attoseconds(), attoseconds_per_decisecond*1);
@@ -177,8 +177,8 @@ TEST_F(TimeTest, test_set_fractional_time) // NOLINT
 TEST_F(TimeTest, test_set_fractional_time_limits) // NOLINT
 {
   Time epoch("2000-01-01-00:00:00");
-  EXPECT_THROW(epoch.set_fractional_time(ska::pst::common::Time::attoseconds_per_second), std::runtime_error); // NOLINT
-  EXPECT_THROW(epoch.set_fractional_time(ska::pst::common::Time::attoseconds_per_second + 1), std::runtime_error); // NOLINT
+  EXPECT_THROW(epoch.set_fractional_time(ska::pst::common::attoseconds_per_second), std::runtime_error); // NOLINT
+  EXPECT_THROW(epoch.set_fractional_time(ska::pst::common::attoseconds_per_second + 1), std::runtime_error); // NOLINT
   double fractional_seconds = 1.0;
   EXPECT_THROW(epoch.set_fractional_time(fractional_seconds), std::runtime_error); // NOLINT
   EXPECT_THROW(epoch.set_fractional_time(fractional_seconds + 0.1), std::runtime_error); // NOLINT

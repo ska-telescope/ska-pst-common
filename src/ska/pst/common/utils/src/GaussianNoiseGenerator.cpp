@@ -47,14 +47,6 @@ void ska::pst::common::GaussianNoiseGenerator::configure(const ska::pst::common:
   dat_sequence.configure(config);
   wts_sequence.configure(config);
   scl_sequence.configure(config);
-
-  scl_block_offset = 0;
-  scl_block_size = layout->get_packet_scales_size();
-
-  wts_block_offset = layout->get_packet_scales_size();
-  wts_block_size = layout->get_packet_weights_size();
-
-  block_stride = layout->get_packet_weights_size() + layout->get_packet_scales_size();
 }
 
 void ska::pst::common::GaussianNoiseGenerator::fill_data(char * buf, uint64_t size)

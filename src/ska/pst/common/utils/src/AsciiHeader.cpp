@@ -41,6 +41,7 @@
 #include <sstream>
 #include <spdlog/spdlog.h>
 
+#include "ska/pst/common/definitions.h"
 #include "ska/pst/common/utils/AsciiHeader.h"
 
 ska::pst::common::AsciiHeader::AsciiHeader() : header_size(default_header_size)
@@ -331,7 +332,7 @@ auto ska::pst::common::AsciiHeader::compute_bits_per_sample() const -> unsigned
 auto ska::pst::common::AsciiHeader::compute_bytes_per_second() const -> double
 {
   static constexpr double nbits_per_byte = 8.0;
-  static constexpr double microseconds_per_second = 1000000;
+  static constexpr double microseconds_per_second = 1.0_mega;
 
   double tsamp{};
   get("TSAMP", &tsamp);

@@ -105,6 +105,7 @@ void DataUnpackerTest::GeneratePackedData()
   uint64_t wdx = 0;
   uint32_t npackets = weights_header.get_uint32("RESOLUTION") / (packet_scales_size + packet_weights_size);
   uint32_t weights_per_packet = (packet_weights_size * 8) / weight_nbit;
+  ASSERT_EQ((packet_weights_size * 8) % weight_nbit, 0);
 
   SPDLOG_TRACE("ska::pst::common::test::DataUnpackerTest::GeneratePackedData generating weights weights.size()={} npackets={} weights+scales={} weights_per_packet={}",
     weights.size(), npackets, packet_scales_size + packet_weights_size, weights_per_packet);

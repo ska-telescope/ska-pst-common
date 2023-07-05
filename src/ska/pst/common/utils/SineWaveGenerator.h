@@ -235,21 +235,6 @@ namespace ska::pst::common {
       //! sequence of uniform values for the scales
       UniformSequence<float> scl_sequence;
 
-      //! offset of the first scale heap in a weights+scales block in bytes
-      uint64_t scl_block_offset{0};
-
-      //! size of the scale heap in a weights+scales block in bytes
-      uint64_t scl_block_size{0};
-
-      //! offset of the first weight heap in a weights+scales block in bytes
-      uint64_t wts_block_offset{0};
-
-      //! size of a weight heap in a weights+scales block in bytes
-      uint64_t wts_block_size{0};
-
-      //! size of a scale and weights heap in bytes
-      uint64_t block_stride{0};
-
   };
 
 }  // namespace ska::pst::common

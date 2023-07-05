@@ -110,6 +110,8 @@ TEST_P(DataGeneratorTest, test_generate_validate_blocks) // NOLINT
   dg->configure(header);
 
   uint32_t npackets_per_spectrum = header.get_uint32("NCHAN") / header.get_uint32("NCHAN_PP");
+  ASSERT_EQ(header.get_uint32("NCHAN") % header.get_uint32("NCHAN_PP"), 0);
+
   uint32_t buffer_size = layout->get_packet_data_size() * npackets_per_spectrum * 2;
   uint32_t weights_scales_size = (layout->get_packet_weights_size() + layout->get_packet_scales_size()) * npackets_per_spectrum * 2;
 
@@ -136,6 +138,5 @@ TEST_P(DataGeneratorTest, test_generate_validate_blocks) // NOLINT
 }
 
 INSTANTIATE_TEST_SUITE_P(SignalGenerators, DataGeneratorTest, testing::Values("Random", "Sine", "GaussianNoise")); // NOLINT
-
 
 } // namespace ska::pst::common::test

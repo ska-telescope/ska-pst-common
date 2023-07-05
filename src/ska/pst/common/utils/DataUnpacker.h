@@ -67,7 +67,9 @@ namespace ska::pst::common
       virtual void configure(const ska::pst::common::AsciiHeader& data_config, const ska::pst::common::AsciiHeader& weights_config);
 
       /**
-       * @brief Unpack the data and weights streams into a floating point vector
+       * @brief Unpack the data and weights streams into the unpacked class attribute.
+       * unpacked is a three dimensional floating point vector, that is resized within this
+       * method to ensure it can store the data.
        *
        * @param data pointer to raw data array
        * @param data_bufsz size of the raw data array in bytes
@@ -78,7 +80,9 @@ namespace ska::pst::common
       auto unpack(char * data, uint64_t data_bufsz, char *weights, uint64_t weights_bufsz) -> std::vector<std::vector<std::vector<std::complex<float>>>> &;
 
       /**
-       * @brief Integrate the data and weights streams into an internal floating point bandpass vector
+       * @brief Integrate the data and weights streams into the bandpass member attribute.
+       * bandpass is a two dimensional floating point vector that is resized within this
+       * method to ensure it can store the data.
        *
        * @param data pointer to raw data array
        * @param data_bufsz size of the raw data array in bytes
@@ -104,9 +108,36 @@ namespace ska::pst::common
 
     private:
 
+      /**
+       * @brief Templated method to unpack 8 or 16 bit integers from data and weights pointers into the unpacked vector.
+       * The unpacked vector (private member attribute) must have been resized through a call to resize() before caling
+       * this method.
+       *
+       * @tparam T type of input data to unpack [int8_t or int16_t]
+       * @param in pointer to the input data array
+       * @param weights  pointer to the input weights array
+       * @param nheaps number of packed heaps to unpack.
+       */
       template <typename T>
       void unpack_samples(const T* in, char * weights, uint32_t nheaps)
       {
+        const uint32_t nsamp = nheaps * nsamp_per_packet;
+        if (unpacked.size() != nsamp)
+        {
+          SPDLOG_ERROR("ska::pst::common::DataUnpacker::unpack_samples unpacked.size() [{}] did not match the number of samples to unpack [{}]", unpacked.size(), nsamp);
+          throw std::runtime_error("ska::pst::common::DataUnpacker::unpack_samples size of unpacked did not match nsamp");
+        }
+        if (unpacked[0].size() != nchan)
+        {
+          SPDLOG_ERROR("ska::pst::common::DataUnpacker::unpack_samples unpacked[0].size() [{}] did not match the number of channels to unpack [{}]", unpacked[0].size(), nchan);
+          throw std::runtime_error("ska::pst::common::DataUnpacker::unpack_samples size of unpacked[0] did not match nchan");
+        }
+        if (unpacked[0][0].size() != npol)
+        {
+          SPDLOG_ERROR("ska::pst::common::DataUnpacker::unpack_samples unpacked[0][0].size() [{}] did not match the number of polarisations to unpack [{}]", unpacked[0][0].size(), npol);
+          throw std::runtime_error("ska::pst::common::DataUnpacker::unpack_samples size of unpacked[0][0] did not match npol");
+        }
+
         // Unpack quantised data store in heap, packet, pol, chan_block, samp_block ordering used in CBF/PSR formats
         uint32_t packet_number = 0;
         for (uint32_t iheap=0; iheap<nheaps; iheap++)
@@ -143,9 +174,30 @@ namespace ska::pst::common
         }
       }
 
+      /**
+       * @brief Templated method to unpack 8 or 16 bit integers from data and weights pointers into the bandpass vector.
+       * The bandpass vector (private member attribute) must have been resized through a call to resize() before caling
+       * this method.
+       *
+       * @tparam T type of input data to unpack [int8_t or int16_t]
+       * @param in pointer to the input data array
+       * @param weights  pointer to the input weights array
+       * @param nheaps number of packed heaps to unpack.
+       */
       template <typename T>
       void integrate_samples(const T* in, char * weights, uint32_t nheaps)
       {
+        if (bandpass.size() != nchan)
+        {
+          SPDLOG_ERROR("ska::pst::common::DataUnpacker::integrate_samples bandpass.size() [{}] did not match the number of channels to unpack [{}]", bandpass.size(), nchan);
+          throw std::runtime_error("ska::pst::common::DataUnpacker::integrate_samples size of bandpass did not match nchan");
+        }
+        if (bandpass[0].size() != npol)
+        {
+          SPDLOG_ERROR("ska::pst::common::DataUnpacker::integrate_samples bandpass[0].size() [{}] did not match the number of polarisations to unpack [{}]", bandpass[0].size(), npol);
+          throw std::runtime_error("ska::pst::common::DataUnpacker::integrate_samples size of bandpass[0] did not match npol");
+        }
+
         // Unpack quantised data store in heap, packet, pol, chan_block, samp_block ordering
         // used in CBF/PSR formats
         uint32_t packet_number = 0;

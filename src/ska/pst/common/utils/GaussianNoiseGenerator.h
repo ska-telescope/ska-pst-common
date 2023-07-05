@@ -129,28 +129,14 @@ namespace ska::pst::common {
     private:
 
       //! sequence of normally distributed values for the data samples
-      ska::pst::common::NormalSequence dat_sequence;
+      NormalSequence dat_sequence;
 
       //! sequence of uniform values for the weights
-      ska::pst::common::UniformSequence<char> wts_sequence;
+      UniformSequence<char> wts_sequence;
 
       //! sequence of randomly distributed values for the scales
-      ska::pst::common::RandomSequence scl_sequence;
+      RandomSequence scl_sequence;
 
-      //! offset of the first scale heap in a weights+scales block in bytes
-      uint64_t scl_block_offset{0};
-
-      //! size of the scale heap in a weights+scales block in bytes
-      uint64_t scl_block_size{0};
-
-      //! offset of the first weight heap in a weights+scales block in bytes
-      uint64_t wts_block_offset{0};
-
-      //! size of a weight heap in a weights+scales block in bytes
-      uint64_t wts_block_size{0};
-
-      //! size of a scale and weights heap in bytes
-      uint64_t block_stride{0};
   };
 
 } // namespace ska::pst::common

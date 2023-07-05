@@ -66,6 +66,17 @@ void ska::pst::common::DataGenerator::configure(const ska::pst::common::AsciiHea
     SPDLOG_ERROR("ska::pst::common::SineWaveGenerator::configure NCHAN={} was not a multiple of nchan_per_packet={}", nchan, layout->get_nchan_per_packet());
     throw std::runtime_error("ska::pst::common::SineWaveGenerator::configure invalid NCHAN");
   }
+
+  // offset and size of the weights part of a packet in the weights+scales block
+  wts_block_offset = layout->get_packet_scales_size();
+  wts_block_size = layout->get_packet_weights_size();
+
+  // offset and size of the scales part of a "packet" in the weights+scales block
+  scl_block_offset = 0;
+  scl_block_size = layout->get_packet_scales_size();
+
+  // size of the weights+scales "packet"
+  block_stride = layout->get_packet_weights_size() + layout->get_packet_scales_size();
 }
 
 auto ska::pst::common::DataGenerator::test_packet(char * buf) -> bool

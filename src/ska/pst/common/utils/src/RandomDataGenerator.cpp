@@ -48,12 +48,6 @@ void ska::pst::common::RandomDataGenerator::configure(const ska::pst::common::As
   wts_sequence.configure(config);
   scl_sequence.configure(config);
 
-  wts_block_offset = layout->get_packet_scales_size();
-  wts_block_size = layout->get_packet_weights_size();
-  scl_block_offset = 0;
-  scl_block_size = layout->get_packet_scales_size();
-  block_stride = layout->get_packet_weights_size() + layout->get_packet_scales_size();
-
 #ifdef DEBUG
   dat_sequence.verbose = true;
 #endif

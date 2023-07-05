@@ -77,12 +77,6 @@ void ska::pst::common::SineWaveGenerator::configure(const ska::pst::common::Asci
     }
   }
 
-  wts_block_offset = layout->get_packet_scales_size();
-  wts_block_size = layout->get_packet_weights_size();
-  scl_block_offset = 0;
-  scl_block_size = layout->get_packet_scales_size();
-  block_stride = layout->get_packet_weights_size() + layout->get_packet_scales_size();
-
   SPDLOG_DEBUG("ska::pst::common::SineWaveGenerator::configure sinusoid_channel={}", sinusoid_channel);
 }
 

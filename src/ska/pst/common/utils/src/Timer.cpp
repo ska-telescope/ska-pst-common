@@ -30,6 +30,7 @@
 
 #include <spdlog/spdlog.h>
 
+#include "ska/pst/common/definitions.h"
 #include "ska/pst/common/utils/Timer.h"
 
 ska::pst::common::Timer::Timer()
@@ -54,31 +55,27 @@ void ska::pst::common::Timer::wait_until(double offset)
 
 auto ska::pst::common::Timer::get_elapsed_microseconds() -> double
 {
-  static constexpr double microseconds_per_second = 1000000;
   struct timeval timestamp{};
   gettimeofday(&timestamp, nullptr);
   const time_t seconds = timestamp.tv_sec - start_epoch.tv_sec;
   const suseconds_t usec =  timestamp.tv_usec - start_epoch.tv_usec;
-  return ((static_cast<double>(seconds) * microseconds_per_second) + static_cast<double>(usec));
+  return ((static_cast<double>(seconds) * ska::pst::common::microseconds_per_second) + static_cast<double>(usec));
 }
 
 auto ska::pst::common::Timer::get_elapsed_milliseconds() -> int
 {
-  static constexpr double microseconds_per_millisecond = 1000;
-  return static_cast<int>(rint(get_elapsed_microseconds()/microseconds_per_millisecond));
+  return static_cast<int>(rint(get_elapsed_microseconds() / static_cast<double>(ska::pst::common::microseconds_per_millisecond)));
 }
 
 void ska::pst::common::Timer::print_rates(uint64_t bytes)
 {
-  static constexpr double microseconds_per_second = 1000000;
-  static constexpr double bytes_per_gigabyte = 1073741824;
   double elapsed_microseconds = get_elapsed_microseconds();
   double bytes_per_second = 0;
   double gbytes_per_second = 0;
   if (elapsed_microseconds > 0)
   {
     bytes_per_second = static_cast<double>(bytes) / (elapsed_microseconds / microseconds_per_second);
-    gbytes_per_second = bytes_per_second / bytes_per_gigabyte;
+    gbytes_per_second = bytes_per_second / static_cast<double>(bytes_per_gigabyte);
   }
 
   SPDLOG_INFO("Data: {} bytes", bytes);

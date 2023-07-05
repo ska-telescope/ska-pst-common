@@ -102,6 +102,8 @@ TEST_P(DataGeneratorBitDepthTest, test_generate_validate_blocks) // NOLINT
   header.set("NBIT", GetParam());
 
   uint32_t npackets_per_spectrum = header.get_uint32("NCHAN") / header.get_uint32("NCHAN_PP");
+  ASSERT_EQ(header.get_uint32("NCHAN") % header.get_uint32("NCHAN_PP"), 0);
+
   uint32_t buffer_size = layout->get_packet_data_size() * npackets_per_spectrum * 2;
   buffer.resize(buffer_size);
   auto buffer_ptr = (&buffer[0]);

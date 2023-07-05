@@ -36,6 +36,7 @@
 #include <vector>
 #include <spdlog/spdlog.h>
 
+#include "ska/pst/common/definitions.h"
 #include "ska/pst/common/utils/Time.h"
 
 ska::pst::common::Time::Time(const char * s)
@@ -106,7 +107,7 @@ auto ska::pst::common::Time::mjd2utctm(double mjd) -> time_t
   auto secs = static_cast<int>(seconds);
   double fracsec = seconds - static_cast<double>(secs);
 
-  static constexpr int milliseconds_in_second = 1000;
+  static constexpr int milliseconds_in_second = 1_kilo;
   if (static_cast<int>(rint(fracsec*milliseconds_in_second)) >= milliseconds_in_second/2)
   {
     secs++;
@@ -147,7 +148,7 @@ auto ska::pst::common::Time::get_gmtime() -> std::string
 
 auto ska::pst::common::Time::get_fractional_time() -> double
 {
-  return static_cast<double>(attoseconds) / attoseconds_per_second;
+  return static_cast<double>(attoseconds) / static_cast<double>(ska::pst::common::attoseconds_per_second);
 }
 
 auto ska::pst::common::Time::get_fractional_time_attoseconds() -> uint64_t
@@ -165,13 +166,13 @@ void ska::pst::common::Time::set_fractional_time(double fractional_seconds)
   {
     throw std::runtime_error("ska::pst::common::Time::set_fractional_time seconds was >= 1");
   }
-  double fractional_attoseconds = fractional_seconds * attoseconds_per_second;
+  double fractional_attoseconds = fractional_seconds * static_cast<double>(ska::pst::common::attoseconds_per_second);
   attoseconds = static_cast<uint64_t>(roundl(fractional_attoseconds));
 }
 
 void ska::pst::common::Time::set_fractional_time(uint64_t _attoseconds)
 {
-  if (_attoseconds >= attoseconds_per_second_u64)
+  if (_attoseconds >= ska::pst::common::attoseconds_per_second)
   {
     throw std::runtime_error("ska::pst::common::Time::set_fractional_time attoseconds >= 1e18");
   }

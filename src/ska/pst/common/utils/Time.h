@@ -32,6 +32,8 @@
 #include <ctime>
 #include <string>
 
+#include "ska/pst/common/definitions.h"
+
 #ifndef SKA_PST_COMMON_UTIL_Time_h
 #define SKA_PST_COMMON_UTIL_Time_h
 
@@ -49,12 +51,6 @@ namespace ska::pst::common {
   class Time {
 
     public:
-
-      //! number of atto seconds in a second as a double
-      static constexpr double attoseconds_per_second = 1.0e18;
-
-      //! number of atto seconds in a second as 64-bit unsigned integer
-      static constexpr uint64_t attoseconds_per_second_u64 = 1000000000000000000;
 
       /**
        * @brief Construct a new Time object initialized to the unix epoch
