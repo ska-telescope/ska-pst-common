@@ -7,6 +7,7 @@ add_subdirectory(statemodel)
 
 set(public_headers
   version.h
+  definitions.h
   ${CMAKE_CURRENT_BINARY_DIR}/config.h
 )
 
