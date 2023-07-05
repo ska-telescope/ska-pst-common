@@ -109,7 +109,7 @@ namespace ska::pst::common {
        *
        * @return char* C-style string
        */
-      [[nodiscard]] auto raw() const -> std::string;
+      auto raw() const -> std::string;
 
       /**
        * @brief Resize the internal storage of the header
@@ -123,14 +123,14 @@ namespace ska::pst::common {
        *
        * @return size_t size of header storage in bytes
        */
-      [[nodiscard]] auto get_header_size() const -> size_t;
+      auto get_header_size() const -> size_t;
 
       /**
        * @brief Return the length of the C-string stored in the internal storage
        *
        * @return size_t
        */
-      [[nodiscard]] auto get_header_length() const -> size_t;
+      auto get_header_length() const -> size_t;
 
       /**
        * @brief Clear the internal storage, resetting the header to an empty string
@@ -228,14 +228,14 @@ namespace ska::pst::common {
        * @return true if the parameter exists
        * @return false if the parameter does not exist
        */
-      [[nodiscard]] auto has(const std::string &key) const -> bool;
+      auto has(const std::string &key) const -> bool;
 
       /**
        * @brief Return a list of keys in the header
        *
        * @return std::vector<std::string> keys in the header
        */
-       [[nodiscard]] auto header_get_keys() const -> std::vector<std::string>;
+       auto header_get_keys() const -> std::vector<std::string>;
 
       /**
        * @brief Get the HDR_SIZE attribute of the ascii header in filename
@@ -252,7 +252,7 @@ namespace ska::pst::common {
        * @param key keyword to search for.
        * @return std::string value of the key
        */
-      [[nodiscard]] auto get_val(const std::string &key) const -> std::string;
+      auto get_val(const std::string &key) const -> std::string;
 
       /**
        * @brief Return a uint32 representation a parameter value stored in the header.
@@ -261,7 +261,7 @@ namespace ska::pst::common {
        * @param key keyword to search for.
        * @return uint32 value of the key
        */
-      [[nodiscard]] auto get_uint32(const std::string &key) const -> uint32_t;
+      auto get_uint32(const std::string &key) const -> uint32_t;
 
       /**
        * @brief Return a int32 representation a parameter value stored in the header.
@@ -270,7 +270,7 @@ namespace ska::pst::common {
        * @param key keyword to search for.
        * @return int32 value of the key
        */
-      [[nodiscard]] auto get_int32(const std::string &key) const -> int32_t;
+      auto get_int32(const std::string &key) const -> int32_t;
 
       /**
        * @brief Return a uint64 representation a parameter value stored in the header.
@@ -279,7 +279,7 @@ namespace ska::pst::common {
        * @param key keyword to search for.
        * @return uint64_t value of the key
        */
-      [[nodiscard]] auto get_uint64(const std::string &key) const -> uint64_t;
+      auto get_uint64(const std::string &key) const -> uint64_t;
 
       /**
        * @brief Return a float representation a parameter value stored in the header.
@@ -288,7 +288,7 @@ namespace ska::pst::common {
        * @param key keyword to search for.
        * @return float value of the key
        */
-      [[nodiscard]] auto get_float(const std::string &key) const -> float;
+      auto get_float(const std::string &key) const -> float;
 
       /**
        * @brief Return a double representation a parameter value stored in the header.
@@ -297,7 +297,7 @@ namespace ska::pst::common {
        * @param key keyword to search for.
        * @return double value of the key
        */
-      [[nodiscard]] auto get_double(const std::string &key) const -> double;
+      auto get_double(const std::string &key) const -> double;
 
       /**
        * @brief Set a key/value pair in the AsciiHeader parameter list
@@ -319,7 +319,7 @@ namespace ska::pst::common {
        *
        * @return uint32_t maximum number of characters to pad
        */
-      [[nodiscard]] auto get_key_padding() const -> uint32_t;
+      auto get_key_padding() const -> uint32_t;
 
       /**
        * @brief Compute the number of bits per time sample for the data stream described by the header
@@ -327,7 +327,7 @@ namespace ska::pst::common {
        * @param header parameters that describe the data stream
        * @return unsigned number of bytes per time sample
        */
-      [[nodiscard]] auto compute_bits_per_sample() const -> unsigned;
+      auto compute_bits_per_sample() const -> unsigned;
 
       /**
        * @brief Compute the number of bytes per second for the data stream described by the header
@@ -335,7 +335,7 @@ namespace ska::pst::common {
        * @param header parameters that describe the data stream
        * @return double number of bytes per second
        */
-      [[nodiscard]] auto compute_bytes_per_second() const -> double;
+      auto compute_bytes_per_second() const -> double;
 
     private:
 

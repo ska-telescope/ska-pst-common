@@ -113,7 +113,7 @@ namespace ska::pst::common
        * @brief Check if empty
        *
        */
-      [[nodiscard]] auto is_empty() const noexcept -> bool {
+      auto is_empty() const noexcept -> bool {
         return errors.empty();
       }
 

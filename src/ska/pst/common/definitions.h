@@ -36,63 +36,63 @@
 namespace ska::pst::common
 {
   //! user defined integer literal for kilo suffix (1e3)
-  constexpr uint64_t operator "" _kilo(unsigned long long l) {
-    return l * 1000;
+  constexpr auto operator "" _kilo(unsigned long long l) -> uint64_t { // NOLINT
+    return static_cast<uint64_t>(l * 1000);
   };
 
   //! user defined double literal for kilo suffix (1e3)
-  constexpr double operator "" _kilo(long double l) {
-    return l * 1000;
+  constexpr auto operator "" _kilo(long double l) -> double {
+    return static_cast<double>(l * 1000);
   };
 
   //! user defined integer literal for mega suffix (1e6)
-  constexpr uint64_t operator "" _mega(unsigned long long l) {
-    return l * 1000_kilo;
+  constexpr auto operator "" _mega(unsigned long long l) -> uint64_t { // NOLINT
+    return static_cast<uint64_t>(l * 1000_kilo); // NOLINT
   };
 
   //! user defined double literal for mega suffix (1e6)
-  constexpr double operator "" _mega(long double l) {
-    return l * 1000.0_kilo;
+  constexpr auto operator "" _mega(long double l) -> double {
+    return static_cast<double>(l * 1000.0_kilo); // NOLINT
   };
 
   //! user defined integer literal for giga suffix (1e9)
-  constexpr uint64_t operator "" _giga(unsigned long long l) {
-    return l * 1000_mega;
+  constexpr auto operator "" _giga(unsigned long long l) -> uint64_t { // NOLINT
+    return static_cast<uint64_t>(l * 1000_mega); // NOLINT
   };
 
   //! user defined double literal for giga suffix (1e9)
-  constexpr uint64_t operator "" _giga(long double l) {
-    return l * 1000.0_mega;
+  constexpr auto operator "" _giga(long double l) -> double {
+    return static_cast<double>(l * 1000.0_mega); // NOLINT
   };
 
   //! user defined integer literal for tera suffix (1e12)
-  constexpr uint64_t operator "" _tera(unsigned long long l) {
-      return l * 1000_giga;
+  constexpr auto operator "" _tera(unsigned long long l) -> uint64_t { // NOLINT
+    return static_cast<uint64_t>(l * 1000_giga); // NOLINT
   };
 
   //! user defined double literal for tera suffix (1e12)
-  constexpr double operator "" _tera(long double l) {
-      return l * 1000.0_giga;
+  constexpr auto operator "" _tera(long double l) -> double{
+    return static_cast<double>(l * 1000.0_giga); // NOLINT
   };
 
   //! user defined integer literal for peta suffix (1e15)
-  constexpr uint64_t operator "" _peta(unsigned long long l) {
-      return l * 1000_tera;
+  constexpr auto operator "" _peta(unsigned long long l) -> uint64_t { // NOLINT
+    return static_cast<uint64_t>(l * 1000_tera); // NOLINT
   };
 
   //! user defined double literal for peta suffix (1e15)
-  constexpr double operator "" _peta(long double l) {
-      return l * 1000.0_tera;
+  constexpr auto operator "" _peta(long double l) -> double {
+    return static_cast<double>(l * 1000.0_tera); // NOLINT
   };
 
   //! user defined double literal for exa suffix (1e18)
-  constexpr uint64_t operator "" _exa(unsigned long long l) {
-      return l * 1000_peta;
+  constexpr auto operator "" _exa(unsigned long long l) -> uint64_t { // NOLINT
+      return static_cast<uint64_t >(l * 1000_peta); // NOLINT
   };
 
   //! user defined double literal for exa suffix (1e18)
-  constexpr double operator "" _exa(long double l) {
-      return l * 1000.0_peta;
+  constexpr auto operator "" _exa(long double l) -> double {
+      return static_cast<double>(l * 1000.0_peta); // NOLINT
   };
 
   //! number of micro seconds in a second
