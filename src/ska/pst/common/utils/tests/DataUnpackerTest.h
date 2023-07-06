@@ -71,8 +71,6 @@ namespace ska::pst::common::test {
 
       std::vector<char> weights;
 
-      std::vector<std::string> get_configs();
-
     private:
 
   };

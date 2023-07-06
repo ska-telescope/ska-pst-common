@@ -57,8 +57,9 @@ void DataUnpackerTest::TearDown()
 
 void DataUnpackerTest::GeneratePackedData()
 {
-  data.resize(data_header.get_uint32("DB_BUFSZ"));
-  weights.resize(weights_header.get_uint32("WB_BUFSZ"));
+  data.resize(data_header.get_uint32("RESOLUTION"));
+  weights.resize(weights_header.get_uint32("RESOLUTION"));
+
 
   const uint32_t nheaps = 1;
   const uint32_t packets_per_heap = data_header.get_uint32("NCHAN") / data_header.get_uint32("UDP_NCHAN");
