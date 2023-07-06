@@ -30,6 +30,8 @@
 
 #include <gtest/gtest.h>
 #include <vector>
+#include <chrono>
+#include <filesystem>
 
 #include "ska/pst/common/utils/AsciiHeader.h"
 #include "ska/pst/common/utils/DataUnpacker.h"
@@ -68,6 +70,8 @@ namespace ska::pst::common::test {
       std::vector<char> data;
 
       std::vector<char> weights;
+
+      std::vector<std::string> get_configs();
 
     private:
 

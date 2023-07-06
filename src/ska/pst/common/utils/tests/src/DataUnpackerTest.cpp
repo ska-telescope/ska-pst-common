@@ -32,6 +32,7 @@
 
 #include "ska/pst/common/testutils/GtestMain.h"
 #include "ska/pst/common/utils/tests/DataUnpackerTest.h"
+using namespace std::chrono;
 
 auto main(int argc, char* argv[]) -> int
 {
@@ -56,8 +57,8 @@ void DataUnpackerTest::TearDown()
 
 void DataUnpackerTest::GeneratePackedData()
 {
-  data.resize(data_header.get_uint32("RESOLUTION"));
-  weights.resize(weights_header.get_uint32("RESOLUTION"));
+  data.resize(data_header.get_uint32("DB_BUFSZ"));
+  weights.resize(weights_header.get_uint32("WB_BUFSZ"));
 
   const uint32_t nheaps = 1;
   const uint32_t packets_per_heap = data_header.get_uint32("NCHAN") / data_header.get_uint32("UDP_NCHAN");
@@ -214,5 +215,72 @@ TEST_F(DataUnpackerTest, test_integrate_bandpass) // NOLINT
     }
   }
 }
+
+TEST_P(DataUnpackerTest, test_unpack_performance) // NOLINT
+{
+  std::string param = GetParam();
+  std::string data_file = param + "_data_header.txt";
+  std::string weights_file = param + "_weights_header.txt";
+  SPDLOG_INFO("data_file: {}", data_file);
+  SPDLOG_INFO("weights_file: {}", weights_file);
+  data_header.load_from_file(test_data_file(data_file));
+  weights_header.load_from_file(test_data_file(weights_file));
+
+  GeneratePackedData();
+
+  ska::pst::common::DataUnpacker unpacker;
+  unpacker.configure(data_header, weights_header);
+
+  // force a resize of the unpacked attribute in the DataUnpacker base class
+  // unpacker.resize(data.size());
+  std::vector<std::vector<std::vector<std::complex<float>>>>& unpacked = unpacker.unpack(&data[0], data.size(), &weights[0], weights.size());
+
+  // Recording the timestamp at the start of the code
+  auto beg = high_resolution_clock::now();
+  
+  // generate packed data and weights
+  unpacked = unpacker.unpack(&data[0], data.size(), &weights[0], weights.size());
+  // const uint32_t nsamp = unpacked.size();
+  // const uint32_t nchan = unpacked[0].size();
+  // const uint32_t npol = unpacked[0][0].size();
+  // const uint32_t nchan_per_packet = weights_header.get_uint32("UDP_NCHAN");
+  // const uint32_t nsamp_per_packet = weights_header.get_uint32("UDP_NSAMP");
+
+  // for (unsigned isamp=0; isamp<nsamp; isamp++)
+  // {
+  //   for (unsigned ichan=0; ichan<nchan; ichan++)
+  //   {
+  //     for (unsigned ipol=0; ipol<npol; ipol++)
+  //     {
+  //       uint32_t ochanpol = ipol * nchan + ichan;
+  //       float value = float((ochanpol * nsamp_per_packet) + isamp);
+  //       if (std::isnan(get_weight_for_channel(ichan, nchan_per_packet)))
+  //       {
+  //         value = 0;
+  //       }
+  //     }
+  //   }
+  // }
+
+  // Taking a timestamp after the code is ran
+  auto end = high_resolution_clock::now();
+  // Subtracting the end timestamp from the beginning
+  // And we choose to receive the difference in microseconds
+  auto duration = duration_cast<microseconds>(end - beg);
+
+  // Displaying the elapsed time
+  SPDLOG_INFO("Elapsed Time (microseconds): {}", duration.count());
+
+}
+
+/*
+TODO
+- parse directory for all configuration files present in test/utils/data
+- instansiate tests for each configuration file detected
+*/
+// nchan * nbit * ndim * npol * nsamp / 8
+INSTANTIATE_TEST_SUITE_P(PerformanceTests, DataUnpackerTest, testing::Values(
+"Low_AA0.5"
+)); // NOLINT
 
 } // namespace ska::pst::common::test
