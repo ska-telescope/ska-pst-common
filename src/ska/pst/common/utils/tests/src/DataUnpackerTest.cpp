@@ -227,6 +227,8 @@ TEST_P(DataUnpackerTest, test_unpack_performance) // NOLINT
   data_header.load_from_file(test_data_file(data_file));
   weights_header.load_from_file(test_data_file(weights_file));
 
+  //
+  // resolution = nchan * nbit * ndim * npol * nsamp / 8
   GeneratePackedData();
 
   ska::pst::common::DataUnpacker unpacker;
@@ -241,27 +243,6 @@ TEST_P(DataUnpackerTest, test_unpack_performance) // NOLINT
   
   // generate packed data and weights
   unpacked = unpacker.unpack(&data[0], data.size(), &weights[0], weights.size());
-  // const uint32_t nsamp = unpacked.size();
-  // const uint32_t nchan = unpacked[0].size();
-  // const uint32_t npol = unpacked[0][0].size();
-  // const uint32_t nchan_per_packet = weights_header.get_uint32("UDP_NCHAN");
-  // const uint32_t nsamp_per_packet = weights_header.get_uint32("UDP_NSAMP");
-
-  // for (unsigned isamp=0; isamp<nsamp; isamp++)
-  // {
-  //   for (unsigned ichan=0; ichan<nchan; ichan++)
-  //   {
-  //     for (unsigned ipol=0; ipol<npol; ipol++)
-  //     {
-  //       uint32_t ochanpol = ipol * nchan + ichan;
-  //       float value = float((ochanpol * nsamp_per_packet) + isamp);
-  //       if (std::isnan(get_weight_for_channel(ichan, nchan_per_packet)))
-  //       {
-  //         value = 0;
-  //       }
-  //     }
-  //   }
-  // }
 
   // Taking a timestamp after the code is ran
   auto end = high_resolution_clock::now();
@@ -279,9 +260,12 @@ TODO
 - parse directory for all configuration files present in test/utils/data
 - instansiate tests for each configuration file detected
 */
-// nchan * nbit * ndim * npol * nsamp / 8
 INSTANTIATE_TEST_SUITE_P(PerformanceTests, DataUnpackerTest, testing::Values(
-"Low_AA0.5"
+"Low_AA0.5",
+"Low_SB1",
+"Low_SB2",
+"Low_SB3",
+"Low_SB4"
 )); // NOLINT
 
 } // namespace ska::pst::common::test
