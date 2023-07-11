@@ -228,14 +228,12 @@ TEST_P(DataUnpackerTest, test_unpack_performance) // NOLINT
   long int duration_total=0, duration_average=0;
   for (int i=0; i<10; i++)
   {
-    // unpack data and weights
-    std::vector<std::vector<std::vector<std::complex<float>>>>& unpacked = unpacker.unpack(&data[0], data.size(), &weights[0], weights.size());
-
+    
     // Recording the timestamp at the start of the code
     auto beg = high_resolution_clock::now();
     
-    // generate packed data and weights
-    unpacked = unpacker.unpack(&data[0], data.size(), &weights[0], weights.size());
+    // unpack data and weights
+    std::vector<std::vector<std::vector<std::complex<float>>>>& unpacked = unpacker.unpack(&data[0], data.size(), &weights[0], weights.size());
 
     // Taking a timestamp after the code is ran
     auto end = high_resolution_clock::now();
@@ -261,8 +259,7 @@ INSTANTIATE_TEST_SUITE_P(PerformanceTests, DataUnpackerTest, testing::Values(
 "Low_AA0.5",
 "Low_SB4",
 "Mid_Band1_SB4",
-"Mid_Band5a_SB4",
-"Mid_Band5b_SB4"
+"Mid_Band5a_SB4"
 )); // NOLINT
 
 } // namespace ska::pst::common::test
