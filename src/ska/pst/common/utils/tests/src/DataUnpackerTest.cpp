@@ -43,61 +43,30 @@ namespace ska::pst::common::test {
 
 void DataUnpackerTest::SetUp()
 {
-  SPDLOG_TRACE("ska::pst::common::test::DataUnpackerTest::SetUp loading data and weights headers");
-  data_header.load_from_file(test_data_file("DataUnpacker_data_header.txt"));
-  weights_header.load_from_file(test_data_file("DataUnpacker_weights_header.txt"));
-
   SPDLOG_TRACE("DataUnpackerTest::SetUp generating packed data");
-  GeneratePackedData();
 }
 
 void DataUnpackerTest::TearDown()
 {
 }
 
-void DataUnpackerTest::GeneratePackedData()
+void DataUnpackerTest::GeneratePackedData(std::string data_header_file, std::string weights_header_file)
 {
-  data.resize(data_header.get_uint32("RESOLUTION"));
-  weights.resize(weights_header.get_uint32("RESOLUTION"));
+  SPDLOG_TRACE("ska::pst::common::test::DataUnpackerTest::SetUp loading data and weights headers");
+  data_header.load_from_file(test_data_file(data_header_file));
+  weights_header.load_from_file(test_data_file(weights_header_file));
 
+  data.resize(data_header.get_uint32("DB_BUFSZ"));
+  weights.resize(weights_header.get_uint32("WB_BUFSZ"));
 
-  const uint32_t nheaps = 1;
-  const uint32_t packets_per_heap = data_header.get_uint32("NCHAN") / data_header.get_uint32("UDP_NCHAN");
-  const uint32_t npol = data_header.get_uint32("NPOL");
-  const uint32_t nsamp_pp = data_header.get_uint32("UDP_NSAMP");
+  const uint32_t nheaps = data_header.get_uint32("DB_BUFSZ")/data_header.get_uint32("RESOLUTION");
+  const uint32_t nbit = data_header.get_uint32("NBIT");
   const uint32_t nchan_pp = data_header.get_uint32("UDP_NCHAN");
-  const uint32_t ndim = data_header.get_uint32("NDIM");
-  const uint32_t nchan = data_header.get_uint32("NCHAN");
-
-  int16_t * data_ptr = reinterpret_cast<int16_t *>(&data[0]);
-
-  SPDLOG_TRACE("ska::pst::common::test::DataUnpackerTest::GeneratePackedData generating data into {}", reinterpret_cast<void *>(data_ptr));
-  uint32_t osamp = 0;
-  for (uint32_t j=0; j<packets_per_heap; j++)
-  {
-    for (uint32_t k=0; k<npol; k++)
-    {
-      for (uint32_t l=0; l<nchan_pp; l++)
-      {
-        uint32_t ochan = j * nchan_pp + l;
-        uint32_t ochanpol = (k * nchan) + ochan;
-        for (uint32_t m=0; m<nsamp_pp; m++)
-        {
-          for (uint32_t n=0; n<ndim; n++)
-          {
-            // ensure range is 0 to 32767
-            int64_t value = (ochanpol * nsamp_pp) + m;
-            *data_ptr = int16_t(value % 32767);
-            if (n == 1)
-            {
-              *data_ptr *= -1;
-            }
-            data_ptr++;
-          }
-        }
-      }
-    }
-  }
+ 
+  if (nbit == 8)
+    GenerateQuantisedPackedData(reinterpret_cast<int8_t*>(&data[0]));
+  else if (nbit == 16)
+    GenerateQuantisedPackedData(reinterpret_cast<int16_t*>(&data[0]));
 
   // the weights stream consists of the scale and weights array from each UDP packet
   uint32_t packet_scales_size = weights_header.get_uint32("PACKET_SCALES_SIZE");
@@ -111,19 +80,39 @@ void DataUnpackerTest::GeneratePackedData()
 
   SPDLOG_TRACE("ska::pst::common::test::DataUnpackerTest::GeneratePackedData generating weights weights.size()={} npackets={} weights+scales={} weights_per_packet={}",
     weights.size(), npackets, packet_scales_size + packet_weights_size, weights_per_packet);
-  for (uint32_t i=0; i<npackets; i++)
+  for (uint32_t i=0; i<nheaps; i++)
   {
-    float * scl = reinterpret_cast<float *>(&weights[wdx]);
-    *scl = get_weight_for_channel(i * nchan_pp, nchan_pp);
-    wdx += packet_scales_size;
-
-    uint16_t * wts = reinterpret_cast<uint16_t *>(&weights[wdx]);
-    for (uint32_t j=0; j<weights_per_packet; j++)
+    for (uint32_t j=0; j<npackets; j++)
     {
-      wts[j] = 65535;
+      float * scl = reinterpret_cast<float *>(&weights[wdx]);
+      *scl = get_weight_for_channel(j * nchan_pp, nchan_pp);
+      wdx += packet_scales_size;
+
+      uint16_t * wts = reinterpret_cast<uint16_t *>(&weights[wdx]);
+      for (uint32_t k=0; k<weights_per_packet; k++)
+      {
+        wts[k] = 65535;
+      }
+      wdx += packet_weights_size;
     }
-    wdx += packet_weights_size;
   }
+}
+
+auto DataUnpackerTest::get_float_value_for_channel_sample(uint32_t ichan, uint32_t nsamp, uint32_t isamp, uint32_t nbit) -> float
+{
+  if (nbit == 8)
+  {
+    int8_t packed;
+    get_value_for_channel_sample(ichan, nsamp, isamp, &packed);
+    return float(packed);
+  }
+  if (nbit == 16)
+  {
+    int16_t packed;
+    get_value_for_channel_sample(ichan, nsamp, isamp, &packed);
+    return float(packed);
+  }
+  return std::nanf("badquant");
 }
 
 auto DataUnpackerTest::get_weight_for_channel(uint32_t channel, uint32_t nchan_per_packet) -> float
@@ -138,6 +127,7 @@ auto DataUnpackerTest::get_weight_for_channel(uint32_t channel, uint32_t nchan_p
 TEST_F(DataUnpackerTest, test_configure) // NOLINT
 {
   ska::pst::common::DataUnpacker unpacker;
+  GeneratePackedData("DataUnpacker_data_header.txt", "DataUnpacker_weights_header.txt");
   EXPECT_NO_THROW(unpacker.configure(data_header, weights_header)); // NOLINT
 
   static constexpr uint32_t bad_header_param = 3;
@@ -154,6 +144,8 @@ TEST_F(DataUnpackerTest, test_configure) // NOLINT
 TEST_F(DataUnpackerTest, test_unpack) // NOLINT
 {
   ska::pst::common::DataUnpacker unpacker;
+
+  GeneratePackedData("DataUnpacker_data_header.txt", "DataUnpacker_weights_header.txt");
   unpacker.configure(data_header, weights_header);
 
   // generate packed data and weights
@@ -164,6 +156,7 @@ TEST_F(DataUnpackerTest, test_unpack) // NOLINT
   const uint32_t npol = unpacked[0][0].size();
   const uint32_t nchan_per_packet = weights_header.get_uint32("UDP_NCHAN");
   const uint32_t nsamp_per_packet = weights_header.get_uint32("UDP_NSAMP");
+  const uint32_t nbit = data_header.get_uint32("NBIT");
 
   for (unsigned isamp=0; isamp<nsamp; isamp++)
   {
@@ -171,8 +164,7 @@ TEST_F(DataUnpackerTest, test_unpack) // NOLINT
     {
       for (unsigned ipol=0; ipol<npol; ipol++)
       {
-        uint32_t ochanpol = ipol * nchan + ichan;
-        float value = float((ochanpol * nsamp_per_packet) + isamp);
+        float value = get_float_value_for_channel_sample(ichan, nsamp, isamp, nbit);
         if (std::isnan(get_weight_for_channel(ichan, nchan_per_packet)))
         {
           value = 0;
@@ -187,11 +179,15 @@ TEST_F(DataUnpackerTest, test_unpack) // NOLINT
 TEST_F(DataUnpackerTest, test_integrate_bandpass) // NOLINT
 {
   ska::pst::common::DataUnpacker unpacker;
+
+  GeneratePackedData("DataUnpacker_data_header.txt", "DataUnpacker_weights_header.txt");
   unpacker.configure(data_header, weights_header);
   unpacker.integrate_bandpass(&data[0], data.size(), &weights[0], weights.size());
   std::vector<std::vector<float>>& bandpass = unpacker.get_bandpass();
 
-  const uint32_t nsamp = data_header.get_uint32("UDP_NSAMP");
+  const uint32_t nheap = data.size()/data_header.get_uint32("RESOLUTION");
+  const uint32_t nsamp = nheap * data_header.get_uint32("UDP_NSAMP");
+  const uint32_t nbit = data_header.get_uint32("NBIT");
   const uint32_t nchan = bandpass.size();
   const uint32_t npol = bandpass[0].size();
   const uint32_t nchan_per_packet = weights_header.get_uint32("UDP_NCHAN");
@@ -204,7 +200,7 @@ TEST_F(DataUnpackerTest, test_integrate_bandpass) // NOLINT
       float power = 0;
       for (unsigned isamp=0; isamp<nsamp; isamp++)
       {
-        float value = float((ochanpol * nsamp) + isamp);
+        float value = get_float_value_for_channel_sample(ichan, nsamp, isamp, nbit);
         power += (value * value) + (value * value);
       }
       if (std::isnan(get_weight_for_channel(ichan, nchan_per_packet)))
@@ -222,37 +218,38 @@ TEST_P(DataUnpackerTest, test_unpack_performance) // NOLINT
   std::string param = GetParam();
   std::string data_file = param + "_data_header.txt";
   std::string weights_file = param + "_weights_header.txt";
-  SPDLOG_INFO("data_file: {}", data_file);
-  SPDLOG_INFO("weights_file: {}", weights_file);
-  data_header.load_from_file(test_data_file(data_file));
-  weights_header.load_from_file(test_data_file(weights_file));
+  SPDLOG_DEBUG("data_file: {}", data_file);
+  SPDLOG_DEBUG("weights_file: {}", weights_file);
 
-  //
-  // resolution = nchan * nbit * ndim * npol * nsamp / 8
-  GeneratePackedData();
-
+  GeneratePackedData(data_file, weights_file);
   ska::pst::common::DataUnpacker unpacker;
   unpacker.configure(data_header, weights_header);
 
-  // force a resize of the unpacked attribute in the DataUnpacker base class
-  // unpacker.resize(data.size());
-  std::vector<std::vector<std::vector<std::complex<float>>>>& unpacked = unpacker.unpack(&data[0], data.size(), &weights[0], weights.size());
+  long int duration_total=0, duration_average=0;
+  for (int i=0; i<10; i++)
+  {
+    // unpack data and weights
+    std::vector<std::vector<std::vector<std::complex<float>>>>& unpacked = unpacker.unpack(&data[0], data.size(), &weights[0], weights.size());
 
-  // Recording the timestamp at the start of the code
-  auto beg = high_resolution_clock::now();
-  
-  // generate packed data and weights
-  unpacked = unpacker.unpack(&data[0], data.size(), &weights[0], weights.size());
+    // Recording the timestamp at the start of the code
+    auto beg = high_resolution_clock::now();
+    
+    // generate packed data and weights
+    unpacked = unpacker.unpack(&data[0], data.size(), &weights[0], weights.size());
 
-  // Taking a timestamp after the code is ran
-  auto end = high_resolution_clock::now();
-  // Subtracting the end timestamp from the beginning
-  // And we choose to receive the difference in microseconds
-  auto duration = duration_cast<microseconds>(end - beg);
-
+    // Taking a timestamp after the code is ran
+    auto end = high_resolution_clock::now();
+    // Subtracting the end timestamp from the beginning
+    // And we choose to receive the difference in microseconds
+    auto duration = duration_cast<microseconds>(end - beg);
+    duration_total += duration.count();
+  }
+  duration_average = duration_total/10;
   // Displaying the elapsed time
-  SPDLOG_INFO("Elapsed Time (microseconds): {}", duration.count());
-
+  SPDLOG_INFO("Data Size: {}", data.size());
+  SPDLOG_INFO("Weights Size: {}", weights.size());
+  SPDLOG_INFO("Elapsed Time (microseconds): {}", duration_average);
+  // }
 }
 
 /*
@@ -262,10 +259,10 @@ TODO
 */
 INSTANTIATE_TEST_SUITE_P(PerformanceTests, DataUnpackerTest, testing::Values(
 "Low_AA0.5",
-"Low_SB1",
-"Low_SB2",
-"Low_SB3",
-"Low_SB4"
+"Low_SB4",
+"Mid_Band1_SB4",
+"Mid_Band5a_SB4",
+"Mid_Band5b_SB4"
 )); // NOLINT
 
 } // namespace ska::pst::common::test

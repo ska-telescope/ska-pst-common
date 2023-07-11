@@ -7,7 +7,7 @@ NBIT                16
 NANT                1
 NPOL                1
 NDIM                1
-TSAMP               6635.52
+TSAMP               207.36
 BAND                Low
 WT_NSAMP            32
 UDP_NSAMP           32
@@ -35,7 +35,7 @@ HB_BUFSZ            4096
 DB_NBUFS            8
 DB_BUFSZ            11059200
 WB_NBUFS            8
-WB_BUFSZ            93600
+WB_BUFSZ            1327104
 SCAN_ID             1
 BEAM_ID             1
 DATA_GENERATOR      Sine
@@ -44,5 +44,5 @@ NSAMP_PER_WEIGHT    32
 UTC_START           2023-02-14-22:15:37
 PICOSECONDS         0
 FILE_NUMBER         0
-PACKET_WEIGHTS_SIZE2 48
+PACKET_WEIGHTS_SIZE 48
 PACKET_SCALES_SIZE  4

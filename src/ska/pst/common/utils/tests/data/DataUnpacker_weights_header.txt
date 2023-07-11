@@ -37,7 +37,7 @@ HB_BUFSZ            4096
 DB_NBUFS            8
 DB_BUFSZ            11059200
 WB_NBUFS            8
-WB_BUFSZ            93600
+WB_BUFSZ            1327104
 SCAN_ID             1
 BEAM_ID             1
 DATA_GENERATOR      Sine
