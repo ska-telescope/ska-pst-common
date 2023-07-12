@@ -95,8 +95,6 @@ void ska::pst::common::DataUnpacker::configure(const ska::pst::common::AsciiHead
 
 auto ska::pst::common::DataUnpacker::get_scale_factor(char * weights, uint32_t packet_number) -> float
 {
-  SPDLOG_TRACE("ska::pst::common::DataUnpacker::get_scale_factor weights={}, packet_number={} weights_packet_stride={}",
-    reinterpret_cast<void *>(weights), packet_number, weights_packet_stride);
   auto * weights_ptr = reinterpret_cast<float *>(weights + (packet_number * weights_packet_stride)); // NOLINT
   // return the scale factor, ignoring invalid value of 0
   if (*weights_ptr == 0) {
@@ -113,13 +111,16 @@ void ska::pst::common::DataUnpacker::resize(uint64_t data_bufsz)
   const uint64_t nval = nsamp * nchan * npol;
 
   SPDLOG_DEBUG("ska::pst::common::DataUnpacker::resize nsamp={} nchan={} npol={} nval={}", nsamp, nchan, npol, nval);
-  unpacked.resize(nsamp);
+  if (unpacked.size() != nsamp)
+    unpacked.resize(nsamp);
   for (unsigned isamp=0; isamp<nsamp; isamp++)
   {
-    unpacked[isamp].resize(nchan);
+    if (unpacked[isamp].size() != nchan)
+      unpacked[isamp].resize(nchan);
     for (unsigned ichan=0; ichan<nchan; ichan++)
     {
-      unpacked[isamp][ichan].resize(npol);
+      if (unpacked[isamp][ichan].size() != npol)
+        unpacked[isamp][ichan].resize(npol);
     }
   }
 }
