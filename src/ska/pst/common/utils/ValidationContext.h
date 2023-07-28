@@ -31,8 +31,8 @@
 #include <string>
 #include <vector>
 
-#ifndef SKA_PST_COMMON_UTIL_ValidationContext_h
-#define SKA_PST_COMMON_UTIL_ValidationContext_h
+#ifndef SKA_PST_COMMON_UTILS_ValidationContext_h
+#define SKA_PST_COMMON_UTILS_ValidationContext_h
 
 namespace ska::pst::common
 {
@@ -184,4 +184,4 @@ namespace ska::pst::common
 
 } // namespace ska::pst::common
 
-#endif // SKA_PST_COMMON_UTIL_ValidationContext_h
+#endif // SKA_PST_COMMON_UTILS_ValidationContext_h

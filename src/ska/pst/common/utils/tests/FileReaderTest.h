@@ -28,76 +28,53 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <sys/time.h>
-#include <cinttypes>
+#include <gtest/gtest.h>
+#include <string>
+#include <memory>
+#include <vector>
 
-#ifndef SKA_PST_COMMON_UTILS_Timer_h
-#define SKA_PST_COMMON_UTILS_Timer_h
+#include "ska/pst/common/utils/FileReader.h"
 
-namespace ska::pst::common
-{
+#ifndef SKA_PST_COMMON_UTILS_TESTS_FileReaderTest_h
+#define SKA_PST_COMMON_UTILS_TESTS_FileReaderTest_h
+
+namespace ska::pst::common::test {
+
   /**
-   * @brief Provides functionality for millisecond precision timing
+   * @brief Test the FileReader class
+   * 
+   * @details
    * 
    */
-  class Timer {
+  class FileReaderTest : public ::testing::Test
+  {
+    protected:
+      void SetUp() override;
 
-    public: 
+      void TearDown() override;
 
-      /**
-       * @brief Construct a new Time object initialized to the current timestamp
-       * 
-       */
-      Timer();
+    public:
+      FileReaderTest();
 
-      /**
-       * @brief Destroy the Timer object
-       *
-       */
-      ~Timer() = default;
+      ~FileReaderTest();
 
-      /**
-       * @brief Reset the timer.
-       *
-       */
-      void reset();
+      ska::pst::common::AsciiHeader header;
 
-      /**
-       * @brief Wait until the specified offset has occured since the last reset of the timer
-       *
-       * @param offset offset in microseconds
-       */
-      void wait_until(double offset);
+      std::vector<char> file_header;
 
-      /**
-       * @brief Get the elapsed time since the last reset in microseconds
-       *
-       * @return double elapsed time in microseconds
-       */
-      auto get_elapsed_microseconds() -> double;
+      std::vector<char> file_data;
 
-      /**
-       * @brief Get the elapsed time since the last reset in milliseconds
-       *
-       * @return int elapsed time in milliseconds
-       */
-      auto get_elapsed_milliseconds() -> int;
+      std::string file_name{"/tmp/FileReaderTest.dada"};
 
-      /**
-       * @brief Print information about the data transfer performance
-       *
-       * @param bytes number of bytes to use when calculating effective data rate
-       */
-      void print_rates(uint64_t bytes);
-    
+      uint32_t header_size{0};
+
+      uint32_t data_size{1048576};
+
     private:
-
-      struct timeval start_epoch{};
-
-      double target{0};
 
   };
 
-} // namespace ska::pst::common
+} // namespace ska::pst::common::test
 
-#endif // SKA_PST_COMMON_UTILS_Timer_h
+#endif // SKA_PST_COMMON_UTILS_TESTS_FileReaderTest_h
+
