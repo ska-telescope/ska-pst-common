@@ -34,8 +34,8 @@
 #include <stdexcept>
 #include <sstream>      // std::ostringstream
 
-#ifndef SKA_PST_COMMON_UTIL_AsciiHeader_h
-#define SKA_PST_COMMON_UTIL_AsciiHeader_h
+#ifndef SKA_PST_COMMON_UTILS_AsciiHeader_h
+#define SKA_PST_COMMON_UTILS_AsciiHeader_h
 
 namespace ska::pst::common {
 
@@ -371,4 +371,4 @@ namespace ska::pst::common {
 
 } // namespace ska::pst::common
 
-#endif // SKA_PST_COMMON_UTIL_AsciiHeader_h
+#endif // SKA_PST_COMMON_UTILS_AsciiHeader_h

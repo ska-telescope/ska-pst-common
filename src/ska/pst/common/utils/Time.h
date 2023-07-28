@@ -34,8 +34,8 @@
 
 #include "ska/pst/common/definitions.h"
 
-#ifndef SKA_PST_COMMON_UTIL_Time_h
-#define SKA_PST_COMMON_UTIL_Time_h
+#ifndef SKA_PST_COMMON_UTILS_Time_h
+#define SKA_PST_COMMON_UTILS_Time_h
 
 #define MJD_1970_01_01 40587  // NOLINT
 #define UNIX_TIME_TO_MJD(t) ( MJD_1970_01_01 + ((t) / 86400.0) )   // NOLINT
@@ -217,4 +217,4 @@ namespace ska::pst::common {
 
 } // namespace ska::pst::common
 
-#endif // SKA_PST_COMMON_UTIL_Time_h
+#endif // SKA_PST_COMMON_UTILS_Time_h

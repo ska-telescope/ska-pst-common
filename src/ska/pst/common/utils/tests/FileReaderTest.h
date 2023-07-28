@@ -35,8 +35,8 @@
 
 #include "ska/pst/common/utils/FileReader.h"
 
-#ifndef SKA_PST_COMMON_UTIL_TESTS_FileReaderTest_h
-#define SKA_PST_COMMON_UTIL_TESTS_FileReaderTest_h
+#ifndef SKA_PST_COMMON_UTILS_TESTS_FileReaderTest_h
+#define SKA_PST_COMMON_UTILS_TESTS_FileReaderTest_h
 
 namespace ska::pst::common::test {
 
@@ -76,5 +76,5 @@ namespace ska::pst::common::test {
 
 } // namespace ska::pst::common::test
 
-#endif // SKA_PST_COMMON_UTIL_TESTS_FileReaderTest_h
+#endif // SKA_PST_COMMON_UTILS_TESTS_FileReaderTest_h
 

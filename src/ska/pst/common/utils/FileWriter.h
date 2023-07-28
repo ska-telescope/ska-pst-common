@@ -35,8 +35,8 @@
 
 #include "ska/pst/common/utils/AsciiHeader.h"
 
-#ifndef SKA_PST_COMMON_UTIL_FileWriter_h
-#define SKA_PST_COMMON_UTIL_FileWriter_h
+#ifndef SKA_PST_COMMON_UTILS_FileWriter_h
+#define SKA_PST_COMMON_UTILS_FileWriter_h
 
 namespace ska::pst::common {
 
@@ -192,4 +192,4 @@ namespace ska::pst::common {
 
 } // namespace ska::pst::common
 
-#endif // SKA_PST_COMMON_UTIL_FileWriter_h
+#endif // SKA_PST_COMMON_UTILS_FileWriter_h
