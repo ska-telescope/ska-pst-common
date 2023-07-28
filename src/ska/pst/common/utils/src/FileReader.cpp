@@ -98,8 +98,7 @@ void ska::pst::common::FileReader::close_file()
 
 auto ska::pst::common::FileReader::read_header() -> ssize_t
 {
-  // assume a default header size of 4096 bytes
-  static constexpr uint32_t default_header_size = 4096;
+  static constexpr uint32_t default_header_size = ska::pst::common::AsciiHeader::default_header_size;
   std::vector<char> buffer;
   buffer.resize(default_header_size);
 
@@ -136,8 +135,20 @@ auto ska::pst::common::FileReader::read_header() -> ssize_t
 
 auto ska::pst::common::FileReader::read_data(char * data_ptr, uint64_t bytes_to_read) -> ssize_t
 {
+  if ( data_ptr == nullptr )
+  {
+    SPDLOG_WARN("ska::pst::common::FileReader::read_data data_ptr is null");
+    throw std::runtime_error("ska::pst::common::FileReader::read_data data_ptr is null");
+  }
+
   size_t bytes_remaining = file_size - bytes_read_from_file;
   SPDLOG_TRACE("ska::pst::common::FileReader::read_data bytes_to_read={} bytes_remaining={}", bytes_to_read, bytes_remaining);
+
+  if (bytes_to_read == 0)
+  {
+    return 0;
+  }
+
   if (bytes_remaining < bytes_to_read)
   {
     bytes_to_read = bytes_remaining;
