@@ -9,6 +9,8 @@ set(public_headers
     DataGenerator.h
     DataGeneratorFactory.h
     DataUnpacker.h
+    FileReader.h
+    FileWriter.h
     GaussianNoiseGenerator.h
     NormalSequence.h
     RandomDataGenerator.h
@@ -27,6 +29,8 @@ set(sources
     src/DataGenerator.cpp
     src/DataGeneratorFactory.cpp
     src/DataUnpacker.cpp
+    src/FileReader.cpp
+    src/FileWriter.cpp
     src/GaussianNoiseGenerator.cpp
     src/RandomDataGenerator.cpp
     src/Logging.cpp
