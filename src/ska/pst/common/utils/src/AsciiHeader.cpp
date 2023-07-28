@@ -133,7 +133,7 @@ void ska::pst::common::AsciiHeader::load_from_file(const std::string &filename)
   std::ifstream header_file(filename);
   if (!header_file.good())
   {
-    SPDLOG_ERROR("ska::pst::common::AsciiHeader::load_from_file could not open file for reading");
+    SPDLOG_ERROR("ska::pst::common::AsciiHeader::load_from_file could not open {} for reading", filename);
     throw std::runtime_error("ska::pst::common::AsciiHeader::load_from_file could not open file for reading");
   }
 
