@@ -81,11 +81,11 @@ namespace ska::pst::common {
       //! the DADA file reader
       std::unique_ptr<ska::pst::common::FileReader> reader;
 
-      //! the base address of the mapped data
-      void* map;
+      //! the details of the entire block
+      std::pair<char*,size_t> block_info;
 
       //! the details of the next block
-      std::pair<char*,size_t> block_info;
+      std::pair<char*,size_t> next_block_info;
   };
 
 } // namespace ska::pst::common

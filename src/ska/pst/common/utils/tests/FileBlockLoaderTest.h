@@ -28,12 +28,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gtest/gtest.h>
-#include <string>
-#include <memory>
-#include <vector>
-
 #include "ska/pst/common/utils/FileBlockLoader.h"
+
+#include <gtest/gtest.h>
 
 #ifndef SKA_PST_COMMON_UTILS_TESTS_FileBlockLoaderTest_h
 #define SKA_PST_COMMON_UTILS_TESTS_FileBlockLoaderTest_h

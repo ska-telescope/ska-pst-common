@@ -31,7 +31,7 @@
 #include "ska/pst/common/utils/FileBlockLoader.h"
 
 #include <spdlog/spdlog.h>
-#include <sys/mman.h> // mmap and munmap
+#include <sys/mman.h>
 
 ska::pst::common::FileBlockLoader::FileBlockLoader(const std::string& file_path)
 	: reader(new FileReader(file_path))
@@ -39,7 +39,7 @@ ska::pst::common::FileBlockLoader::FileBlockLoader(const std::string& file_path)
   ssize_t hdr_size = reader->read_header();
   ssize_t data_size = reader->get_file_size()-hdr_size;
 
-  map = mmap(0, data_size, PROT_READ, MAP_SHARED, reader->_get_fd(), hdr_size);
+  void* map = mmap(0, data_size, PROT_READ, MAP_SHARED, reader->_get_fd(), hdr_size);
   if (map == MAP_FAILED)
   {
     SPDLOG_ERROR("ska::pst::common::FileBlockLoader::ctor failed mmap fd={}", reader->_get_fd());
@@ -48,11 +48,15 @@ ska::pst::common::FileBlockLoader::FileBlockLoader(const std::string& file_path)
 
   block_info.first = reinterpret_cast<char*>(map);
   block_info.second = data_size;
+  next_block_info = block_info;
 }
 
 ska::pst::common::FileBlockLoader::~FileBlockLoader ()
 {
-  if (munmap(map, reader->get_file_size()) == -1)
+  void* map = block_info.first;
+  ssize_t data_size = block_info.second;
+
+  if (munmap(map, data_size) == -1)
   {
     SPDLOG_ERROR("ska::pst::common::FileBlockLoader::ctor failed munmap");
     throw std::runtime_error("ska::pst::common::FileReader::dtor failed munmap");
@@ -66,8 +70,8 @@ const ska::pst::common::AsciiHeader& ska::pst::common::FileBlockLoader::get_head
 
 std::pair<char*,size_t> ska::pst::common::FileBlockLoader::next_block()
 {
-  auto result = block_info;
-  block_info = std::pair<char*,size_t> (nullptr, 0); // next call to next_block returns EOD marker
+  auto result = next_block_info;
+  next_block_info = std::pair<char*,size_t> (nullptr, 0); // next call to next_block returns EOD marker
   return result;
 }
 

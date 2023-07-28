@@ -30,7 +30,6 @@
 
 #include <spdlog/spdlog.h>
 #include <filesystem>
-#include <vector>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -84,7 +83,9 @@ void FileBlockLoaderTest::TearDown()
 
 TEST_F(FileBlockLoaderTest, test_get_header) // NOLINT
 {
+  SPDLOG_TRACE("ska::pst::common::test::FileBlockLoaderTest::test_get_header construct from file_name={}", file_name);
   FileBlockLoader fr(file_name);
+  SPDLOG_TRACE("ska::pst::common::test::FileBlockLoaderTest::test_get_header get_header");
   EXPECT_EQ(fr.get_header().raw(), header.raw());
 }
 
