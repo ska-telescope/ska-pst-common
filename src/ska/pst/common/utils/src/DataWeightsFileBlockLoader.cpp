@@ -37,7 +37,6 @@
 #include "ska/pst/common/utils/DataWeightsFileBlockLoader.h"
 
 ska::pst::common::DataWeightsFileBlockLoader::DataWeightsFileBlockLoader(
-        const ska::pst::common::AsciiHeader& config,
         const std::string& data_file_path,
         const std::string& weights_file_path)
 {

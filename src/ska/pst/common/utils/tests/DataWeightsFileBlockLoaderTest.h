@@ -3,18 +3,18 @@
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *
+ * 
  * 1. Redistributions of source code must retain the above copyright notice,
  * this list of conditions and the following disclaimer.
- *
+ * 
  * 2. Redistributions in binary form must reproduce the above copyright
  * notice, this list of conditions and the following disclaimer in the
  * documentation and/or other materials provided with the distribution.
- *
+ * 
  * 3. Neither the name of the copyright holder nor the names of its
  * contributors may be used to endorse or promote products derived from this
  * software without specific prior written permission.
- *
+ * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -28,44 +28,52 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <string>
+#include "ska/pst/common/utils/DataWeightsFileBlockLoader.h"
 
-#include "ska/pst/common/utils/DataWeightsBlockLoader.h"
+#include <gtest/gtest.h>
 
-#ifndef __SKA_PST_COMMON_UTILS_DataWeightsFileBlockLoader_h
-#define __SKA_PST_COMMON_UTILS_DataWeightsFileBlockLoader_h
+#ifndef SKA_PST_COMMON_UTILS_TESTS_DataWeightsFileBlockLoaderTest_h
+#define SKA_PST_COMMON_UTILS_TESTS_DataWeightsFileBlockLoaderTest_h
 
-namespace ska::pst::common {
+namespace ska::pst::common::test {
 
   /**
-   * @brief Class used for reading block of voltage from a file along with
-   * its weights.
-   *
-   * This reader uses a memory mapped (mmap) to read and seek to the next
-   * appropriate block.
+   * @brief Test the DataWeightsFileBlockLoader class
+   * 
+   * @details
+   * 
    */
-  class DataWeightsFileBlockLoader : public DataWeightsBlockLoader
+  class DataWeightsFileBlockLoaderTest : public ::testing::Test
   {
-    public:
-      /**
-       * @brief Create instance of a File Reader object.
-       *
-       * @param config the configuration for the file processing job.
-       * @param data_file_path path to the data file to process.
-       * @param weights_file_path the path to the weights file for the data file.
-       */
-      DataWeightsFileBlockLoader(
-        const std::string& data_file_path,
-        const std::string& weights_file_path
-      );
+    protected:
+      void SetUp() override;
 
-      /**
-       * @brief Destroy the File Reader object.
-       *
-       */
-      ~DataWeightsFileBlockLoader();
+      void TearDown() override;
+
+    public:
+      DataWeightsFileBlockLoaderTest();
+
+      ~DataWeightsFileBlockLoaderTest();
+
+      ska::pst::common::AsciiHeader header;
+
+      std::vector<char> file_header;
+
+      std::vector<char> data_file_data;
+      std::vector<char> weights_file_data;
+
+      std::string data_file_name{"/tmp/DataWeightsFileBlockLoaderTest.dada"};
+      std::string weights_file_name{"/tmp/DataWeightsFileBlockLoaderTest.dada"};
+
+      uint32_t header_size{0};
+
+      uint32_t data_size{1048576};
+
+    private:
+
   };
 
-} // namespace ska::pst::common
+} // namespace ska::pst::common::test
 
-#endif // __SKA_PST_COMMON_UTILS_DataWeightsFileBlockLoader_h
+#endif // SKA_PST_COMMON_UTILS_TESTS_DataWeightsFileBlockLoaderTest_h
+
