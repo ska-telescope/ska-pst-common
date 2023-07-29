@@ -62,8 +62,8 @@ namespace ska::pst::common::test {
       std::vector<char> data_file_data;
       std::vector<char> weights_file_data;
 
-      std::string data_file_name{"/tmp/DataWeightsFileBlockLoaderTest.dada"};
-      std::string weights_file_name{"/tmp/DataWeightsFileBlockLoaderTest.dada"};
+      std::string data_file_name{"/tmp/DataFileBlockLoaderTest.dada"};
+      std::string weights_file_name{"/tmp/WeightsFileBlockLoaderTest.dada"};
 
       uint32_t header_size{0};
 

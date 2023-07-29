@@ -54,17 +54,17 @@ DataWeightsFileBlockLoaderTest::DataWeightsFileBlockLoaderTest()
   sprintf(&file_header[0], header.raw().c_str(), header.raw().size()); // NOLINT
 
   data_file_data.resize(data_size);
-  auto file_data_ptr = reinterpret_cast<uint8_t *>(&data_file_data[0]);
+  auto data_file_ptr = reinterpret_cast<uint8_t *>(&data_file_data[0]);
   for (unsigned i=0; i<data_size; i++)
   {
-    file_data_ptr[i] = uint8_t(i % 256); // NOLINT
+    data_file_ptr[i] = uint8_t(i % 256); // NOLINT
   }
 
   weights_file_data.resize(data_size);
-  file_data_ptr = reinterpret_cast<uint8_t *>(&weights_file_data[0]);
+  auto weights_file_ptr = reinterpret_cast<uint8_t *>(&weights_file_data[0]);
   for (unsigned i=0; i<data_size; i++)
   {
-    file_data_ptr[i] = uint8_t((i + 128) % 256); // NOLINT
+    weights_file_ptr[i] = uint8_t((i + 128) % 256); // NOLINT
   }
 
   int flags = O_WRONLY | O_CREAT | O_TRUNC;
@@ -118,16 +118,20 @@ TEST_F(DataWeightsFileBlockLoaderTest, test_next_block) // NOLINT
   EXPECT_EQ(next.data_size, data_size);
   EXPECT_EQ(next.weights_size, data_size);
 
-  auto file_data_ptr = reinterpret_cast<uint8_t *>(next.data_block);
+  auto data_file_ptr = reinterpret_cast<uint8_t *>(next.data_block);
+  auto data_ptr = reinterpret_cast<uint8_t *>(&data_file_data[0]);
+
   for (unsigned i=0; i<data_size; i++)
   {
-    ASSERT_EQ(file_data_ptr[i], uint8_t(i % 256));  // NOLINT
+    ASSERT_EQ(data_file_ptr[i], data_ptr[i]);  // NOLINT
   }
 
-  file_data_ptr = reinterpret_cast<uint8_t *>(next.weights_block);
+  auto weights_file_ptr = reinterpret_cast<uint8_t *>(next.weights_block);
+  auto weights_ptr = reinterpret_cast<uint8_t *>(&weights_file_data[0]);
+
   for (unsigned i=0; i<data_size; i++)
   {
-    ASSERT_EQ(file_data_ptr[i], uint8_t((i + 128) % 256));  // NOLINT
+    ASSERT_EQ(weights_file_ptr[i], weights_ptr[i]);  // NOLINT
   }
 }
 

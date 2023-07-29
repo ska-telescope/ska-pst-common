@@ -33,7 +33,7 @@ add_test(AsciiHeaderTest AsciiHeaderTest --test_data "${CMAKE_CURRENT_LIST_DIR}/
 add_test(DataGeneratorTest DataGeneratorTest --test_data "${CMAKE_CURRENT_LIST_DIR}/data")
 add_test(DataUnpackerTest DataUnpackerTest --test_data "${CMAKE_CURRENT_LIST_DIR}/data")
 add_test(DataGeneratorBitDepthTest DataGeneratorBitDepthTest --test_data "${CMAKE_CURRENT_LIST_DIR}/data")
-add_test(DataWeightsFileBlockLoaderTest FileBlockLoaderTest --test_data "${CMAKE_CURRENT_LIST_DIR}/data")
+add_test(DataWeightsFileBlockLoaderTest DataWeightsFileBlockLoaderTest --test_data "${CMAKE_CURRENT_LIST_DIR}/data")
 add_test(FileBlockLoaderTest FileBlockLoaderTest --test_data "${CMAKE_CURRENT_LIST_DIR}/data")
 add_test(FileReaderTest FileReaderTest --test_data "${CMAKE_CURRENT_LIST_DIR}/data")
 add_test(NormalSequenceTest NormalSequenceTest --test_data "${CMAKE_CURRENT_LIST_DIR}/data")

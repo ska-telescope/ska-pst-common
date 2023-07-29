@@ -130,7 +130,7 @@ auto ska::pst::common::FileReader::read_header() -> ssize_t
 
   // increment the counter for bytes read
   bytes_read_from_file = hdr_size;
-  return ssize_t(hdr_size);
+  return static_cast<ssize_t>(hdr_size);
 }
 
 auto ska::pst::common::FileReader::read_data(char * data_ptr, uint64_t bytes_to_read) -> ssize_t
