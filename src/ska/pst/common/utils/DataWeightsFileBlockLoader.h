@@ -30,47 +30,43 @@
 
 #include <string>
 
-#include "ska/pst/common/utils/AsciiHeader.h"
+#include "ska/pst/common/utils/DataWeightsBlockLoader.h"
 
-#ifndef __SKA_PST_COMMON_UTILS_BlockLoader_h
-#define __SKA_PST_COMMON_UTILS_BlockLoader_h
+#ifndef __SKA_PST_COMMON_UTILS_DataWeightsFileBlockLoader_h
+#define __SKA_PST_COMMON_UTILS_DataWeightsFileBlockLoader_h
 
 namespace ska::pst::common {
 
   /**
-   * @brief Interface used for reading blocks of data from a source
+   * @brief Class used for reading block of voltage from a file along with
+   * its weights.
    *
+   * This reader uses a memory mapped (mmap) to read and seek to the next
+   * appropriate block.
    */
-  class BlockLoader
+  class DataWeightsFileBlockLoader : public DataWeightsBlockLoader
   {
     public:
+      /**
+       * @brief Create instance of a File Reader object.
+       *
+       * @param config the configuration for the file processing job.
+       * @param data_file_path path to the data file to process.
+       * @param weights_file_path the path to the weights file for the data file.
+       */
+      DataWeightsFileBlockLoader(
+        const ska::pst::common::AsciiHeader& config,
+        const std::string& data_file_path,
+        const std::string& weights_file_path
+      );
 
       /**
-       * @brief Virtual destructor required for interfaces
+       * @brief Destroy the File Reader object.
        *
        */
-      virtual ~BlockLoader () = default;
-
-      /**
-       * @brief Get the AsciiHeader that describes the block stream
-       *
-       * @return const ska::pst::common::AsciiHeader& header of the data
-       */
-      virtual const ska::pst::common::AsciiHeader& get_header() const = 0;
-
-      /**
-       * @brief Get the next block of data
-       *
-       * This returns a pair that contains the pointer to the next block of data
-       * and the size, in bytes, of that block.
-       * At the end of the block stream, this function returns (nullptr, 0)
-       *
-       * @return (char* address of block, size_t bytes in block)
-       */
-      virtual std::pair<char*,size_t> next_block() = 0;
+      ~DataWeightsFileBlockLoader();
   };
 
 } // namespace ska::pst::common
 
-#endif // __SKA_PST_COMMON_UTILS_BlockLoader_h
-
+#endif // __SKA_PST_COMMON_UTILS_DataWeightsFileBlockLoader_h
