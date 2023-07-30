@@ -38,6 +38,7 @@
 
 #include "ska/pst/common/testutils/GtestMain.h"
 #include "ska/pst/common/utils/tests/FileWriterTest.h"
+#include "ska/pst/common/utils/FileReader.h"
 
 auto main(int argc, char* argv[]) -> int
 {
@@ -270,6 +271,18 @@ TEST_F(FileWriterTest, test_write_data) // NOLINT
 
     SPDLOG_TRACE("ska::pst::common::test::FileWriterTest::test_write_data write_data");
     EXPECT_EQ(writer.write_data(file_data, data_size), data_size);
+
+    FileReader reader (file_name);
+    reader.read_header();
+    EXPECT_EQ(reader.get_header().raw(), header.raw());
+
+    std::vector<char> read_data(data_size);
+    EXPECT_EQ(reader.read_data(&read_data[0], data_size), data_size);
+
+    for (unsigned i=0; i<data_size; i++)
+    {
+      ASSERT_EQ(file_data[i], read_data[i]);  // NOLINT
+    }
   }
 
   std::filesystem::remove(std::filesystem::path(file_name));
