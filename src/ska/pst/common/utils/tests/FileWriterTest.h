@@ -62,7 +62,7 @@ namespace ska::pst::common::test {
 
       std::vector<char> file_header;
 
-      std::vector<char> file_data;
+      char* file_data{nullptr};
 
       std::string file_name{"/tmp/FileWriterTest.dada"};
 

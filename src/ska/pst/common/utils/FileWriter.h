@@ -54,7 +54,7 @@ namespace ska::pst::common {
        *
        * @param use_o_direct Flag to enable the O_DIRECT option.
        */
-      FileWriter(bool use_o_direct);
+      FileWriter(bool use_o_direct = false);
 
       /**
        * @brief Destroy the FileWriter object
@@ -90,6 +90,12 @@ namespace ska::pst::common {
        * @param new_file full path to the file to be opened
        */
       void open_file(const std::filesystem::path& new_file);
+
+      /**
+       * @brief Return the (assumed) logical block size of the filesystem
+       *
+       */
+      uint32_t block_alignment () const { return o_direct_alignment; }
 
       /**
        * @brief Write the header to the currently opened file

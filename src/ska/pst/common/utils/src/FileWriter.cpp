@@ -63,7 +63,7 @@ void ska::pst::common::FileWriter::configure(uint64_t _header_bufsz)
 
   if (o_direct && (_header_bufsz % o_direct_alignment != 0))
   {
-    SPDLOG_ERROR("ska::pst::common::FileWriter::validate_o_direct header_bufsz={} must be a multiple of {} bytes if O_DIRECT enabled", o_direct_alignment, _header_bufsz);
+    SPDLOG_ERROR("ska::pst::common::FileWriter::validate_o_direct header_bufsz={} must be a multiple of {} bytes if O_DIRECT enabled", _header_bufsz, o_direct_alignment);
     throw std::runtime_error("ska::pst::common::FileWriter::validate_o_direct bad header_bufsz");
   }
 
@@ -102,6 +102,12 @@ auto ska::pst::common::FileWriter::is_file_open() -> bool
 
 void ska::pst::common::FileWriter::open_file(const std::filesystem::path& new_file)
 {
+  if (file_open)
+  {
+    SPDLOG_ERROR("ska::pst::common::FileWriter::open_file already open");
+    throw std::runtime_error("ska::pst::common::FileWriter::open_file already open");
+  }
+
   int flags = O_WRONLY | O_CREAT | O_TRUNC;
   int perms = S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH;
   if (o_direct)
@@ -150,6 +156,12 @@ void ska::pst::common::FileWriter::reopen_file()
 
 void ska::pst::common::FileWriter::close_file()
 {
+  if (!file_open)
+  {
+    SPDLOG_ERROR("ska::pst::common::FileWriter::close_file not open");
+    throw std::runtime_error("ska::pst::common::FileWriter::close_file not open");
+  }
+
   SPDLOG_DEBUG("ska::pst::common::FileWriter::close_file fd={}", fd);
   if (::close(fd) < 0)
   {
@@ -162,6 +174,12 @@ void ska::pst::common::FileWriter::close_file()
 auto ska::pst::common::FileWriter::write_header(const ska::pst::common::AsciiHeader& header) -> ssize_t
 {
   SPDLOG_DEBUG("ska::pst::common::FileWriter::write_header()");
+
+  if (header_bytes_written > 0)
+  {
+    SPDLOG_ERROR("ska::pst::common::FileWriter::write_header header bytes already written={}", header_bytes_written);
+    throw std::runtime_error("ska::pst::common::FileWriter::write_header header already written");
+  }
 
   // ensure that the header buffer is allocated (and large enough)
   auto header_size = header.get_uint32("HDR_SIZE");
@@ -193,13 +211,19 @@ auto ska::pst::common::FileWriter::write_header(const ska::pst::common::AsciiHea
     // This won't block, but will start writeout asynchronously
     sync_file_range(fd, 0, header_bufsz, SYNC_FILE_RANGE_WRITE);
   }
-  header_bytes_written += wrote;
+  header_bytes_written = header_bufsz;
   return wrote;
 }
 
 auto ska::pst::common::FileWriter::write_data(char * data_ptr, uint64_t bytes_to_write) -> ssize_t
 {
   SPDLOG_DEBUG("ska::pst::common::FileWriter::write_data writing {} bytes to file", bytes_to_write);
+
+  if (header_bytes_written == 0)
+  {
+    SPDLOG_ERROR("ska::pst::common::FileWriter::write_data header not written");
+    throw std::runtime_error("ska::pst::common::FileWriter::write_data header not written");
+  }
 
   if (o_direct && (bytes_to_write % o_direct_alignment != 0))
   {
@@ -208,6 +232,13 @@ auto ska::pst::common::FileWriter::write_data(char * data_ptr, uint64_t bytes_to
   }
 
   ssize_t wrote = write(fd, reinterpret_cast<void *>(data_ptr), bytes_to_write);
+
+  if (wrote < 0)
+  {
+    SPDLOG_ERROR("ska::pst::common::FileWriter::write_data write({}, {}, {}) failed: {}", fd, reinterpret_cast<void *>(data_ptr), bytes_to_write, strerror(errno));
+    throw std::runtime_error("ska::pst::common::FileWriter::write_data could not write data to file");
+  }
+
   if (wrote != bytes_to_write)
   {
     SPDLOG_ERROR("ska::pst::common::FileWriter::write_data wrote fewer bytes than expected requested={} actual={}", bytes_to_write, wrote);
