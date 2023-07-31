@@ -69,7 +69,7 @@ FileWriterTest::~FileWriterTest()
 {
   std::filesystem::remove(std::filesystem::path(file_name));
 
-  free(file_data);
+  free(file_data); // NOLINT
 }
 
 void FileWriterTest::SetUp()
@@ -99,8 +99,6 @@ TEST_F(FileWriterTest, test_open_file) // NOLINT
     EXPECT_EQ(writer.get_header_bytes_written(), 0);
     EXPECT_EQ(writer.get_data_bytes_written(), 0);
   }
-
-  std::filesystem::remove(std::filesystem::path(file_name));
 }
 
 TEST_F(FileWriterTest, test_write_header) // NOLINT
@@ -119,8 +117,6 @@ TEST_F(FileWriterTest, test_write_header) // NOLINT
     SPDLOG_TRACE("ska::pst::common::test::FileWriterTest::test_write_header header_bytes_written={}", writer.get_header_bytes_written());
     EXPECT_EQ(writer.get_header_bytes_written(), header_size);
   }
-
-  std::filesystem::remove(std::filesystem::path(file_name));
 }
 
 TEST_F(FileWriterTest, test_open_twice) // NOLINT
@@ -136,8 +132,6 @@ TEST_F(FileWriterTest, test_open_twice) // NOLINT
     SPDLOG_TRACE("ska::pst::common::test::FileWriterTest::test_open_twice incorrectly open again");
     EXPECT_THROW(writer.open_file(file_name), std::runtime_error); // NOLINT
   }
-
-  std::filesystem::remove(std::filesystem::path(file_name));
 }
 
 TEST_F(FileWriterTest, test_write_header_twice) // NOLINT
@@ -156,8 +150,6 @@ TEST_F(FileWriterTest, test_write_header_twice) // NOLINT
     SPDLOG_TRACE("ska::pst::common::test::FileWriterTest::test_write_header_twice incorrectly write_header again");
     EXPECT_THROW(writer.write_header(header), std::runtime_error); // NOLINT
   }
-
-  std::filesystem::remove(std::filesystem::path(file_name));
 }
 
 TEST_F(FileWriterTest, test_open_bad_file) // NOLINT
@@ -188,8 +180,6 @@ TEST_F(FileWriterTest, test_close_when_closed) // NOLINT
     SPDLOG_TRACE("ska::pst::common::test::FileWriterTest::test_close_when_closed writer.close_file()");
     EXPECT_THROW(writer.close_file(), std::runtime_error); // NOLINT
   }
-
-  std::filesystem::remove(std::filesystem::path(file_name));
 }
 
 
@@ -212,15 +202,13 @@ TEST_F(FileWriterTest, test_bad_header_size) // NOLINT
     SPDLOG_TRACE("ska::pst::common::test::FileWriterTest::test_bad_header_size write_header");
     EXPECT_THROW(writer.write_header(bad_header), std::runtime_error);
   }
-
-  std::filesystem::remove(std::filesystem::path(file_name));
 }
 
 
 TEST_F(FileWriterTest, test_large_header_size) // NOLINT
 {
   ska::pst::common::AsciiHeader large_header;
-  uint32_t large_header_size = header_size * 64;
+  uint32_t large_header_size = header_size * 64; // NOLINT
   large_header.clone(header);
   large_header.set("HDR_SIZE", large_header_size);
 
@@ -235,8 +223,6 @@ TEST_F(FileWriterTest, test_large_header_size) // NOLINT
     SPDLOG_TRACE("ska::pst::common::test::FileWriterTest::test_large_header_size write_header");
     EXPECT_EQ(writer.write_header(large_header), large_header_size);
   }
-
-  std::filesystem::remove(std::filesystem::path(file_name));
 }
 
 TEST_F(FileWriterTest, test_write_data_before_header) // NOLINT
@@ -252,8 +238,6 @@ TEST_F(FileWriterTest, test_write_data_before_header) // NOLINT
     SPDLOG_TRACE("ska::pst::common::test::FileWriterTest::test_write_data_before_header incorrectly write_data before write_header");
     EXPECT_THROW(writer.write_data(file_data, data_size), std::runtime_error);
   }
-
-  std::filesystem::remove(std::filesystem::path(file_name));
 }
 
 TEST_F(FileWriterTest, test_write_data) // NOLINT
@@ -284,8 +268,6 @@ TEST_F(FileWriterTest, test_write_data) // NOLINT
       ASSERT_EQ(file_data[i], read_data[i]);  // NOLINT
     }
   }
-
-  std::filesystem::remove(std::filesystem::path(file_name));
 }
 
 TEST_F(FileWriterTest, test_write_unaligned_pointer) // NOLINT
@@ -302,9 +284,7 @@ TEST_F(FileWriterTest, test_write_unaligned_pointer) // NOLINT
   writer.write_header(header);
 
   SPDLOG_TRACE("ska::pst::common::test::FileWriterTest::test_write_unaligned_pointer write_data unaligned base address");
-  EXPECT_THROW(writer.write_data(file_data+1, data_size/2), std::runtime_error);
-
-  std::filesystem::remove(std::filesystem::path(file_name));
+  EXPECT_THROW(writer.write_data(file_data+1, data_size/2), std::runtime_error); // NOLINT
 }
 
 TEST_F(FileWriterTest, test_write_less_than_block) // NOLINT
@@ -323,8 +303,6 @@ TEST_F(FileWriterTest, test_write_less_than_block) // NOLINT
   size_t half_block = writer.block_alignment()/2;
   SPDLOG_TRACE("ska::pst::common::test::FileWriterTest::test_write_less_than_block write_data half of logical block size");
   EXPECT_EQ(writer.write_data(file_data, half_block), half_block);
-
-  std::filesystem::remove(std::filesystem::path(file_name));
 }
 
 } // namespace ska::pst::common::test

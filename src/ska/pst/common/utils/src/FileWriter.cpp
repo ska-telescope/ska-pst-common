@@ -41,6 +41,17 @@
 
 #include "ska/pst/common/utils/FileWriter.h"
 
+// casts an unsigned integer to an integer and throws an out-of-range exception if the unsigned argument is greater than the maximum possible signed value
+template<typename T>
+std::make_signed_t<T> safe_signed_cast (const T& arg)
+{
+  if (arg > std::numeric_limits<std::make_signed_t<T>>::max())
+  {
+    throw std::out_of_range("safe_cast_to_signed");
+  }
+  return static_cast<std::make_signed_t<T>>(arg);
+}
+
 ska::pst::common::FileWriter::FileWriter(bool use_o_direct) :
   o_direct(use_o_direct)
 {
@@ -92,7 +103,7 @@ auto ska::pst::common::FileWriter::get_filename(const std::string& utc_start, ui
   std::ostringstream oss;
   oss << utc_start << "_" << std::setfill('0') << std::setw(obs_offset_width) << obs_offset
       << "_" << std::setw(file_number_width) << file_number << ".dada";
-  return std::filesystem::path(oss.str());
+  return oss.str();
 }
 
 auto ska::pst::common::FileWriter::is_file_open() -> bool
@@ -209,7 +220,7 @@ auto ska::pst::common::FileWriter::write_header(const ska::pst::common::AsciiHea
   if (!o_direct)
   {
     // This won't block, but will start writeout asynchronously
-    sync_file_range(fd, 0, header_bufsz, SYNC_FILE_RANGE_WRITE);
+    sync_file_range(fd, 0, safe_signed_cast(header_bufsz), SYNC_FILE_RANGE_WRITE);
   }
   header_bytes_written = header_bufsz;
   return wrote;
@@ -248,12 +259,12 @@ auto ska::pst::common::FileWriter::write_data(char * data_ptr, uint64_t bytes_to
   if (!o_direct)
   {
     // This won't block, but will start writeout asynchronously
-    sync_file_range(fd, header_bytes_written + data_bytes_written, bytes_to_write, SYNC_FILE_RANGE_WRITE);
+    sync_file_range(fd, safe_signed_cast(header_bytes_written + data_bytes_written), safe_signed_cast(bytes_to_write), SYNC_FILE_RANGE_WRITE);
 
     // This does a blocking write-and-wait on any old ranges
     if (data_bytes_written > 0)
     {
-      sync_file_range(fd, header_bytes_written + data_bytes_written, bytes_to_write, SYNC_FILE_RANGE_WAIT_BEFORE|SYNC_FILE_RANGE_WRITE|SYNC_FILE_RANGE_WAIT_AFTER);
+      sync_file_range(fd, safe_signed_cast(header_bytes_written + data_bytes_written), safe_signed_cast(bytes_to_write), SYNC_FILE_RANGE_WAIT_BEFORE|SYNC_FILE_RANGE_WRITE|SYNC_FILE_RANGE_WAIT_AFTER);
     }
   }
 

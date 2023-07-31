@@ -67,13 +67,8 @@ void versionTest::SetUp()
     }
   }
   release_file.close();
-  for (unsigned i=0; i<release_version.size(); i++)
-  {
-    if (release_version[i] == '.')
-    {
-      release_version[i] = ':';
-    }
-  }
+  std::replace( release_version.begin(), release_version.end(), '.', ':'); // replace all '.' with ':'
+
   SPDLOG_DEBUG("ska::pst::common::test::versionTest::SetUp converted release_version={}", release_version);
 }
 
