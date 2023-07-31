@@ -29,6 +29,7 @@
  */
 
 #include "ska/pst/common/utils/BlockLoader.h"
+#include <memory>
 
 #ifndef __SKA_PST_COMMON_UTILS_DataWeightsBlockLoader_h
 #define __SKA_PST_COMMON_UTILS_DataWeightsBlockLoader_h
