@@ -32,6 +32,7 @@
 
 #include "ska/pst/common/testutils/GtestMain.h"
 #include "ska/pst/common/utils/tests/DataUnpackerTest.h"
+#include "ska/pst/common/definitions.h"
 
 auto main(int argc, char* argv[]) -> int
 {
@@ -76,12 +77,10 @@ void DataUnpackerTest::GeneratePackedData(const std::string& data_header_file, c
   uint32_t packet_weights_size = weights_header.get_uint32("PACKET_WEIGHTS_SIZE");
   uint32_t weight_nbit = weights_header.get_uint32("NBIT");
 
-  const unsigned bits_per_byte = 8;
-
   uint64_t wdx = 0;
   uint32_t npackets = weights_header.get_uint32("RESOLUTION") / (packet_scales_size + packet_weights_size);
-  uint32_t weights_per_packet = (packet_weights_size * bits_per_byte) / weight_nbit;
-  ASSERT_EQ((packet_weights_size * bits_per_byte) % weight_nbit, 0);
+  uint32_t weights_per_packet = (packet_weights_size * ska::pst::common::bits_per_byte) / weight_nbit;
+  ASSERT_EQ((packet_weights_size * ska::pst::common::bits_per_byte) % weight_nbit, 0);
 
   SPDLOG_TRACE("ska::pst::common::test::DataUnpackerTest::GeneratePackedData generating weights weights.size()={} npackets={} weights+scales={} weights_per_packet={}",
     weights.size(), npackets, packet_scales_size + packet_weights_size, weights_per_packet);
