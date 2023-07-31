@@ -31,14 +31,18 @@
 #include "ska/pst/common/utils/DataWeightsBlockLoader.h"
 #include <spdlog/spdlog.h>
 
-#define LOG_THROW(x) SPDLOG_ERROR(x); throw std::runtime_error(x);
+static void log_throw (const char* msg)
+{
+  SPDLOG_ERROR(msg); 
+  throw std::runtime_error(msg);
+}
 
 auto ska::pst::common::DataWeightsBlockLoader::get_data_header() const -> const AsciiHeader&
 {
   SPDLOG_DEBUG("ska::pst::common::DataWeightsBlockLoader::get_data_header");
   if (!data_block_loader)
   {
-    LOG_THROW("ska::pst::common::DataWeightsBlockLoader::get_data_header data_block_loader not initialised");
+    log_throw("ska::pst::common::DataWeightsBlockLoader::get_data_header data_block_loader not initialised");
   }
   return data_block_loader->get_header();
 }
@@ -48,7 +52,7 @@ auto ska::pst::common::DataWeightsBlockLoader::get_weights_header() const -> con
   SPDLOG_DEBUG("ska::pst::common::DataWeightsBlockLoader::get_weights_header");
   if (!weights_block_loader)
   {
-    LOG_THROW("ska::pst::common::DataWeightsBlockLoader::get_weights_header weights_block_loader not initialised");
+    log_throw("ska::pst::common::DataWeightsBlockLoader::get_weights_header weights_block_loader not initialised");
   }
   return weights_block_loader->get_header();
 }
@@ -60,11 +64,11 @@ auto ska::pst::common::DataWeightsBlockLoader::next_block() -> Block
 
   if (!data_block_loader)
   {
-    LOG_THROW("ska::pst::common::DataWeightsBlockLoader::next_block data_block_loader not initialised");
+    log_throw("ska::pst::common::DataWeightsBlockLoader::next_block data_block_loader not initialised");
   }
   if (!weights_block_loader)
   {
-    LOG_THROW("ska::pst::common::DataWeightsBlockLoader::next_block weights_block_loader not initialised");
+    log_throw("ska::pst::common::DataWeightsBlockLoader::next_block weights_block_loader not initialised");
   }
 
   Block result;

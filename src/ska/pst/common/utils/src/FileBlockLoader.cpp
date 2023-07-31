@@ -36,10 +36,10 @@
 ska::pst::common::FileBlockLoader::FileBlockLoader(const std::string& file_path)
 	: reader(new FileReader(file_path))
 {
-  ssize_t hdr_size = reader->read_header();
-  ssize_t data_size = reader->get_file_size()-hdr_size;
+  auto hdr_size = reader->read_header();
+  auto data_size = reader->get_file_size()-hdr_size;
 
-  void* map = mmap(0, data_size, PROT_READ, MAP_SHARED, reader->_get_fd(), hdr_size);
+  void* map = mmap(nullptr, data_size, PROT_READ, MAP_SHARED, reader->_get_fd(), hdr_size);
   if (map == MAP_FAILED)
   {
     SPDLOG_ERROR("ska::pst::common::FileBlockLoader::ctor mmap failed: {} fd={}", strerror(errno), reader->_get_fd());
@@ -54,7 +54,7 @@ ska::pst::common::FileBlockLoader::FileBlockLoader(const std::string& file_path)
 ska::pst::common::FileBlockLoader::~FileBlockLoader()
 {
   void* map = block_info.block;
-  ssize_t data_size = block_info.size;
+  auto data_size = block_info.size;
 
   if (map == nullptr)
   {
@@ -68,7 +68,7 @@ ska::pst::common::FileBlockLoader::~FileBlockLoader()
   }
 }
 
-const ska::pst::common::AsciiHeader& ska::pst::common::FileBlockLoader::get_header() const
+auto ska::pst::common::FileBlockLoader::get_header() const -> const ska::pst::common::AsciiHeader& 
 {
   return reader->get_header();
 }
