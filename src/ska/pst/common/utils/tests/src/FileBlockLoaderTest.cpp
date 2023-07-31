@@ -111,6 +111,28 @@ TEST_F(FileBlockLoaderTest, test_open_empty_file) // NOLINT
   std::filesystem::remove(std::filesystem::path(empty_file_name));
 }
 
+TEST_F(FileBlockLoaderTest, test_bad_mmap) // NOLINT
+{
+  ska::pst::common::AsciiHeader bad_header(header);
+  size_t bad_header_size = header_size + 1;
+  bad_header.set("HDR_SIZE", bad_header_size);
+  file_header.resize(bad_header_size);
+  sprintf(&file_header[0], bad_header.raw().c_str(), header.raw().size()); // NOLINT
+
+  std::string bad_file_name = "/tmp/FileBlockLoaderTest_bad_mmap.dat";
+
+  int flags = O_WRONLY | O_CREAT | O_TRUNC;
+  int perms = S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH;
+  int fd = open(bad_file_name.c_str(), flags, perms); // NOLINT
+  write(fd, &file_header[0], bad_header_size);
+  write(fd, &file_data[0], data_size);
+  close(fd);
+
+  EXPECT_THROW(FileBlockLoader fr(bad_file_name), std::runtime_error); // NOLINT
+
+  std::filesystem::remove(std::filesystem::path(bad_file_name));
+}
+
 TEST_F(FileBlockLoaderTest, test_next_block) // NOLINT
 {
   FileBlockLoader fr(file_name);
