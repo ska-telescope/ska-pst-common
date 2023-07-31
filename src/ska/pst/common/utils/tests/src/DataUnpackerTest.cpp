@@ -32,7 +32,7 @@
 
 #include "ska/pst/common/testutils/GtestMain.h"
 #include "ska/pst/common/utils/tests/DataUnpackerTest.h"
-using namespace std::chrono;
+#include "ska/pst/common/definitions.h"
 
 auto main(int argc, char* argv[]) -> int
 {
@@ -50,7 +50,7 @@ void DataUnpackerTest::TearDown()
 {
 }
 
-void DataUnpackerTest::GeneratePackedData(std::string data_header_file, std::string weights_header_file)
+void DataUnpackerTest::GeneratePackedData(const std::string& data_header_file, const std::string& weights_header_file)
 {
   SPDLOG_TRACE("ska::pst::common::test::DataUnpackerTest::SetUp loading data and weights headers");
   data_header.load_from_file(test_data_file(data_header_file));
@@ -63,10 +63,14 @@ void DataUnpackerTest::GeneratePackedData(std::string data_header_file, std::str
   const uint32_t nbit = data_header.get_uint32("NBIT");
   const uint32_t nchan_pp = data_header.get_uint32("UDP_NCHAN");
  
-  if (nbit == 8)
+  if (nbit == 8) // NOLINT
+  {
     GenerateQuantisedPackedData(reinterpret_cast<int8_t*>(&data[0]));
-  else if (nbit == 16)
+  }
+  else if (nbit == 16) // NOLINT
+  {
     GenerateQuantisedPackedData(reinterpret_cast<int16_t*>(&data[0]));
+  }
 
   // the weights stream consists of the scale and weights array from each UDP packet
   uint32_t packet_scales_size = weights_header.get_uint32("PACKET_SCALES_SIZE");
@@ -75,8 +79,8 @@ void DataUnpackerTest::GeneratePackedData(std::string data_header_file, std::str
 
   uint64_t wdx = 0;
   uint32_t npackets = weights_header.get_uint32("RESOLUTION") / (packet_scales_size + packet_weights_size);
-  uint32_t weights_per_packet = (packet_weights_size * 8) / weight_nbit;
-  ASSERT_EQ((packet_weights_size * 8) % weight_nbit, 0);
+  uint32_t weights_per_packet = (packet_weights_size * ska::pst::common::bits_per_byte) / weight_nbit;
+  ASSERT_EQ((packet_weights_size * ska::pst::common::bits_per_byte) % weight_nbit, 0);
 
   SPDLOG_TRACE("ska::pst::common::test::DataUnpackerTest::GeneratePackedData generating weights weights.size()={} npackets={} weights+scales={} weights_per_packet={}",
     weights.size(), npackets, packet_scales_size + packet_weights_size, weights_per_packet);
@@ -84,14 +88,14 @@ void DataUnpackerTest::GeneratePackedData(std::string data_header_file, std::str
   {
     for (uint32_t j=0; j<npackets; j++)
     {
-      float * scl = reinterpret_cast<float *>(&weights[wdx]);
+      auto scl = reinterpret_cast<float *>(&weights[wdx]);
       *scl = get_weight_for_channel(j * nchan_pp, nchan_pp);
       wdx += packet_scales_size;
 
-      uint16_t * wts = reinterpret_cast<uint16_t *>(&weights[wdx]);
+      auto wts = reinterpret_cast<uint16_t *>(&weights[wdx]);
       for (uint32_t k=0; k<weights_per_packet; k++)
       {
-        wts[k] = 65535;
+        wts[k] = 65535; // NOLINT
       }
       wdx += packet_weights_size;
     }
@@ -100,17 +104,17 @@ void DataUnpackerTest::GeneratePackedData(std::string data_header_file, std::str
 
 auto DataUnpackerTest::get_float_value_for_channel_sample(uint32_t ichan, uint32_t nsamp, uint32_t isamp, uint32_t nbit) -> float
 {
-  if (nbit == 8)
+  if (nbit == 8) // NOLINT
   {
-    int8_t packed;
+    int8_t packed = 0;
     get_value_for_channel_sample(ichan, nsamp, isamp, &packed);
-    return float(packed);
+    return static_cast<float>(packed);
   }
-  if (nbit == 16)
+  if (nbit == 16) // NOLINT
   {
-    int16_t packed;
+    int16_t packed = 0;
     get_value_for_channel_sample(ichan, nsamp, isamp, &packed);
-    return float(packed);
+    return static_cast<float>(packed);
   }
   return std::nanf("badquant");
 }
@@ -155,7 +159,6 @@ TEST_F(DataUnpackerTest, test_unpack) // NOLINT
   const uint32_t nchan = unpacked[0].size();
   const uint32_t npol = unpacked[0][0].size();
   const uint32_t nchan_per_packet = weights_header.get_uint32("UDP_NCHAN");
-  const uint32_t nsamp_per_packet = weights_header.get_uint32("UDP_NSAMP");
   const uint32_t nbit = data_header.get_uint32("NBIT");
 
   for (unsigned isamp=0; isamp<nsamp; isamp++)
@@ -196,7 +199,6 @@ TEST_F(DataUnpackerTest, test_integrate_bandpass) // NOLINT
   {
     for (unsigned ipol=0; ipol<npol; ipol++)
     {
-      const uint32_t ochanpol = ipol * nchan + ichan;
       float power = 0;
       for (unsigned isamp=0; isamp<nsamp; isamp++)
       {
@@ -207,7 +209,7 @@ TEST_F(DataUnpackerTest, test_integrate_bandpass) // NOLINT
       {
         power = 0;
       }
-      float allowed_error = power / 100000;
+      float allowed_error = power / 100000; // NOLINT
       EXPECT_NEAR(power, bandpass[ichan][ipol], allowed_error);
     }
   }
@@ -225,24 +227,24 @@ TEST_P(DataUnpackerTest, test_unpack_performance) // NOLINT
   ska::pst::common::DataUnpacker unpacker;
   unpacker.configure(data_header, weights_header);
 
-  long int duration_total=0, duration_average=0;
-  for (int i=0; i<10; i++)
-  {
-    
-    // Recording the timestamp at the start of the code
-    auto beg = high_resolution_clock::now();
-    
+  // Recording the timestamp at the start of the loop
+  auto beg = std::chrono::high_resolution_clock::now();
+
+  const unsigned iterations = 10;
+  for (int i=0; i<iterations; i++)
+  {    
     // unpack data and weights
     std::vector<std::vector<std::vector<std::complex<float>>>>& unpacked = unpacker.unpack(&data[0], data.size(), &weights[0], weights.size());
-
-    // Taking a timestamp after the code is ran
-    auto end = high_resolution_clock::now();
-    // Subtracting the end timestamp from the beginning
-    // And we choose to receive the difference in microseconds
-    auto duration = duration_cast<microseconds>(end - beg);
-    duration_total += duration.count();
   }
-  duration_average = duration_total/10;
+
+  // Taking a timestamp after the loop is finished
+  auto end = std::chrono::high_resolution_clock::now();
+
+  // Subtracting the end timestamp from the beginning
+  // And we choose to receive the difference in microseconds
+  auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - beg);
+  auto duration_average = duration.count()/iterations;
+
   // Displaying the elapsed time
   SPDLOG_INFO("Data Size: {}", data.size());
   SPDLOG_INFO("Weights Size: {}", weights.size());

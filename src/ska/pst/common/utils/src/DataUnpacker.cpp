@@ -112,15 +112,22 @@ void ska::pst::common::DataUnpacker::resize(uint64_t data_bufsz)
 
   SPDLOG_DEBUG("ska::pst::common::DataUnpacker::resize nsamp={} nchan={} npol={} nval={}", nsamp, nchan, npol, nval);
   if (unpacked.size() != nsamp)
+  {
     unpacked.resize(nsamp);
+  }
+
   for (unsigned isamp=0; isamp<nsamp; isamp++)
   {
     if (unpacked[isamp].size() != nchan)
+    {
       unpacked[isamp].resize(nchan);
+    }
     for (unsigned ichan=0; ichan<nchan; ichan++)
     {
       if (unpacked[isamp][ichan].size() != npol)
+      {
         unpacked[isamp][ichan].resize(npol);
+      }
     }
   }
 }

@@ -54,7 +54,7 @@ namespace ska::pst::common::test {
 
       void TearDown() override;
 
-      void GeneratePackedData(std::string data_header_file, std::string weights_heade_file);
+      void GeneratePackedData(const std::string& data_header_file, const std::string& weights_heade_file);
 
       float get_weight_for_channel(uint32_t channel, uint32_t nchan_per_packet);
 

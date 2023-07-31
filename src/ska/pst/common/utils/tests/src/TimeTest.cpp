@@ -106,13 +106,13 @@ TEST_F(TimeTest, mjd2utctm) // NOLINT
   static constexpr double milliseconds_per_day = seconds_per_day * ska::pst::common::milliseconds_per_second;
   static constexpr unsigned seconds_to_test = 10;
 
-  auto ntests = unsigned(seconds_to_test * milliseconds_per_second);
+  auto ntests = seconds_to_test * milliseconds_per_second;
   for (unsigned i=0; i<ntests; i++)
   {
-    double fractional_day = double(i) / milliseconds_per_day;
-    double fractional_seconds = double(i) / ska::pst::common::milliseconds_per_second;
+    double fractional_day = static_cast<double>(i) / milliseconds_per_day;
+    double fractional_seconds = static_cast<double>(i) / ska::pst::common::milliseconds_per_second;
     time_t epoch = Time::mjd2utctm(base_mjd + fractional_day);
-    time_t expected_epoch = base_epoch + int(floor(fractional_seconds));
+    time_t expected_epoch = base_epoch + static_cast<time_t>(floor(fractional_seconds));
     if (i % milliseconds_per_second >= (milliseconds_per_second/2))
     {
       expected_epoch++;
