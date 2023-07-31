@@ -28,10 +28,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <complex>
-
 #include "ska/pst/common/utils/AsciiHeader.h"
 #include "ska/pst/common/utils/DataLayout.h"
+
+#include <spdlog/spdlog.h>
+#include <complex>
 
 #ifndef SKA_PST_COMMON_UTILS_DataUnpacker_h
 #define SKA_PST_COMMON_UTILS_DataUnpacker_h
