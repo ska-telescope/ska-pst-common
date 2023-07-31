@@ -43,7 +43,7 @@
 
 // casts an unsigned integer to an integer and throws an out-of-range exception if the unsigned argument is greater than the maximum possible signed value
 template<typename T>
-std::make_signed_t<T> safe_signed_cast (const T& arg)
+auto safe_signed_cast (const T& arg) -> std::make_signed_t<T>
 {
   if (arg > std::numeric_limits<std::make_signed_t<T>>::max())
   {
@@ -258,13 +258,16 @@ auto ska::pst::common::FileWriter::write_data(char * data_ptr, uint64_t bytes_to
 
   if (!o_direct)
   {
+    auto offset = safe_signed_cast(header_bytes_written + data_bytes_written);
+    auto nbytes = safe_signed_cast(bytes_to_write);
+
     // This won't block, but will start writeout asynchronously
-    sync_file_range(fd, safe_signed_cast(header_bytes_written + data_bytes_written), safe_signed_cast(bytes_to_write), SYNC_FILE_RANGE_WRITE);
+    sync_file_range(fd, offset, nbytes, SYNC_FILE_RANGE_WRITE);
 
     // This does a blocking write-and-wait on any old ranges
     if (data_bytes_written > 0)
     {
-      sync_file_range(fd, safe_signed_cast(header_bytes_written + data_bytes_written), safe_signed_cast(bytes_to_write), SYNC_FILE_RANGE_WAIT_BEFORE|SYNC_FILE_RANGE_WRITE|SYNC_FILE_RANGE_WAIT_AFTER);
+      sync_file_range(fd, offset, nbytes, SYNC_FILE_RANGE_WAIT_BEFORE|SYNC_FILE_RANGE_WRITE|SYNC_FILE_RANGE_WAIT_AFTER);
     }
   }
 

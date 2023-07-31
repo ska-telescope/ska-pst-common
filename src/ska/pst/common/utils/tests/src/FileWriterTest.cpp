@@ -67,7 +67,10 @@ FileWriterTest::FileWriterTest()
 
 FileWriterTest::~FileWriterTest()
 {
-  std::filesystem::remove(std::filesystem::path(file_name));
+  if (std::filesystem::exists(std::filesystem::path(file_name)))
+  {
+    std::filesystem::remove(std::filesystem::path(file_name));
+  }
 
   free(file_data); // NOLINT
 }
@@ -87,6 +90,18 @@ TEST_F(FileWriterTest, test_default_constructor) // NOLINT
     FileWriter writer(use_o_direct);
     EXPECT_EQ(writer.is_file_open(), false);
   }
+}
+
+TEST_F(FileWriterTest, test_get_filename) // NOLINT
+{
+  FileWriter writer;
+  std::string utc = "2023-07-31-13:41:23";
+  static constexpr uint64_t obs_offset = 1234567890;
+  static constexpr unsigned file_number = 256;
+
+  auto filename = writer.get_filename(utc, obs_offset, file_number);
+  std::string expect = utc + "_0000001234567890_000256.dada";
+  EXPECT_EQ(filename, expect);
 }
 
 TEST_F(FileWriterTest, test_open_file) // NOLINT

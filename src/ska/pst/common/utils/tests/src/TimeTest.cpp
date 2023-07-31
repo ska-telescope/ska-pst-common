@@ -112,7 +112,7 @@ TEST_F(TimeTest, mjd2utctm) // NOLINT
     double fractional_day = static_cast<double>(i) / milliseconds_per_day;
     double fractional_seconds = static_cast<double>(i) / ska::pst::common::milliseconds_per_second;
     time_t epoch = Time::mjd2utctm(base_mjd + fractional_day);
-    time_t expected_epoch = base_epoch + static_cast<double>(floor(fractional_seconds));
+    time_t expected_epoch = base_epoch + static_cast<time_t>(floor(fractional_seconds));
     if (i % milliseconds_per_second >= (milliseconds_per_second/2))
     {
       expected_epoch++;
