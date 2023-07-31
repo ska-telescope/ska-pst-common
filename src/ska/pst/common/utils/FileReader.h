@@ -121,7 +121,7 @@ namespace ska::pst::common {
 
     private:
 
-      //! the scan configuration parameters.
+      //! the DADA file header
       ska::pst::common::AsciiHeader header;
 
       //! file descriptor of the currently opened file

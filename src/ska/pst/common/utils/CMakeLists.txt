@@ -1,6 +1,9 @@
 
 set(public_headers
     AsciiHeader.h
+    BlockLoader.h
+    DataWeightsBlockLoader.h
+    DataWeightsFileBlockLoader.h
     Endian.h
     Time.h
     Timer.h
@@ -9,6 +12,7 @@ set(public_headers
     DataGenerator.h
     DataGeneratorFactory.h
     DataUnpacker.h
+    FileBlockLoader.h
     FileReader.h
     FileWriter.h
     GaussianNoiseGenerator.h
@@ -22,6 +26,8 @@ set(public_headers
 
 set(sources
     src/AsciiHeader.cpp
+    src/DataWeightsBlockLoader.cpp
+    src/DataWeightsFileBlockLoader.cpp
     src/Time.cpp
     src/Timer.cpp
     src/NormalSequence.cpp
@@ -29,6 +35,7 @@ set(sources
     src/DataGenerator.cpp
     src/DataGeneratorFactory.cpp
     src/DataUnpacker.cpp
+    src/FileBlockLoader.cpp
     src/FileReader.cpp
     src/FileWriter.cpp
     src/GaussianNoiseGenerator.cpp
