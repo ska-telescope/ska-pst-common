@@ -46,6 +46,23 @@ namespace ska::pst::common {
     public:
 
       /**
+       * @brief Stores the base address and size, in bytes, of a block of data
+       *
+       */
+      class Block
+      {
+        public:
+
+          Block (char* _block=nullptr, size_t _size=0) : block(_block), size(_size) {}
+
+          //! pointer to the block
+          char* block;
+
+          //! the size, in bytes, of the block
+          size_t size;
+      };
+
+      /**
        * @brief Virtual destructor required for interfaces
        *
        */
@@ -67,7 +84,7 @@ namespace ska::pst::common {
        *
        * @return (char* address of block, size_t bytes in block)
        */
-      virtual std::pair<char*,size_t> next_block() = 0;
+      virtual Block next_block() = 0;
   };
 
 } // namespace ska::pst::common

@@ -42,24 +42,30 @@ ska::pst::common::FileBlockLoader::FileBlockLoader(const std::string& file_path)
   void* map = mmap(0, data_size, PROT_READ, MAP_SHARED, reader->_get_fd(), hdr_size);
   if (map == MAP_FAILED)
   {
-    SPDLOG_ERROR("ska::pst::common::FileBlockLoader::ctor failed mmap fd={}", reader->_get_fd());
-    throw std::runtime_error("ska::pst::common::FileReader::ctor failed mmap");
+    SPDLOG_ERROR("ska::pst::common::FileBlockLoader::ctor mmap failed: {} fd={}", strerror(errno), reader->_get_fd());
+    throw std::runtime_error("ska::pst::common::FileReader::ctor mmap failed");
   }
 
-  block_info.first = reinterpret_cast<char*>(map);
-  block_info.second = data_size;
+  block_info.block = reinterpret_cast<char*>(map);
+  block_info.size = data_size;
   next_block_info = block_info;
 }
 
-ska::pst::common::FileBlockLoader::~FileBlockLoader ()
+ska::pst::common::FileBlockLoader::~FileBlockLoader()
 {
-  void* map = block_info.first;
-  ssize_t data_size = block_info.second;
+  void* map = block_info.block;
+  ssize_t data_size = block_info.size;
+
+  if (map == nullptr)
+  {
+    SPDLOG_ERROR("ska::pst::common::FileBlockLoader::dtor nothing to munmap");
+    return;
+  }
 
   if (munmap(map, data_size) == -1)
   {
-    SPDLOG_ERROR("ska::pst::common::FileBlockLoader::ctor failed munmap");
-    throw std::runtime_error("ska::pst::common::FileReader::dtor failed munmap");
+    SPDLOG_ERROR("ska::pst::common::FileBlockLoader::dtor munmap failed: {}", strerror(errno));
+    throw std::runtime_error("ska::pst::common::FileReader::dtor munmap failed");
   }
 }
 
@@ -68,10 +74,10 @@ const ska::pst::common::AsciiHeader& ska::pst::common::FileBlockLoader::get_head
   return reader->get_header();
 }
 
-std::pair<char*,size_t> ska::pst::common::FileBlockLoader::next_block()
+auto ska::pst::common::FileBlockLoader::next_block() -> BlockLoader::Block
 {
   auto result = next_block_info;
-  next_block_info = std::pair<char*,size_t> (nullptr, 0); // next call to next_block returns EOD marker
+  next_block_info = BlockLoader::Block(nullptr, 0); // next call to next_block returns EOD marker
   return result;
 }
 

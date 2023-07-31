@@ -28,13 +28,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <iostream>
-#include <spdlog/spdlog.h>
-#include <stdexcept>
-#include <string>
-#include <vector>
-
 #include "ska/pst/common/utils/DataWeightsBlockLoader.h"
+#include <spdlog/spdlog.h>
 
 #define LOG_THROW(x) SPDLOG_ERROR(x); throw std::runtime_error(x);
 
@@ -59,7 +54,7 @@ auto ska::pst::common::DataWeightsBlockLoader::get_weights_header() const -> con
 }
 
 
-auto ska::pst::common::DataWeightsBlockLoader::next_block() -> block_t
+auto ska::pst::common::DataWeightsBlockLoader::next_block() -> Block
 {
   SPDLOG_DEBUG("ska::pst::common::DataWeightsBlockLoader::next_block");
 
@@ -72,16 +67,8 @@ auto ska::pst::common::DataWeightsBlockLoader::next_block() -> block_t
     LOG_THROW("ska::pst::common::DataWeightsBlockLoader::next_block weights_block_loader not initialised");
   }
 
-  auto next_data_block = data_block_loader->next_block();
-  auto next_weights_block = weights_block_loader->next_block();
-
-  block_t result;
-
-  result.data_block = next_data_block.first;
-  result.data_size = next_data_block.second;
-
-  result.weights_block = next_weights_block.first;
-  result.weights_size = next_weights_block.second;
-
+  Block result;
+  result.data = data_block_loader->next_block();
+  result.weights = weights_block_loader->next_block();
   return result;
 }

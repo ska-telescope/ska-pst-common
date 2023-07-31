@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Square Kilometre Array Observatory
+ * Copyright 2023 Square Kilometre Array Observatory
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -115,10 +115,10 @@ TEST_F(DataWeightsFileBlockLoaderTest, test_next_block) // NOLINT
 {
   DataWeightsFileBlockLoader fr(data_file_name, weights_file_name);
   auto next = fr.next_block();
-  EXPECT_EQ(next.data_size, data_size);
-  EXPECT_EQ(next.weights_size, data_size);
+  EXPECT_EQ(next.data.size, data_size);
+  EXPECT_EQ(next.weights.size, data_size);
 
-  auto data_file_ptr = reinterpret_cast<uint8_t *>(next.data_block);
+  auto data_file_ptr = reinterpret_cast<uint8_t *>(next.data.block);
   auto data_ptr = reinterpret_cast<uint8_t *>(&data_file_data[0]);
 
   for (unsigned i=0; i<data_size; i++)
@@ -126,7 +126,7 @@ TEST_F(DataWeightsFileBlockLoaderTest, test_next_block) // NOLINT
     ASSERT_EQ(data_file_ptr[i], data_ptr[i]);  // NOLINT
   }
 
-  auto weights_file_ptr = reinterpret_cast<uint8_t *>(next.weights_block);
+  auto weights_file_ptr = reinterpret_cast<uint8_t *>(next.weights.block);
   auto weights_ptr = reinterpret_cast<uint8_t *>(&weights_file_data[0]);
 
   for (unsigned i=0; i<data_size; i++)
@@ -140,10 +140,10 @@ TEST_F(DataWeightsFileBlockLoaderTest, test_read_more_data_than_available) // NO
   DataWeightsFileBlockLoader fr(data_file_name, weights_file_name);
   auto next = fr.next_block();
   next = fr.next_block();
-  EXPECT_EQ(next.data_block, nullptr); // NOLINT
-  EXPECT_EQ(next.data_size, 0);
-  EXPECT_EQ(next.weights_block, nullptr); // NOLINT
-  EXPECT_EQ(next.weights_size, 0);
+  EXPECT_EQ(next.data.block, nullptr); // NOLINT
+  EXPECT_EQ(next.data.size, 0);
+  EXPECT_EQ(next.weights.block, nullptr); // NOLINT
+  EXPECT_EQ(next.weights.size, 0);
 }
 
 } // namespace ska::pst::common::test

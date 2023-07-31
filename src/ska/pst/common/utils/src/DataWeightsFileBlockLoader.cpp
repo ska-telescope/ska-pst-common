@@ -28,14 +28,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <iostream>
-#include <spdlog/spdlog.h>
-#include <stdexcept>
-#include <string>
-#include <vector>
-
 #include "ska/pst/common/utils/DataWeightsFileBlockLoader.h"
 #include "ska/pst/common/utils/FileBlockLoader.h"
+
+#include <spdlog/spdlog.h>
 
 ska::pst::common::DataWeightsFileBlockLoader::DataWeightsFileBlockLoader(
         const std::string& data_file_path,
@@ -43,8 +39,8 @@ ska::pst::common::DataWeightsFileBlockLoader::DataWeightsFileBlockLoader(
 {
   SPDLOG_DEBUG("ska::pst::common::DataWeightsFileBlockLoader::DataWeightsFileBlockLoader");
 
-  data_block_loader = std::make_shared<FileBlockLoader>(data_file_path);
-  weights_block_loader = std::make_shared<FileBlockLoader>(weights_file_path);
+  data_block_loader = std::make_unique<FileBlockLoader>(data_file_path);
+  weights_block_loader = std::make_unique<FileBlockLoader>(weights_file_path);
 }
 
 ska::pst::common::DataWeightsFileBlockLoader::~DataWeightsFileBlockLoader()

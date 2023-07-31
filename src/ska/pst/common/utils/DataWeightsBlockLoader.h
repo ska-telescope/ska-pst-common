@@ -35,32 +35,32 @@
 
 namespace ska::pst::common {
 
-  class block_t
-  {
-    public:
-      //! pointer to the next block data to process
-      char* data_block;
-
-      //! the size, in bytes, of data to process
-      size_t data_size;
-
-      //! pointer to the next block of weights to process
-      char* weights_block;
-
-      //! the size, in bytes, of the weights to process
-      size_t weights_size;
-  };
-
   /**
    * @brief Base class used for reading blocks of voltage data and weights
    *
+   * This class implements an interface to data+weights that can be from any source,
+   * including file (see DataWeightsFileBlockLoader) or ring buffer (in principal).
    */
   class DataWeightsBlockLoader
   {
     public:
 
       /**
-       * @brief Destroy the File Reader object.
+       * @brief Stores pointers to data and weight block, and their sizes
+       *
+       */
+      class Block
+      {
+        public:
+          //! Data block
+          BlockLoader::Block data;
+
+          //! Weights block
+          BlockLoader::Block weights;
+      };
+
+      /**
+       * @brief Destroy the DataWeightsBlockLoader object.
        *
        */
       virtual ~DataWeightsBlockLoader() = default;
@@ -82,16 +82,16 @@ namespace ska::pst::common {
       /**
        * @brief Get the next block of data and weights.
        *
-       * This returns a struct that contains the pointer to the next block of data
-       * and weights.  It also includes the size, in bytes, that for both data
+       * The returned Block contains the pointer to the next block of data
+       * and weights.  It also includes the size, in bytes, for both data
        * and weights. Clients of this must not go beyond the size of data.
        */
-      virtual block_t next_block();
+      virtual Block next_block();
 
     protected:
 
-      std::shared_ptr<BlockLoader> data_block_loader;
-      std::shared_ptr<BlockLoader> weights_block_loader;
+      std::unique_ptr<BlockLoader> data_block_loader;
+      std::unique_ptr<BlockLoader> weights_block_loader;
   };
 
 } // namespace ska::pst::common

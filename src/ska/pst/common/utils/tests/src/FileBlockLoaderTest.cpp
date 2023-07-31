@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Square Kilometre Array Observatory
+ * Copyright 2023 Square Kilometre Array Observatory
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -100,9 +100,9 @@ TEST_F(FileBlockLoaderTest, test_next_block) // NOLINT
 {
   FileBlockLoader fr(file_name);
   auto next = fr.next_block();
-  EXPECT_EQ(next.second, data_size);
+  EXPECT_EQ(next.size, data_size);
 
-  auto file_data_ptr = reinterpret_cast<uint8_t *>(next.first);
+  auto file_data_ptr = reinterpret_cast<uint8_t *>(next.block);
   for (unsigned i=0; i<data_size; i++)
   {
     ASSERT_EQ(file_data_ptr[i], uint8_t(i % 256));  // NOLINT
@@ -114,8 +114,8 @@ TEST_F(FileBlockLoaderTest, test_read_more_data_than_available) // NOLINT
   FileBlockLoader fr(file_name);
   auto next = fr.next_block();
   next = fr.next_block();
-  EXPECT_EQ(next.first, nullptr); // NOLINT
-  EXPECT_EQ(next.second, 0);
+  EXPECT_EQ(next.block, nullptr); // NOLINT
+  EXPECT_EQ(next.size, 0);
 }
 
 } // namespace ska::pst::common::test

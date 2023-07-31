@@ -39,8 +39,9 @@
 namespace ska::pst::common {
 
   /**
-   * @brief Interface used for reading blocks of data from a source
+   * @brief Loads blocks of data from file.
    *
+   * Currently maps the entire file into memory as a single block.
    */
   class FileBlockLoader : public BlockLoader
   {
@@ -51,13 +52,13 @@ namespace ska::pst::common {
        *
        * @param file_path path to the DADA file to open for reading
        */
-      FileBlockLoader (const std::string& file_path);
+      FileBlockLoader(const std::string& file_path);
 
       /**
-       * @brief Destroy FileBlockLoader object
+       * @brief Destroy a FileBlockLoader object.
        *
        */
-      ~FileBlockLoader ();
+      ~FileBlockLoader();
 
       /**
        * @brief Get the AsciiHeader that describes the DADA file contents
@@ -67,14 +68,14 @@ namespace ska::pst::common {
       const ska::pst::common::AsciiHeader& get_header() const;
 
       /**
-       * @brief Get the next block of data
+       * @brief Get the next block of data.
        *
        * When first called, returns a pair containing
        * - the base address of the start of data in the memory-mapped DADA file
        * - the size of the file in bytes (minus the size of the header)
        * If called again, this function returns (nullptr, 0)
        */
-      std::pair<char*,size_t> next_block();
+      BlockLoader::Block next_block();
 
     protected:
 
@@ -82,10 +83,10 @@ namespace ska::pst::common {
       std::unique_ptr<ska::pst::common::FileReader> reader;
 
       //! the details of the entire block
-      std::pair<char*,size_t> block_info;
+      BlockLoader::Block block_info;
 
       //! the details of the next block
-      std::pair<char*,size_t> next_block_info;
+      BlockLoader::Block next_block_info;
   };
 
 } // namespace ska::pst::common

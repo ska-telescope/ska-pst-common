@@ -38,19 +38,15 @@
 namespace ska::pst::common {
 
   /**
-   * @brief Class used for reading block of voltage from a file along with
-   * its weights.
+   * @brief Class used for reading voltage data and weights from file.
    *
-   * This reader uses a memory mapped (mmap) to read and seek to the next
-   * appropriate block.
    */
   class DataWeightsFileBlockLoader : public DataWeightsBlockLoader
   {
     public:
       /**
-       * @brief Create instance of a File Reader object.
+       * @brief Create instance of a DataWeightsFileBlockLoader object.
        *
-       * @param config the configuration for the file processing job.
        * @param data_file_path path to the data file to process.
        * @param weights_file_path the path to the weights file for the data file.
        */
@@ -60,7 +56,7 @@ namespace ska::pst::common {
       );
 
       /**
-       * @brief Destroy the File Reader object.
+       * @brief Destroy the DataWeightsFileBlockLoader object.
        *
        */
       ~DataWeightsFileBlockLoader();
