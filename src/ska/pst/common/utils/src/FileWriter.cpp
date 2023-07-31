@@ -41,6 +41,17 @@
 
 #include "ska/pst/common/utils/FileWriter.h"
 
+// casts an unsigned integer to an integer and throws an out-of-range exception if the unsigned argument is greater than the maximum possible signed value
+template<typename T>
+auto safe_signed_cast (const T& arg) -> std::make_signed_t<T>
+{
+  if (arg > std::numeric_limits<std::make_signed_t<T>>::max())
+  {
+    throw std::out_of_range("safe_cast_to_signed");
+  }
+  return static_cast<std::make_signed_t<T>>(arg);
+}
+
 ska::pst::common::FileWriter::FileWriter(bool use_o_direct) :
   o_direct(use_o_direct)
 {
@@ -50,41 +61,41 @@ ska::pst::common::FileWriter::FileWriter(bool use_o_direct) :
 ska::pst::common::FileWriter::~FileWriter()
 {
   SPDLOG_TRACE("ska::pst::common::FileWriter::~FileWriter");
+  deconfigure();
 }
 
-void ska::pst::common::FileWriter::configure(uint64_t _header_bufsz, uint64_t _data_bufsz)
+void ska::pst::common::FileWriter::configure(uint64_t _header_bufsz)
 {
-  header_bufsz = _header_bufsz;
-  data_bufsz = _data_bufsz;
-
-  if (o_direct && (header_bufsz % o_direct_alignment != 0))
+  if (header_bufsz > 0 && _header_bufsz > header_bufsz)
   {
-    SPDLOG_ERROR("ska::pst::common::FileWriter::validate_o_direct header_bufsz={} must be a multiple of {} bytes if O_DIRECT enabled", o_direct_alignment, header_bufsz);
+    // the currently allocated buffer is not large enough
+    deconfigure();
+  }
+
+  if (o_direct && (_header_bufsz % o_direct_alignment != 0))
+  {
+    SPDLOG_ERROR("ska::pst::common::FileWriter::validate_o_direct header_bufsz={} must be a multiple of {} bytes if O_DIRECT enabled", _header_bufsz, o_direct_alignment);
     throw std::runtime_error("ska::pst::common::FileWriter::validate_o_direct bad header_bufsz");
   }
 
-  if (o_direct && (data_bufsz % o_direct_alignment != 0))
+  if (!header_buffer)
   {
-    SPDLOG_ERROR("ska::pst::common::FileWriter::validate_o_direct data_bufsz={} must be a multiple of {} bytes if O_DIRECT enabled", o_direct_alignment, data_bufsz);
-    throw std::runtime_error("ska::pst::common::FileWriter::validate_o_direct bad header_bufsz");
-  }
-
-  if (!buffer)
-  {
-    SPDLOG_DEBUG("ska::pst::common::FileWriter::validate_o_direct posix_memalign(buffer, {}, {})", o_direct_alignment, header_bufsz);
-    posix_memalign(reinterpret_cast<void **>(&buffer), o_direct_alignment, header_bufsz);
-    memset(buffer, 0, header_bufsz);
+    SPDLOG_DEBUG("ska::pst::common::FileWriter::validate_o_direct posix_memalign(header_buffer, {}, {})", o_direct_alignment, _header_bufsz);
+    posix_memalign(reinterpret_cast<void **>(&header_buffer), o_direct_alignment, _header_bufsz);
+    memset(header_buffer, 0, _header_bufsz);
+    header_bufsz = _header_bufsz;
   }
 }
 
 void ska::pst::common::FileWriter::deconfigure()
 {
-  if (buffer)
+  if (header_buffer)
   {
-    SPDLOG_DEBUG("ska::pst::common::FileWriter::deconfigure free(buffer)");
-    free(buffer); // NOLINT
+    SPDLOG_DEBUG("ska::pst::common::FileWriter::deconfigure free(header_buffer)");
+    free(header_buffer); // NOLINT
   }
-  buffer = nullptr;
+  header_buffer = nullptr;
+  header_bufsz = 0;
 }
 
 auto ska::pst::common::FileWriter::get_filename(const std::string& utc_start, uint64_t obs_offset, unsigned file_number) -> std::filesystem::path
@@ -92,7 +103,7 @@ auto ska::pst::common::FileWriter::get_filename(const std::string& utc_start, ui
   std::ostringstream oss;
   oss << utc_start << "_" << std::setfill('0') << std::setw(obs_offset_width) << obs_offset
       << "_" << std::setw(file_number_width) << file_number << ".dada";
-  return std::filesystem::path(oss.str());
+  return oss.str();
 }
 
 auto ska::pst::common::FileWriter::is_file_open() -> bool
@@ -102,6 +113,12 @@ auto ska::pst::common::FileWriter::is_file_open() -> bool
 
 void ska::pst::common::FileWriter::open_file(const std::filesystem::path& new_file)
 {
+  if (file_open)
+  {
+    SPDLOG_ERROR("ska::pst::common::FileWriter::open_file already open");
+    throw std::runtime_error("ska::pst::common::FileWriter::open_file already open");
+  }
+
   int flags = O_WRONLY | O_CREAT | O_TRUNC;
   int perms = S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH;
   if (o_direct)
@@ -150,6 +167,12 @@ void ska::pst::common::FileWriter::reopen_file()
 
 void ska::pst::common::FileWriter::close_file()
 {
+  if (!file_open)
+  {
+    SPDLOG_ERROR("ska::pst::common::FileWriter::close_file not open");
+    throw std::runtime_error("ska::pst::common::FileWriter::close_file not open");
+  }
+
   SPDLOG_DEBUG("ska::pst::common::FileWriter::close_file fd={}", fd);
   if (::close(fd) < 0)
   {
@@ -162,12 +185,29 @@ void ska::pst::common::FileWriter::close_file()
 auto ska::pst::common::FileWriter::write_header(const ska::pst::common::AsciiHeader& header) -> ssize_t
 {
   SPDLOG_DEBUG("ska::pst::common::FileWriter::write_header()");
-  sprintf(buffer, header.raw().c_str(), header.raw().length()); // NOLINT
 
-  ssize_t wrote = write(fd, buffer, header_bufsz);
+  if (header_bytes_written > 0)
+  {
+    SPDLOG_ERROR("ska::pst::common::FileWriter::write_header header bytes already written={}", header_bytes_written);
+    throw std::runtime_error("ska::pst::common::FileWriter::write_header header already written");
+  }
+
+  // ensure that the header buffer is allocated (and large enough)
+  auto header_size = header.get_uint32("HDR_SIZE");
+  configure (header_size);
+
+  if (header_bufsz < header.raw().length())
+  {
+    SPDLOG_ERROR("ska::pst::common::FileWriter::write_header header_bufsz={} smaller than header.raw.length()={} (HDR_SIZE={})", header_bufsz, header.raw().length(), header_size);
+    throw std::runtime_error("ska::pst::common::FileWriter::write_header header_bufsz smaller than header.raw.length after calling configure()");
+  }
+
+  sprintf(header_buffer, header.raw().c_str(), header.raw().length()); // NOLINT
+
+  ssize_t wrote = write(fd, header_buffer, header_bufsz);
   if (wrote < 0)
   {
-    SPDLOG_ERROR("ska::pst::common::FileWriter::write_header write({}, {}, {}) failed: {}", fd, reinterpret_cast<void *>(buffer), header_bufsz, strerror(errno));
+    SPDLOG_ERROR("ska::pst::common::FileWriter::write_header write({}, {}, {}) failed: {}", fd, reinterpret_cast<void *>(header_buffer), header_bufsz, strerror(errno));
     throw std::runtime_error("ska::pst::common::FileWriter::write_header could not write header to file");
   }
 
@@ -180,15 +220,21 @@ auto ska::pst::common::FileWriter::write_header(const ska::pst::common::AsciiHea
   if (!o_direct)
   {
     // This won't block, but will start writeout asynchronously
-    sync_file_range(fd, 0, header_bufsz, SYNC_FILE_RANGE_WRITE);
+    sync_file_range(fd, 0, safe_signed_cast(header_bufsz), SYNC_FILE_RANGE_WRITE);
   }
-  header_bytes_written += wrote;
+  header_bytes_written = header_bufsz;
   return wrote;
 }
 
 auto ska::pst::common::FileWriter::write_data(char * data_ptr, uint64_t bytes_to_write) -> ssize_t
 {
   SPDLOG_DEBUG("ska::pst::common::FileWriter::write_data writing {} bytes to file", bytes_to_write);
+
+  if (header_bytes_written == 0)
+  {
+    SPDLOG_ERROR("ska::pst::common::FileWriter::write_data header not written");
+    throw std::runtime_error("ska::pst::common::FileWriter::write_data header not written");
+  }
 
   if (o_direct && (bytes_to_write % o_direct_alignment != 0))
   {
@@ -197,6 +243,13 @@ auto ska::pst::common::FileWriter::write_data(char * data_ptr, uint64_t bytes_to
   }
 
   ssize_t wrote = write(fd, reinterpret_cast<void *>(data_ptr), bytes_to_write);
+
+  if (wrote < 0)
+  {
+    SPDLOG_ERROR("ska::pst::common::FileWriter::write_data write({}, {}, {}) failed: {}", fd, reinterpret_cast<void *>(data_ptr), bytes_to_write, strerror(errno));
+    throw std::runtime_error("ska::pst::common::FileWriter::write_data could not write data to file");
+  }
+
   if (wrote != bytes_to_write)
   {
     SPDLOG_ERROR("ska::pst::common::FileWriter::write_data wrote fewer bytes than expected requested={} actual={}", bytes_to_write, wrote);
@@ -205,13 +258,16 @@ auto ska::pst::common::FileWriter::write_data(char * data_ptr, uint64_t bytes_to
 
   if (!o_direct)
   {
+    auto offset = safe_signed_cast(header_bytes_written + data_bytes_written);
+    auto nbytes = safe_signed_cast(bytes_to_write);
+
     // This won't block, but will start writeout asynchronously
-    sync_file_range(fd, header_bytes_written + data_bytes_written, bytes_to_write, SYNC_FILE_RANGE_WRITE);
+    sync_file_range(fd, offset, nbytes, SYNC_FILE_RANGE_WRITE);
 
     // This does a blocking write-and-wait on any old ranges
     if (data_bytes_written > 0)
     {
-      sync_file_range(fd, header_bytes_written + data_bytes_written, bytes_to_write, SYNC_FILE_RANGE_WAIT_BEFORE|SYNC_FILE_RANGE_WRITE|SYNC_FILE_RANGE_WAIT_AFTER);
+      sync_file_range(fd, offset, nbytes, SYNC_FILE_RANGE_WAIT_BEFORE|SYNC_FILE_RANGE_WRITE|SYNC_FILE_RANGE_WAIT_AFTER);
     }
   }
 

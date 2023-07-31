@@ -54,7 +54,7 @@ namespace ska::pst::common {
        *
        * @param use_o_direct Flag to enable the O_DIRECT option.
        */
-      FileWriter(bool use_o_direct);
+      FileWriter(bool use_o_direct = false);
 
       /**
        * @brief Destroy the FileWriter object
@@ -67,9 +67,8 @@ namespace ska::pst::common {
        * used to write the header to the file.
        *
        * @param header_bufsz size of a header buffer element in bytes
-       * @param data_bufsz size of a data buffer element in bytes
        */
-      void configure(uint64_t header_bufsz, uint64_t data_bufsz);
+      void configure(uint64_t header_bufsz);
 
       /**
        * @brief Deconfigure the file writer, releasing the internal buffer.
@@ -91,6 +90,12 @@ namespace ska::pst::common {
        * @param new_file full path to the file to be opened
        */
       void open_file(const std::filesystem::path& new_file);
+
+      /**
+       * @brief Return the (assumed) logical block size of the filesystem
+       *
+       */
+      uint32_t block_alignment () const { return o_direct_alignment; }
 
       /**
        * @brief Write the header to the currently opened file
@@ -157,8 +162,11 @@ namespace ska::pst::common {
       //! file descriptor of the currently opened file
       int fd{-1};
 
-      //! local buffer of 512-byte aligned memory used to write the AsciiHeader to O_DIRECT opened file handles
-      char * buffer{nullptr};
+      //! local buffer of page-aligned memory used to write the AsciiHeader to O_DIRECT opened file handles
+      char* header_buffer{nullptr};
+
+      //! size of the header ring buffer elements in bytes
+      uint64_t header_bufsz{0};
 
       //! path of the currently opened file
       std::filesystem::path current_file;
@@ -168,12 +176,6 @@ namespace ska::pst::common {
 
       //! flag which instructs open_file to enable O_DIRECT flag when opening files
       bool o_direct{false};
-
-      //! size of the header ring buffer elements in bytes
-      uint64_t header_bufsz{0};
-
-      //! size of the data ring buffer element in bytes
-      uint64_t data_bufsz{0};
 
       //! alignment for I/O operations on O-DIRECT buffers
       const uint32_t o_direct_alignment{512};

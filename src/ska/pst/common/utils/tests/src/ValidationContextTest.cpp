@@ -65,7 +65,7 @@ TEST_F(ValidationContextTest, throw_error_if_not_empty) // NOLINT
 {
   ValidationContext context;
 
-  context.add_validation_error<int32_t>("DATA_PORT", 42, "Invalid data port");
+  context.add_validation_error<int32_t>("DATA_PORT", 42, "Invalid data port"); // NOLINT
   try {
     context.throw_error_if_not_empty();
     FAIL(); // NOLINT
@@ -78,7 +78,7 @@ TEST_F(ValidationContextTest, throw_error_if_not_empty_multiple_errors) // NOLIN
 {
   ValidationContext context;
 
-  context.add_validation_error<int32_t>("DATA_PORT", 42, "Invalid data port");
+  context.add_validation_error<int32_t>("DATA_PORT", 42, "Invalid data port"); // NOLINT
   context.add_validation_error<std::string>("SOURCE", "Not the right source", "invalid source");
   try {
     context.throw_error_if_not_empty();
