@@ -58,14 +58,13 @@ ska::pst::common::FileBlockLoader::~FileBlockLoader()
 
   if (map == nullptr)
   {
-    SPDLOG_ERROR("ska::pst::common::FileBlockLoader::dtor nothing to munmap");
+    SPDLOG_DEBUG("ska::pst::common::FileBlockLoader::dtor nothing to munmap");
     return;
   }
 
   if (munmap(map, data_size) == -1)
   {
     SPDLOG_ERROR("ska::pst::common::FileBlockLoader::dtor munmap failed: {}", strerror(errno));
-    throw std::runtime_error("ska::pst::common::FileReader::dtor munmap failed");
   }
 }
 

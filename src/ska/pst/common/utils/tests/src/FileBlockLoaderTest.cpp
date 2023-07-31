@@ -96,6 +96,21 @@ TEST_F(FileBlockLoaderTest, test_open_bad_file) // NOLINT
   EXPECT_THROW(FileBlockLoader fr(bad_file_name), std::runtime_error); // NOLINT
 }
 
+TEST_F(FileBlockLoaderTest, test_open_empty_file) // NOLINT
+{
+  std::string empty_file_name = "/tmp/FileBlockLoaderTest_empty.dat";
+
+  int flags = O_WRONLY | O_CREAT | O_TRUNC;
+  int perms = S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH;
+  int fd = open(empty_file_name.c_str(), flags, perms); // NOLINT
+  close(fd);
+
+  SPDLOG_TRACE("ska::pst::common::test::FileBlockLoaderTest::test_open_empty_file fr.open_file({})", empty_file_name);
+  EXPECT_THROW(FileBlockLoader fr(empty_file_name), std::runtime_error); // NOLINT
+
+  std::filesystem::remove(std::filesystem::path(empty_file_name));
+}
+
 TEST_F(FileBlockLoaderTest, test_next_block) // NOLINT
 {
   FileBlockLoader fr(file_name);
