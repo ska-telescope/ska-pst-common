@@ -64,23 +64,34 @@ ska::pst::common::FileWriter::~FileWriter()
   deconfigure();
 }
 
+void ska::pst::common::FileWriter::check_block_size(uint64_t block_size) const
+{
+  if (block_size == 0)
+  {
+    SPDLOG_ERROR("ska::pst::common::FileWriter::check_block_size block_size is zero");
+    throw std::runtime_error("ska::pst::common::FileWriter::check_block_size block_size is zero");
+  }
+
+  if (o_direct && (block_size % o_direct_alignment != 0))
+  {
+    SPDLOG_ERROR("ska::pst::common::FileWriter::check_block_size block_size={} must be a multiple of {} bytes when O_DIRECT is enabled", block_size, o_direct_alignment);
+    throw std::runtime_error("ska::pst::common::FileWriter::check_block_size block_size is not a multiple of logical block size");
+  }
+}
+
 void ska::pst::common::FileWriter::configure(uint64_t _header_bufsz)
 {
+  check_block_size (_header_bufsz);
+
   if (header_bufsz > 0 && _header_bufsz > header_bufsz)
   {
     // the currently allocated buffer is not large enough
     deconfigure();
   }
 
-  if (o_direct && (_header_bufsz % o_direct_alignment != 0))
-  {
-    SPDLOG_ERROR("ska::pst::common::FileWriter::validate_o_direct header_bufsz={} must be a multiple of {} bytes if O_DIRECT enabled", _header_bufsz, o_direct_alignment);
-    throw std::runtime_error("ska::pst::common::FileWriter::validate_o_direct bad header_bufsz");
-  }
-
   if (!header_buffer)
   {
-    SPDLOG_DEBUG("ska::pst::common::FileWriter::validate_o_direct posix_memalign(header_buffer, {}, {})", o_direct_alignment, _header_bufsz);
+    SPDLOG_DEBUG("ska::pst::common::FileWriter::configure posix_memalign(header_buffer, {}, {})", o_direct_alignment, _header_bufsz);
     posix_memalign(reinterpret_cast<void **>(&header_buffer), o_direct_alignment, _header_bufsz);
     memset(header_buffer, 0, _header_bufsz);
     header_bufsz = _header_bufsz;

@@ -95,7 +95,14 @@ namespace ska::pst::common {
        * @brief Return the (assumed) logical block size of the filesystem
        *
        */
-      uint32_t block_alignment () const { return o_direct_alignment; }
+      uint32_t block_alignment() const { return o_direct_alignment; }
+
+      /**
+       * @brief Throw an exception if the block size is not a multiple of the (assumed) logical block size of the filesystem
+       *
+       * @param block_size the block size to be tested, in bytes
+       */
+      void check_block_size(uint64_t block_size) const;
 
       /**
        * @brief Write the header to the currently opened file
