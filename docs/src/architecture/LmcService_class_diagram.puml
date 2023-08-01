@@ -1,0 +1,40 @@
+@startuml LMC Service Class Diagram
+
+class LmcService
+{
+  handler : LmcServiceHandler*
+  state : ObsState
+  monitor_thread: std::thread
+  grpc_server: grpc::Server
+}
+
+interface LmcServiceHandler
+
+LmcService o-- LmcServiceHandler : uses >
+LmcServiceHandler <|-- RecvLmcServiceHandler
+LmcServiceHandler <|-- SmrbLmcServiceHandler
+LmcServiceHandler <|-- DiskLmcServiceHandler
+
+class RecvLmcServiceHandler
+{
+  recv: ControlledReceiver*
+}
+
+RecvLmcServiceHandler o-- ControlledReceiver : uses 1..4 >
+
+class SmrbLmcServiceHandler
+{
+  smrb: DataBlockManager*
+}
+
+SmrbLmcServiceHandler o-- DataBlockManager : uses 1..4 >
+
+class DiskLmcServiceHandler
+{
+  disk: DiskManager*
+}
+
+DiskLmcServiceHandler o-- DiskManager : uses 1..4 >
+
+@enduml
+
