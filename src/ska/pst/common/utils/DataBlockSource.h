@@ -28,60 +28,69 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "ska/pst/common/utils/DataBlockSource.h"
+#include "ska/pst/common/utils/BlockLoader.h"
 
-#include <memory>
-
-#ifndef __SKA_PST_COMMON_UTILS_DataBlockLoader_h
-#define __SKA_PST_COMMON_UTILS_DataBlockLoader_h
+#ifndef __SKA_PST_COMMON_UTILS_DataBlockSource_h
+#define __SKA_PST_COMMON_UTILS_DataBlockSource_h
 
 namespace ska::pst::common {
 
   /**
-   * @brief Base class used for reading blocks of voltage data and weights
+   * @brief Interface for reading blocks of voltage data and weights
    *
-   * This class implements an interface to data+weights that can be from any source,
-   * including file (see DataFileBlockLoader) or ring buffer (in principal).
+   * This pure virtual base class implements an interface to data+weights that can be from any source,
+   * including file (see DataFileBlockLoader), artificial signal generator (see DataBlockGenerator) or ring buffer (in principal) 
    */
-  class DataBlockLoader : public DataBlockSource
+  class DataBlockSource
   {
     public:
 
       /**
-       * @brief Destroy the DataBlockLoader object.
+       * @brief Stores pointers to data and weights blocks, and their sizes
        *
        */
-      virtual ~DataBlockLoader() = default;
+      class Block
+      {
+        public:
+          //! Data block
+          BlockLoader::Block data;
+
+          //! Weights block
+          BlockLoader::Block weights;
+      };
+
+      /**
+       * @brief Pure virtual destructor
+       *
+       */
+      virtual ~DataBlockSource() = default;
 
       /**
        * @brief Get the AsciiHeader that describes the data block stream
        *
        * @return const ska::pst::common::AsciiHeader& header of the data block stream
        */
-      virtual const ska::pst::common::AsciiHeader& get_data_header() const;
+      virtual const ska::pst::common::AsciiHeader& get_data_header() const = 0;
 
       /**
        * @brief Get the AsciiHeader that describes the weights block stream
        *
        * @return const ska::pst::common::AsciiHeader& header of the weights block stream
        */
-      virtual const ska::pst::common::AsciiHeader& get_weights_header() const;
+      virtual const ska::pst::common::AsciiHeader& get_weights_header() const = 0;
 
       /**
        * @brief Get the next block of data and weights.
        *
-       * The returned Block contains the pointer to the next block of data
+       * The returned Block contains the pointer to the next blocks of data
        * and weights.  It also includes the size, in bytes, for both data
-       * and weights. Clients of this must not go beyond the size of data.
+       * and weights.  End of data is indicated by a Block in which the pointers
+       * are set to nullptr and the sizes are set to zero
        */
-      virtual Block next_block();
+      virtual Block next_block() = 0;
 
-    protected:
-
-      std::unique_ptr<BlockLoader> data_block_loader;
-      std::unique_ptr<BlockLoader> weights_block_loader;
   };
 
 } // namespace ska::pst::common
 
-#endif // __SKA_PST_COMMON_UTILS_DataBlockLoader_h
+#endif // __SKA_PST_COMMON_UTILS_DataBlockSource_h

@@ -2,6 +2,7 @@
 set(public_headers
     AsciiHeader.h
     BlockLoader.h
+    DataBlockGenerator.h
     DataBlockLoader.h
     DataFileBlockLoader.h
     Endian.h
@@ -27,6 +28,7 @@ set(public_headers
 
 set(sources
     src/AsciiHeader.cpp
+    src/DataBlockGenerator.cpp
     src/DataBlockLoader.cpp
     src/DataFileBlockLoader.cpp
     src/Time.cpp

@@ -29,43 +29,64 @@
  */
 
 #include "ska/pst/common/utils/DataBlockSource.h"
+#include "ska/pst/common/utils/HeapLayout.h"
 
-#include <memory>
+#include <spdlog/spdlog.h>
+#include <complex>
 
-#ifndef __SKA_PST_COMMON_UTILS_DataBlockLoader_h
-#define __SKA_PST_COMMON_UTILS_DataBlockLoader_h
+#ifndef SKA_PST_COMMON_UTILS_DataBlockGenerator_h
+#define SKA_PST_COMMON_UTILS_DataBlockGenerator_h
 
-namespace ska::pst::common {
-
+namespace ska::pst::common
+{
   /**
-   * @brief Base class used for reading blocks of voltage data and weights
+   * @brief Unpacks data+weights+scales generation and validation
    *
-   * This class implements an interface to data+weights that can be from any source,
-   * including file (see DataFileBlockLoader) or ring buffer (in principal).
    */
-  class DataBlockLoader : public DataBlockSource
+  class DataBlockGenerator : public DataBlockSource
   {
     public:
 
       /**
-       * @brief Destroy the DataBlockLoader object.
+       * @brief Construct a new DataBlockGenerator object
        *
        */
-      virtual ~DataBlockLoader() = default;
+      DataBlockGenerator() = default;
+
+      /**
+       * @brief Destroy the DataBlockGenerator object
+       *
+       */
+      ~DataBlockGenerator();
+
+      /**
+       * @brief Configure the data unpacker with the AsciiHeader from the data and weights streams
+       *
+       * @param data_config AsciiHeader containing the configuration of the data stream
+       * @param weights_config AsciiHeader containing the configuration of the weights stream
+       */
+      virtual void configure(const ska::pst::common::AsciiHeader& data_config, const ska::pst::common::AsciiHeader& weights_config);
 
       /**
        * @brief Get the AsciiHeader that describes the data block stream
        *
        * @return const ska::pst::common::AsciiHeader& header of the data block stream
        */
-      virtual const ska::pst::common::AsciiHeader& get_data_header() const;
+      const ska::pst::common::AsciiHeader& get_data_header() const { return data_config; }
 
       /**
        * @brief Get the AsciiHeader that describes the weights block stream
        *
        * @return const ska::pst::common::AsciiHeader& header of the weights block stream
        */
-      virtual const ska::pst::common::AsciiHeader& get_weights_header() const;
+      const ska::pst::common::AsciiHeader& get_weights_header() const { return weights_config; }
+
+      /**
+       * @brief Resize the internal storage for data and weights
+       *
+       * @param nheap the number of heaps to be generated on each call to next_block
+       */
+      void resize(uint64_t nheap);
 
       /**
        * @brief Get the next block of data and weights.
@@ -74,14 +95,27 @@ namespace ska::pst::common {
        * and weights.  It also includes the size, in bytes, for both data
        * and weights. Clients of this must not go beyond the size of data.
        */
-      virtual Block next_block();
+      Block next_block();
 
     protected:
 
-      std::unique_ptr<BlockLoader> data_block_loader;
-      std::unique_ptr<BlockLoader> weights_block_loader;
+      //! the AsciiHeader that describes the data block stream
+      ska::pst::common::AsciiHeader data_config;
+      
+      //! the AsciiHeader that describes the weights block stream
+      ska::pst::common::AsciiHeader weights_config;
+
+      //! the data and weights blocks
+      Block block;
+
+      //! The layout of data, weights and scales in each heap
+      HeapLayout layout;
+
+      //! The number of heaps generated on each call to next_block
+      uint64_t nheap{0};
   };
 
 } // namespace ska::pst::common
 
-#endif // __SKA_PST_COMMON_UTILS_DataBlockLoader_h
+#endif // SKA_PST_COMMON_UTILS_DataBlockGenerator_h
+
