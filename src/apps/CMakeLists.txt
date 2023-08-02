@@ -3,7 +3,7 @@ include_directories(
   ..
   ${SkaPstCommon_INCLUDE_DIR}
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>
-  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/proto>
+  $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/proto>
 )
 
 add_executable(ska_pst_generate_file ska_pst_generate_file.cpp)
