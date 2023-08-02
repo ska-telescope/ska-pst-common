@@ -1,9 +1,10 @@
 
-include_directories(
-  ..
-  ${SkaPstCommon_INCLUDE_DIR}
+target_include_directories(
+  ska_pst_common-utils
+  PUBLIC
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>
-  $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/proto>
+  $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/src>
+  $<INSTALL_INTERFACE:include>
 )
 
 add_executable(ska_pst_generate_file ska_pst_generate_file.cpp)
