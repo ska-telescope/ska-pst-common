@@ -32,6 +32,7 @@ find_package(gRPC)
 find_package(spdlog)
 
 find_dependencies()
-add_subdirectory(protobuf)
 add_subdirectory(src/ska/pst/common)
+add_subdirectory(protobuf)
 add_subdirectory(src/apps)
+
