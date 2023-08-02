@@ -29,6 +29,7 @@
  */
 
 #include "ska/pst/common/utils/DataBlockSource.h"
+#include "ska/pst/common/utils/DataGenerator.h"
 #include "ska/pst/common/utils/HeapLayout.h"
 
 #include <spdlog/spdlog.h>
@@ -65,21 +66,21 @@ namespace ska::pst::common
        * @param data_config AsciiHeader containing the configuration of the data stream
        * @param weights_config AsciiHeader containing the configuration of the weights stream
        */
-      virtual void configure(const ska::pst::common::AsciiHeader& data_config, const ska::pst::common::AsciiHeader& weights_config);
+      virtual void configure(const AsciiHeader& data_config, const AsciiHeader& weights_config);
 
       /**
        * @brief Get the AsciiHeader that describes the data block stream
        *
-       * @return const ska::pst::common::AsciiHeader& header of the data block stream
+       * @return const AsciiHeader& header of the data block stream
        */
-      const ska::pst::common::AsciiHeader& get_data_header() const { return data_config; }
+      const AsciiHeader& get_data_header() const { return data_config; }
 
       /**
        * @brief Get the AsciiHeader that describes the weights block stream
        *
-       * @return const ska::pst::common::AsciiHeader& header of the weights block stream
+       * @return const AsciiHeader& header of the weights block stream
        */
-      const ska::pst::common::AsciiHeader& get_weights_header() const { return weights_config; }
+      const AsciiHeader& get_weights_header() const { return weights_config; }
 
       /**
        * @brief Resize the internal storage for data and weights
@@ -100,10 +101,13 @@ namespace ska::pst::common
     protected:
 
       //! the AsciiHeader that describes the data block stream
-      ska::pst::common::AsciiHeader data_config;
+      AsciiHeader data_config;
       
       //! the AsciiHeader that describes the weights block stream
-      ska::pst::common::AsciiHeader weights_config;
+      AsciiHeader weights_config;
+
+      //! DataGenerator sets the data and weights of each packet in each heap
+      std::shared_ptr<DataGenerator> generator{nullptr};
 
       //! the data and weights blocks
       Block block;

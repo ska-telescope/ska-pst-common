@@ -29,6 +29,7 @@
  */
 
 #include "ska/pst/common/utils/DataBlockGenerator.h"
+#include "ska/pst/common/utils/DataGeneratorFactory.h"
 #include "ska/pst/common/definitions.h"
 
 #include <spdlog/spdlog.h>
@@ -39,12 +40,15 @@ ska::pst::common::DataBlockGenerator::~DataBlockGenerator()
   resize (0);
 }
 
-void ska::pst::common::DataBlockGenerator::configure(const ska::pst::common::AsciiHeader& _data_config, const ska::pst::common::AsciiHeader& _weights_config)
+void ska::pst::common::DataBlockGenerator::configure(const AsciiHeader& _data_config, const AsciiHeader& _weights_config)
 {
   data_config = _data_config;
   weights_config = _weights_config;
 
   layout.configure(data_config, weights_config);
+
+  std::string generator_name = data_config.get_val("DATA_GENERATOR");
+  generator = DataGeneratorFactory(generator_name, layout.get_packet_layout_ptr());
 }
 
 void resize (ska::pst::common::BlockLoader::Block& block, uint64_t size)
@@ -88,13 +92,21 @@ void ska::pst::common::DataBlockGenerator::resize(uint64_t _nheap)
 auto ska::pst::common::DataBlockGenerator::next_block() -> Block
 {
   const uint32_t packets_per_heap = layout.get_packets_per_heap();
+  const uint64_t num_packets = nheap * packets_per_heap;
 
-  for (uint32_t iheap=0; iheap<nheap; iheap++)
+  const DataLayout& packet_layout = layout.get_packet_layout();
+
+  for (auto packet_number = 0; packet_number < num_packets; packet_number++)
   {
-    for (uint32_t ipacket=0; ipacket<packets_per_heap; ipacket++)
-    {
-      
-    }
+    auto data_offset = packet_number * layout.get_data_packet_stride();
+    auto weights_offset = packet_number * layout.get_weights_packet_stride();
+
+    SPDLOG_TRACE("ska::pst::common::DataBlockGenerator::next_block generating data packet {}", packet_number);
+    generator->fill_data(block.data.block + data_offset, packet_layout.get_packet_data_size()); // NOLINT
+    SPDLOG_TRACE("ska::pst::common::DataBlockGenerator::next_block generating scales packet {}", packet_number);
+    generator->fill_scales(block.weights.block + weights_offset + packet_layout.get_packet_scales_offset(), packet_layout.get_packet_scales_size()); // NOLINT
+    SPDLOG_TRACE("ska::pst::common::DataBlockGenerator::next_block generating weights packet {}", packet_number);
+    generator->fill_weights(block.weights.block + weights_offset + packet_layout.get_packet_weights_offset(), packet_layout.get_packet_weights_size()); // NOLINT
   }
 
   return block;

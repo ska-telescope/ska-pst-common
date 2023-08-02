@@ -77,7 +77,7 @@ class HeapPacketLayout : public ska::pst::common::DataLayout
 
 void ska::pst::common::HeapLayout::configure(const ska::pst::common::AsciiHeader& data_config, const ska::pst::common::AsciiHeader& weights_config)
 {
-  packet_layout = HeapPacketLayout(data_config, weights_config);
+  packet_layout = std::make_shared<HeapPacketLayout>(data_config, weights_config);
 
   // extract the required parameters from the data header
   auto ndim = data_config.get_uint32("NDIM");
@@ -103,21 +103,21 @@ void ska::pst::common::HeapLayout::configure(const ska::pst::common::AsciiHeader
     throw std::runtime_error("ska::pst::common::HeapLayout::configure invalid NBIT");
   }
 
-  SPDLOG_DEBUG("ska::pst::common::HeapLayout::configure nchan={} nchan_per_packet={}", nchan, packet_layout.get_nchan_per_packet());
-  if (nchan % packet_layout.get_nchan_per_packet() != 0)
+  SPDLOG_DEBUG("ska::pst::common::HeapLayout::configure nchan={} nchan_per_packet={}", nchan, packet_layout->get_nchan_per_packet());
+  if (nchan % packet_layout->get_nchan_per_packet() != 0)
   {
-    SPDLOG_ERROR("ska::pst::common::HeapLayout::configure NCHAN={} was not a multiple of nchan_per_packet={}", nchan, packet_layout.get_nchan_per_packet());
+    SPDLOG_ERROR("ska::pst::common::HeapLayout::configure NCHAN={} was not a multiple of nchan_per_packet={}", nchan, packet_layout->get_nchan_per_packet());
     throw std::runtime_error("ska::pst::common::HeapLayout::configure invalid NCHAN");
   }
 
   // extract parameters from the weights header
   weights_packet_stride = weights_config.get_uint32("PACKET_WEIGHTS_SIZE") + weights_config.get_uint32("PACKET_SCALES_SIZE");
-  weights_heap_stride = weights_packet_stride * nchan / packet_layout.get_nchan_per_packet();
+  weights_heap_stride = weights_packet_stride * nchan / packet_layout->get_nchan_per_packet();
 
   SPDLOG_DEBUG("ska::pst::common::HeapLayout::configure weights packet_stride={}", weights_packet_stride);
 
-  data_packet_stride = (packet_layout.get_samples_per_packet() * packet_layout.get_nchan_per_packet() * npol * ndim * nbit) / ska::pst::common::bits_per_byte;
-  data_heap_stride = (packet_layout.get_samples_per_packet() * nchan * npol * ndim * nbit) / ska::pst::common::bits_per_byte;
+  data_packet_stride = (packet_layout->get_samples_per_packet() * packet_layout->get_nchan_per_packet() * npol * ndim * nbit) / ska::pst::common::bits_per_byte;
+  data_heap_stride = (packet_layout->get_samples_per_packet() * nchan * npol * ndim * nbit) / ska::pst::common::bits_per_byte;
   if (data_heap_stride % data_packet_stride)
   {
     SPDLOG_ERROR("ska::pst::common::HeapLayout::configure data_heap_stride={} is not a multiple of data_packet_stride={}", data_heap_stride, data_packet_stride);
