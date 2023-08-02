@@ -1,0 +1,55 @@
+@startuml Stream Class Diagram
+
+interface Stream
+{
+  data_header : AsciiHeader*
+  weights_header : AsciiHeader*
+  next_slice : Slice
+}
+
+Stream <|-- StreamLoader
+Stream <|-- StreamGenerator
+
+StreamLoader <|-- StreamFileLoader
+StreamLoader <|-- smrb::StreamBufferLoader
+
+class StreamGenerator
+{
+  generator : PacketGenerator*
+  layout : HeapLayout*
+
+  data_header : AsciiHeader*
+  weights_header : AsciiHeader*
+  next_slice : Slice
+}
+
+class StreamLoader
+{
+  data_loader : BlockLoader*
+  header_loader : BlockLoader*
+
+  data_header : AsciiHeader*
+  weights_header : AsciiHeader*
+  next_slice : Slice
+}
+
+interface BlockLoader
+{
+  header : AsciiHeader*
+  next_block : Block
+}
+
+class Stream::Slice
+{
+  data : Block;
+  weights : Block;
+}
+
+class Block
+{
+  block : char*;
+  size : size_t;
+}
+
+@enduml
+
