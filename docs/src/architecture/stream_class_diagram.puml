@@ -2,54 +2,117 @@
 
 interface Stream
 {
-  data_header : AsciiHeader*
-  weights_header : AsciiHeader*
-  next_slice : Slice
+  + get_data_header() : AsciiHeader*
+  + get_weights_header() : AsciiHeader*
+  + next_slice() : Slice
 }
 
 Stream <|-- StreamLoader
 Stream <|-- StreamGenerator
 
-StreamLoader <|-- StreamFileLoader
-StreamLoader <|-- smrb::StreamBufferLoader
+package ska::pst::smrb {
+  class RingBufferStreamLoader
+}
+
+StreamLoader <|-- RingBufferStreamLoader
 
 class StreamGenerator
 {
-  generator : PacketGenerator*
-  layout : HeapLayout*
+  - generator : PacketGenerator*
+  - layout : HeapLayout*
 
-  data_header : AsciiHeader*
-  weights_header : AsciiHeader*
-  next_slice : Slice
+  + get_data_header() : AsciiHeader*
+  + get_weights_header() : AsciiHeader*
+  + next_slice() : Slice
+}
+
+StreamGenerator *-- PacketGenerator
+StreamGenerator *-- HeapLayout
+
+PacketGenerator o-- PacketLayout
+HeapLayout o-- PacketLayout
+
+class PacketGenerator
+{
+  - layout : PacketLayout*
+  + fill_packet(buffer: char*);
+}
+
+class HeapLayout
+{
+  packet_layout : PacketLayout*
+
+  packets_per_heap : unsigned
+  data_packet_stride : unsigned
+  weights_packet_stride : unsigned
+  data_heap_stride : unsigned
+  weights_heap_stride : unsigned 
+}
+
+class PacketLayout
+{
+  packet_size : unsigned
+  packet_header_size : unsigned
+  packet_data_size : unsigned
+  packet_weights_size : unsigned
+  packet_scales_size : unsigned
+  packet_data_offset : unsigned
+  packet_weights_offset : unsigned
+  packet_scales_offset : unsigned
+  nsamp_per_packet : unsigned
+  nchan_per_packet : unsigned
+  nsamp_per_weight : unsigned
 }
 
 class StreamLoader
 {
-  data_loader : BlockLoader*
-  header_loader : BlockLoader*
+  - data_loader : BlockLoader*
+  - header_loader : BlockLoader*
 
-  data_header : AsciiHeader*
-  weights_header : AsciiHeader*
-  next_slice : Slice
+  + get_data_header() : AsciiHeader*
+  + get_weights_header() : AsciiHeader*
+  + next_slice() : Slice
 }
+
+StreamLoader <|-- FileStreamLoader
+
+class FileStreamLoader
+{
+  - data_loader : FileBlockLoader*
+  - header_loader : FileBlockLoader*
+}
+
+FileStreamLoader *-- FileBlockLoader
 
 interface BlockLoader
 {
-  header : AsciiHeader*
-  next_block : Block
+  + get_header() : AsciiHeader*
+  + next_block() : Block
 }
 
-class Stream::Slice
+BlockLoader <|-- FileBlockLoader
+
+class FileBlockLoader
 {
-  data : Block;
-  weights : Block;
+  - reader : FileReader*
+  
+  + get_header() : AsciiHeader*
+  + next_block() : Block
 }
+
+
+class Slice
+{
+  data : Block
+  weights : Block
+}
+
+Slice *-- Block
 
 class Block
 {
-  block : char*;
-  size : size_t;
+  block : char*
+  size : size_t
 }
 
 @enduml
-
