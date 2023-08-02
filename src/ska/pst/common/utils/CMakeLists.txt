@@ -9,6 +9,7 @@ set(public_headers
     Timer.h
     RandomSequence.h
     DataLayout.h
+    HeapLayout.h
     DataGenerator.h
     DataGeneratorFactory.h
     DataUnpacker.h
@@ -32,6 +33,7 @@ set(sources
     src/Timer.cpp
     src/NormalSequence.cpp
     src/RandomSequence.cpp
+    src/HeapLayout.cpp
     src/DataGenerator.cpp
     src/DataGeneratorFactory.cpp
     src/DataUnpacker.cpp
