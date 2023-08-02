@@ -30,10 +30,10 @@
 
 #include <string>
 
-#include "ska/pst/common/utils/DataWeightsBlockLoader.h"
+#include "ska/pst/common/utils/DataBlockLoader.h"
 
-#ifndef __SKA_PST_COMMON_UTILS_DataWeightsFileBlockLoader_h
-#define __SKA_PST_COMMON_UTILS_DataWeightsFileBlockLoader_h
+#ifndef __SKA_PST_COMMON_UTILS_DataFileBlockLoader_h
+#define __SKA_PST_COMMON_UTILS_DataFileBlockLoader_h
 
 namespace ska::pst::common {
 
@@ -41,27 +41,27 @@ namespace ska::pst::common {
    * @brief Class used for reading voltage data and weights from file.
    *
    */
-  class DataWeightsFileBlockLoader : public DataWeightsBlockLoader
+  class DataFileBlockLoader : public DataBlockLoader
   {
     public:
       /**
-       * @brief Create instance of a DataWeightsFileBlockLoader object.
+       * @brief Create instance of a DataFileBlockLoader object.
        *
        * @param data_file_path path to the data file to process.
        * @param weights_file_path the path to the weights file for the data file.
        */
-      DataWeightsFileBlockLoader(
+      DataFileBlockLoader(
         const std::string& data_file_path,
         const std::string& weights_file_path
       );
 
       /**
-       * @brief Destroy the DataWeightsFileBlockLoader object.
+       * @brief Destroy the DataFileBlockLoader object.
        *
        */
-      ~DataWeightsFileBlockLoader();
+      ~DataFileBlockLoader();
   };
 
 } // namespace ska::pst::common
 
-#endif // __SKA_PST_COMMON_UTILS_DataWeightsFileBlockLoader_h
+#endif // __SKA_PST_COMMON_UTILS_DataFileBlockLoader_h

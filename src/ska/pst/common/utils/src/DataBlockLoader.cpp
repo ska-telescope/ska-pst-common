@@ -3,18 +3,18 @@
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice,
  * this list of conditions and the following disclaimer.
- * 
+ *
  * 2. Redistributions in binary form must reproduce the above copyright
  * notice, this list of conditions and the following disclaimer in the
  * documentation and/or other materials provided with the distribution.
- * 
+ *
  * 3. Neither the name of the copyright holder nor the names of its
  * contributors may be used to endorse or promote products derived from this
  * software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -28,52 +28,51 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "ska/pst/common/utils/DataWeightsFileBlockLoader.h"
+#include "ska/pst/common/utils/DataBlockLoader.h"
+#include <spdlog/spdlog.h>
 
-#include <gtest/gtest.h>
+static void log_throw (const char* msg)
+{
+  SPDLOG_ERROR(msg); 
+  throw std::runtime_error(msg);
+}
 
-#ifndef SKA_PST_COMMON_UTILS_TESTS_DataWeightsFileBlockLoaderTest_h
-#define SKA_PST_COMMON_UTILS_TESTS_DataWeightsFileBlockLoaderTest_h
-
-namespace ska::pst::common::test {
-
-  /**
-   * @brief Test the DataWeightsFileBlockLoader class
-   * 
-   * @details
-   * 
-   */
-  class DataWeightsFileBlockLoaderTest : public ::testing::Test
+auto ska::pst::common::DataBlockLoader::get_data_header() const -> const AsciiHeader&
+{
+  SPDLOG_DEBUG("ska::pst::common::DataBlockLoader::get_data_header");
+  if (!data_block_loader)
   {
-    protected:
-      void SetUp() override;
+    log_throw("ska::pst::common::DataBlockLoader::get_data_header data_block_loader not initialised");
+  }
+  return data_block_loader->get_header();
+}
 
-      void TearDown() override;
+auto ska::pst::common::DataBlockLoader::get_weights_header() const -> const AsciiHeader&
+{
+  SPDLOG_DEBUG("ska::pst::common::DataBlockLoader::get_weights_header");
+  if (!weights_block_loader)
+  {
+    log_throw("ska::pst::common::DataBlockLoader::get_weights_header weights_block_loader not initialised");
+  }
+  return weights_block_loader->get_header();
+}
 
-    public:
-      DataWeightsFileBlockLoaderTest();
 
-      ~DataWeightsFileBlockLoaderTest();
+auto ska::pst::common::DataBlockLoader::next_block() -> Block
+{
+  SPDLOG_DEBUG("ska::pst::common::DataBlockLoader::next_block");
 
-      ska::pst::common::AsciiHeader header;
+  if (!data_block_loader)
+  {
+    log_throw("ska::pst::common::DataBlockLoader::next_block data_block_loader not initialised");
+  }
+  if (!weights_block_loader)
+  {
+    log_throw("ska::pst::common::DataBlockLoader::next_block weights_block_loader not initialised");
+  }
 
-      std::vector<char> file_header;
-
-      std::vector<char> data_file_data;
-      std::vector<char> weights_file_data;
-
-      std::string data_file_name{"/tmp/DataFileBlockLoaderTest.dada"};
-      std::string weights_file_name{"/tmp/WeightsFileBlockLoaderTest.dada"};
-
-      uint32_t header_size{0};
-
-      uint32_t data_size{1048576};
-
-    private:
-
-  };
-
-} // namespace ska::pst::common::test
-
-#endif // SKA_PST_COMMON_UTILS_TESTS_DataWeightsFileBlockLoaderTest_h
-
+  Block result;
+  result.data = data_block_loader->next_block();
+  result.weights = weights_block_loader->next_block();
+  return result;
+}

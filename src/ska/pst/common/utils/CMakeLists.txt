@@ -2,8 +2,8 @@
 set(public_headers
     AsciiHeader.h
     BlockLoader.h
-    DataWeightsBlockLoader.h
-    DataWeightsFileBlockLoader.h
+    DataBlockLoader.h
+    DataFileBlockLoader.h
     Endian.h
     Time.h
     Timer.h
@@ -27,8 +27,8 @@ set(public_headers
 
 set(sources
     src/AsciiHeader.cpp
-    src/DataWeightsBlockLoader.cpp
-    src/DataWeightsFileBlockLoader.cpp
+    src/DataBlockLoader.cpp
+    src/DataFileBlockLoader.cpp
     src/Time.cpp
     src/Timer.cpp
     src/NormalSequence.cpp

@@ -31,8 +31,8 @@
 #include "ska/pst/common/utils/BlockLoader.h"
 #include <memory>
 
-#ifndef __SKA_PST_COMMON_UTILS_DataWeightsBlockLoader_h
-#define __SKA_PST_COMMON_UTILS_DataWeightsBlockLoader_h
+#ifndef __SKA_PST_COMMON_UTILS_DataBlockLoader_h
+#define __SKA_PST_COMMON_UTILS_DataBlockLoader_h
 
 namespace ska::pst::common {
 
@@ -40,9 +40,9 @@ namespace ska::pst::common {
    * @brief Base class used for reading blocks of voltage data and weights
    *
    * This class implements an interface to data+weights that can be from any source,
-   * including file (see DataWeightsFileBlockLoader) or ring buffer (in principal).
+   * including file (see DataFileBlockLoader) or ring buffer (in principal).
    */
-  class DataWeightsBlockLoader
+  class DataBlockLoader
   {
     public:
 
@@ -61,10 +61,10 @@ namespace ska::pst::common {
       };
 
       /**
-       * @brief Destroy the DataWeightsBlockLoader object.
+       * @brief Destroy the DataBlockLoader object.
        *
        */
-      virtual ~DataWeightsBlockLoader() = default;
+      virtual ~DataBlockLoader() = default;
 
       /**
        * @brief Get the AsciiHeader that describes the data block stream
@@ -97,4 +97,4 @@ namespace ska::pst::common {
 
 } // namespace ska::pst::common
 
-#endif // __SKA_PST_COMMON_UTILS_DataWeightsBlockLoader_h
+#endif // __SKA_PST_COMMON_UTILS_DataBlockLoader_h

@@ -35,7 +35,7 @@
 #include <fcntl.h>
 
 #include "ska/pst/common/testutils/GtestMain.h"
-#include "ska/pst/common/utils/tests/DataWeightsFileBlockLoaderTest.h"
+#include "ska/pst/common/utils/tests/DataFileBlockLoaderTest.h"
 
 auto main(int argc, char* argv[]) -> int
 {
@@ -44,7 +44,7 @@ auto main(int argc, char* argv[]) -> int
 
 namespace ska::pst::common::test {
 
-DataWeightsFileBlockLoaderTest::DataWeightsFileBlockLoaderTest()
+DataFileBlockLoaderTest::DataFileBlockLoaderTest()
     : ::testing::Test()
 {
   header.load_from_file(test_data_file("data_scan_config.txt"));
@@ -80,40 +80,40 @@ DataWeightsFileBlockLoaderTest::DataWeightsFileBlockLoaderTest()
   close(fd);
 }
 
-DataWeightsFileBlockLoaderTest::~DataWeightsFileBlockLoaderTest()
+DataFileBlockLoaderTest::~DataFileBlockLoaderTest()
 {
   std::filesystem::remove(std::filesystem::path(data_file_name));
   std::filesystem::remove(std::filesystem::path(weights_file_name));
 }
 
-void DataWeightsFileBlockLoaderTest::SetUp()
+void DataFileBlockLoaderTest::SetUp()
 {
 }
 
-void DataWeightsFileBlockLoaderTest::TearDown()
+void DataFileBlockLoaderTest::TearDown()
 {
 }
 
-TEST_F(DataWeightsFileBlockLoaderTest, test_get_header) // NOLINT
+TEST_F(DataFileBlockLoaderTest, test_get_header) // NOLINT
 {
-  SPDLOG_TRACE("ska::pst::common::test::DataWeightsFileBlockLoaderTest::test_get_header construct from data_file_name={} weights_file_name={}", data_file_name, weights_file_name);
-  DataWeightsFileBlockLoader fr(data_file_name, weights_file_name);
-  SPDLOG_TRACE("ska::pst::common::test::DataWeightsFileBlockLoaderTest::test_get_header get_data_header");
+  SPDLOG_TRACE("ska::pst::common::test::DataFileBlockLoaderTest::test_get_header construct from data_file_name={} weights_file_name={}", data_file_name, weights_file_name);
+  DataFileBlockLoader fr(data_file_name, weights_file_name);
+  SPDLOG_TRACE("ska::pst::common::test::DataFileBlockLoaderTest::test_get_header get_data_header");
   EXPECT_EQ(fr.get_data_header().raw(), header.raw());
-  SPDLOG_TRACE("ska::pst::common::test::DataWeightsFileBlockLoaderTest::test_get_header get_weights_header");
+  SPDLOG_TRACE("ska::pst::common::test::DataFileBlockLoaderTest::test_get_header get_weights_header");
   EXPECT_EQ(fr.get_weights_header().raw(), header.raw());
 }
 
-TEST_F(DataWeightsFileBlockLoaderTest, test_open_bad_file) // NOLINT
+TEST_F(DataFileBlockLoaderTest, test_open_bad_file) // NOLINT
 {
   std::string bad_file_name = "/tmp/file/that/does/not/exist";
-  SPDLOG_TRACE("ska::pst::common::test::DataWeightsFileBlockLoaderTest::test_open_bad_file fr.open_file({})", bad_file_name);
-  EXPECT_THROW(DataWeightsFileBlockLoader fr(bad_file_name, bad_file_name), std::runtime_error); // NOLINT
+  SPDLOG_TRACE("ska::pst::common::test::DataFileBlockLoaderTest::test_open_bad_file fr.open_file({})", bad_file_name);
+  EXPECT_THROW(DataFileBlockLoader fr(bad_file_name, bad_file_name), std::runtime_error); // NOLINT
 }
 
-TEST_F(DataWeightsFileBlockLoaderTest, test_next_block) // NOLINT
+TEST_F(DataFileBlockLoaderTest, test_next_block) // NOLINT
 {
-  DataWeightsFileBlockLoader fr(data_file_name, weights_file_name);
+  DataFileBlockLoader fr(data_file_name, weights_file_name);
   auto next = fr.next_block();
   EXPECT_EQ(next.data.size, data_size);
   EXPECT_EQ(next.weights.size, data_size);
@@ -135,9 +135,9 @@ TEST_F(DataWeightsFileBlockLoaderTest, test_next_block) // NOLINT
   }
 }
 
-TEST_F(DataWeightsFileBlockLoaderTest, test_read_more_data_than_available) // NOLINT
+TEST_F(DataFileBlockLoaderTest, test_read_more_data_than_available) // NOLINT
 {
-  DataWeightsFileBlockLoader fr(data_file_name, weights_file_name);
+  DataFileBlockLoader fr(data_file_name, weights_file_name);
   auto next = fr.next_block();
   next = fr.next_block();
   EXPECT_EQ(next.data.block, nullptr); // NOLINT
