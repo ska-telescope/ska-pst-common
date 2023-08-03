@@ -35,14 +35,14 @@
 #include "ska/pst/common/utils/RandomDataGenerator.h"
 
 ska::pst::common::RandomDataGenerator::RandomDataGenerator(std::shared_ptr<ska::pst::common::PacketLayout> _layout) :
-  DataGenerator(std::move(_layout)), wts_sequence(unity_weight)
+  PacketGenerator(std::move(_layout)), wts_sequence(unity_weight)
 {
 }
 
 void ska::pst::common::RandomDataGenerator::configure(const ska::pst::common::AsciiHeader& config)
 {
   SPDLOG_DEBUG("ska::pst::common::RandomDataGenerator::configure");
-  ska::pst::common::DataGenerator::configure(config);
+  ska::pst::common::PacketGenerator::configure(config);
 
   dat_sequence.configure(config);
   wts_sequence.configure(config);

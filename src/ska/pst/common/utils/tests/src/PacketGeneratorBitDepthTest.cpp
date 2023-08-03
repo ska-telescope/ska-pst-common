@@ -31,7 +31,7 @@
 #include <spdlog/spdlog.h>
 
 #include "ska/pst/common/testutils/GtestMain.h"
-#include "ska/pst/common/utils/tests/DataGeneratorBitDepthTest.h"
+#include "ska/pst/common/utils/tests/PacketGeneratorBitDepthTest.h"
 #include "ska/pst/common/utils/GaussianNoiseGenerator.h"
 #include "ska/pst/common/utils/SineWaveGenerator.h"
 
@@ -42,17 +42,17 @@ auto main(int argc, char* argv[]) -> int
 
 namespace ska::pst::common::test {
 
-void DataGeneratorBitDepthTest::SetUp()
+void PacketGeneratorBitDepthTest::SetUp()
 {
   header.load_from_file(test_data_file("data_header.txt"));
   buffer.resize(default_buffer_size);
 }
 
-void DataGeneratorBitDepthTest::TearDown()
+void PacketGeneratorBitDepthTest::TearDown()
 {
 }
 
-TEST_P(DataGeneratorBitDepthTest, test_generate_validate_packet) // NOLINT
+TEST_P(PacketGeneratorBitDepthTest, test_generate_validate_packet) // NOLINT
 {
   std::shared_ptr<TestPacketLayout> layout = std::make_shared<TestPacketLayout>();
   layout->compute_packet_properties(GetParam());
@@ -95,7 +95,7 @@ TEST_P(DataGeneratorBitDepthTest, test_generate_validate_packet) // NOLINT
   EXPECT_FALSE(swg.test_packet(buffer_ptr));
 }
 
-TEST_P(DataGeneratorBitDepthTest, test_generate_validate_blocks) // NOLINT
+TEST_P(PacketGeneratorBitDepthTest, test_generate_validate_blocks) // NOLINT
 {
   std::shared_ptr<TestPacketLayout> layout = std::make_shared<TestPacketLayout>();
   layout->compute_packet_properties(GetParam());
@@ -123,6 +123,6 @@ TEST_P(DataGeneratorBitDepthTest, test_generate_validate_blocks) // NOLINT
   EXPECT_FALSE(swg.test_data(buffer_ptr, buffer_size));
 }
 
-INSTANTIATE_TEST_SUITE_P(SignalGenerators, DataGeneratorBitDepthTest, testing::Values(8, 16)); // NOLINT
+INSTANTIATE_TEST_SUITE_P(SignalGenerators, PacketGeneratorBitDepthTest, testing::Values(8, 16)); // NOLINT
 
 } // namespace ska::pst::common::test

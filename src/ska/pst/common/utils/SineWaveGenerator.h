@@ -31,7 +31,7 @@
 #include <complex>
 #include <spdlog/spdlog.h>
 
-#include "ska/pst/common/utils/DataGenerator.h"
+#include "ska/pst/common/utils/PacketGenerator.h"
 #include "ska/pst/common/utils/UniformSequence.h"
 
 #ifndef SKA_PST_COMMON_UTILS_SineWaveGenerator_h
@@ -43,7 +43,7 @@ namespace ska::pst::common {
    * @brief Generates and validates data + weights using a sine wave for each
    *
    */
-  class SineWaveGenerator : public DataGenerator
+  class SineWaveGenerator : public PacketGenerator
   {
     public:
 

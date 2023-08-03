@@ -32,20 +32,20 @@
 #include <vector>
 
 #include "ska/pst/common/utils/AsciiHeader.h"
-#include "ska/pst/common/utils/DataGenerator.h"
+#include "ska/pst/common/utils/PacketGenerator.h"
 
-#ifndef SKA_PST_COMMON_UTILS_TESTS_DataGeneratorTest_h
-#define SKA_PST_COMMON_UTILS_TESTS_DataGeneratorTest_h
+#ifndef SKA_PST_COMMON_UTILS_TESTS_PacketGeneratorTest_h
+#define SKA_PST_COMMON_UTILS_TESTS_PacketGeneratorTest_h
 
 namespace ska::pst::common::test {
 
   /**
-   * @brief Test the DataGenerator class
+   * @brief Test the PacketGenerator class
    *
    * @details
    *
    */
-  class DataGeneratorTest : public ::testing::TestWithParam<const char*>
+  class PacketGeneratorTest : public ::testing::TestWithParam<const char*>
   {
     protected:
       void SetUp() override;
@@ -53,9 +53,9 @@ namespace ska::pst::common::test {
       void TearDown() override;
 
     public:
-      DataGeneratorTest() = default;
+      PacketGeneratorTest() = default;
 
-      ~DataGeneratorTest() = default;
+      ~PacketGeneratorTest() = default;
 
       ska::pst::common::AsciiHeader header;
 
@@ -104,4 +104,4 @@ namespace ska::pst::common::test {
 
 } // namespace ska::pst::common::test
 
-#endif // SKA_PST_COMMON_UTILS_TESTS_DataGeneratorTest_h
+#endif // SKA_PST_COMMON_UTILS_TESTS_PacketGeneratorTest_h

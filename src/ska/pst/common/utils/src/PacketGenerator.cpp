@@ -34,14 +34,14 @@
 #include <utility>
 #include <spdlog/spdlog.h>
 
-#include "ska/pst/common/utils/DataGenerator.h"
+#include "ska/pst/common/utils/PacketGenerator.h"
 
-ska::pst::common::DataGenerator::DataGenerator(std::shared_ptr<ska::pst::common::PacketLayout> _layout) :
+ska::pst::common::PacketGenerator::PacketGenerator(std::shared_ptr<ska::pst::common::PacketLayout> _layout) :
   layout(std::move(_layout))
 {
 }
 
-void ska::pst::common::DataGenerator::configure(const ska::pst::common::AsciiHeader& config)
+void ska::pst::common::PacketGenerator::configure(const ska::pst::common::AsciiHeader& config)
 {
   nbit = config.get_uint32("NBIT");
   ndim = config.get_uint32("NDIM");
@@ -51,14 +51,14 @@ void ska::pst::common::DataGenerator::configure(const ska::pst::common::AsciiHea
 
   if (ndim != 2)
   {
-    SPDLOG_ERROR("ska::pst::common::DataGenerator::configure expected NDIM=2, but found {}", ndim);
-    throw std::runtime_error("ska::pst::common::DataGenerator::configure expected valud of NDIM");
+    SPDLOG_ERROR("ska::pst::common::PacketGenerator::configure expected NDIM=2, but found {}", ndim);
+    throw std::runtime_error("ska::pst::common::PacketGenerator::configure expected valud of NDIM");
   }
 
   if (npol != 2)
   {
-    SPDLOG_ERROR("ska::pst::common::DataGenerator::configure expected NPOL=2, but found {}", npol);
-    throw std::runtime_error("ska::pst::common::DataGenerator::configure expected valud of NPOL");
+    SPDLOG_ERROR("ska::pst::common::PacketGenerator::configure expected NPOL=2, but found {}", npol);
+    throw std::runtime_error("ska::pst::common::PacketGenerator::configure expected valud of NPOL");
   }
 
   if (nchan % layout->get_nchan_per_packet() != 0)
@@ -79,17 +79,17 @@ void ska::pst::common::DataGenerator::configure(const ska::pst::common::AsciiHea
   block_stride = layout->get_packet_weights_size() + layout->get_packet_scales_size();
 }
 
-auto ska::pst::common::DataGenerator::test_packet(char * buf) -> bool
+auto ska::pst::common::PacketGenerator::test_packet(char * buf) -> bool
 {
-  SPDLOG_TRACE("ska::pst::common::DataGenerator::test_packet");
+  SPDLOG_TRACE("ska::pst::common::PacketGenerator::test_packet");
   return test_scales(buf + layout->get_packet_scales_offset(), layout->get_packet_scales_size()) // NOLINT
      &&  test_weights(buf + layout->get_packet_weights_offset(), layout->get_packet_weights_size()) // NOLINT
      &&  test_data(buf + layout->get_packet_data_offset(), layout->get_packet_data_size()); // NOLINT
 }
 
-void ska::pst::common::DataGenerator::fill_packet(char * buf)
+void ska::pst::common::PacketGenerator::fill_packet(char * buf)
 {
-  SPDLOG_TRACE("ska::pst::common::DataGenerator::fill_packet");
+  SPDLOG_TRACE("ska::pst::common::PacketGenerator::fill_packet");
   fill_scales(buf + layout->get_packet_scales_offset(), layout->get_packet_scales_size()); // NOLINT
   fill_weights(buf + layout->get_packet_weights_offset(), layout->get_packet_weights_size()); // NOLINT
   fill_data(buf + layout->get_packet_data_offset(), layout->get_packet_data_size()); // NOLINT

@@ -33,8 +33,8 @@
 #include "ska/pst/common/utils/AsciiHeader.h"
 #include "ska/pst/common/utils/PacketLayout.h"
 
-#ifndef SKA_PST_COMMON_UTILS_DataGenerator_h
-#define SKA_PST_COMMON_UTILS_DataGenerator_h
+#ifndef SKA_PST_COMMON_UTILS_PacketGenerator_h
+#define SKA_PST_COMMON_UTILS_PacketGenerator_h
 
 namespace ska::pst::common {
 
@@ -42,21 +42,21 @@ namespace ska::pst::common {
    * @brief Abstract base class for data+weights+scales generation and validation
    *
    */
-  class DataGenerator
+  class PacketGenerator
   {
     public:
 
       /**
-       * @brief Construct a new DataGenerator object
+       * @brief Construct a new PacketGenerator object
        *
        */
-      explicit DataGenerator(std::shared_ptr<PacketLayout> layout);
+      explicit PacketGenerator(std::shared_ptr<PacketLayout> layout);
 
       /**
-       * @brief Destroy the DataGenerator object
+       * @brief Destroy the PacketGenerator object
        *
        */
-      virtual ~DataGenerator() = default;
+      virtual ~PacketGenerator() = default;
 
       /**
        * @brief Configure the streams written to data+weights+scales
@@ -180,5 +180,5 @@ namespace ska::pst::common {
 
 } // namespace ska::pst::common
 
-#endif // SKA_PST_COMMON_UTILS_DataGenerator_h
+#endif // SKA_PST_COMMON_UTILS_PacketGenerator_h
 

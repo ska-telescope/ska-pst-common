@@ -31,8 +31,8 @@
 #include <spdlog/spdlog.h>
 
 #include "ska/pst/common/testutils/GtestMain.h"
-#include "ska/pst/common/utils/tests/DataGeneratorTest.h"
-#include "ska/pst/common/utils/DataGeneratorFactory.h"
+#include "ska/pst/common/utils/tests/PacketGeneratorTest.h"
+#include "ska/pst/common/utils/PacketGeneratorFactory.h"
 
 auto main(int argc, char* argv[]) -> int
 {
@@ -41,17 +41,17 @@ auto main(int argc, char* argv[]) -> int
 
 namespace ska::pst::common::test {
 
-void DataGeneratorTest::SetUp()
+void PacketGeneratorTest::SetUp()
 {
   header.load_from_file(test_data_file("data_header.txt"));
   buffer.resize(default_buffer_size);
 }
 
-void DataGeneratorTest::TearDown()
+void PacketGeneratorTest::TearDown()
 {
 }
 
-TEST_F(DataGeneratorTest, test_factory) // NOLINT
+TEST_F(PacketGeneratorTest, test_factory) // NOLINT
 {
   EXPECT_EQ(ska::pst::common::get_supported_data_generators_list(), "Random, Sine, GaussianNoise");
   std::vector<std::string> data_generators = ska::pst::common::get_supported_data_generators();
@@ -60,13 +60,13 @@ TEST_F(DataGeneratorTest, test_factory) // NOLINT
   EXPECT_EQ(data_generators[2], "GaussianNoise");
 
   std::shared_ptr<TestPacketLayout> layout = std::make_shared<TestPacketLayout>();
-  EXPECT_THROW(DataGeneratorFactory("Garbage", layout), std::runtime_error); // NOLINT);
+  EXPECT_THROW(PacketGeneratorFactory("Garbage", layout), std::runtime_error); // NOLINT);
 }
 
-TEST_P(DataGeneratorTest, test_configure) // NOLINT
+TEST_P(PacketGeneratorTest, test_configure) // NOLINT
 {
   std::shared_ptr<TestPacketLayout> layout = std::make_shared<TestPacketLayout>();
-  std::shared_ptr<ska::pst::common::DataGenerator> dg = DataGeneratorFactory(GetParam(), layout);
+  std::shared_ptr<ska::pst::common::PacketGenerator> dg = PacketGeneratorFactory(GetParam(), layout);
   EXPECT_NO_THROW(dg->configure(header)); // NOLINT
 
   static constexpr uint32_t bad_header_param = 3;
@@ -78,10 +78,10 @@ TEST_P(DataGeneratorTest, test_configure) // NOLINT
   EXPECT_THROW(dg->configure(header), std::runtime_error); // NOLINT
 }
 
-TEST_P(DataGeneratorTest, test_generate_validate_packet) // NOLINT
+TEST_P(PacketGeneratorTest, test_generate_validate_packet) // NOLINT
 {
   std::shared_ptr<TestPacketLayout> layout = std::make_shared<TestPacketLayout>();
-  std::shared_ptr<ska::pst::common::DataGenerator> dg = DataGeneratorFactory(GetParam(), layout);
+  std::shared_ptr<ska::pst::common::PacketGenerator> dg = PacketGeneratorFactory(GetParam(), layout);
 
   dg->configure(header);
 
@@ -102,10 +102,10 @@ TEST_P(DataGeneratorTest, test_generate_validate_packet) // NOLINT
   EXPECT_FALSE(dg->test_packet(buffer_ptr));
 }
 
-TEST_P(DataGeneratorTest, test_generate_validate_blocks) // NOLINT
+TEST_P(PacketGeneratorTest, test_generate_validate_blocks) // NOLINT
 {
   std::shared_ptr<TestPacketLayout> layout = std::make_shared<TestPacketLayout>();
-  std::shared_ptr<ska::pst::common::DataGenerator> dg = DataGeneratorFactory(GetParam(), layout);
+  std::shared_ptr<ska::pst::common::PacketGenerator> dg = PacketGeneratorFactory(GetParam(), layout);
 
   dg->configure(header);
 
@@ -118,7 +118,7 @@ TEST_P(DataGeneratorTest, test_generate_validate_blocks) // NOLINT
   buffer.resize(buffer_size);
   auto buffer_ptr = (&buffer[0]);
 
-  SPDLOG_TRACE("ska::pst::common::test::DataGeneratorTest::test_generate_validate_blocks dg->fill_data()");
+  SPDLOG_TRACE("ska::pst::common::test::PacketGeneratorTest::test_generate_validate_blocks dg->fill_data()");
   dg->fill_data(buffer_ptr, buffer_size);
   dg->reset();
   EXPECT_TRUE(dg->test_data(buffer_ptr, buffer_size));
@@ -126,17 +126,17 @@ TEST_P(DataGeneratorTest, test_generate_validate_blocks) // NOLINT
   // reuse the buffer for the weights and scales
   buffer.resize(weights_scales_size);
   dg->reset();
-  SPDLOG_TRACE("ska::pst::common::test::DataGeneratorTest::test_generate_validate_blocks dg->fill_weights()");
+  SPDLOG_TRACE("ska::pst::common::test::PacketGeneratorTest::test_generate_validate_blocks dg->fill_weights()");
   dg->fill_weights(buffer_ptr, weights_scales_size);
-  SPDLOG_TRACE("ska::pst::common::test::DataGeneratorTest::test_generate_validate_blocks dg->fill_scales()");
+  SPDLOG_TRACE("ska::pst::common::test::PacketGeneratorTest::test_generate_validate_blocks dg->fill_scales()");
   dg->fill_scales(buffer_ptr, weights_scales_size);
   dg->reset();
-  SPDLOG_TRACE("ska::pst::common::test::DataGeneratorTest::test_generate_validate_blocks dg->test_weights()");
+  SPDLOG_TRACE("ska::pst::common::test::PacketGeneratorTest::test_generate_validate_blocks dg->test_weights()");
   EXPECT_TRUE(dg->test_weights(buffer_ptr, weights_scales_size));
-  SPDLOG_TRACE("ska::pst::common::test::DataGeneratorTest::test_generate_validate_blocks dg->test_scales()");
+  SPDLOG_TRACE("ska::pst::common::test::PacketGeneratorTest::test_generate_validate_blocks dg->test_scales()");
   EXPECT_TRUE(dg->test_scales(buffer_ptr, weights_scales_size));
 }
 
-INSTANTIATE_TEST_SUITE_P(SignalGenerators, DataGeneratorTest, testing::Values("Random", "Sine", "GaussianNoise")); // NOLINT
+INSTANTIATE_TEST_SUITE_P(SignalGenerators, PacketGeneratorTest, testing::Values("Random", "Sine", "GaussianNoise")); // NOLINT
 
 } // namespace ska::pst::common::test

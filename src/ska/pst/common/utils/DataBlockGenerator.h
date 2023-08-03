@@ -29,7 +29,7 @@
  */
 
 #include "ska/pst/common/utils/DataBlockSource.h"
-#include "ska/pst/common/utils/DataGenerator.h"
+#include "ska/pst/common/utils/PacketGenerator.h"
 #include "ska/pst/common/utils/HeapLayout.h"
 
 #include <spdlog/spdlog.h>
@@ -106,8 +106,8 @@ namespace ska::pst::common
       //! the AsciiHeader that describes the weights block stream
       AsciiHeader weights_config;
 
-      //! DataGenerator sets the data and weights of each packet in each heap
-      std::shared_ptr<DataGenerator> generator{nullptr};
+      //! PacketGenerator sets the data and weights of each packet in each heap
+      std::shared_ptr<PacketGenerator> generator{nullptr};
 
       //! the data and weights blocks
       Block block;

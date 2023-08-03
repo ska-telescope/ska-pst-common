@@ -29,7 +29,7 @@
  */
 
 #include "ska/pst/common/utils/DataBlockGenerator.h"
-#include "ska/pst/common/utils/DataGeneratorFactory.h"
+#include "ska/pst/common/utils/PacketGeneratorFactory.h"
 #include "ska/pst/common/definitions.h"
 
 #include <spdlog/spdlog.h>
@@ -48,7 +48,7 @@ void ska::pst::common::DataBlockGenerator::configure(const AsciiHeader& _data_co
   layout.configure(data_config, weights_config);
 
   std::string generator_name = data_config.get_val("DATA_GENERATOR");
-  generator = DataGeneratorFactory(generator_name, layout.get_packet_layout_ptr());
+  generator = PacketGeneratorFactory(generator_name, layout.get_packet_layout_ptr());
 }
 
 void resize (ska::pst::common::BlockLoader::Block& block, uint64_t size)

@@ -11,8 +11,8 @@ set(public_headers
     RandomSequence.h
     PacketLayout.h
     HeapLayout.h
-    DataGenerator.h
-    DataGeneratorFactory.h
+    PacketGenerator.h
+    PacketGeneratorFactory.h
     DataUnpacker.h
     FileBlockLoader.h
     FileReader.h
@@ -36,8 +36,8 @@ set(sources
     src/NormalSequence.cpp
     src/RandomSequence.cpp
     src/HeapLayout.cpp
-    src/DataGenerator.cpp
-    src/DataGeneratorFactory.cpp
+    src/PacketGenerator.cpp
+    src/PacketGeneratorFactory.cpp
     src/DataUnpacker.cpp
     src/FileBlockLoader.cpp
     src/FileReader.cpp
