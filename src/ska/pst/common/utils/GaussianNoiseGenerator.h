@@ -50,7 +50,7 @@ namespace ska::pst::common {
        * @brief Construct a new GaussianNoiseGenerator object
        *
        */
-      explicit GaussianNoiseGenerator(std::shared_ptr<DataLayout> layout);
+      explicit GaussianNoiseGenerator(std::shared_ptr<PacketLayout> layout);
 
       /**
        * @brief Destroy the GaussianNoiseGenerator object

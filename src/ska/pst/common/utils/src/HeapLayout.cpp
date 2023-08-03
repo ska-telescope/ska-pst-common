@@ -39,7 +39,7 @@
  *
  * Data and weights are stored in separate heaps in blocks of shared memory or data from file
  */
-class HeapPacketLayout : public ska::pst::common::DataLayout
+class HeapPacketLayout : public ska::pst::common::PacketLayout
 {
   public:
   HeapPacketLayout(const ska::pst::common::AsciiHeader& data_config, const ska::pst::common::AsciiHeader& weights_config)

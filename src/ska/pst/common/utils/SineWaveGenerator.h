@@ -51,7 +51,7 @@ namespace ska::pst::common {
        * @brief Construct a new SineWaveGenerator object
        *
        */
-      explicit SineWaveGenerator(std::shared_ptr<DataLayout> layout);
+      explicit SineWaveGenerator(std::shared_ptr<PacketLayout> layout);
 
       /**
        * @brief Destroy the SineWaveGenerator object

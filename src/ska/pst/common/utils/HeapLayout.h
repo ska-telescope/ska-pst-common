@@ -29,7 +29,7 @@
  */
 
 #include "ska/pst/common/utils/AsciiHeader.h"
-#include "ska/pst/common/utils/DataLayout.h"
+#include "ska/pst/common/utils/PacketLayout.h"
 #include "ska/pst/common/definitions.h"
 
 #include <memory>
@@ -72,16 +72,16 @@ namespace ska::pst::common
       /**
        * @brief Get the layout of each packet in the heap
        *
-       * @return DataLayout layout of each packet in the heap
+       * @return PacketLayout layout of each packet in the heap
        */
-      auto get_packet_layout() const -> const DataLayout& { return *packet_layout; }
+      auto get_packet_layout() const -> const PacketLayout& { return *packet_layout; }
 
       /**
        * @brief Get the pointer to the layout of each packet in the heap
        *
-       * @return DataLayout pointer to the layout of each packet in the heap
+       * @return PacketLayout pointer to the layout of each packet in the heap
        */
-      auto get_packet_layout_ptr() const -> const std::shared_ptr<DataLayout>& { return packet_layout; }
+      auto get_packet_layout_ptr() const -> const std::shared_ptr<PacketLayout>& { return packet_layout; }
 
       /**
        * @brief Get the number of packets in each heap
@@ -121,7 +121,7 @@ namespace ska::pst::common
     protected:
 
       //! The layout of each packet in the heap
-      std::shared_ptr<DataLayout> packet_layout;
+      std::shared_ptr<PacketLayout> packet_layout;
 
       //! Number of packets per heap in the data stream
       uint32_t packets_per_heap{0};

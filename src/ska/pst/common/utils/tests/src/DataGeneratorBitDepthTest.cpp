@@ -54,7 +54,7 @@ void DataGeneratorBitDepthTest::TearDown()
 
 TEST_P(DataGeneratorBitDepthTest, test_generate_validate_packet) // NOLINT
 {
-  std::shared_ptr<TestDataLayout> layout = std::make_shared<TestDataLayout>();
+  std::shared_ptr<TestPacketLayout> layout = std::make_shared<TestPacketLayout>();
   layout->compute_packet_properties(GetParam());
   ska::pst::common::GaussianNoiseGenerator gnd(layout);
   header.set("NBIT", GetParam());
@@ -97,7 +97,7 @@ TEST_P(DataGeneratorBitDepthTest, test_generate_validate_packet) // NOLINT
 
 TEST_P(DataGeneratorBitDepthTest, test_generate_validate_blocks) // NOLINT
 {
-  std::shared_ptr<TestDataLayout> layout = std::make_shared<TestDataLayout>();
+  std::shared_ptr<TestPacketLayout> layout = std::make_shared<TestPacketLayout>();
   layout->compute_packet_properties(GetParam());
   header.set("NBIT", GetParam());
 

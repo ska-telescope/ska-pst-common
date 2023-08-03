@@ -67,10 +67,10 @@ namespace ska::pst::common::test {
 
   };
 
-  class TestDataLayout : public ska::pst::common::DataLayout
+  class TestPacketLayout : public ska::pst::common::PacketLayout
   {
     public:
-    TestDataLayout ()
+    TestPacketLayout ()
     {
       ska::pst::common::AsciiHeader header;
       header.load_from_file(test_data_file("data_header.txt"));

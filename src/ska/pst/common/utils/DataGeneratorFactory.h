@@ -46,7 +46,7 @@ namespace ska::pst::common {
    * @param layout data layout that describes the data, weights and scale sizes
    * @return DataGenerator* new DataGenerator object
    */
-  auto DataGeneratorFactory(const std::string &name, const std::shared_ptr<DataLayout>& layout) -> std::shared_ptr<DataGenerator>;
+  auto DataGeneratorFactory(const std::string &name, const std::shared_ptr<PacketLayout>& layout) -> std::shared_ptr<DataGenerator>;
 
   /**
    * @brief Return a vector of the supported data generator names

@@ -59,13 +59,13 @@ TEST_F(DataGeneratorTest, test_factory) // NOLINT
   EXPECT_EQ(data_generators[1], "Sine");
   EXPECT_EQ(data_generators[2], "GaussianNoise");
 
-  std::shared_ptr<TestDataLayout> layout = std::make_shared<TestDataLayout>();
+  std::shared_ptr<TestPacketLayout> layout = std::make_shared<TestPacketLayout>();
   EXPECT_THROW(DataGeneratorFactory("Garbage", layout), std::runtime_error); // NOLINT);
 }
 
 TEST_P(DataGeneratorTest, test_configure) // NOLINT
 {
-  std::shared_ptr<TestDataLayout> layout = std::make_shared<TestDataLayout>();
+  std::shared_ptr<TestPacketLayout> layout = std::make_shared<TestPacketLayout>();
   std::shared_ptr<ska::pst::common::DataGenerator> dg = DataGeneratorFactory(GetParam(), layout);
   EXPECT_NO_THROW(dg->configure(header)); // NOLINT
 
@@ -80,7 +80,7 @@ TEST_P(DataGeneratorTest, test_configure) // NOLINT
 
 TEST_P(DataGeneratorTest, test_generate_validate_packet) // NOLINT
 {
-  std::shared_ptr<TestDataLayout> layout = std::make_shared<TestDataLayout>();
+  std::shared_ptr<TestPacketLayout> layout = std::make_shared<TestPacketLayout>();
   std::shared_ptr<ska::pst::common::DataGenerator> dg = DataGeneratorFactory(GetParam(), layout);
 
   dg->configure(header);
@@ -104,7 +104,7 @@ TEST_P(DataGeneratorTest, test_generate_validate_packet) // NOLINT
 
 TEST_P(DataGeneratorTest, test_generate_validate_blocks) // NOLINT
 {
-  std::shared_ptr<TestDataLayout> layout = std::make_shared<TestDataLayout>();
+  std::shared_ptr<TestPacketLayout> layout = std::make_shared<TestPacketLayout>();
   std::shared_ptr<ska::pst::common::DataGenerator> dg = DataGeneratorFactory(GetParam(), layout);
 
   dg->configure(header);

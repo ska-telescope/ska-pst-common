@@ -34,7 +34,7 @@
 
 #include "ska/pst/common/utils/GaussianNoiseGenerator.h"
 
-ska::pst::common::GaussianNoiseGenerator::GaussianNoiseGenerator(std::shared_ptr<ska::pst::common::DataLayout> _layout) :
+ska::pst::common::GaussianNoiseGenerator::GaussianNoiseGenerator(std::shared_ptr<ska::pst::common::PacketLayout> _layout) :
   DataGenerator(std::move(_layout)), wts_sequence(unity_weight)
 {
 }

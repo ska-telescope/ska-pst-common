@@ -94,7 +94,7 @@ auto ska::pst::common::DataBlockGenerator::next_block() -> Block
   const uint32_t packets_per_heap = layout.get_packets_per_heap();
   const uint64_t num_packets = nheap * packets_per_heap;
 
-  const DataLayout& packet_layout = layout.get_packet_layout();
+  const PacketLayout& packet_layout = layout.get_packet_layout();
 
   for (auto packet_number = 0; packet_number < num_packets; packet_number++)
   {

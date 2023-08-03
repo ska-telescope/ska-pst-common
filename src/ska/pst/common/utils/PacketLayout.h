@@ -28,8 +28,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SKA_PST_COMMON_UTILS_DataLayout_h
-#define SKA_PST_COMMON_UTILS_DataLayout_h
+#ifndef SKA_PST_COMMON_UTILS_PacketLayout_h
+#define SKA_PST_COMMON_UTILS_PacketLayout_h
 
 namespace ska::pst::common {
 
@@ -37,21 +37,21 @@ namespace ska::pst::common {
    * @brief Stores the offsets and sizes of data, weights, and scales in data blocks
    *
    */
-  class DataLayout
+  class PacketLayout
   {
     public:
 
       /**
-       * @brief Construct a new DataLayout object
+       * @brief Construct a new PacketLayout object
        *
        */
-      DataLayout() = default;
+      PacketLayout() = default;
 
       /**
-       * @brief Destroy the DataLayout object
+       * @brief Destroy the PacketLayout object
        *
        */
-      ~DataLayout() = default;
+      ~PacketLayout() = default;
 
       /**
        * @brief Get the total size of the data block
@@ -168,5 +168,5 @@ namespace ska::pst::common {
 
 } // namespace ska::pst::common
 
-#endif // SKA_PST_COMMON_UTILS_DataLayout_h
+#endif // SKA_PST_COMMON_UTILS_PacketLayout_h
 
