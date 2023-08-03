@@ -1,15 +1,21 @@
 
+add_executable(ska_pst_generate_file ska_pst_generate_file.cpp)
+
 target_include_directories(
-  ska_pst_common-utils
+  ska_pst_generate_file
   PUBLIC
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>
   $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/src>
   $<INSTALL_INTERFACE:include>
 )
 
-add_executable(ska_pst_generate_file ska_pst_generate_file.cpp)
-
-target_link_libraries(ska_pst_generate_file PUBLIC ska_pst_common)
+target_link_libraries(
+  ska_pst_generate_file
+  PUBLIC
+  ska_pst_lmc_generated
+  ska_pst_common
+  spdlog::spdlog
+)
 
 install (
   TARGETS
