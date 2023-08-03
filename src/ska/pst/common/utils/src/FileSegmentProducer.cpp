@@ -29,7 +29,7 @@
  */
 
 #include "ska/pst/common/utils/FileSegmentProducer.h"
-#include "ska/pst/common/utils/FileBlockLoader.h"
+#include "ska/pst/common/utils/FileBlockProducer.h"
 
 #include <spdlog/spdlog.h>
 
@@ -39,8 +39,8 @@ ska::pst::common::FileSegmentProducer::FileSegmentProducer(
 {
   SPDLOG_DEBUG("ska::pst::common::FileSegmentProducer::FileSegmentProducer");
 
-  data_block_loader = std::make_unique<FileBlockLoader>(data_file_path);
-  weights_block_loader = std::make_unique<FileBlockLoader>(weights_file_path);
+  data_block_producer = std::make_unique<FileBlockProducer>(data_file_path);
+  weights_block_producer = std::make_unique<FileBlockProducer>(weights_file_path);
 }
 
 ska::pst::common::FileSegmentProducer::~FileSegmentProducer()

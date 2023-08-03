@@ -111,10 +111,10 @@ TEST_F(FileSegmentProducerTest, test_open_bad_file) // NOLINT
   EXPECT_THROW(FileSegmentProducer fr(bad_file_name, bad_file_name), std::runtime_error); // NOLINT
 }
 
-TEST_F(FileSegmentProducerTest, test_next_block) // NOLINT
+TEST_F(FileSegmentProducerTest, test_next_segment) // NOLINT
 {
   FileSegmentProducer fr(data_file_name, weights_file_name);
-  auto next = fr.next_block();
+  auto next = fr.next_segment();
   EXPECT_EQ(next.data.size, data_size);
   EXPECT_EQ(next.weights.size, data_size);
 
@@ -138,8 +138,8 @@ TEST_F(FileSegmentProducerTest, test_next_block) // NOLINT
 TEST_F(FileSegmentProducerTest, test_read_more_data_than_available) // NOLINT
 {
   FileSegmentProducer fr(data_file_name, weights_file_name);
-  auto next = fr.next_block();
-  next = fr.next_block();
+  auto next = fr.next_segment();
+  next = fr.next_segment();
   EXPECT_EQ(next.data.block, nullptr); // NOLINT
   EXPECT_EQ(next.data.size, 0);
   EXPECT_EQ(next.weights.block, nullptr); // NOLINT

@@ -28,19 +28,19 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "ska/pst/common/utils/DataBlockGenerator.h"
+#include "ska/pst/common/utils/SegmentGenerator.h"
 #include "ska/pst/common/utils/PacketGeneratorFactory.h"
 #include "ska/pst/common/definitions.h"
 
 #include <spdlog/spdlog.h>
 #include <stdexcept>
 
-ska::pst::common::DataBlockGenerator::~DataBlockGenerator()
+ska::pst::common::SegmentGenerator::~SegmentGenerator()
 {
   resize (0);
 }
 
-void ska::pst::common::DataBlockGenerator::configure(const AsciiHeader& _data_config, const AsciiHeader& _weights_config)
+void ska::pst::common::SegmentGenerator::configure(const AsciiHeader& _data_config, const AsciiHeader& _weights_config)
 {
   data_config = _data_config;
   weights_config = _weights_config;
@@ -51,7 +51,7 @@ void ska::pst::common::DataBlockGenerator::configure(const AsciiHeader& _data_co
   generator = PacketGeneratorFactory(generator_name, layout.get_packet_layout_ptr());
 }
 
-void resize (ska::pst::common::BlockLoader::Block& block, uint64_t size)
+void resize (ska::pst::common::BlockProducer::Block& block, uint64_t size)
 {
   if (block.block != nullptr && block.size > 0 && (size > block.size || size == 0))
   {
@@ -67,29 +67,29 @@ void resize (ska::pst::common::BlockLoader::Block& block, uint64_t size)
   }
 }
 
-void ska::pst::common::DataBlockGenerator::resize(uint64_t _nheap)
+void ska::pst::common::SegmentGenerator::resize(uint64_t _nheap)
 {
   if (layout.get_data_heap_stride() == 0)
   {
-    SPDLOG_ERROR("ska::pst::common::DataBlockGenerator::resize data_heap_stride is zero (not configured?)");
-    throw std::runtime_error("ska::pst::common::DataBlockGenerator::resize data_heap_stride is zero (not configured?)");
+    SPDLOG_ERROR("ska::pst::common::SegmentGenerator::resize data_heap_stride is zero (not configured?)");
+    throw std::runtime_error("ska::pst::common::SegmentGenerator::resize data_heap_stride is zero (not configured?)");
   }
 
-  ::resize(block.data, _nheap * layout.get_data_heap_stride());
+  ::resize(segment.data, _nheap * layout.get_data_heap_stride());
 
   if (layout.get_weights_heap_stride() == 0)
   {
-    SPDLOG_ERROR("ska::pst::common::DataBlockGenerator::resize weights_heap_stride is zero (not configured?)");
-    throw std::runtime_error("ska::pst::common::DataBlockGenerator::resize weights_heap_stride is zero (not configured?)");
+    SPDLOG_ERROR("ska::pst::common::SegmentGenerator::resize weights_heap_stride is zero (not configured?)");
+    throw std::runtime_error("ska::pst::common::SegmentGenerator::resize weights_heap_stride is zero (not configured?)");
   }
 
-  ::resize(block.weights, _nheap * layout.get_weights_heap_stride());
+  ::resize(segment.weights, _nheap * layout.get_weights_heap_stride());
 
   nheap = _nheap;
 }
 
 
-auto ska::pst::common::DataBlockGenerator::next_block() -> Block
+auto ska::pst::common::SegmentGenerator::next_segment() -> Segment
 {
   const uint32_t packets_per_heap = layout.get_packets_per_heap();
   const uint64_t num_packets = nheap * packets_per_heap;
@@ -101,13 +101,13 @@ auto ska::pst::common::DataBlockGenerator::next_block() -> Block
     auto data_offset = packet_number * layout.get_data_packet_stride();
     auto weights_offset = packet_number * layout.get_weights_packet_stride();
 
-    SPDLOG_TRACE("ska::pst::common::DataBlockGenerator::next_block generating data packet {}", packet_number);
-    generator->fill_data(block.data.block + data_offset, packet_layout.get_packet_data_size()); // NOLINT
-    SPDLOG_TRACE("ska::pst::common::DataBlockGenerator::next_block generating scales packet {}", packet_number);
-    generator->fill_scales(block.weights.block + weights_offset + packet_layout.get_packet_scales_offset(), packet_layout.get_packet_scales_size()); // NOLINT
-    SPDLOG_TRACE("ska::pst::common::DataBlockGenerator::next_block generating weights packet {}", packet_number);
-    generator->fill_weights(block.weights.block + weights_offset + packet_layout.get_packet_weights_offset(), packet_layout.get_packet_weights_size()); // NOLINT
+    SPDLOG_TRACE("ska::pst::common::SegmentGenerator::next_block generating data packet {}", packet_number);
+    generator->fill_data(segment.data.block + data_offset, packet_layout.get_packet_data_size()); // NOLINT
+    SPDLOG_TRACE("ska::pst::common::SegmentGenerator::next_block generating scales packet {}", packet_number);
+    generator->fill_scales(segment.weights.block + weights_offset + packet_layout.get_packet_scales_offset(), packet_layout.get_packet_scales_size()); // NOLINT
+    SPDLOG_TRACE("ska::pst::common::SegmentGenerator::next_block generating weights packet {}", packet_number);
+    generator->fill_weights(segment.weights.block + weights_offset + packet_layout.get_packet_weights_offset(), packet_layout.get_packet_weights_size()); // NOLINT
   }
 
-  return block;
+  return segment;
 }

@@ -30,7 +30,7 @@
 
 #include <string>
 
-#include "ska/pst/common/utils/DataBlockLoader.h"
+#include "ska/pst/common/utils/BlockSegmentProducer.h"
 
 #ifndef __SKA_PST_COMMON_UTILS_FileSegmentProducer_h
 #define __SKA_PST_COMMON_UTILS_FileSegmentProducer_h
@@ -41,7 +41,7 @@ namespace ska::pst::common {
    * @brief Class used for reading voltage data and weights from file.
    *
    */
-  class FileSegmentProducer : public DataBlockLoader
+  class FileSegmentProducer : public BlockSegmentProducer
   {
     public:
       /**

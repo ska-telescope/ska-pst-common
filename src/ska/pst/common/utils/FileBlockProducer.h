@@ -28,13 +28,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "ska/pst/common/utils/BlockLoader.h"
+#include "ska/pst/common/utils/BlockProducer.h"
 #include "ska/pst/common/utils/FileReader.h"
 
 #include <memory>
 
-#ifndef __SKA_PST_COMMON_UTILS_FileBlockLoader_h
-#define __SKA_PST_COMMON_UTILS_FileBlockLoader_h
+#ifndef __SKA_PST_COMMON_UTILS_FileBlockProducer_h
+#define __SKA_PST_COMMON_UTILS_FileBlockProducer_h
 
 namespace ska::pst::common {
 
@@ -43,22 +43,22 @@ namespace ska::pst::common {
    *
    * Currently maps the entire file into memory as a single block.
    */
-  class FileBlockLoader : public BlockLoader
+  class FileBlockProducer : public BlockProducer
   {
     public:
 
       /**
-       * @brief Construct a new FileBlockLoader object.
+       * @brief Construct a new FileBlockProducer object.
        *
        * @param file_path path to the DADA file to open for reading
        */
-      FileBlockLoader(const std::string& file_path);
+      FileBlockProducer(const std::string& file_path);
 
       /**
-       * @brief Destroy a FileBlockLoader object.
+       * @brief Destroy a FileBlockProducer object.
        *
        */
-      ~FileBlockLoader();
+      ~FileBlockProducer();
 
       /**
        * @brief Get the AsciiHeader that describes the DADA file contents
@@ -75,7 +75,7 @@ namespace ska::pst::common {
        * - the size of the file in bytes (minus the size of the header)
        * If called again, this function returns (nullptr, 0)
        */
-      BlockLoader::Block next_block();
+      BlockProducer::Block next_block();
 
     protected:
 
@@ -83,13 +83,13 @@ namespace ska::pst::common {
       std::unique_ptr<ska::pst::common::FileReader> reader;
 
       //! the details of the entire block
-      BlockLoader::Block block_info;
+      BlockProducer::Block block_info;
 
       //! the details of the next block
-      BlockLoader::Block next_block_info;
+      BlockProducer::Block next_block_info;
   };
 
 } // namespace ska::pst::common
 
-#endif // __SKA_PST_COMMON_UTILS_FileBlockLoader_h
+#endif // __SKA_PST_COMMON_UTILS_FileBlockProducer_h
 

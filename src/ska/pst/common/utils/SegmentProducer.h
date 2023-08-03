@@ -28,10 +28,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "ska/pst/common/utils/BlockLoader.h"
+#include "ska/pst/common/utils/BlockProducer.h"
 
-#ifndef __SKA_PST_COMMON_UTILS_DataBlockSource_h
-#define __SKA_PST_COMMON_UTILS_DataBlockSource_h
+#ifndef __SKA_PST_COMMON_UTILS_SegmentProducer_h
+#define __SKA_PST_COMMON_UTILS_SegmentProducer_h
 
 namespace ska::pst::common {
 
@@ -39,31 +39,31 @@ namespace ska::pst::common {
    * @brief Interface for reading blocks of voltage data and weights
    *
    * This pure virtual base class implements an interface to data+weights that can be from any source,
-   * including file (see FileSegmentProducer), artificial signal generator (see DataBlockGenerator) or ring buffer (in principal) 
+   * including file (see FileSegmentProducer), artificial signal generator (see SegmentGenerator) or ring buffer (in principal) 
    */
-  class DataBlockSource
+  class SegmentProducer
   {
     public:
 
       /**
-       * @brief Stores pointers to data and weights blocks, and their sizes
+       * @brief Container of data and weights blocks
        *
        */
-      class Block
+      class Segment
       {
         public:
           //! Data block
-          BlockLoader::Block data;
+          BlockProducer::Block data;
 
           //! Weights block
-          BlockLoader::Block weights;
+          BlockProducer::Block weights;
       };
 
       /**
        * @brief Pure virtual destructor
        *
        */
-      virtual ~DataBlockSource() = default;
+      virtual ~SegmentProducer() = default;
 
       /**
        * @brief Get the AsciiHeader that describes the data block stream
@@ -80,17 +80,16 @@ namespace ska::pst::common {
       virtual const ska::pst::common::AsciiHeader& get_weights_header() const = 0;
 
       /**
-       * @brief Get the next block of data and weights.
+       * @brief Get the next segment of data and weights.
        *
-       * The returned Block contains the pointer to the next blocks of data
-       * and weights.  It also includes the size, in bytes, for both data
-       * and weights.  End of data is indicated by a Block in which the pointers
-       * are set to nullptr and the sizes are set to zero
+       * The returned Segment contains the next blocks of data and weights.
+       * Each Block includes the base pointer of an array and the size, in bytes, of that array.
+       * End of data is indicated by a Block in which the pointers are set to nullptr and the sizes are set to zero.
        */
-      virtual Block next_block() = 0;
+      virtual Segment next_segment() = 0;
 
   };
 
 } // namespace ska::pst::common
 
-#endif // __SKA_PST_COMMON_UTILS_DataBlockSource_h
+#endif // __SKA_PST_COMMON_UTILS_SegmentProducer_h

@@ -1,9 +1,10 @@
 
 set(public_headers
     AsciiHeader.h
-    BlockLoader.h
-    DataBlockGenerator.h
-    DataBlockLoader.h
+    SegmentGenerator.h
+    SegmentProducer.h
+    BlockProducer.h
+    BlockSegmentProducer.h
     FileSegmentProducer.h
     Endian.h
     Time.h
@@ -14,7 +15,7 @@ set(public_headers
     PacketGenerator.h
     PacketGeneratorFactory.h
     DataUnpacker.h
-    FileBlockLoader.h
+    FileBlockProducer.h
     FileReader.h
     FileWriter.h
     GaussianNoiseGenerator.h
@@ -28,8 +29,8 @@ set(public_headers
 
 set(sources
     src/AsciiHeader.cpp
-    src/DataBlockGenerator.cpp
-    src/DataBlockLoader.cpp
+    src/SegmentGenerator.cpp
+    src/BlockSegmentProducer.cpp
     src/FileSegmentProducer.cpp
     src/Time.cpp
     src/Timer.cpp
@@ -39,7 +40,7 @@ set(sources
     src/PacketGenerator.cpp
     src/PacketGeneratorFactory.cpp
     src/DataUnpacker.cpp
-    src/FileBlockLoader.cpp
+    src/FileBlockProducer.cpp
     src/FileReader.cpp
     src/FileWriter.cpp
     src/GaussianNoiseGenerator.cpp

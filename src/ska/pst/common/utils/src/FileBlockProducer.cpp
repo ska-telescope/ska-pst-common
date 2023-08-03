@@ -3,18 +3,18 @@
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- *
+ * 
  * 1. Redistributions of source code must retain the above copyright notice,
  * this list of conditions and the following disclaimer.
- *
+ * 
  * 2. Redistributions in binary form must reproduce the above copyright
  * notice, this list of conditions and the following disclaimer in the
  * documentation and/or other materials provided with the distribution.
- *
+ * 
  * 3. Neither the name of the copyright holder nor the names of its
  * contributors may be used to endorse or promote products derived from this
  * software without specific prior written permission.
- *
+ * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -28,51 +28,55 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "ska/pst/common/utils/DataBlockLoader.h"
+#include "ska/pst/common/utils/FileBlockProducer.h"
+
 #include <spdlog/spdlog.h>
+#include <sys/mman.h>
 
-static void log_throw (const char* msg)
+ska::pst::common::FileBlockProducer::FileBlockProducer(const std::string& file_path)
+	: reader(new FileReader(file_path))
 {
-  SPDLOG_ERROR(msg); 
-  throw std::runtime_error(msg);
+  auto hdr_size = reader->read_header();
+  auto data_size = reader->get_file_size()-hdr_size;
+
+  void* map = mmap(nullptr, data_size, PROT_READ, MAP_SHARED, reader->_get_fd(), hdr_size);
+  if (map == MAP_FAILED)
+  {
+    SPDLOG_ERROR("ska::pst::common::FileBlockProducer::ctor mmap failed: {} fd={}", strerror(errno), reader->_get_fd());
+    throw std::runtime_error("ska::pst::common::FileReader::ctor mmap failed");
+  }
+
+  block_info.block = reinterpret_cast<char*>(map);
+  block_info.size = data_size;
+  next_block_info = block_info;
 }
 
-auto ska::pst::common::DataBlockLoader::get_data_header() const -> const AsciiHeader&
+ska::pst::common::FileBlockProducer::~FileBlockProducer()
 {
-  SPDLOG_DEBUG("ska::pst::common::DataBlockLoader::get_data_header");
-  if (!data_block_loader)
+  void* map = block_info.block;
+  auto data_size = block_info.size;
+
+  if (map == nullptr)
   {
-    log_throw("ska::pst::common::DataBlockLoader::get_data_header data_block_loader not initialised");
+    SPDLOG_DEBUG("ska::pst::common::FileBlockProducer::dtor nothing to munmap");
+    return;
   }
-  return data_block_loader->get_header();
+
+  if (munmap(map, data_size) == -1)
+  {
+    SPDLOG_ERROR("ska::pst::common::FileBlockProducer::dtor munmap failed: {}", strerror(errno));
+  }
 }
 
-auto ska::pst::common::DataBlockLoader::get_weights_header() const -> const AsciiHeader&
+auto ska::pst::common::FileBlockProducer::get_header() const -> const ska::pst::common::AsciiHeader& 
 {
-  SPDLOG_DEBUG("ska::pst::common::DataBlockLoader::get_weights_header");
-  if (!weights_block_loader)
-  {
-    log_throw("ska::pst::common::DataBlockLoader::get_weights_header weights_block_loader not initialised");
-  }
-  return weights_block_loader->get_header();
+  return reader->get_header();
 }
 
-
-auto ska::pst::common::DataBlockLoader::next_block() -> Block
+auto ska::pst::common::FileBlockProducer::next_block() -> BlockProducer::Block
 {
-  SPDLOG_DEBUG("ska::pst::common::DataBlockLoader::next_block");
-
-  if (!data_block_loader)
-  {
-    log_throw("ska::pst::common::DataBlockLoader::next_block data_block_loader not initialised");
-  }
-  if (!weights_block_loader)
-  {
-    log_throw("ska::pst::common::DataBlockLoader::next_block weights_block_loader not initialised");
-  }
-
-  Block result;
-  result.data = data_block_loader->next_block();
-  result.weights = weights_block_loader->next_block();
+  auto result = next_block_info;
+  next_block_info = BlockProducer::Block(nullptr, 0); // next call to next_block returns EOD marker
   return result;
 }
+

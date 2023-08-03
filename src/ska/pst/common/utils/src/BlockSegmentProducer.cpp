@@ -3,18 +3,18 @@
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice,
  * this list of conditions and the following disclaimer.
- * 
+ *
  * 2. Redistributions in binary form must reproduce the above copyright
  * notice, this list of conditions and the following disclaimer in the
  * documentation and/or other materials provided with the distribution.
- * 
+ *
  * 3. Neither the name of the copyright holder nor the names of its
  * contributors may be used to endorse or promote products derived from this
  * software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -28,50 +28,51 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "ska/pst/common/utils/FileBlockLoader.h"
+#include "ska/pst/common/utils/BlockSegmentProducer.h"
+#include <spdlog/spdlog.h>
 
-#include <gtest/gtest.h>
+static void log_throw (const char* msg)
+{
+  SPDLOG_ERROR(msg); 
+  throw std::runtime_error(msg);
+}
 
-#ifndef SKA_PST_COMMON_UTILS_TESTS_FileBlockLoaderTest_h
-#define SKA_PST_COMMON_UTILS_TESTS_FileBlockLoaderTest_h
-
-namespace ska::pst::common::test {
-
-  /**
-   * @brief Test the FileBlockLoader class
-   * 
-   * @details
-   * 
-   */
-  class FileBlockLoaderTest : public ::testing::Test
+auto ska::pst::common::BlockSegmentProducer::get_data_header() const -> const AsciiHeader&
+{
+  SPDLOG_DEBUG("ska::pst::common::BlockSegmentProducer::get_data_header");
+  if (!data_block_producer)
   {
-    protected:
-      void SetUp() override;
+    log_throw("ska::pst::common::BlockSegmentProducer::get_data_header data_block_producer not initialised");
+  }
+  return data_block_producer->get_header();
+}
 
-      void TearDown() override;
+auto ska::pst::common::BlockSegmentProducer::get_weights_header() const -> const AsciiHeader&
+{
+  SPDLOG_DEBUG("ska::pst::common::BlockSegmentProducer::get_weights_header");
+  if (!weights_block_producer)
+  {
+    log_throw("ska::pst::common::BlockSegmentProducer::get_weights_header weights_block_producer not initialised");
+  }
+  return weights_block_producer->get_header();
+}
 
-    public:
-      FileBlockLoaderTest();
 
-      ~FileBlockLoaderTest();
+auto ska::pst::common::BlockSegmentProducer::next_segment() -> Segment
+{
+  SPDLOG_DEBUG("ska::pst::common::BlockSegmentProducer::next_block");
 
-      ska::pst::common::AsciiHeader header;
+  if (!data_block_producer)
+  {
+    log_throw("ska::pst::common::BlockSegmentProducer::next_block data_block_producer not initialised");
+  }
+  if (!weights_block_producer)
+  {
+    log_throw("ska::pst::common::BlockSegmentProducer::next_block weights_block_producer not initialised");
+  }
 
-      std::vector<char> file_header;
-
-      std::vector<char> file_data;
-
-      std::string file_name{"/tmp/FileBlockLoaderTest.dada"};
-
-      uint32_t header_size{0};
-
-      uint32_t data_size{1048576};
-
-    private:
-
-  };
-
-} // namespace ska::pst::common::test
-
-#endif // SKA_PST_COMMON_UTILS_TESTS_FileBlockLoaderTest_h
-
+  Segment result;
+  result.data = data_block_producer->next_block();
+  result.weights = weights_block_producer->next_block();
+  return result;
+}

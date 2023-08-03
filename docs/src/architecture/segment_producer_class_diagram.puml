@@ -60,60 +60,50 @@ class Block
     + size: size_t
 }
 
-' Provides a source of heaps. Implementation of this could
-' hide the fact that it needs to load another data+weights file
-' with out the SegmentProducer knowing that
-class FileSegmentProducer 
+' A source of heaps that have been divided into blocks
+class BlockSegmentProducer 
 {
-    - data_reader: FileBlockProducer
-    - weights_reader: FileBlockProducer
+    - data: BlockProducer
+    - weights: BlockProducer
     + next_segment(): Segment
 }
 
+SegmentProducer <|-- BlockSegmentProducer
+
 class FileBlockProducer 
 {
-    - reader : FileReader*
+    - reader : FileReader
     + get_header(): AsciiHeader
     + next_block(): Block
 }
 
-FileSegmentProducer *-- "2" FileBlockProducer
-SegmentProducer <|-- FileSegmentProducer
-BlockProducer <|-- FileBlockProducer
-
-BlockProducer .. "produces" Block
-
-class RingBufferSegmentProducer 
-{
-    - data_reader: RingBufferBlockProducer
-    - weights_reader: RingBufferBlockProducer
-    + next_segment(): Segment
+package ska::pst::smrb {
+  class RingBufferBlockProducer
 }
 
 class RingBufferBlockProducer 
 {
-    - data_reader: DataBlockReader
-    - header_reader: DataBlockReader
+    - reader: DataBlockReader
+    + get_header(): AsciiHeader
     + next_block(): Block
-    + next_header(): AsciiHeader
 }
 
-
-RingBufferSegmentProducer *-- "2" RingBufferBlockProducer
+BlockSegmentProducer *-- "2" BlockProducer
+BlockProducer <|-- FileBlockProducer
 BlockProducer <|-- RingBufferBlockProducer
 
-SegmentProducer <|-- RingBufferSegmentProducer
+BlockProducer .. "produces" Block
 
-class RandomDataSegmentProducer 
+class SegmentGenerator 
 {
     - generator: PacketGenerator
     - layout: HeapLayout
     + next_segment(): Segment
 }
 
-SegmentProducer <|-- RandomDataSegmentProducer
-RandomDataSegmentProducer *-- HeapLayout
-RandomDataSegmentProducer *-- PacketGenerator
+SegmentProducer <|-- SegmentGenerator
+SegmentGenerator *-- HeapLayout
+SegmentGenerator *-- PacketGenerator
 
 class PacketGenerator 
 {

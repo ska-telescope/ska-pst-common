@@ -28,89 +28,86 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "ska/pst/common/utils/DataBlockSource.h"
+#include "ska/pst/common/utils/SegmentProducer.h"
 #include "ska/pst/common/utils/PacketGenerator.h"
 #include "ska/pst/common/utils/HeapLayout.h"
 
 #include <spdlog/spdlog.h>
 #include <complex>
 
-#ifndef SKA_PST_COMMON_UTILS_DataBlockGenerator_h
-#define SKA_PST_COMMON_UTILS_DataBlockGenerator_h
+#ifndef SKA_PST_COMMON_UTILS_SegmentGenerator_h
+#define SKA_PST_COMMON_UTILS_SegmentGenerator_h
 
 namespace ska::pst::common
 {
   /**
-   * @brief Unpacks data+weights+scales generation and validation
+   * @brief Generates simulated signals as a series of Segments
    *
    */
-  class DataBlockGenerator : public DataBlockSource
+  class SegmentGenerator : public SegmentProducer
   {
     public:
 
       /**
-       * @brief Construct a new DataBlockGenerator object
+       * @brief Construct a new SegmentGenerator object
        *
        */
-      DataBlockGenerator() = default;
+      SegmentGenerator() = default;
 
       /**
-       * @brief Destroy the DataBlockGenerator object
+       * @brief Destroy the SegmentGenerator object
        *
        */
-      ~DataBlockGenerator();
+      ~SegmentGenerator();
 
       /**
-       * @brief Configure the data unpacker with the AsciiHeader from the data and weights streams
+       * @brief Configure the simulator with the AsciiHeader for the data and weights blocks
        *
-       * @param data_config AsciiHeader containing the configuration of the data stream
-       * @param weights_config AsciiHeader containing the configuration of the weights stream
+       * @param data_config AsciiHeader containing the configuration of the data blocks
+       * @param weights_config AsciiHeader containing the configuration of the weights blocks
        */
       virtual void configure(const AsciiHeader& data_config, const AsciiHeader& weights_config);
 
       /**
-       * @brief Get the AsciiHeader that describes the data block stream
+       * @brief Get the AsciiHeader that describes the data blocks
        *
-       * @return const AsciiHeader& header of the data block stream
+       * @return const AsciiHeader& header of the data blocks
        */
       const AsciiHeader& get_data_header() const { return data_config; }
 
       /**
-       * @brief Get the AsciiHeader that describes the weights block stream
+       * @brief Get the AsciiHeader that describes the weights blocks
        *
-       * @return const AsciiHeader& header of the weights block stream
+       * @return const AsciiHeader& header of the weights blocks
        */
       const AsciiHeader& get_weights_header() const { return weights_config; }
 
       /**
        * @brief Resize the internal storage for data and weights
        *
-       * @param nheap the number of heaps to be generated on each call to next_block
+       * @param nheap the number of heaps to be generated on each call to next_segment
        */
       void resize(uint64_t nheap);
 
       /**
-       * @brief Get the next block of data and weights.
+       * @brief Get the next segment of simulated data and weights.
        *
-       * The returned Block contains the pointer to the next block of data
-       * and weights.  It also includes the size, in bytes, for both data
-       * and weights. Clients of this must not go beyond the size of data.
        */
-      Block next_block();
+      Segment next_segment();
 
     protected:
 
-      //! the AsciiHeader that describes the data block stream
+      //! the AsciiHeader that describes the data blocks
       AsciiHeader data_config;
       
-      //! the AsciiHeader that describes the weights block stream
+      //! the AsciiHeader that describes the weights blocks
       AsciiHeader weights_config;
 
       //! PacketGenerator sets the data and weights of each packet in each heap
       std::shared_ptr<PacketGenerator> generator{nullptr};
 
-      //! the data and weights blocks
-      Block block;
+      //! storage for the simulated Segment returned by next_segmemtn
+      Segment segment;
 
       //! The layout of data, weights and scales in each heap
       HeapLayout layout;
@@ -121,5 +118,5 @@ namespace ska::pst::common
 
 } // namespace ska::pst::common
 
-#endif // SKA_PST_COMMON_UTILS_DataBlockGenerator_h
+#endif // SKA_PST_COMMON_UTILS_SegmentGenerator_h
 

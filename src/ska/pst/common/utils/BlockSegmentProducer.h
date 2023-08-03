@@ -28,12 +28,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "ska/pst/common/utils/DataBlockSource.h"
+#include "ska/pst/common/utils/SegmentProducer.h"
+#include "ska/pst/common/utils/BlockProducer.h"
 
 #include <memory>
 
-#ifndef __SKA_PST_COMMON_UTILS_DataBlockLoader_h
-#define __SKA_PST_COMMON_UTILS_DataBlockLoader_h
+#ifndef __SKA_PST_COMMON_UTILS_BlockSegmentProducer_h
+#define __SKA_PST_COMMON_UTILS_BlockSegmentProducer_h
 
 namespace ska::pst::common {
 
@@ -43,15 +44,15 @@ namespace ska::pst::common {
    * This class implements an interface to data+weights that can be from any source,
    * including file (see FileSegmentProducer) or ring buffer (in principal).
    */
-  class DataBlockLoader : public DataBlockSource
+  class BlockSegmentProducer : public SegmentProducer
   {
     public:
 
       /**
-       * @brief Destroy the DataBlockLoader object.
+       * @brief Destroy the BlockSegmentProducer object.
        *
        */
-      virtual ~DataBlockLoader() = default;
+      virtual ~BlockSegmentProducer() = default;
 
       /**
        * @brief Get the AsciiHeader that describes the data block stream
@@ -68,20 +69,17 @@ namespace ska::pst::common {
       virtual const ska::pst::common::AsciiHeader& get_weights_header() const;
 
       /**
-       * @brief Get the next block of data and weights.
+       * @brief Get the next Segment of data and weights.
        *
-       * The returned Block contains the pointer to the next block of data
-       * and weights.  It also includes the size, in bytes, for both data
-       * and weights. Clients of this must not go beyond the size of data.
        */
-      virtual Block next_block();
+      virtual Segment next_segment();
 
     protected:
 
-      std::unique_ptr<BlockLoader> data_block_loader;
-      std::unique_ptr<BlockLoader> weights_block_loader;
+      std::shared_ptr<BlockProducer> data_block_producer;
+      std::shared_ptr<BlockProducer> weights_block_producer;
   };
 
 } // namespace ska::pst::common
 
-#endif // __SKA_PST_COMMON_UTILS_DataBlockLoader_h
+#endif // __SKA_PST_COMMON_UTILS_BlockSegmentProducer_h
