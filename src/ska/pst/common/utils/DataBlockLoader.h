@@ -41,7 +41,7 @@ namespace ska::pst::common {
    * @brief Base class used for reading blocks of voltage data and weights
    *
    * This class implements an interface to data+weights that can be from any source,
-   * including file (see DataFileBlockLoader) or ring buffer (in principal).
+   * including file (see FileSegmentProducer) or ring buffer (in principal).
    */
   class DataBlockLoader : public DataBlockSource
   {

@@ -4,7 +4,7 @@ set(public_headers
     BlockLoader.h
     DataBlockGenerator.h
     DataBlockLoader.h
-    DataFileBlockLoader.h
+    FileSegmentProducer.h
     Endian.h
     Time.h
     Timer.h
@@ -30,7 +30,7 @@ set(sources
     src/AsciiHeader.cpp
     src/DataBlockGenerator.cpp
     src/DataBlockLoader.cpp
-    src/DataFileBlockLoader.cpp
+    src/FileSegmentProducer.cpp
     src/Time.cpp
     src/Timer.cpp
     src/NormalSequence.cpp

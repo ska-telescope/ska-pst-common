@@ -28,23 +28,23 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "ska/pst/common/utils/DataFileBlockLoader.h"
+#include "ska/pst/common/utils/FileSegmentProducer.h"
 #include "ska/pst/common/utils/FileBlockLoader.h"
 
 #include <spdlog/spdlog.h>
 
-ska::pst::common::DataFileBlockLoader::DataFileBlockLoader(
+ska::pst::common::FileSegmentProducer::FileSegmentProducer(
         const std::string& data_file_path,
         const std::string& weights_file_path)
 {
-  SPDLOG_DEBUG("ska::pst::common::DataFileBlockLoader::DataFileBlockLoader");
+  SPDLOG_DEBUG("ska::pst::common::FileSegmentProducer::FileSegmentProducer");
 
   data_block_loader = std::make_unique<FileBlockLoader>(data_file_path);
   weights_block_loader = std::make_unique<FileBlockLoader>(weights_file_path);
 }
 
-ska::pst::common::DataFileBlockLoader::~DataFileBlockLoader()
+ska::pst::common::FileSegmentProducer::~FileSegmentProducer()
 {
-  SPDLOG_DEBUG("ska::pst::common::DataFileBlockLoader::~DataFileBlockLoader()");
+  SPDLOG_DEBUG("ska::pst::common::FileSegmentProducer::~FileSegmentProducer()");
 }
 
