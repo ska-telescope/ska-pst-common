@@ -28,8 +28,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "ska/pst/common/utils/SegmentGenerator.h"
+#include "ska/pst/common/utils/PacketGeneratorFactory.h"
+
 #include "ska/pst/common/utils/FileWriter.h"
 #include "ska/pst/common/utils/Logging.h"
+#include "ska/pst/common/utils/Time.h"
 #include "ska/pst/common/definitions.h"
 
 #include <unistd.h>
@@ -42,9 +46,18 @@
 
 void usage();
 
+// default duration of output signal
+static const double default_duration = 10.0; // seconds
+
 auto main(int argc, char *argv[]) -> int
 {
   ska::pst::common::setup_spdlog();
+
+  std::string data_config_filename;
+  std::string weights_config_filename;
+
+  std::string signal_generator;
+  double duration = default_duration;
 
   bool use_o_direct = false;
 
@@ -54,7 +67,7 @@ auto main(int argc, char *argv[]) -> int
 
   int c = 0;
 
-  while ((c = getopt(argc, argv, "hov")) != EOF)
+  while ((c = getopt(argc, argv, "d:hos:T:w:v")) != EOF)
   {
     switch(c)
     {
@@ -67,12 +80,28 @@ auto main(int argc, char *argv[]) -> int
         use_o_direct = true;
         break;
 
+      case 'd':
+        data_config_filename = optarg;
+        break;
+
+      case 'w':
+        weights_config_filename = optarg;
+        break;
+
+      case 's':
+        signal_generator = optarg;
+        break;
+
+      case 'T':
+        duration = atof(optarg);
+        break;
+
       case 'v':
         verbose++;
         break;
 
       default:
-        std::cerr << "ERROR: unrecognised option: -" << char(optopt) << std::endl;
+        std::cerr << "ERROR: unrecognised option: -" << static_cast<char>(optopt) << std::endl;
         usage();
         return EXIT_FAILURE;
         break;
@@ -88,58 +117,99 @@ auto main(int argc, char *argv[]) -> int
     }
   }
 
-  // Check arguments
-  if ((argc - optind) != 3)
+  if (data_config_filename.empty())
   {
-    SPDLOG_ERROR("ERROR: 3 command line arguments are expected");
+    SPDLOG_ERROR("ERROR: config filename not specified");
     usage();
     return EXIT_FAILURE;
   }
 
-  std::string data_file(argv[optind]); // NOLINT
-  std::string weights_file(argv[optind+1]); // NOLINT
-  std::string output_dir(argv[optind+2]); // NOLINT
-  std::string output_data_dir = output_dir + "/data";
-  std::string output_weights_dir = output_dir + "/weights";
+  if (weights_config_filename.empty())
+  {
+    SPDLOG_ERROR("ERROR: config filename not specified");
+    usage();
+    return EXIT_FAILURE;
+  }
+
+  if (signal_generator.empty())
+  {
+    SPDLOG_ERROR("ERROR: signal generator not specified");
+    usage();
+    return EXIT_FAILURE;
+  }
+
+  std::string output_data_dir = "data";
+  std::string output_weights_dir = "weights";
 
   int return_code = 0;
 
   try
   {
+    // load data and weights configurations and set parameters as needed
+
+    ska::pst::common::AsciiHeader data_header;
+    ska::pst::common::AsciiHeader weights_header;
+
+    data_header.load_from_file(data_config_filename);
+    weights_header.load_from_file(weights_config_filename);
+
+    data_header.set_val("DATA_GENERATOR", signal_generator);
+
+    std::string utc_start;
+
+    if (data_header.has("UTC_START"))
+    {
+      utc_start = data_header.get_val("UTC_START");
+    }
+    else
+    {
+      ska::pst::common::Time now(time(nullptr));
+      utc_start = now.get_gmtime();
+      data_header.set_val("UTC_START",utc_start);
+    }
+
+    uint32_t file_number = 0;
+    
+    if (data_header.has("FILE_NUMBER"))
+    {
+      file_number = data_header.get_uint32("FILE_NUMBER");
+    }
+    else
+    {
+      data_header.set("FILE_NUMBER",file_number);
+    }
+
+    uint32_t obs_offset = 0;
+
+    if (data_header.has("OBS_OFFSET"))
+    {
+      obs_offset = data_header.get_uint32("OBS_OFFSET");
+    }
+    else
+    {
+      data_header.set("OBS_OFFSET",obs_offset);
+    }
+
+    // create output data and weights folders
+
+    std::filesystem::path output_data_path(output_data_dir);
+    std::filesystem::create_directory(output_data_path);
+
+    std::filesystem::path output_weights_path(output_weights_dir);
+    std::filesystem::create_directory(output_weights_path);
+
+    // create output filenames
 
     ska::pst::common::FileWriter data_file_writer(use_o_direct);
     ska::pst::common::FileWriter weights_file_writer(use_o_direct);
-
-    ssize_t data_bytes_remaining = 0; // requires calculation
-    ssize_t weights_bytes_remaining = 0; // requires calculation
-
-    const ska::pst::common::AsciiHeader data_header;
-    const ska::pst::common::AsciiHeader weights_header;
-
-    uint32_t data_size_factor = ska::pst::common::bits_per_float / data_header.get_uint32("NBIT");
-    uint32_t unpacked_obs_offset = data_size_factor * data_header.get_uint32("OBS_OFFSET");
-    double unpacked_bytes_per_second = data_size_factor * data_header.get_double("BYTES_PER_SECOND");
-    uint32_t file_number = data_header.get_uint32("FILE_NUMBER");
-    std::string utc_start = data_header.get_val("UTC_START");
-
-    auto data_hdrsz = ssize_t(data_header.get_uint32("HDR_SIZE"));
-    auto data_bufsz = ssize_t(data_header.get_uint32("RESOLUTION"));
-    auto weights_bufsz = ssize_t(weights_header.get_uint32("RESOLUTION"));
-    SPDLOG_DEBUG("ska_pst_generate_file RESOLUTION data={} weights={}", data_bufsz, weights_bufsz);
-
-    // the RESOLUTION is tied to the number of time samples per UDP packet
-    // for Low this is 32 * 207.36 us (approximately 6ms), increasing this by 64 for improved performance
-    static constexpr uint32_t process_block_factor = 64;
-    data_bufsz *= process_block_factor;
-    weights_bufsz *= process_block_factor;
-
-    std::filesystem::path output_data_path(output_data_dir);
-    std::filesystem::path output_data_filename = output_data_path / data_file_writer.get_filename(utc_start, unpacked_obs_offset, file_number);
+    
+    std::filesystem::path output_data_filename = output_data_path / data_file_writer.get_filename(utc_start, obs_offset, file_number);
     SPDLOG_DEBUG("ska_pst_generate_file writing data to file {}", output_data_filename.generic_string());
 
-    std::filesystem::path output_weights_path(output_weights_dir);
-    std::filesystem::path output_weights_filename = output_weights_path / weights_file_writer.get_filename(utc_start, unpacked_obs_offset, file_number);
+    std::filesystem::path output_weights_filename = output_weights_path / weights_file_writer.get_filename(utc_start, obs_offset, file_number);
     SPDLOG_DEBUG("ska_pst_generate_file writing weights to file {}", output_weights_filename.generic_string());
+
+    // open output files and write headers
 
     data_file_writer.open_file(output_data_filename);
     data_file_writer.write_header(data_header);
@@ -147,31 +217,29 @@ auto main(int argc, char *argv[]) -> int
     weights_file_writer.open_file(output_weights_filename);
     weights_file_writer.write_header(weights_header);
 
-    std::vector<char> data_buffer(data_bufsz);
-    std::vector<char> weights_buffer(weights_bufsz);
+    // compute the number of heaps to write to file
 
-    size_t data_bytes_generated = 0;
-    size_t weights_bytes_generated = 0;
-    bool data_valid = true;
+    double bytes_per_second = data_header.compute_bytes_per_second();
+    auto bytes_per_heap = data_header.get_uint32("RESOLUTION");
 
-    char* data_ptr = nullptr;
-    char* weights_ptr = nullptr;
+    double seconds_per_heap = bytes_per_heap / bytes_per_second;
+    auto num_heaps = static_cast<size_t>(floor(duration / seconds_per_heap));
 
-    while (data_valid && data_bytes_remaining > 0 && weights_bytes_remaining > 0)
+    SPDLOG_DEBUG("ska_pst_generate_file seconds_per_heap={} num_heaps={}", seconds_per_heap, num_heaps);
+
+    ska::pst::common::SegmentGenerator generator;
+    generator.configure(data_header, weights_header);
+
+    unsigned num_heaps_per_loop = 1;
+    generator.resize(num_heaps_per_loop);
+
+    for (unsigned iheap=0; iheap < num_heaps; iheap++)
     {
-      ssize_t data_bytes_to_generate = std::min(data_bytes_remaining, data_bufsz);
-      ssize_t weights_bytes_to_generate = std::min(weights_bytes_remaining, weights_bufsz);
+      std::cerr << "generate " << iheap << "/" << num_heaps << std::endl;
+      ska::pst::common::SegmentProducer::Segment segment = generator.next_segment();
 
-      SPDLOG_DEBUG("Reading {} bytes, remaining={}", data_bytes_to_generate, data_bytes_remaining);
-
-      data_file_writer.write_data(data_ptr, data_bufsz);
-      weights_file_writer.write_data(weights_ptr, weights_bufsz);
-
-      data_bytes_generated += data_bytes_to_generate;
-      weights_bytes_generated += weights_bytes_to_generate;
-
-      data_bytes_remaining -= data_bytes_to_generate;
-      weights_bytes_remaining -= weights_bytes_to_generate;
+      ssize_t data_written = data_file_writer.write_data(segment.data.block, segment.data.size);
+      ssize_t weights_written = weights_file_writer.write_data(segment.weights.block, segment.weights.size);
     }
 
     data_file_writer.close_file();
@@ -189,11 +257,12 @@ auto main(int argc, char *argv[]) -> int
 
 void usage()
 {
-  std::cout << "Usage: ska_pst_generate_file [options] data_file weights_file output_dir" << std::endl;
+  std::cout << "Usage: ska_pst_generate_file [options]" << std::endl;
   std::cout << std::endl;
-  std::cout << "  data_file     raw data file containing packed data samples" << std::endl;
-  std::cout << "  weights_file  weights file containing scale and weights corresponding to the data file" << std::endl;
-  std::cout << "  output_dir    directory to write the unpacked file" << std::endl;
+  std::cout << "  -d config     name of configuration file for output data" << std::endl;
+  std::cout << "  -w config     name of configuration file for output weights" << std::endl;
+  std::cout << "  -s signal     name of signal generator (" << ska::pst::common::get_supported_data_generators_list() << ")" << std::endl;
+  std::cout << "  -T seconds    duration of simulated signal (default: " << default_duration << ")" << std::endl;
   std::cout << "  -h            print this help text" << std::endl;
   std::cout << "  -o            use O_DIRECT for writing file output" << std::endl;
   std::cout << "  -v            verbose output" << std::endl;

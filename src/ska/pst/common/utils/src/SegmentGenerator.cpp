@@ -49,13 +49,14 @@ void ska::pst::common::SegmentGenerator::configure(const AsciiHeader& _data_conf
 
   std::string generator_name = data_config.get_val("DATA_GENERATOR");
   generator = PacketGeneratorFactory(generator_name, layout.get_packet_layout_ptr());
+  generator->configure(data_config);
 }
 
 void resize (ska::pst::common::BlockProducer::Block& block, uint64_t size)
 {
   if (block.block != nullptr && block.size > 0 && (size > block.size || size == 0))
   {
-    free (block.block);
+    free (block.block); // NOLINT
     block.block = nullptr;
     block.size = 0;
   }

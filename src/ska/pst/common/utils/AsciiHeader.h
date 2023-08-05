@@ -235,7 +235,7 @@ namespace ska::pst::common {
        *
        * @return std::vector<std::string> keys in the header
        */
-       auto header_get_keys() const -> std::vector<std::string>;
+      auto header_get_keys() const -> std::vector<std::string>;
 
       /**
        * @brief Get the HDR_SIZE attribute of the ascii header in filename

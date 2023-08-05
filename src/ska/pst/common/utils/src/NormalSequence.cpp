@@ -105,6 +105,12 @@ void ska::pst::common::NormalSequence::generate(char * buffer, uint64_t bufsz)
     new_red_noise_factor = std::abs(red_noise_distribution(red_noise_generator));
   }
 
+  if (nbit == 0)
+  {
+    SPDLOG_ERROR("ska::pst::common::NormalSequence::generate nbit=0");
+    throw std::runtime_error("ska::pst::common::NormalSequence::generate nbit=0");
+  }
+
   uint64_t nval = bufsz * ska::pst::common::bits_per_byte / nbit;
   // floating point values are requantised to signed integers at 8 or 16 bits per sample
   if (nbit == 8) // NOLINT
