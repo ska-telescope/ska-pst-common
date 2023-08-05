@@ -20,15 +20,17 @@ in the DADA file format as output by the AA0.5 voltage recorder.
     -w config     name of configuration file for output weights
     -s signal     name of signal generator (Random, Sine, GaussianNoise)
     -T seconds    duration of simulated signal (default: 10)
-    -h            print this help text
     -o            use O_DIRECT for writing file output
-    -v            verbose output
 
 Example: generate 0.1 seconds of data containing normally distributed GaussianNoise
 
+.. code-block:: bash
+    
     ska_pst_generate_file -d data_config.txt -w weights_config.txt -s GaussianNoise -T 0.1
 
 The example data_config.txt
+
+::
 
     HDR_SIZE      4096
     NPOL          2
@@ -49,6 +51,8 @@ The example data_config.txt
     TSAMP               25.92  # microseconds
 
 The example weights_config.txt
+
+::
 
     HDR_SIZE      4096
     NPOL          1
