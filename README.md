@@ -1,8 +1,13 @@
 # ska-pst-common
 
-This project allows centralised management of package dependencies required to be propagated against downstream SKA Pulsar Timing components.
+This project provides a C++ library of common utilities and centralised management of package dependencies 
+for the components of the Pulsar Timing instrument for SKA Mid and SKA Low.
 
-The primary artefact produced by this repository are oci images published to the centralised artefact repostory. At this time of writing, the base oci image used is `ubuntu:20.04` due to the future compatibility requirement against [NVIDIA's supported linux distributions](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html#linux-distributions).
+## Documentation
+
+[![Documentation Status](https://readthedocs.org/projects/ska-telescope-ska-pst-common/badge/?version=latest)](https://developer.skao.int/projects/ska-pst-common/en/latest/)
+
+The documentation for this project, including the package description, Architecture description and the API modules can be found at SKA developer portal:  [https://developer.skao.int/projects/ska-pst-common/en/latest/](https://developer.skao.int/projects/ska-pst-common/en/latest/)
 
 ## Build Instructions
 
