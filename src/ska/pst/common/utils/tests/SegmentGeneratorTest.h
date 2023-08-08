@@ -59,7 +59,7 @@ namespace ska::pst::common::test {
       ska::pst::common::AsciiHeader data_header;
       ska::pst::common::AsciiHeader weights_header;
 
-      uint32_t default_nheap{128};
+      uint32_t default_nheap{4};
   };
 
 } // namespace ska::pst::common::test
