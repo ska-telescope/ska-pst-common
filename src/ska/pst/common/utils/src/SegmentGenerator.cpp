@@ -34,6 +34,7 @@
 
 #include <spdlog/spdlog.h>
 #include <stdexcept>
+#include <iostream>
 
 ska::pst::common::SegmentGenerator::~SegmentGenerator()
 {
@@ -65,6 +66,7 @@ void resize (ska::pst::common::BlockProducer::Block& block, uint64_t size)
   {
     static constexpr uint64_t memory_alignment = 512;
     posix_memalign(reinterpret_cast<void **>(&(block.block)), memory_alignment, size);
+    block.size = size;
   }
 }
 
@@ -92,6 +94,12 @@ void ska::pst::common::SegmentGenerator::resize(uint64_t _nheap)
 
 auto ska::pst::common::SegmentGenerator::next_segment() -> Segment
 {
+  if (nheap == 0)
+  {
+    SPDLOG_ERROR("ska::pst::common::SegmentGenerator::next_segment nheap is zero (not configured?)");
+    throw std::runtime_error("ska::pst::common::SegmentGenerator::next_segment nheap is zero (not configured?)");
+  }
+
   const uint32_t packets_per_heap = layout.get_packets_per_heap();
   const uint64_t num_packets = nheap * packets_per_heap;
 

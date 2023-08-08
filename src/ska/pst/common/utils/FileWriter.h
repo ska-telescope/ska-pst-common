@@ -28,12 +28,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <cstddef>
+#include "ska/pst/common/utils/AsciiHeader.h"
+
 #include <filesystem>
+#include <cstddef>
 #include <mutex>
 #include <inttypes.h>
-
-#include "ska/pst/common/utils/AsciiHeader.h"
 
 #ifndef SKA_PST_COMMON_UTILS_FileWriter_h
 #define SKA_PST_COMMON_UTILS_FileWriter_h
@@ -168,6 +168,9 @@ namespace ska::pst::common {
 
       //! file descriptor of the currently opened file
       int fd{-1};
+
+      //! flags passed to std C open function
+      int flags{0};
 
       //! local buffer of page-aligned memory used to write the AsciiHeader to O_DIRECT opened file handles
       char* header_buffer{nullptr};
