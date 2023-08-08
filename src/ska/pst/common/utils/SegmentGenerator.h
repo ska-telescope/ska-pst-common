@@ -61,7 +61,7 @@ namespace ska::pst::common
       ~SegmentGenerator();
 
       /**
-       * @brief Configure the simulator with the AsciiHeader for the data and weights blocks
+       * @brief Configure the simulator with the AsciiHeader for the data and weights+scales blocks
        *
        * @param data_config AsciiHeader containing the configuration of the data blocks
        * @param weights_config AsciiHeader containing the configuration of the weights blocks
@@ -83,23 +83,32 @@ namespace ska::pst::common
       const AsciiHeader& get_weights_header() const { return weights_config; }
 
       /**
-       * @brief Resize the internal storage for data and weights
+       * @brief Resize the internal storage for data and weights+scales
        *
        * @param nheap the number of heaps to be generated on each call to next_segment
        */
       void resize(uint64_t nheap);
 
       /**
-       * @brief Get the next segment of simulated data and weights.
+       * @brief Get the next segment of simulated data and weights+scales
        *
        */
       Segment next_segment();
 
-      /*
-       * @brief Get the packet generator 
+      /**
+       * @brief Verify the data and weights+scales of the segment
        *
-      */
-      auto get_packet_generator() -> std::shared_ptr<PacketGenerator>& { return generator; }
+       * @param segment the segment of simulated data and weights+scales to be verified
+       * @return true if data and weights+scales match expectations
+       */
+      bool test_segment(const Segment& segment);
+
+      /**
+       * @brief Reset all sequences (data, weights, and scales)
+       * The next call to next_segment or test_segment will behave as on the first call to these functions
+       *
+       */
+      void reset();
 
     protected:
 
@@ -109,7 +118,7 @@ namespace ska::pst::common
       //! the AsciiHeader that describes the weights blocks
       AsciiHeader weights_config;
 
-      //! PacketGenerator sets the data and weights of each packet in each heap
+      //! PacketGenerator sets the data and weights+scales of each packet in each heap
       std::shared_ptr<PacketGenerator> generator{nullptr};
 
       //! storage for the simulated Segment returned by next_segmemtn

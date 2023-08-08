@@ -74,16 +74,16 @@ void ska::pst::common::SegmentGenerator::resize(uint64_t _nheap)
 {
   if (layout.get_data_heap_stride() == 0)
   {
-    SPDLOG_ERROR("ska::pst::common::SegmentGenerator::resize data_heap_stride is zero (not configured?)");
-    throw std::runtime_error("ska::pst::common::SegmentGenerator::resize data_heap_stride is zero (not configured?)");
+    SPDLOG_ERROR("ska::pst::common::SegmentGenerator::resize data_heap_stride is zero");
+    throw std::runtime_error("ska::pst::common::SegmentGenerator::resize data_heap_stride is zero");
   }
 
   ::resize(segment.data, _nheap * layout.get_data_heap_stride());
 
   if (layout.get_weights_heap_stride() == 0)
   {
-    SPDLOG_ERROR("ska::pst::common::SegmentGenerator::resize weights_heap_stride is zero (not configured?)");
-    throw std::runtime_error("ska::pst::common::SegmentGenerator::resize weights_heap_stride is zero (not configured?)");
+    SPDLOG_ERROR("ska::pst::common::SegmentGenerator::resize weights_heap_stride is zero");
+    throw std::runtime_error("ska::pst::common::SegmentGenerator::resize weights_heap_stride is zero");
   }
 
   ::resize(segment.weights, _nheap * layout.get_weights_heap_stride());
@@ -96,8 +96,8 @@ auto ska::pst::common::SegmentGenerator::next_segment() -> Segment
 {
   if (nheap == 0)
   {
-    SPDLOG_ERROR("ska::pst::common::SegmentGenerator::next_segment nheap is zero (not configured?)");
-    throw std::runtime_error("ska::pst::common::SegmentGenerator::next_segment nheap is zero (not configured?)");
+    SPDLOG_ERROR("ska::pst::common::SegmentGenerator::next_segment nheap is zero");
+    throw std::runtime_error("ska::pst::common::SegmentGenerator::next_segment nheap is zero");
   }
 
   const uint32_t packets_per_heap = layout.get_packets_per_heap();
@@ -110,13 +110,54 @@ auto ska::pst::common::SegmentGenerator::next_segment() -> Segment
     auto data_offset = packet_number * layout.get_data_packet_stride();
     auto weights_offset = packet_number * layout.get_weights_packet_stride();
 
-    SPDLOG_TRACE("ska::pst::common::SegmentGenerator::next_block generating data packet {}", packet_number);
+    SPDLOG_TRACE("ska::pst::common::SegmentGenerator::next_segment generating data packet {}", packet_number);
     generator->fill_data(segment.data.block + data_offset, packet_layout.get_packet_data_size()); // NOLINT
-    SPDLOG_TRACE("ska::pst::common::SegmentGenerator::next_block generating scales packet {}", packet_number);
+    SPDLOG_TRACE("ska::pst::common::SegmentGenerator::next_segment generating scales packet {}", packet_number);
     generator->fill_scales(segment.weights.block + weights_offset + packet_layout.get_packet_scales_offset(), packet_layout.get_packet_scales_size()); // NOLINT
-    SPDLOG_TRACE("ska::pst::common::SegmentGenerator::next_block generating weights packet {}", packet_number);
+    SPDLOG_TRACE("ska::pst::common::SegmentGenerator::next_segment generating weights packet {}", packet_number);
     generator->fill_weights(segment.weights.block + weights_offset + packet_layout.get_packet_weights_offset(), packet_layout.get_packet_weights_size()); // NOLINT
   }
 
   return segment;
+}
+
+bool ska::pst::common::SegmentGenerator::test_segment(const Segment& test)
+{
+  if (nheap == 0)
+  {
+    SPDLOG_ERROR("ska::pst::common::SegmentGenerator::test_segment nheap is zero");
+    throw std::runtime_error("ska::pst::common::SegmentGenerator::test_segment nheap is zero");
+  }
+
+  const uint32_t packets_per_heap = layout.get_packets_per_heap();
+  const uint64_t num_packets = nheap * packets_per_heap;
+
+  const PacketLayout& packet_layout = layout.get_packet_layout();
+
+  for (auto packet_number = 0; packet_number < num_packets; packet_number++)
+  {
+    auto data_offset = packet_number * layout.get_data_packet_stride();
+    auto weights_offset = packet_number * layout.get_weights_packet_stride();
+
+    SPDLOG_TRACE("ska::pst::common::SegmentGenerator::test_segment generating data packet {}", packet_number);
+    if (generator->test_data(test.data.block + data_offset, packet_layout.get_packet_data_size()) == false) // NOLINT
+    {
+      return false;
+    }
+    SPDLOG_TRACE("ska::pst::common::SegmentGenerator::test_segment generating scales packet {}", packet_number);
+    if (generator->test_scales(test.weights.block + weights_offset + packet_layout.get_packet_scales_offset(), packet_layout.get_packet_scales_size()) == false) // NOLINT
+    {
+      return false;
+    }
+    SPDLOG_TRACE("ska::pst::common::SegmentGenerator::test_segment generating weights packet {}", packet_number);
+    if (generator->test_weights(test.weights.block + weights_offset + packet_layout.get_packet_weights_offset(), packet_layout.get_packet_weights_size()) == false) // NOLINT
+    {
+      return false;
+    }
+  }
+}
+      
+void ska::pst::common::SegmentGenerator::reset()
+{
+  generator->reset();
 }

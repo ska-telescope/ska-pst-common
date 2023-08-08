@@ -71,18 +71,12 @@ TEST_P(SegmentGeneratorTest, test_generate_validate) // NOLINT
   generator->configure(data_header, weights_header);
   generator->resize(default_nheap);
 
-  SPDLOG_TRACE("ska::pst::common::test::SegmentGeneratorTest::test_generate_validate dg->fill_data()");
+  SPDLOG_TRACE("ska::pst::common::test::SegmentGeneratorTest::test_generate_validate generator->next_segment()");
   auto segment = generator->next_segment();
+  generator->reset();
 
-  auto packet_generator = generator->get_packet_generator();
-  packet_generator->reset();
-
-  SPDLOG_TRACE("ska::pst::common::test::SegmentGeneratorTest::test_generate_validate packet_generator->test_data()");
-  EXPECT_TRUE(packet_generator->test_data(segment.data.block, segment.data.size));
-  SPDLOG_TRACE("ska::pst::common::test::SegmentGeneratorTest::test_generate_validate packet_generator->test_weights()");
-  EXPECT_TRUE(packet_generator->test_weights(segment.weights.block, segment.weights.size));
-  SPDLOG_TRACE("ska::pst::common::test::SegmentGeneratorTest::test_generate_validate packet_generator->test_scales()");
-  EXPECT_TRUE(packet_generator->test_scales(segment.weights.block, segment.weights.size));
+  SPDLOG_TRACE("ska::pst::common::test::SegmentGeneratorTest::test_generate_validate generator->test_segment()");
+  EXPECT_TRUE(generator->test_segment(segment));
 }
 
 INSTANTIATE_TEST_SUITE_P(SignalGenerators, SegmentGeneratorTest, testing::Values("Random", "Sine", "GaussianNoise")); // NOLINT

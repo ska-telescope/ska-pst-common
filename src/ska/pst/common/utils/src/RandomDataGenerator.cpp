@@ -55,7 +55,7 @@ void ska::pst::common::RandomDataGenerator::configure(const ska::pst::common::As
 
 void ska::pst::common::RandomDataGenerator::fill_data(char * buf, uint64_t size)
 {
-  dat_sequence.generate(reinterpret_cast<uint8_t*> (buf), size);
+  dat_sequence.generate(reinterpret_cast<uint8_t*>(buf), size);
 }
 
 void ska::pst::common::RandomDataGenerator::fill_weights(char * buf, uint64_t size)
@@ -65,12 +65,12 @@ void ska::pst::common::RandomDataGenerator::fill_weights(char * buf, uint64_t si
 
 void ska::pst::common::RandomDataGenerator::fill_scales(char * buf, uint64_t size)
 {
-  scl_sequence.generate_block(reinterpret_cast<uint8_t *>(buf), size, scl_block_offset, scl_block_size, block_stride);
+  scl_sequence.generate_block(reinterpret_cast<uint8_t*>(buf), size, scl_block_offset, scl_block_size, block_stride);
 }
 
 auto ska::pst::common::RandomDataGenerator::test_data(char * buf, uint64_t size) -> bool
 {
-  return dat_sequence.validate(reinterpret_cast<uint8_t*> (buf), size);
+  return dat_sequence.validate(reinterpret_cast<uint8_t*>(buf), size);
 }
 
 auto ska::pst::common::RandomDataGenerator::test_weights(char * buf, uint64_t size) -> bool
