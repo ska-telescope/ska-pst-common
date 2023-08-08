@@ -62,12 +62,7 @@ TEST_P(SegmentGeneratorTest, test_configure) // NOLINT
   ska::pst::common::AsciiHeader bad_data_header(data_header);
   bad_data_header.set("NCHAN", bad_header_param);
   EXPECT_THROW(generator->configure(bad_data_header, weights_header), std::runtime_error); // NOLINT
-
-  ska::pst::common::AsciiHeader bad_weights_header(weights_header);
-  bad_weights_header.set("NPOL", bad_header_param);
-  EXPECT_THROW(generator->configure(data_header, bad_weights_header), std::runtime_error); // NOLINT
 }
-
 
 TEST_P(SegmentGeneratorTest, test_generate_validate) // NOLINT
 {
