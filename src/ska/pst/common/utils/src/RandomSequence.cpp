@@ -124,7 +124,7 @@ auto ska::pst::common::RandomSequence::validate(uint8_t * buffer, uint64_t bufsz
     }
     else
     {
-      SPDLOG_WARN("ska::pst::common::RandomSequence::validate unexpected byte at index={}", i);
+      SPDLOG_DEBUG("ska::pst::common::RandomSequence::validate unexpected byte at index={}", i);
 
       unsigned zeroes = 0;
       while (i<bufsz && buffer[i] == 0) // NOLINT
@@ -135,7 +135,7 @@ auto ska::pst::common::RandomSequence::validate(uint8_t * buffer, uint64_t bufsz
 
       if (zeroes > 1)
       {
-        SPDLOG_WARN("ska::pst::common::RandomSequence::validate skipping {} consecutive zeroes", zeroes);
+        SPDLOG_DEBUG("ska::pst::common::RandomSequence::validate skipping {} consecutive zeroes", zeroes);
         seek (zeroes - 1);
       }
       else

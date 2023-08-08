@@ -1,0 +1,14 @@
+HDR_SIZE      4096
+NPOL          1
+NDIM          1
+NCHAN         20736
+NBIT          16
+
+RESOLUTION              44928
+PACKET_SCALES_SIZE      4
+PACKET_WEIGHTS_SIZE     48
+
+UDP_NSAMP               32
+WT_NSAMP                32
+UDP_NCHAN               24
+

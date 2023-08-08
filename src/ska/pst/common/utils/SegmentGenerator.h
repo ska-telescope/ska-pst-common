@@ -95,6 +95,12 @@ namespace ska::pst::common
        */
       Segment next_segment();
 
+      /*
+       * @brief Get the packet generator 
+       *
+      */
+      auto get_packet_generator() -> std::shared_ptr<PacketGenerator>& { return generator; }
+
     protected:
 
       //! the AsciiHeader that describes the data blocks

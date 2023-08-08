@@ -53,7 +53,7 @@ void ska::pst::common::SegmentGenerator::configure(const AsciiHeader& _data_conf
   generator->configure(data_config);
 }
 
-void resize (ska::pst::common::BlockProducer::Block& block, uint64_t size)
+void resize(ska::pst::common::BlockProducer::Block& block, uint64_t size)
 {
   if (block.block != nullptr && block.size > 0 && (size > block.size || size == 0))
   {
