@@ -186,13 +186,16 @@ void ska::pst::common::AsciiHeader::append_from_str(const char * raw_header)
 void ska::pst::common::AsciiHeader::del(const std::string &key)
 {
   check_not_empty(key);
-  for (auto it=params.begin(); it != params.end(); it++)
+  auto it=params.begin();
+  while (it != params.end())
   {
-    if ((*it).first == key)
+    if (it->first == key)
     {
-      // Notice that the iterator is decremented after it is passed
-      // to erase() but before erase() is executed
-      params.erase(it--);
+      params.erase(it);
+    }
+    else
+    {
+      it++;
     }
   }
 }

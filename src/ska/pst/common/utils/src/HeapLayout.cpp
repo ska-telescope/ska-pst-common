@@ -41,40 +41,119 @@
  */
 class HeapPacketLayout : public ska::pst::common::PacketLayout
 {
+  void assert_equal (const std::string& name, const ska::pst::common::AsciiHeader& data_config, const ska::pst::common::AsciiHeader& weights_config)
+  {
+    auto data_val = data_config.get_val(name);
+    auto weights_val = weights_config.get_val(name);
+
+    if (data_val != weights_val)
+    {
+      std::string error = "ska::pst::common::HeapPacketLayout::assert_equal " + name +
+        " data_config value=" + data_val + " does not equal weights_config value=" + weights_val;
+      SPDLOG_ERROR(error);
+      throw std::runtime_error(error);
+    }
+  }
+
+  void assert_equal (const std::string& name, const ska::pst::common::AsciiHeader& config, const std::string& expected)
+  {
+    auto got = config.get_val(name);
+
+    if (got != expected)
+    {
+      std::string error = "ska::pst::common::HeapPacketLayout::assert_equal " + name +
+        " config value=" + got + " does not equal expected value=" + expected;
+      SPDLOG_ERROR(error);
+      throw std::runtime_error(error);
+    }
+  }
+
+  template<typename T, typename U>
+  void assert_equal (const std::string& name, T got, U expected)
+  {
+    if (got != expected)
+    {
+      std::ostringstream ostr;
+      ostr << "ska::pst::common::HeapPacketLayout::assert_equal " << name << "=" << got << " does not equal " << expected;
+      std::string error = ostr.str();
+      
+      SPDLOG_ERROR(error);
+      throw std::runtime_error(error);
+    }
+  }
+
+  template<typename T, typename U>
+  void assert_not_equal (const std::string& name, T got, U unexpected)
+  {
+    if (got == unexpected)
+    {
+      std::ostringstream ostr;
+      ostr << "ska::pst::common::HeapPacketLayout::assert_equal " << name << "=" << got << " is equal to " << unexpected;
+      std::string error = ostr.str();
+      
+      SPDLOG_ERROR(error);
+      throw std::runtime_error(error);
+    }
+  }
+
   public:
   HeapPacketLayout(const ska::pst::common::AsciiHeader& data_config, const ska::pst::common::AsciiHeader& weights_config)
   {
-    uint32_t ndim = data_config.get_uint32("NDIM");
-    uint32_t npol = data_config.get_uint32("NPOL");
-    uint32_t nbit = data_config.get_uint32("NBIT");
+    assert_equal("UDP_NSAMP", data_config, weights_config);
+    assert_equal("UDP_NCHAN", data_config, weights_config);
+    assert_equal("WT_NSAMP", data_config, weights_config);
 
+    uint32_t zero = 0;
     nsamp_per_packet = data_config.get_uint32("UDP_NSAMP");
+    assert_not_equal("UDP_NSAMP", nsamp_per_packet, zero);
+
     nchan_per_packet = data_config.get_uint32("UDP_NCHAN");
+    assert_not_equal("UDP_NCHAN", nchan_per_packet, zero);
+
     nsamp_per_weight = data_config.get_uint32("WT_NSAMP");
+    assert_not_equal("WT_NSAMP", nsamp_per_weight, zero);
 
-    if (nsamp_per_packet == 0)
-    {
-      SPDLOG_ERROR("ska::pst::common::HeapPacketLayout::configure UDP_NSAMP is zero");
-      throw std::runtime_error("ska::pst::common::HeapPacketLayout::configure UDP_NSAMP is zero");
-    } 
+    uint32_t nchan = data_config.get_uint32("NCHAN");
+    assert_equal("NCHAN", data_config, weights_config);
 
-    if (nchan_per_packet == 0)
-    {
-      SPDLOG_ERROR("ska::pst::common::HeapPacketLayout::configure UDP_NCHAN is zero");
-      throw std::runtime_error("ska::pst::common::HeapPacketLayout::configure UDP_NCHAN is zero");
-    } 
+    uint32_t npol = data_config.get_uint32("NPOL");
+    assert_equal("NPOL", npol, 2);
 
-    if (nsamp_per_weight == 0)
-    {
-      SPDLOG_ERROR("ska::pst::common::HeapPacketLayout::configure WT_NSAMP is zero");
-      throw std::runtime_error("ska::pst::common::HeapPacketLayout::configure WT_NSAMP is zero");
-    } 
+    uint32_t ndim = data_config.get_uint32("NDIM");
+    assert_equal("NDIM", ndim, 2);
 
-    if (nsamp_per_packet % nsamp_per_weight != 0)
+    uint32_t nbit = data_config.get_uint32("NBIT");
+    if (nbit != 8 && nbit != 16) // NOLINT
     {
-      SPDLOG_ERROR("ska::pst::common::HeapLayout::configure UDP_NSAMP={} is not a multiple of WT_NSAMP={}", nsamp_per_packet, nsamp_per_weight);
-      throw std::runtime_error("ska::pst::common::HeapLayout::configure UDP_NSAMP is not a multiple of WT_NSAMP");
+      SPDLOG_ERROR("ska::pst::common::HeapPacketLayout::configure expected NBIT=8 or 16, but found {}", nbit);
+      throw std::runtime_error("ska::pst::common::HeapPacketLayout::configure invalid data_config NBIT");
     }
+
+    uint32_t weights_npol = weights_config.get_uint32("NPOL");
+    assert_equal("NPOL", weights_npol, 1);
+
+    uint32_t weights_ndim = weights_config.get_uint32("NDIM");
+    assert_equal("NDIM", weights_ndim, 1);
+
+    uint32_t weights_nbit = data_config.get_uint32("NBIT");
+    if (weights_nbit != 8 && weights_nbit != 16) // NOLINT
+    {
+      SPDLOG_ERROR("ska::pst::common::HeapPacketLayout::configure expected NBIT=8 or 16, but found {}", weights_nbit);
+      throw std::runtime_error("ska::pst::common::HeapPacketLayout::configure invalid weights_config NBIT");
+    }
+
+    if (nsamp_per_packet % nsamp_per_weight)
+    {
+      SPDLOG_ERROR("ska::pst::common::HeapPacketLayout::configure UDP_NSAMP={} is not a multiple of WT_NSAMP={}", nsamp_per_packet, nsamp_per_weight);
+      throw std::runtime_error("ska::pst::common::HeapPacketLayout::configure UDP_NSAMP is not a multiple of WT_NSAMP");
+    }
+
+    if (nchan % nchan_per_packet)
+    {
+      SPDLOG_ERROR("ska::pst::common::HeapPacketLayout::configure NCHAN={} is not a multiple of UDP_NCHAN={}", nchan, nchan_per_packet);
+      throw std::runtime_error("ska::pst::common::HeapLayout::configure invalid NCHAN is not a multiple of UDP_NCHAN");
+    }
+
     auto nweight_per_packet = nchan_per_packet * (nsamp_per_packet / nsamp_per_weight);
 
     // if PACKET_SCALES_SIZE is not set, assume one scale factor per packet
@@ -84,7 +163,6 @@ class HeapPacketLayout : public ska::pst::common::PacketLayout
       packet_scales_size = weights_config.get_uint32("PACKET_SCALES_SIZE");
     }
 
-    uint32_t weights_nbit = weights_config.get_uint32("NBIT");
     packet_weights_size = (nweight_per_packet * weights_nbit) / ska::pst::common::bits_per_byte;
     if (weights_config.has("PACKET_WEIGHTS_SIZE"))
     {
@@ -125,31 +203,6 @@ void ska::pst::common::HeapLayout::configure(const ska::pst::common::AsciiHeader
   auto npol = data_config.get_uint32("NPOL");
   auto nbit = data_config.get_uint32("NBIT");
   auto nchan = data_config.get_uint32("NCHAN");
-
-  if (ndim != 2)
-  {
-    SPDLOG_ERROR("ska::pst::common::HeapLayout::configure expected NDIM=2, but found {}", ndim);
-    throw std::runtime_error("ska::pst::common::HeapLayout::configure invalid NDIM");
-  }
-
-  if (npol != 2)
-  {
-    SPDLOG_ERROR("ska::pst::common::HeapLayout::configure expected NPOL=2, but found {}", npol);
-    throw std::runtime_error("ska::pst::common::HeapLayout::configure invalid NPOL");
-  }
-
-  if (nbit != 8 && nbit != 16) // NOLINT
-  {
-    SPDLOG_ERROR("ska::pst::common::HeapLayout::configure expected NBIT=8 or 16, but found {}", nbit);
-    throw std::runtime_error("ska::pst::common::HeapLayout::configure invalid NBIT");
-  }
-
-  SPDLOG_DEBUG("ska::pst::common::HeapLayout::configure nchan={} nchan_per_packet={}", nchan, nchan_per_packet);
-  if (nchan % nchan_per_packet)
-  {
-    SPDLOG_ERROR("ska::pst::common::HeapLayout::configure NCHAN={} was not a multiple of nchan_per_packet={}", nchan, nchan_per_packet);
-    throw std::runtime_error("ska::pst::common::HeapLayout::configure invalid NCHAN is not a multiple of UDP_NCHAN");
-  }
 
   // extract parameters from the weights header
   weights_packet_stride = packet_layout->get_packet_weights_size() + packet_layout->get_packet_scales_size();
