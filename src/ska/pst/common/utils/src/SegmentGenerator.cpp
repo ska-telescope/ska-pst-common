@@ -30,6 +30,8 @@
 
 #include "ska/pst/common/utils/SegmentGenerator.h"
 #include "ska/pst/common/utils/PacketGeneratorFactory.h"
+#include "ska/pst/common/utils/Time.h"
+
 #include "ska/pst/common/definitions.h"
 
 #include <spdlog/spdlog.h>
@@ -46,12 +48,55 @@ void ska::pst::common::SegmentGenerator::configure(const AsciiHeader& _data_conf
   data_config = _data_config;
   weights_config = _weights_config;
 
-  layout.configure(data_config, weights_config);
+  update_config(data_config);
+
+  layout.initialise(data_config, weights_config);
 
   std::string generator_name = data_config.get_val("DATA_GENERATOR");
   generator = PacketGeneratorFactory(generator_name, layout.get_packet_layout_ptr());
   generator->configure(data_config);
 }
+
+void ska::pst::common::SegmentGenerator::update_config(AsciiHeader& config)
+{
+  std::string utc_start;
+
+  if (config.has("UTC_START"))
+  {
+    utc_start = config.get_val("UTC_START");
+  }
+  else
+  {
+    ska::pst::common::Time now(time(nullptr));
+    utc_start = now.get_gmtime();
+    config.set_val("UTC_START",utc_start);
+  }
+
+  uint32_t file_number = 0;
+  
+  if (config.has("FILE_NUMBER"))
+  {
+    file_number = config.get_uint32("FILE_NUMBER");
+  }
+  else
+  {
+    config.set("FILE_NUMBER",file_number);
+  }
+
+  uint32_t obs_offset = 0;
+
+  if (config.has("OBS_OFFSET"))
+  {
+    obs_offset = config.get_uint32("OBS_OFFSET");
+  }
+  else
+  {
+    config.set("OBS_OFFSET",obs_offset);
+  }
+}
+
+
+
 
 void resize(ska::pst::common::BlockProducer::Block& block, uint64_t size)
 {
@@ -121,7 +166,7 @@ auto ska::pst::common::SegmentGenerator::next_segment() -> Segment
   return segment;
 }
 
-bool ska::pst::common::SegmentGenerator::test_segment(const Segment& test)
+auto ska::pst::common::SegmentGenerator::test_segment(const Segment& test) -> bool
 {
   if (nheap == 0)
   {
@@ -155,9 +200,12 @@ bool ska::pst::common::SegmentGenerator::test_segment(const Segment& test)
       return false;
     }
   }
+
+  return true;
 }
       
 void ska::pst::common::SegmentGenerator::reset()
 {
   generator->reset();
 }
+

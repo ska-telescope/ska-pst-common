@@ -66,8 +66,19 @@ namespace ska::pst::common
        *
        * @param data_config AsciiHeader containing the configuration of the data stream
        * @param weights_config AsciiHeader containing the configuration of the weights stream
+       * 
        */
       void configure (const ska::pst::common::AsciiHeader& data_config, const ska::pst::common::AsciiHeader& weights_config);
+
+      /**
+       * @brief Initialise a HeapLayout from the AsciiHeader from the data and weights streams
+       *
+       * @param data_config AsciiHeader containing the configuration of the data stream
+       * @param weights_config AsciiHeader containing the configuration of the weights stream
+       * 
+       * The RESOLUTION parameters of both data_config and weights_config are initialised
+       */
+      void initialise (ska::pst::common::AsciiHeader& data_config, ska::pst::common::AsciiHeader& weights_config);
 
       /**
        * @brief Get the layout of each packet in the heap

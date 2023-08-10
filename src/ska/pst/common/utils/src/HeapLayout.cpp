@@ -66,7 +66,7 @@ class HeapPacketLayout : public ska::pst::common::PacketLayout
     packet_weights_size = weights_config.get_uint32("PACKET_WEIGHTS_SIZE");
     packet_weights_offset = packet_scales_size;
 
-    // data are included at the start of each weights block
+    // data are included at the start of each data block
     packet_data_size = (nsamp_per_packet * nchan_per_packet * ndim * npol * nbit) / ska::pst::common::bits_per_byte;
     packet_data_offset = 0;
 
@@ -84,6 +84,8 @@ void ska::pst::common::HeapLayout::configure(const ska::pst::common::AsciiHeader
   auto npol = data_config.get_uint32("NPOL");
   auto nbit = data_config.get_uint32("NBIT");
   auto nchan = data_config.get_uint32("NCHAN");
+
+  auto nchan_per_packet = packet_layout->get_nchan_per_packet();
 
   if (ndim != 2)
   {
@@ -103,25 +105,59 @@ void ska::pst::common::HeapLayout::configure(const ska::pst::common::AsciiHeader
     throw std::runtime_error("ska::pst::common::HeapLayout::configure invalid NBIT");
   }
 
-  SPDLOG_DEBUG("ska::pst::common::HeapLayout::configure nchan={} nchan_per_packet={}", nchan, packet_layout->get_nchan_per_packet());
-  if (nchan % packet_layout->get_nchan_per_packet() != 0)
+  SPDLOG_DEBUG("ska::pst::common::HeapLayout::configure nchan={} nchan_per_packet={}", nchan, nchan_per_packet);
+  if (nchan % nchan_per_packet != 0)
   {
-    SPDLOG_ERROR("ska::pst::common::HeapLayout::configure NCHAN={} was not a multiple of nchan_per_packet={}", nchan, packet_layout->get_nchan_per_packet());
+    SPDLOG_ERROR("ska::pst::common::HeapLayout::configure NCHAN={} was not a multiple of nchan_per_packet={}", nchan, nchan_per_packet);
     throw std::runtime_error("ska::pst::common::HeapLayout::configure invalid NCHAN");
   }
 
   // extract parameters from the weights header
   weights_packet_stride = weights_config.get_uint32("PACKET_WEIGHTS_SIZE") + weights_config.get_uint32("PACKET_SCALES_SIZE");
-  weights_heap_stride = weights_packet_stride * nchan / packet_layout->get_nchan_per_packet();
+
+  if ((weights_packet_stride * nchan) % nchan_per_packet)
+  {
+    SPDLOG_ERROR("ska::pst::common::HeapLayout::configure weights_packet_stride*nchan={} is not a multiple of nchan_per_packet={}", (weights_packet_stride * nchan), nchan_per_packet);
+    throw std::runtime_error("ska::pst::common::HeapLayout::configure invalid heap/packet stride");
+  }
+  weights_heap_stride = (weights_packet_stride * nchan) / nchan_per_packet;
 
   SPDLOG_DEBUG("ska::pst::common::HeapLayout::configure weights packet_stride={}", weights_packet_stride);
 
-  data_packet_stride = (packet_layout->get_samples_per_packet() * packet_layout->get_nchan_per_packet() * npol * ndim * nbit) / ska::pst::common::bits_per_byte;
+  data_packet_stride = (packet_layout->get_samples_per_packet() * nchan_per_packet * npol * ndim * nbit) / ska::pst::common::bits_per_byte;
   data_heap_stride = (packet_layout->get_samples_per_packet() * nchan * npol * ndim * nbit) / ska::pst::common::bits_per_byte;
+
   if (data_heap_stride % data_packet_stride)
   {
     SPDLOG_ERROR("ska::pst::common::HeapLayout::configure data_heap_stride={} is not a multiple of data_packet_stride={}", data_heap_stride, data_packet_stride);
     throw std::runtime_error("ska::pst::common::HeapLayout::configure invalid heap/packet stride");
   }
   packets_per_heap = data_heap_stride / data_packet_stride;
+
+  if (data_config.has("RESOLUTION"))
+  {
+    auto data_resolution = data_config.get_uint32("RESOLUTION");
+    if (data_resolution != data_heap_stride)
+    {
+      SPDLOG_ERROR("ska::pst::common::HeapLayout::configure RESOLUTION={} in data_config does not equal data_heap_stride={}", data_resolution, data_heap_stride);
+      throw std::runtime_error("ska::pst::common::HeapLayout::configure invalid RESOLUTION in data_config");
+    }
+  }
+
+  if (weights_config.has("RESOLUTION"))
+  {
+    auto weights_resolution = weights_config.get_uint32("RESOLUTION");
+    if (weights_resolution != weights_heap_stride)
+    {
+      SPDLOG_ERROR("ska::pst::common::HeapLayout::configure RESOLUTION={} in weights_config does not equal weights_heap_stride={}", weights_resolution, weights_heap_stride);
+      throw std::runtime_error("ska::pst::common::HeapLayout::configure invalid RESOLUTION in weights_config");
+    }
+  }
+}
+
+void ska::pst::common::HeapLayout::initialise(ska::pst::common::AsciiHeader& data_config, ska::pst::common::AsciiHeader& weights_config)
+{
+  configure(data_config, weights_config);
+  weights_config.set("RESOLUTION",weights_heap_stride);
+  data_config.set("RESOLUTION",data_heap_stride);
 }

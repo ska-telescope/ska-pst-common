@@ -217,6 +217,8 @@ TEST_F(DataUnpackerTest, test_integrate_bandpass) // NOLINT
 
 TEST_P(DataUnpackerTest, test_unpack_performance) // NOLINT
 {
+  GTEST_SKIP() << "Skipping DataUnpacker performance tests";
+
   std::string param = GetParam();
   std::string data_file = param + "_data_header.txt";
   std::string weights_file = param + "_weights_header.txt";

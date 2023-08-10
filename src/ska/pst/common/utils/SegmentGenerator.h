@@ -129,6 +129,9 @@ namespace ska::pst::common
 
       //! The number of heaps generated on each call to next_block
       uint64_t nheap{0};
+
+      //! Ensures that various useful header parameters are set
+      void update_config(AsciiHeader& config);
   };
 
 } // namespace ska::pst::common

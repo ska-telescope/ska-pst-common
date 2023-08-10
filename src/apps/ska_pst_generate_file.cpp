@@ -33,7 +33,6 @@
 
 #include "ska/pst/common/utils/FileWriter.h"
 #include "ska/pst/common/utils/Logging.h"
-#include "ska/pst/common/utils/Time.h"
 #include "ska/pst/common/definitions.h"
 
 #include <unistd.h>
@@ -155,40 +154,16 @@ auto main(int argc, char *argv[]) -> int
 
     data_header.set_val("DATA_GENERATOR", signal_generator);
 
-    std::string utc_start;
+    ska::pst::common::SegmentGenerator generator;
+    generator.configure(data_header, weights_header);
 
-    if (data_header.has("UTC_START"))
-    {
-      utc_start = data_header.get_val("UTC_START");
-    }
-    else
-    {
-      ska::pst::common::Time now(time(nullptr));
-      utc_start = now.get_gmtime();
-      data_header.set_val("UTC_START",utc_start);
-    }
+    // the SegmentGenerator will initialize some header parameters if necessary
+    data_header = generator.get_data_header();
+    weights_header = generator.get_weights_header();
 
-    uint32_t file_number = 0;
-    
-    if (data_header.has("FILE_NUMBER"))
-    {
-      file_number = data_header.get_uint32("FILE_NUMBER");
-    }
-    else
-    {
-      data_header.set("FILE_NUMBER",file_number);
-    }
-
-    uint32_t obs_offset = 0;
-
-    if (data_header.has("OBS_OFFSET"))
-    {
-      obs_offset = data_header.get_uint32("OBS_OFFSET");
-    }
-    else
-    {
-      data_header.set("OBS_OFFSET",obs_offset);
-    }
+    std::string utc_start = data_header.get_val("UTC_START");
+    uint32_t file_number = data_header.get_uint32("FILE_NUMBER");
+    uint32_t obs_offset = data_header.get_uint32("OBS_OFFSET");
 
     // create output data and weights folders
 
@@ -227,19 +202,27 @@ auto main(int argc, char *argv[]) -> int
 
     SPDLOG_DEBUG("ska_pst_generate_file seconds_per_heap={} num_heaps={}", seconds_per_heap, num_heaps);
 
-    ska::pst::common::SegmentGenerator generator;
-    generator.configure(data_header, weights_header);
-
     unsigned num_heaps_per_loop = 1;
     generator.resize(num_heaps_per_loop);
 
     for (unsigned iheap=0; iheap < num_heaps; iheap++)
     {
-      std::cerr << "generate " << iheap << "/" << num_heaps << std::endl;
+      SPDLOG_INFO("ska_pst_generate_file generating {} of {} heaps", iheap, num_heaps);
       ska::pst::common::SegmentProducer::Segment segment = generator.next_segment();
 
       ssize_t data_written = data_file_writer.write_data(segment.data.block, segment.data.size);
+      if (data_written != segment.data.size)
+      {
+        SPDLOG_ERROR("ska_pst_generate_file wrote only {} of {} bytes of data", data_written, segment.data.size);
+        break;
+      }
+
       ssize_t weights_written = weights_file_writer.write_data(segment.weights.block, segment.weights.size);
+      if (weights_written != segment.weights.size)
+      {
+        SPDLOG_ERROR("ska_pst_generate_file wrote only {} of {} bytes of weight", weights_written, segment.weights.size);
+        break;
+      }
     }
 
     data_file_writer.close_file();

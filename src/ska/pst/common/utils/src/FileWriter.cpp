@@ -53,11 +53,9 @@ auto safe_signed_cast (const T& arg) -> std::make_signed_t<T>
 }
 
 ska::pst::common::FileWriter::FileWriter(bool use_o_direct) :
-  o_direct(use_o_direct)
+  o_direct(use_o_direct), flags(O_WRONLY | O_CREAT | O_TRUNC)
 {
   SPDLOG_TRACE("ska::pst::common::FileWriter::FileWriter");
-
-  flags = O_WRONLY | O_CREAT | O_TRUNC;
 }
 
 ska::pst::common::FileWriter::~FileWriter()
