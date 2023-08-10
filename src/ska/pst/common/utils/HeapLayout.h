@@ -67,6 +67,23 @@ namespace ska::pst::common
        * @param data_config AsciiHeader containing the configuration of the data stream
        * @param weights_config AsciiHeader containing the configuration of the weights stream
        * 
+       * The data_config must specify the following attributes:
+       *   NCHAN
+       *   NPOL
+       *   NDIM
+       *   NBIT
+       *   UDP_NSAMP
+       *   UDP_NCHAN
+       *   WT_NSAMP
+       * 
+       * Optionally, either data_config or weights_config may specify the RESOLUTION.
+       * If RESOLUTION is specified, then it is verified (if it is inconsistent, an exception is thrown).
+       * 
+       * Optionally, the weights_config may also specify PACKET_SCALES_SIZE and/or PACKET_WEIGHTS_SIZE
+       * 
+       * If PACKET_SCALES_SIZE is specified, then it overrides the assumed default.
+       * If PACKET_WEIGHTS_SIZE is specified, then it is verified (if it is inconsistent, an exception is thrown).
+       * 
        */
       void configure (const ska::pst::common::AsciiHeader& data_config, const ska::pst::common::AsciiHeader& weights_config);
 

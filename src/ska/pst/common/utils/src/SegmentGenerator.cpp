@@ -36,7 +36,6 @@
 
 #include <spdlog/spdlog.h>
 #include <stdexcept>
-#include <iostream>
 
 ska::pst::common::SegmentGenerator::~SegmentGenerator()
 {
@@ -49,6 +48,8 @@ void ska::pst::common::SegmentGenerator::configure(const AsciiHeader& _data_conf
   weights_config = _weights_config;
 
   update_config(data_config);
+
+  SPDLOG_DEBUG("ska::pst::common::SegmentGenerator::configure calling HeapLayout::initialise");
 
   layout.initialise(data_config, weights_config);
 
@@ -94,9 +95,6 @@ void ska::pst::common::SegmentGenerator::update_config(AsciiHeader& config)
     config.set("OBS_OFFSET",obs_offset);
   }
 }
-
-
-
 
 void resize(ska::pst::common::BlockProducer::Block& block, uint64_t size)
 {

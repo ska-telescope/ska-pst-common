@@ -52,25 +52,63 @@ class HeapPacketLayout : public ska::pst::common::PacketLayout
     nchan_per_packet = data_config.get_uint32("UDP_NCHAN");
     nsamp_per_weight = data_config.get_uint32("WT_NSAMP");
 
+    if (nsamp_per_packet == 0)
+    {
+      SPDLOG_ERROR("ska::pst::common::HeapPacketLayout::configure UDP_NSAMP is zero");
+      throw std::runtime_error("ska::pst::common::HeapPacketLayout::configure UDP_NSAMP is zero");
+    } 
+
+    if (nchan_per_packet == 0)
+    {
+      SPDLOG_ERROR("ska::pst::common::HeapPacketLayout::configure UDP_NCHAN is zero");
+      throw std::runtime_error("ska::pst::common::HeapPacketLayout::configure UDP_NCHAN is zero");
+    } 
+
+    if (nsamp_per_weight == 0)
+    {
+      SPDLOG_ERROR("ska::pst::common::HeapPacketLayout::configure WT_NSAMP is zero");
+      throw std::runtime_error("ska::pst::common::HeapPacketLayout::configure WT_NSAMP is zero");
+    } 
+
     if (nsamp_per_packet % nsamp_per_weight != 0)
     {
       SPDLOG_ERROR("ska::pst::common::HeapLayout::configure UDP_NSAMP={} is not a multiple of WT_NSAMP={}", nsamp_per_packet, nsamp_per_weight);
       throw std::runtime_error("ska::pst::common::HeapLayout::configure UDP_NSAMP is not a multiple of WT_NSAMP");
     }
+    auto nweight_per_packet = nchan_per_packet * (nsamp_per_packet / nsamp_per_weight);
+
+    // if PACKET_SCALES_SIZE is not set, assume one scale factor per packet
+    packet_scales_size = sizeof(float); 
+    if (weights_config.has("PACKET_SCALES_SIZE"))
+    {
+      packet_scales_size = weights_config.get_uint32("PACKET_SCALES_SIZE");
+    }
+
+    uint32_t weights_nbit = weights_config.get_uint32("NBIT");
+    packet_weights_size = (nweight_per_packet * weights_nbit) / ska::pst::common::bits_per_byte;
+    if (weights_config.has("PACKET_WEIGHTS_SIZE"))
+    {
+      auto config_packet_weights_size = weights_config.get_uint32("PACKET_WEIGHTS_SIZE");
+      if (config_packet_weights_size != packet_weights_size)
+      {
+        SPDLOG_ERROR("ska::pst::common::HeapPacketLayout::configure PACKET_WEIGHTS_SIZE={} in weights_config does not equal packet_weights_size={}", config_packet_weights_size, packet_weights_size);
+        throw std::runtime_error("ska::pst::common::HeapLayout::configure invalid PACKET_WEIGHTS_SIZE in weights_config");
+      }
+    }
+
+    packet_data_size = (nsamp_per_packet * nchan_per_packet * ndim * npol * nbit) / ska::pst::common::bits_per_byte;
+    packet_size = packet_data_size;
 
     // scales are included at the start of each weights block
-    packet_scales_size = weights_config.get_uint32("PACKET_SCALES_SIZE"); // NOLINT
     packet_scales_offset = 0;
-
+    
     // weights directly follow scales in each weights block
-    packet_weights_size = weights_config.get_uint32("PACKET_WEIGHTS_SIZE");
     packet_weights_offset = packet_scales_size;
 
     // data are included at the start of each data block
-    packet_data_size = (nsamp_per_packet * nchan_per_packet * ndim * npol * nbit) / ska::pst::common::bits_per_byte;
     packet_data_offset = 0;
 
-    packet_size = packet_data_size;
+    // no headers in blocks
     packet_header_size = 0;
   }
 };
@@ -79,13 +117,14 @@ void ska::pst::common::HeapLayout::configure(const ska::pst::common::AsciiHeader
 {
   packet_layout = std::make_shared<HeapPacketLayout>(data_config, weights_config);
 
+  auto nchan_per_packet = packet_layout->get_nchan_per_packet();
+  auto nsamp_per_packet = packet_layout->get_samples_per_packet();
+  
   // extract the required parameters from the data header
   auto ndim = data_config.get_uint32("NDIM");
   auto npol = data_config.get_uint32("NPOL");
   auto nbit = data_config.get_uint32("NBIT");
   auto nchan = data_config.get_uint32("NCHAN");
-
-  auto nchan_per_packet = packet_layout->get_nchan_per_packet();
 
   if (ndim != 2)
   {
@@ -106,26 +145,20 @@ void ska::pst::common::HeapLayout::configure(const ska::pst::common::AsciiHeader
   }
 
   SPDLOG_DEBUG("ska::pst::common::HeapLayout::configure nchan={} nchan_per_packet={}", nchan, nchan_per_packet);
-  if (nchan % nchan_per_packet != 0)
+  if (nchan % nchan_per_packet)
   {
     SPDLOG_ERROR("ska::pst::common::HeapLayout::configure NCHAN={} was not a multiple of nchan_per_packet={}", nchan, nchan_per_packet);
-    throw std::runtime_error("ska::pst::common::HeapLayout::configure invalid NCHAN");
+    throw std::runtime_error("ska::pst::common::HeapLayout::configure invalid NCHAN is not a multiple of UDP_NCHAN");
   }
 
   // extract parameters from the weights header
-  weights_packet_stride = weights_config.get_uint32("PACKET_WEIGHTS_SIZE") + weights_config.get_uint32("PACKET_SCALES_SIZE");
-
-  if ((weights_packet_stride * nchan) % nchan_per_packet)
-  {
-    SPDLOG_ERROR("ska::pst::common::HeapLayout::configure weights_packet_stride*nchan={} is not a multiple of nchan_per_packet={}", (weights_packet_stride * nchan), nchan_per_packet);
-    throw std::runtime_error("ska::pst::common::HeapLayout::configure invalid heap/packet stride");
-  }
-  weights_heap_stride = (weights_packet_stride * nchan) / nchan_per_packet;
+  weights_packet_stride = packet_layout->get_packet_weights_size() + packet_layout->get_packet_scales_size();
+  weights_heap_stride = weights_packet_stride * nchan / nchan_per_packet;
 
   SPDLOG_DEBUG("ska::pst::common::HeapLayout::configure weights packet_stride={}", weights_packet_stride);
 
-  data_packet_stride = (packet_layout->get_samples_per_packet() * nchan_per_packet * npol * ndim * nbit) / ska::pst::common::bits_per_byte;
-  data_heap_stride = (packet_layout->get_samples_per_packet() * nchan * npol * ndim * nbit) / ska::pst::common::bits_per_byte;
+  data_packet_stride = (nsamp_per_packet * nchan_per_packet * npol * ndim * nbit) / ska::pst::common::bits_per_byte;
+  data_heap_stride = (nsamp_per_packet * nchan * npol * ndim * nbit) / ska::pst::common::bits_per_byte;
 
   if (data_heap_stride % data_packet_stride)
   {
@@ -153,11 +186,22 @@ void ska::pst::common::HeapLayout::configure(const ska::pst::common::AsciiHeader
       throw std::runtime_error("ska::pst::common::HeapLayout::configure invalid RESOLUTION in weights_config");
     }
   }
+
+  SPDLOG_DEBUG("ska::pst::common::HeapLayout::configure exit");
 }
 
 void ska::pst::common::HeapLayout::initialise(ska::pst::common::AsciiHeader& data_config, ska::pst::common::AsciiHeader& weights_config)
 {
+  SPDLOG_DEBUG("ska::pst::common::HeapLayout::initialise calling configure");
+
   configure(data_config, weights_config);
-  weights_config.set("RESOLUTION",weights_heap_stride);
+
+  SPDLOG_DEBUG("ska::pst::common::HeapLayout::initialise data resolution={}", data_heap_stride);
   data_config.set("RESOLUTION",data_heap_stride);
+
+  SPDLOG_DEBUG("ska::pst::common::HeapLayout::initialise weights resolution={}", weights_heap_stride);
+  weights_config.set("RESOLUTION",weights_heap_stride);
+
+  weights_config.set("PACKET_WEIGHTS_SIZE",packet_layout->get_packet_weights_size());
+  weights_config.set("PACKET_SCALES_SIZE",packet_layout->get_packet_scales_size());
 }
