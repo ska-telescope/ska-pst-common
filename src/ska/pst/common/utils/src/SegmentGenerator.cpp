@@ -72,27 +72,15 @@ void ska::pst::common::SegmentGenerator::update_config(AsciiHeader& config)
     utc_start = now.get_gmtime();
     config.set_val("UTC_START",utc_start);
   }
-
-  uint32_t file_number = 0;
   
-  if (config.has("FILE_NUMBER"))
+  if (!config.has("FILE_NUMBER"))
   {
-    file_number = config.get_uint32("FILE_NUMBER");
-  }
-  else
-  {
-    config.set("FILE_NUMBER",file_number);
+    config.set("FILE_NUMBER",0);
   }
 
-  uint32_t obs_offset = 0;
-
-  if (config.has("OBS_OFFSET"))
+  if (!config.has("OBS_OFFSET"))
   {
-    obs_offset = config.get_uint32("OBS_OFFSET");
-  }
-  else
-  {
-    config.set("OBS_OFFSET",obs_offset);
+    config.set("OBS_OFFSET",0);
   }
 }
 
