@@ -186,12 +186,16 @@ void ska::pst::common::AsciiHeader::append_from_str(const char * raw_header)
 void ska::pst::common::AsciiHeader::del(const std::string &key)
 {
   check_not_empty(key);
+
+  // with C++20, the following loop can be replaced with
+  // std::erase_if(params, [](const auto& item){ return item.first == key; });
+
   auto it=params.begin();
   while (it != params.end())
   {
     if (it->first == key)
     {
-      params.erase(it);
+      it = params.erase(it);
     }
     else
     {
