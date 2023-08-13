@@ -103,15 +103,14 @@ class HeapPacketLayout : public ska::pst::common::PacketLayout
     assert_equal("UDP_NCHAN", data_config, weights_config);
     assert_equal("WT_NSAMP", data_config, weights_config);
 
-    uint32_t zero = 0;
     nsamp_per_packet = data_config.get_uint32("UDP_NSAMP");
-    assert_not_equal("UDP_NSAMP", nsamp_per_packet, zero);
+    assert_not_equal("UDP_NSAMP", nsamp_per_packet, 0);
 
     nchan_per_packet = data_config.get_uint32("UDP_NCHAN");
-    assert_not_equal("UDP_NCHAN", nchan_per_packet, zero);
+    assert_not_equal("UDP_NCHAN", nchan_per_packet, 0);
 
     nsamp_per_weight = data_config.get_uint32("WT_NSAMP");
-    assert_not_equal("WT_NSAMP", nsamp_per_weight, zero);
+    assert_not_equal("WT_NSAMP", nsamp_per_weight, 0);
 
     uint32_t nchan = data_config.get_uint32("NCHAN");
     assert_equal("NCHAN", data_config, weights_config);
@@ -135,7 +134,7 @@ class HeapPacketLayout : public ska::pst::common::PacketLayout
     uint32_t weights_ndim = weights_config.get_uint32("NDIM");
     assert_equal("NDIM", weights_ndim, 1);
 
-    uint32_t weights_nbit = data_config.get_uint32("NBIT");
+    uint32_t weights_nbit = weights_config.get_uint32("NBIT");
     if (weights_nbit != 8 && weights_nbit != 16) // NOLINT
     {
       SPDLOG_ERROR("ska::pst::common::HeapPacketLayout::configure expected NBIT=8 or 16, but found {}", weights_nbit);

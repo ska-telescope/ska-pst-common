@@ -45,13 +45,21 @@ unsigned constexpr udp_nsamp = 128;
 unsigned constexpr udp_nchan = 64;   // nchan must be a multiple of udp_nchan
 unsigned constexpr wt_nsamp = 32;    // udp_nsamp must be a multiple of wt_nsamp
 
+unsigned constexpr data_nbit = 8;
+unsigned constexpr data_npol = 2;
+unsigned constexpr data_ndim = 2;
+
+unsigned constexpr weights_nbit = 16;
+unsigned constexpr weights_npol = 1;
+unsigned constexpr weights_ndim = 1;
+
 void HeapLayoutTest::SetUp()
 {
   // Define a minimal good data header
   data_header.set("NCHAN",nchan);
-  data_header.set("NBIT",8); // NOLINT
-  data_header.set("NPOL",2); // NOLINT
-  data_header.set("NDIM",2); // NOLINT
+  data_header.set("NBIT",data_nbit);
+  data_header.set("NPOL",data_npol);
+  data_header.set("NDIM",data_ndim);
 
   data_header.set("UDP_NSAMP",udp_nsamp);
   data_header.set("UDP_NCHAN",udp_nchan);
@@ -59,9 +67,9 @@ void HeapLayoutTest::SetUp()
 
   // Define a minimal good weights header
   weights_header = data_header;
-  weights_header.set("NBIT",16); // NOLINT
-  weights_header.set("NPOL",1); // NOLINT
-  weights_header.set("NDIM",1); // NOLINT
+  weights_header.set("NBIT",weights_nbit);
+  weights_header.set("NPOL",weights_npol);
+  weights_header.set("NDIM",weights_ndim);
 }
 
 void HeapLayoutTest::TearDown()
@@ -71,6 +79,19 @@ void HeapLayoutTest::TearDown()
 TEST_F(HeapLayoutTest, test_configure) // NOLINT
 {
   EXPECT_NO_THROW(layout.configure(data_header, weights_header)); // NOLINT
+
+  auto expected_packets_per_heap = nchan / udp_nchan;
+  EXPECT_EQ(layout.get_packets_per_heap(), expected_packets_per_heap);
+
+  auto nbyte_per_datum = (data_nbit*data_npol*data_ndim)/ska::pst::common::bits_per_byte;
+  EXPECT_EQ(layout.get_data_packet_stride(), nbyte_per_datum * udp_nsamp * udp_nchan);
+  EXPECT_EQ(layout.get_data_heap_stride(), nbyte_per_datum * udp_nsamp * nchan);
+
+  auto nbyte_per_weight = (weights_nbit*weights_npol*weights_ndim)/ska::pst::common::bits_per_byte;
+  auto nweight_per_channel = udp_nsamp/wt_nsamp;
+  auto nbyte_per_scale = sizeof(float);
+  EXPECT_EQ(layout.get_weights_packet_stride(), nbyte_per_weight * nweight_per_channel * udp_nchan + nbyte_per_scale);
+  EXPECT_EQ(layout.get_weights_heap_stride(), nbyte_per_weight * nweight_per_channel * nchan + nbyte_per_scale * expected_packets_per_heap);
 }
 
 TEST_F(HeapLayoutTest, test_inconsistent_nchan) // NOLINT
