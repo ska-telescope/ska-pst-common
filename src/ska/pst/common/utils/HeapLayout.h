@@ -67,22 +67,10 @@ namespace ska::pst::common
        * @param data_config AsciiHeader containing the configuration of the data stream
        * @param weights_config AsciiHeader containing the configuration of the weights stream
        * 
-       * The data_config must specify the following attributes:
-       *   NCHAN
-       *   NPOL
-       *   NDIM
-       *   NBIT
-       *   UDP_NSAMP
-       *   UDP_NCHAN
-       *   WT_NSAMP
+       * Both data_config and weights_config must satisfy all of the preconditions defined by the HeapLayout::PacketLayout constructor.
        * 
        * Optionally, either data_config or weights_config may specify the RESOLUTION.
        * If RESOLUTION is specified, then it is verified (if it is inconsistent, an exception is thrown).
-       * 
-       * Optionally, the weights_config may also specify PACKET_SCALES_SIZE and/or PACKET_WEIGHTS_SIZE
-       * 
-       * If PACKET_SCALES_SIZE is specified, then it overrides the assumed default.
-       * If PACKET_WEIGHTS_SIZE is specified, then it is verified (if it is inconsistent, an exception is thrown).
        * 
        */
       void configure (const ska::pst::common::AsciiHeader& data_config, const ska::pst::common::AsciiHeader& weights_config);
@@ -93,7 +81,9 @@ namespace ska::pst::common
        * @param data_config AsciiHeader containing the configuration of the data stream
        * @param weights_config AsciiHeader containing the configuration of the weights stream
        * 
-       * The RESOLUTION parameters of both data_config and weights_config are initialised
+       * After calling HeapLayout::configure:
+       *   - the RESOLUTION parameters of both data_config and weights_config are initialised
+       *   - the PACKET_WEIGHTS_SIZE and PACKET_SCALES_SIZE parameters of weights_config are initialised
        */
       void initialise (ska::pst::common::AsciiHeader& data_config, ska::pst::common::AsciiHeader& weights_config);
 
@@ -146,10 +136,16 @@ namespace ska::pst::common
        */
       auto get_weights_heap_stride() const -> unsigned { return weights_heap_stride; }
 
+      /**
+       * @brief Stores the offsets and sizes of data, weights, and scales of each packet in a heap
+       *
+       */
+      class PacketLayout;
+
     protected:
 
       //! The layout of each packet in the heap
-      std::shared_ptr<PacketLayout> packet_layout;
+      std::shared_ptr<common::PacketLayout> packet_layout;
 
       //! Number of packets per heap in the data stream
       uint32_t packets_per_heap{0};
@@ -165,7 +161,43 @@ namespace ska::pst::common
 
       //! Number of bytes per heap in the weights stream
       uint32_t weights_heap_stride{0};
-  };
+
+  }; // class HeapLayout
+
+  /**
+   * @brief Stores the offsets and sizes of data, weights, and scales of each packet in a heap
+   *
+   * Data and weights are stored in separate heaps in blocks of shared memory or data from file
+   */
+  class HeapLayout::PacketLayout : public ska::pst::common::PacketLayout
+  {
+    public:
+      /**
+       * @brief Configure a HeapLayout::PacketLayout from the AsciiHeader of the data and weights streams
+       *
+       * @param data_config AsciiHeader containing the configuration of the data stream
+       * @param weights_config AsciiHeader containing the configuration of the weights stream
+       * 
+       * Both data_config and weights_config must specify the following attributes:
+       *   NCHAN
+       *   NPOL
+       *   NDIM
+       *   NBIT
+       *   UDP_NSAMP
+       *   UDP_NCHAN
+       *   WT_NSAMP
+       * 
+       * Optionally, the weights_config may also specify 
+       *   PACKET_SCALES_SIZE
+       *   PACKET_WEIGHTS_SIZE
+       * 
+       * If PACKET_SCALES_SIZE is specified, then it overrides the assumed default.
+       * If PACKET_WEIGHTS_SIZE is specified, then it is verified (if it is inconsistent, an exception is thrown).
+       * 
+       */
+      PacketLayout (const ska::pst::common::AsciiHeader& data_config, const ska::pst::common::AsciiHeader& weights_config);
+
+  }; // class HeapLayout::PacketLayout
 
 } // namespace ska::pst::common
 
