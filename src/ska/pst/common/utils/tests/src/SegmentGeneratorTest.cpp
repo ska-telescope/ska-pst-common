@@ -50,6 +50,14 @@ void SegmentGeneratorTest::TearDown()
 {
 }
 
+TEST_F(SegmentGeneratorTest, test_bad_configure) // NOLINT
+{
+  auto generator = std::make_shared<ska::pst::common::SegmentGenerator>();
+
+  // no DATA_GENERATOR specified
+  EXPECT_THROW(generator->configure(data_header, weights_header), std::runtime_error); // NOLINT
+}
+
 TEST_P(SegmentGeneratorTest, test_configure) // NOLINT
 {
   auto generator = std::make_shared<ska::pst::common::SegmentGenerator>();
@@ -57,11 +65,31 @@ TEST_P(SegmentGeneratorTest, test_configure) // NOLINT
 
   EXPECT_NO_THROW(generator->configure(data_header, weights_header)); // NOLINT
 
-  static constexpr uint32_t bad_header_param = 3;
+  AsciiHeader generated_data_header = generator->get_data_header();
+  AsciiHeader generated_weights_header = generator->get_weights_header();
 
-  ska::pst::common::AsciiHeader bad_data_header(data_header);
-  bad_data_header.set("NCHAN", bad_header_param);
-  EXPECT_THROW(generator->configure(bad_data_header, weights_header), std::runtime_error); // NOLINT
+  // delete additional parameters initialised by the SegmentGenerator if not in the input data_header
+  for (auto param: {"RESOLUTION", "FILE_NUMBER"})
+  { 
+    if (!data_header.has(param))
+    {
+      SPDLOG_TRACE("ska::pst::common::test::SegmentGeneratorTest::test_configure deleting {} from generated data_header",param);
+      generated_data_header.del(param);
+    }
+  }
+
+  // delete additional parameters initialised by the SegmentGenerator if not in the input weights_header
+  for (auto param: {"RESOLUTION", "PACKET_WEIGHTS_SIZE", "PACKET_SCALES_SIZE"})
+  {
+    if (!weights_header.has(param))
+    {
+      SPDLOG_TRACE("ska::pst::common::test::SegmentGeneratorTest::test_configure deleting {} from generated weights_header",param);
+      generated_weights_header.del(param);
+    }
+  }
+
+  EXPECT_EQ(data_header,generated_data_header);
+  EXPECT_EQ(weights_header,generated_weights_header);
 }
 
 TEST_P(SegmentGeneratorTest, test_generate_validate) // NOLINT

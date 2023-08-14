@@ -187,21 +187,10 @@ void ska::pst::common::AsciiHeader::del(const std::string &key)
 {
   check_not_empty(key);
 
-  // with C++20, the following loop can be replaced with
-  // std::erase_if(params, [](const auto& item){ return item.first == key; });
-
-  auto it=params.begin();
-  while (it != params.end())
-  {
-    if (it->first == key)
-    {
-      it = params.erase(it);
-    }
-    else
-    {
-      it++;
-    }
-  }
+  SPDLOG_TRACE("ska::pst::common::AsciiHeader::del key={} before remove_if size={}", key, params.size());
+  auto iterator = std::remove_if(params.begin(), params.end(), [&key](const auto& item){ return item.first == key; });
+  params.erase(iterator, params.end());
+  SPDLOG_TRACE("ska::pst::common::AsciiHeader::del after remove_if size={}", params.size());
 }
 
 auto ska::pst::common::AsciiHeader::has(const std::string &key) const -> bool
@@ -351,6 +340,52 @@ auto ska::pst::common::AsciiHeader::compute_bytes_per_second() const -> double
 
   SPDLOG_DEBUG("ska::pst::common::AsciiHeader::compute_bytes_per_second bytes_ps={}", bytes_ps);
   return bytes_ps;
+}
+
+template<typename T>
+void report_extra(const T& more, const T& less)
+{
+  for (unsigned i=0; i<more.size(); i++)
+  {
+    if (std::find(less.begin(),less.end(),more[i]) == less.end())
+    {
+      SPDLOG_DEBUG("ska::pst::common::operator==(AsciiHeader) extra key={} val={}", more[i].first, more[i].second);
+    }
+  }
+}
+
+bool ska::pst::common::operator==(const AsciiHeader& A, const AsciiHeader& B)
+{
+  SPDLOG_TRACE("ska::pst::common::operator==(AsciiHeader A.size={} B.size={})", A.params.size(), B.params.size());
+
+  if (A.params.size() != B.params.size())
+  {
+    if (B.params.size() > A.params.size())
+    {
+      report_extra(B.params,A.params);
+    }
+    else
+    {
+      report_extra(A.params,B.params);
+    }
+    return false;
+  }
+
+  AsciiHeader Acopy (A);
+  AsciiHeader Bcopy (B);
+
+  std::sort(Acopy.params.begin(), Acopy.params.end());
+  std::sort(Bcopy.params.begin(), Bcopy.params.end());
+
+  for (unsigned i=0; i < Acopy.params.size(); i++)
+  {
+    if (Acopy.params[i] != Bcopy.params[i])
+    {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 template void ska::pst::common::AsciiHeader::get<int32_t>(const std::string &key, int32_t * val);
