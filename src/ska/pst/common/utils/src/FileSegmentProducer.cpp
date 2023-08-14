@@ -28,66 +28,23 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <string>
+#include "ska/pst/common/utils/FileSegmentProducer.h"
+#include "ska/pst/common/utils/FileBlockProducer.h"
 
-#include "ska/pst/common/utils/AsciiHeader.h"
+#include <spdlog/spdlog.h>
 
-#ifndef __SKA_PST_COMMON_UTILS_BlockLoader_h
-#define __SKA_PST_COMMON_UTILS_BlockLoader_h
+ska::pst::common::FileSegmentProducer::FileSegmentProducer(
+        const std::string& data_file_path,
+        const std::string& weights_file_path)
+{
+  SPDLOG_DEBUG("ska::pst::common::FileSegmentProducer::FileSegmentProducer");
 
-namespace ska::pst::common {
+  data_block_producer = std::make_unique<FileBlockProducer>(data_file_path);
+  weights_block_producer = std::make_unique<FileBlockProducer>(weights_file_path);
+}
 
-  /**
-   * @brief Interface used for reading blocks of data from a source
-   *
-   */
-  class BlockLoader
-  {
-    public:
-
-      /**
-       * @brief Stores the base address and size, in bytes, of a block of data
-       *
-       */
-      class Block
-      {
-        public:
-
-          Block (char* _block=nullptr, size_t _size=0) : block(_block), size(_size) {}
-
-          //! pointer to the block
-          char* block;
-
-          //! the size, in bytes, of the block
-          size_t size;
-      };
-
-      /**
-       * @brief Virtual destructor required for interfaces
-       *
-       */
-      virtual ~BlockLoader () = default;
-
-      /**
-       * @brief Get the AsciiHeader that describes the block stream
-       *
-       * @return const ska::pst::common::AsciiHeader& header of the data
-       */
-      virtual const ska::pst::common::AsciiHeader& get_header() const = 0;
-
-      /**
-       * @brief Get the next block of data
-       *
-       * This returns a pair that contains the pointer to the next block of data
-       * and the size, in bytes, of that block.
-       * At the end of the block stream, this function returns (nullptr, 0)
-       *
-       * @return (char* address of block, size_t bytes in block)
-       */
-      virtual Block next_block() = 0;
-  };
-
-} // namespace ska::pst::common
-
-#endif // __SKA_PST_COMMON_UTILS_BlockLoader_h
+ska::pst::common::FileSegmentProducer::~FileSegmentProducer()
+{
+  SPDLOG_DEBUG("ska::pst::common::FileSegmentProducer::~FileSegmentProducer()");
+}
 

@@ -101,6 +101,9 @@ namespace ska::pst::common
   //! number of bits in a byte
   static constexpr unsigned bits_per_byte = 8;
 
+  //! number of bits in a float
+  static constexpr unsigned bits_per_float = bits_per_byte * sizeof(float);
+
   //! number of bytes in a gigabyte
   static constexpr uint64_t bytes_per_gigabyte = 1073741824;
 

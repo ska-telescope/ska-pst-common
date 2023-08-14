@@ -28,55 +28,50 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "ska/pst/common/utils/FileBlockLoader.h"
+#include "ska/pst/common/utils/FileBlockProducer.h"
 
-#include <spdlog/spdlog.h>
-#include <sys/mman.h>
+#include <gtest/gtest.h>
 
-ska::pst::common::FileBlockLoader::FileBlockLoader(const std::string& file_path)
-	: reader(new FileReader(file_path))
-{
-  auto hdr_size = reader->read_header();
-  auto data_size = reader->get_file_size()-hdr_size;
+#ifndef SKA_PST_COMMON_UTILS_TESTS_FileBlockProducerTest_h
+#define SKA_PST_COMMON_UTILS_TESTS_FileBlockProducerTest_h
 
-  void* map = mmap(nullptr, data_size, PROT_READ, MAP_SHARED, reader->_get_fd(), hdr_size);
-  if (map == MAP_FAILED)
+namespace ska::pst::common::test {
+
+  /**
+   * @brief Test the FileBlockProducer class
+   * 
+   * @details
+   * 
+   */
+  class FileBlockProducerTest : public ::testing::Test
   {
-    SPDLOG_ERROR("ska::pst::common::FileBlockLoader::ctor mmap failed: {} fd={}", strerror(errno), reader->_get_fd());
-    throw std::runtime_error("ska::pst::common::FileReader::ctor mmap failed");
-  }
+    protected:
+      void SetUp() override;
 
-  block_info.block = reinterpret_cast<char*>(map);
-  block_info.size = data_size;
-  next_block_info = block_info;
-}
+      void TearDown() override;
 
-ska::pst::common::FileBlockLoader::~FileBlockLoader()
-{
-  void* map = block_info.block;
-  auto data_size = block_info.size;
+    public:
+      FileBlockProducerTest();
 
-  if (map == nullptr)
-  {
-    SPDLOG_DEBUG("ska::pst::common::FileBlockLoader::dtor nothing to munmap");
-    return;
-  }
+      ~FileBlockProducerTest();
 
-  if (munmap(map, data_size) == -1)
-  {
-    SPDLOG_ERROR("ska::pst::common::FileBlockLoader::dtor munmap failed: {}", strerror(errno));
-  }
-}
+      ska::pst::common::AsciiHeader header;
 
-auto ska::pst::common::FileBlockLoader::get_header() const -> const ska::pst::common::AsciiHeader& 
-{
-  return reader->get_header();
-}
+      std::vector<char> file_header;
 
-auto ska::pst::common::FileBlockLoader::next_block() -> BlockLoader::Block
-{
-  auto result = next_block_info;
-  next_block_info = BlockLoader::Block(nullptr, 0); // next call to next_block returns EOD marker
-  return result;
-}
+      std::vector<char> file_data;
+
+      std::string file_name{"/tmp/FileBlockProducerTest.dada"};
+
+      uint32_t header_size{0};
+
+      uint32_t data_size{1048576};
+
+    private:
+
+  };
+
+} // namespace ska::pst::common::test
+
+#endif // SKA_PST_COMMON_UTILS_TESTS_FileBlockProducerTest_h
 

@@ -28,40 +28,68 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <string>
+#include "ska/pst/common/utils/BlockProducer.h"
+#include "ska/pst/common/utils/FileReader.h"
 
-#include "ska/pst/common/utils/DataWeightsBlockLoader.h"
+#include <memory>
 
-#ifndef __SKA_PST_COMMON_UTILS_DataWeightsFileBlockLoader_h
-#define __SKA_PST_COMMON_UTILS_DataWeightsFileBlockLoader_h
+#ifndef __SKA_PST_COMMON_UTILS_FileBlockProducer_h
+#define __SKA_PST_COMMON_UTILS_FileBlockProducer_h
 
 namespace ska::pst::common {
 
   /**
-   * @brief Class used for reading voltage data and weights from file.
+   * @brief Loads blocks of data from file.
    *
+   * Currently maps the entire file into memory as a single block.
    */
-  class DataWeightsFileBlockLoader : public DataWeightsBlockLoader
+  class FileBlockProducer : public BlockProducer
   {
     public:
-      /**
-       * @brief Create instance of a DataWeightsFileBlockLoader object.
-       *
-       * @param data_file_path path to the data file to process.
-       * @param weights_file_path the path to the weights file for the data file.
-       */
-      DataWeightsFileBlockLoader(
-        const std::string& data_file_path,
-        const std::string& weights_file_path
-      );
 
       /**
-       * @brief Destroy the DataWeightsFileBlockLoader object.
+       * @brief Construct a new FileBlockProducer object.
+       *
+       * @param file_path path to the DADA file to open for reading
+       */
+      FileBlockProducer(const std::string& file_path);
+
+      /**
+       * @brief Destroy a FileBlockProducer object.
        *
        */
-      ~DataWeightsFileBlockLoader();
+      ~FileBlockProducer();
+
+      /**
+       * @brief Get the AsciiHeader that describes the DADA file contents
+       *
+       * @return const ska::pst::common::AsciiHeader& header of the DADA file
+       */
+      const ska::pst::common::AsciiHeader& get_header() const;
+
+      /**
+       * @brief Get the next block of data.
+       *
+       * When first called, returns a pair containing
+       * - the base address of the start of data in the memory-mapped DADA file
+       * - the size of the file in bytes (minus the size of the header)
+       * If called again, this function returns (nullptr, 0)
+       */
+      BlockProducer::Block next_block();
+
+    protected:
+
+      //! the DADA file reader
+      std::unique_ptr<ska::pst::common::FileReader> reader;
+
+      //! the details of the entire block
+      BlockProducer::Block block_info;
+
+      //! the details of the next block
+      BlockProducer::Block next_block_info;
   };
 
 } // namespace ska::pst::common
 
-#endif // __SKA_PST_COMMON_UTILS_DataWeightsFileBlockLoader_h
+#endif // __SKA_PST_COMMON_UTILS_FileBlockProducer_h
+

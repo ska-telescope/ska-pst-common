@@ -35,7 +35,7 @@
 #include <fcntl.h>
 
 #include "ska/pst/common/testutils/GtestMain.h"
-#include "ska/pst/common/utils/tests/FileBlockLoaderTest.h"
+#include "ska/pst/common/utils/tests/FileBlockProducerTest.h"
 
 auto main(int argc, char* argv[]) -> int
 {
@@ -44,7 +44,7 @@ auto main(int argc, char* argv[]) -> int
 
 namespace ska::pst::common::test {
 
-FileBlockLoaderTest::FileBlockLoaderTest()
+FileBlockProducerTest::FileBlockProducerTest()
     : ::testing::Test()
 {
   header.load_from_file(test_data_file("data_scan_config.txt"));
@@ -68,50 +68,50 @@ FileBlockLoaderTest::FileBlockLoaderTest()
   close(fd);
 }
 
-FileBlockLoaderTest::~FileBlockLoaderTest()
+FileBlockProducerTest::~FileBlockProducerTest()
 {
   std::filesystem::remove(std::filesystem::path(file_name));
 }
 
-void FileBlockLoaderTest::SetUp()
+void FileBlockProducerTest::SetUp()
 {
 }
 
-void FileBlockLoaderTest::TearDown()
+void FileBlockProducerTest::TearDown()
 {
 }
 
-TEST_F(FileBlockLoaderTest, test_get_header) // NOLINT
+TEST_F(FileBlockProducerTest, test_get_header) // NOLINT
 {
-  SPDLOG_TRACE("ska::pst::common::test::FileBlockLoaderTest::test_get_header construct from file_name={}", file_name);
-  FileBlockLoader fr(file_name);
-  SPDLOG_TRACE("ska::pst::common::test::FileBlockLoaderTest::test_get_header get_header");
+  SPDLOG_TRACE("ska::pst::common::test::FileBlockProducerTest::test_get_header construct from file_name={}", file_name);
+  FileBlockProducer fr(file_name);
+  SPDLOG_TRACE("ska::pst::common::test::FileBlockProducerTest::test_get_header get_header");
   EXPECT_EQ(fr.get_header().raw(), header.raw());
 }
 
-TEST_F(FileBlockLoaderTest, test_open_bad_file) // NOLINT
+TEST_F(FileBlockProducerTest, test_open_bad_file) // NOLINT
 {
   std::string bad_file_name = "/tmp/file/that/does/not/exist";
-  SPDLOG_TRACE("ska::pst::common::test::FileBlockLoaderTest::test_open_bad_file fr.open_file({})", bad_file_name);
-  EXPECT_THROW(FileBlockLoader fr(bad_file_name), std::runtime_error); // NOLINT
+  SPDLOG_TRACE("ska::pst::common::test::FileBlockProducerTest::test_open_bad_file fr.open_file({})", bad_file_name);
+  EXPECT_THROW(FileBlockProducer fr(bad_file_name), std::runtime_error); // NOLINT
 }
 
-TEST_F(FileBlockLoaderTest, test_open_empty_file) // NOLINT
+TEST_F(FileBlockProducerTest, test_open_empty_file) // NOLINT
 {
-  std::string empty_file_name = "/tmp/FileBlockLoaderTest_empty.dat";
+  std::string empty_file_name = "/tmp/FileBlockProducerTest_empty.dat";
 
   int flags = O_WRONLY | O_CREAT | O_TRUNC;
   int perms = S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH;
   int fd = open(empty_file_name.c_str(), flags, perms); // NOLINT
   close(fd);
 
-  SPDLOG_TRACE("ska::pst::common::test::FileBlockLoaderTest::test_open_empty_file fr.open_file({})", empty_file_name);
-  EXPECT_THROW(FileBlockLoader fr(empty_file_name), std::runtime_error); // NOLINT
+  SPDLOG_TRACE("ska::pst::common::test::FileBlockProducerTest::test_open_empty_file fr.open_file({})", empty_file_name);
+  EXPECT_THROW(FileBlockProducer fr(empty_file_name), std::runtime_error); // NOLINT
 
   std::filesystem::remove(std::filesystem::path(empty_file_name));
 }
 
-TEST_F(FileBlockLoaderTest, test_bad_mmap) // NOLINT
+TEST_F(FileBlockProducerTest, test_bad_mmap) // NOLINT
 {
   ska::pst::common::AsciiHeader bad_header(header);
   size_t bad_header_size = header_size + 1;
@@ -119,7 +119,7 @@ TEST_F(FileBlockLoaderTest, test_bad_mmap) // NOLINT
   file_header.resize(bad_header_size);
   sprintf(&file_header[0], bad_header.raw().c_str(), header.raw().size()); // NOLINT
 
-  std::string bad_file_name = "/tmp/FileBlockLoaderTest_bad_mmap.dat";
+  std::string bad_file_name = "/tmp/FileBlockProducerTest_bad_mmap.dat";
 
   int flags = O_WRONLY | O_CREAT | O_TRUNC;
   int perms = S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH;
@@ -128,14 +128,14 @@ TEST_F(FileBlockLoaderTest, test_bad_mmap) // NOLINT
   write(fd, &file_data[0], data_size);
   close(fd);
 
-  EXPECT_THROW(FileBlockLoader fr(bad_file_name), std::runtime_error); // NOLINT
+  EXPECT_THROW(FileBlockProducer fr(bad_file_name), std::runtime_error); // NOLINT
 
   std::filesystem::remove(std::filesystem::path(bad_file_name));
 }
 
-TEST_F(FileBlockLoaderTest, test_next_block) // NOLINT
+TEST_F(FileBlockProducerTest, test_next_block) // NOLINT
 {
-  FileBlockLoader fr(file_name);
+  FileBlockProducer fr(file_name);
   auto next = fr.next_block();
   EXPECT_EQ(next.size, data_size);
 
@@ -146,9 +146,9 @@ TEST_F(FileBlockLoaderTest, test_next_block) // NOLINT
   }
 }
 
-TEST_F(FileBlockLoaderTest, test_read_more_data_than_available) // NOLINT
+TEST_F(FileBlockProducerTest, test_read_more_data_than_available) // NOLINT
 {
-  FileBlockLoader fr(file_name);
+  FileBlockProducer fr(file_name);
   auto next = fr.next_block();
   next = fr.next_block();
   EXPECT_EQ(next.block, nullptr); // NOLINT

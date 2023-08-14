@@ -34,15 +34,15 @@
 
 #include "ska/pst/common/utils/GaussianNoiseGenerator.h"
 
-ska::pst::common::GaussianNoiseGenerator::GaussianNoiseGenerator(std::shared_ptr<ska::pst::common::DataLayout> _layout) :
-  DataGenerator(std::move(_layout)), wts_sequence(unity_weight)
+ska::pst::common::GaussianNoiseGenerator::GaussianNoiseGenerator(std::shared_ptr<ska::pst::common::PacketLayout> _layout) :
+  PacketGenerator(std::move(_layout)), wts_sequence(unity_weight)
 {
 }
 
 void ska::pst::common::GaussianNoiseGenerator::configure(const ska::pst::common::AsciiHeader& config)
 {
   SPDLOG_DEBUG("ska::pst::common::GaussianNoiseGenerator::configure");
-  ska::pst::common::DataGenerator::configure(config);
+  ska::pst::common::PacketGenerator::configure(config);
 
   dat_sequence.configure(config);
   wts_sequence.configure(config);

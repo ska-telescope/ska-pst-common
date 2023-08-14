@@ -28,7 +28,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "ska/pst/common/utils/DataGenerator.h"
+#include "ska/pst/common/utils/PacketGenerator.h"
 #include "ska/pst/common/utils/NormalSequence.h"
 #include "ska/pst/common/utils/UniformSequence.h"
 #include "ska/pst/common/utils/RandomSequence.h"
@@ -42,7 +42,7 @@ namespace ska::pst::common {
    * @brief Generates and validates data + weights using a RandomSequence for each
    *
    */
-  class GaussianNoiseGenerator : public DataGenerator
+  class GaussianNoiseGenerator : public PacketGenerator
   {
     public:
 
@@ -50,7 +50,7 @@ namespace ska::pst::common {
        * @brief Construct a new GaussianNoiseGenerator object
        *
        */
-      explicit GaussianNoiseGenerator(std::shared_ptr<DataLayout> layout);
+      explicit GaussianNoiseGenerator(std::shared_ptr<PacketLayout> layout);
 
       /**
        * @brief Destroy the GaussianNoiseGenerator object

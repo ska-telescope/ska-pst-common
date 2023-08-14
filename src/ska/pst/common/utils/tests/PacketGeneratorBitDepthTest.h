@@ -32,20 +32,20 @@
 #include <vector>
 
 #include "ska/pst/common/utils/AsciiHeader.h"
-#include "ska/pst/common/utils/DataGenerator.h"
+#include "ska/pst/common/utils/PacketGenerator.h"
 
-#ifndef SKA_PST_COMMON_UTILS_TESTS_DataGeneratorBitDepthTest_h
-#define SKA_PST_COMMON_UTILS_TESTS_DataGeneratorBitDepthTest_h
+#ifndef SKA_PST_COMMON_UTILS_TESTS_PacketGeneratorBitDepthTest_h
+#define SKA_PST_COMMON_UTILS_TESTS_PacketGeneratorBitDepthTest_h
 
 namespace ska::pst::common::test {
 
   /**
-   * @brief Test the DataGenerator class
+   * @brief Test the PacketGenerator class
    *
    * @details
    *
    */
-  class DataGeneratorBitDepthTest : public ::testing::TestWithParam<int>
+  class PacketGeneratorBitDepthTest : public ::testing::TestWithParam<int>
   {
     protected:
       void SetUp() override;
@@ -53,9 +53,9 @@ namespace ska::pst::common::test {
       void TearDown() override;
 
     public:
-      DataGeneratorBitDepthTest() = default;
+      PacketGeneratorBitDepthTest() = default;
 
-      ~DataGeneratorBitDepthTest() = default;
+      ~PacketGeneratorBitDepthTest() = default;
 
       ska::pst::common::AsciiHeader header;
 
@@ -67,10 +67,10 @@ namespace ska::pst::common::test {
 
   };
 
-  class TestDataLayout : public ska::pst::common::DataLayout
+  class TestPacketLayout : public ska::pst::common::PacketLayout
   {
     public:
-    TestDataLayout ()
+    TestPacketLayout ()
     {
       header.load_from_file(test_data_file("data_header.txt"));
       nsamp_per_packet = header.get_uint32("NSAMP_PP");
@@ -108,4 +108,4 @@ namespace ska::pst::common::test {
 
 } // namespace ska::pst::common::test
 
-#endif // SKA_PST_COMMON_UTILS_TESTS_DataGeneratorBitDepthTest_h
+#endif // SKA_PST_COMMON_UTILS_TESTS_PacketGeneratorBitDepthTest_h

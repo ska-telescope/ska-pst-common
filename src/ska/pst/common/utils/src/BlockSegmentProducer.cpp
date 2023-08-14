@@ -28,23 +28,51 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "ska/pst/common/utils/DataWeightsFileBlockLoader.h"
-#include "ska/pst/common/utils/FileBlockLoader.h"
-
+#include "ska/pst/common/utils/BlockSegmentProducer.h"
 #include <spdlog/spdlog.h>
 
-ska::pst::common::DataWeightsFileBlockLoader::DataWeightsFileBlockLoader(
-        const std::string& data_file_path,
-        const std::string& weights_file_path)
+static void log_throw (const char* msg)
 {
-  SPDLOG_DEBUG("ska::pst::common::DataWeightsFileBlockLoader::DataWeightsFileBlockLoader");
-
-  data_block_loader = std::make_unique<FileBlockLoader>(data_file_path);
-  weights_block_loader = std::make_unique<FileBlockLoader>(weights_file_path);
+  SPDLOG_ERROR(msg); 
+  throw std::runtime_error(msg);
 }
 
-ska::pst::common::DataWeightsFileBlockLoader::~DataWeightsFileBlockLoader()
+auto ska::pst::common::BlockSegmentProducer::get_data_header() const -> const AsciiHeader&
 {
-  SPDLOG_DEBUG("ska::pst::common::DataWeightsFileBlockLoader::~DataWeightsFileBlockLoader()");
+  SPDLOG_DEBUG("ska::pst::common::BlockSegmentProducer::get_data_header");
+  if (!data_block_producer)
+  {
+    log_throw("ska::pst::common::BlockSegmentProducer::get_data_header data_block_producer not initialised");
+  }
+  return data_block_producer->get_header();
 }
 
+auto ska::pst::common::BlockSegmentProducer::get_weights_header() const -> const AsciiHeader&
+{
+  SPDLOG_DEBUG("ska::pst::common::BlockSegmentProducer::get_weights_header");
+  if (!weights_block_producer)
+  {
+    log_throw("ska::pst::common::BlockSegmentProducer::get_weights_header weights_block_producer not initialised");
+  }
+  return weights_block_producer->get_header();
+}
+
+
+auto ska::pst::common::BlockSegmentProducer::next_segment() -> Segment
+{
+  SPDLOG_DEBUG("ska::pst::common::BlockSegmentProducer::next_block");
+
+  if (!data_block_producer)
+  {
+    log_throw("ska::pst::common::BlockSegmentProducer::next_block data_block_producer not initialised");
+  }
+  if (!weights_block_producer)
+  {
+    log_throw("ska::pst::common::BlockSegmentProducer::next_block weights_block_producer not initialised");
+  }
+
+  Segment result;
+  result.data = data_block_producer->next_block();
+  result.weights = weights_block_producer->next_block();
+  return result;
+}

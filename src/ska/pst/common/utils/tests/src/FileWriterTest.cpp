@@ -104,6 +104,18 @@ TEST_F(FileWriterTest, test_get_filename) // NOLINT
   EXPECT_EQ(filename, expect);
 }
 
+TEST_F(FileWriterTest, test_check_block_size) // NOLINT
+{
+  bool use_o_direct = true;
+  FileWriter writer(use_o_direct);
+
+  static constexpr uint64_t bad_block_size = 11; // not a multiple of 512
+  EXPECT_THROW(writer.check_block_size(bad_block_size), std::runtime_error); // NOLINT
+
+  static constexpr uint64_t good_block_size = 4 * 512; // a multiple of 512
+  writer.check_block_size(good_block_size);
+}
+
 TEST_F(FileWriterTest, test_open_file) // NOLINT
 {
   for (bool use_o_direct : {false,true})
@@ -197,7 +209,6 @@ TEST_F(FileWriterTest, test_close_when_closed) // NOLINT
   }
 }
 
-
 TEST_F(FileWriterTest, test_bad_header_size) // NOLINT
 {
   ska::pst::common::AsciiHeader bad_header;
@@ -218,7 +229,6 @@ TEST_F(FileWriterTest, test_bad_header_size) // NOLINT
     EXPECT_THROW(writer.write_header(bad_header), std::runtime_error);
   }
 }
-
 
 TEST_F(FileWriterTest, test_large_header_size) // NOLINT
 {

@@ -1,47 +1,52 @@
 
 set(public_headers
     AsciiHeader.h
-    BlockLoader.h
-    DataWeightsBlockLoader.h
-    DataWeightsFileBlockLoader.h
-    Endian.h
-    Time.h
-    Timer.h
-    RandomSequence.h
-    DataLayout.h
-    DataGenerator.h
-    DataGeneratorFactory.h
+    BlockProducer.h
+    BlockSegmentProducer.h
     DataUnpacker.h
-    FileBlockLoader.h
+    Endian.h
+    FileBlockProducer.h
     FileReader.h
+    FileSegmentProducer.h
     FileWriter.h
     GaussianNoiseGenerator.h
-    NormalSequence.h
-    RandomDataGenerator.h
+    HeapLayout.h
     Logging.h
+    NormalSequence.h
+    PacketGenerator.h
+    PacketGeneratorFactory.h
+    PacketLayout.h
+    RandomDataGenerator.h
+    RandomSequence.h
+    SegmentGenerator.h
+    SegmentProducer.h
     SineWaveGenerator.h
+    Time.h
+    Timer.h
     UniformSequence.h
     ValidationContext.h
 )
 
 set(sources
     src/AsciiHeader.cpp
-    src/DataWeightsBlockLoader.cpp
-    src/DataWeightsFileBlockLoader.cpp
-    src/Time.cpp
-    src/Timer.cpp
-    src/NormalSequence.cpp
-    src/RandomSequence.cpp
-    src/DataGenerator.cpp
-    src/DataGeneratorFactory.cpp
+    src/BlockSegmentProducer.cpp
     src/DataUnpacker.cpp
-    src/FileBlockLoader.cpp
+    src/FileBlockProducer.cpp
     src/FileReader.cpp
+    src/FileSegmentProducer.cpp
     src/FileWriter.cpp
     src/GaussianNoiseGenerator.cpp
-    src/RandomDataGenerator.cpp
+    src/HeapLayout.cpp
     src/Logging.cpp
+    src/NormalSequence.cpp
+    src/PacketGenerator.cpp
+    src/PacketGeneratorFactory.cpp
+    src/RandomDataGenerator.cpp
+    src/RandomSequence.cpp
+    src/SegmentGenerator.cpp
     src/SineWaveGenerator.cpp
+    src/Time.cpp
+    src/Timer.cpp
     src/UniformSequence.cpp
     src/ValidationContext.cpp
 )

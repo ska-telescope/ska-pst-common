@@ -51,7 +51,7 @@ author = 'PST Team'
 # The full version, including alpha/beta/rc tags
 with open('../../.release') as f:
     version = f.readline().strip().split("=")[1]
-release = '0.9.1'
+release = '0.10.0'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
@@ -81,6 +81,7 @@ extensions = [
     'breathe',
     'exhale',
     'recommonmark',
+    'sphinxcontrib.plantuml',
 ]
 
 source_suffix = [".rst", '.md']
@@ -186,3 +187,9 @@ html_static_path = ['_static']
 html_css_files = [
     'css/custom.css',
 ]
+
+## sphinxcontrib.plantuml
+plantuml_syntax_error_image = True
+
+plantuml = '/usr/bin/plantuml -Djava.awt.headless=true '
+

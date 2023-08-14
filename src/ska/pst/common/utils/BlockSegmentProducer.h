@@ -28,68 +28,58 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "ska/pst/common/utils/BlockLoader.h"
-#include "ska/pst/common/utils/FileReader.h"
+#include "ska/pst/common/utils/SegmentProducer.h"
+#include "ska/pst/common/utils/BlockProducer.h"
 
 #include <memory>
 
-#ifndef __SKA_PST_COMMON_UTILS_FileBlockLoader_h
-#define __SKA_PST_COMMON_UTILS_FileBlockLoader_h
+#ifndef __SKA_PST_COMMON_UTILS_BlockSegmentProducer_h
+#define __SKA_PST_COMMON_UTILS_BlockSegmentProducer_h
 
 namespace ska::pst::common {
 
   /**
-   * @brief Loads blocks of data from file.
+   * @brief Base class used for reading blocks of voltage data and weights
    *
-   * Currently maps the entire file into memory as a single block.
+   * This class implements an interface to data+weights that can be from any source,
+   * including file (see FileSegmentProducer) or ring buffer (in principal).
    */
-  class FileBlockLoader : public BlockLoader
+  class BlockSegmentProducer : public SegmentProducer
   {
     public:
 
       /**
-       * @brief Construct a new FileBlockLoader object.
+       * @brief Destroy the BlockSegmentProducer object.
        *
-       * @param file_path path to the DADA file to open for reading
        */
-      FileBlockLoader(const std::string& file_path);
+      virtual ~BlockSegmentProducer() = default;
 
       /**
-       * @brief Destroy a FileBlockLoader object.
+       * @brief Get the AsciiHeader that describes the data block stream
        *
+       * @return const ska::pst::common::AsciiHeader& header of the data block stream
        */
-      ~FileBlockLoader();
+      virtual const ska::pst::common::AsciiHeader& get_data_header() const;
 
       /**
-       * @brief Get the AsciiHeader that describes the DADA file contents
+       * @brief Get the AsciiHeader that describes the weights block stream
        *
-       * @return const ska::pst::common::AsciiHeader& header of the DADA file
+       * @return const ska::pst::common::AsciiHeader& header of the weights block stream
        */
-      const ska::pst::common::AsciiHeader& get_header() const;
+      virtual const ska::pst::common::AsciiHeader& get_weights_header() const;
 
       /**
-       * @brief Get the next block of data.
+       * @brief Get the next Segment of data and weights.
        *
-       * When first called, returns a pair containing
-       * - the base address of the start of data in the memory-mapped DADA file
-       * - the size of the file in bytes (minus the size of the header)
-       * If called again, this function returns (nullptr, 0)
        */
-      BlockLoader::Block next_block();
+      virtual Segment next_segment();
 
     protected:
 
-      //! the DADA file reader
-      std::unique_ptr<ska::pst::common::FileReader> reader;
-
-      //! the details of the entire block
-      BlockLoader::Block block_info;
-
-      //! the details of the next block
-      BlockLoader::Block next_block_info;
+      std::shared_ptr<BlockProducer> data_block_producer;
+      std::shared_ptr<BlockProducer> weights_block_producer;
   };
 
 } // namespace ska::pst::common
 
-#endif // __SKA_PST_COMMON_UTILS_FileBlockLoader_h
-
+#endif // __SKA_PST_COMMON_UTILS_BlockSegmentProducer_h

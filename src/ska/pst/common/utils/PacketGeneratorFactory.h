@@ -28,42 +28,40 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "ska/pst/common/utils/DataGeneratorFactory.h"
-#include "ska/pst/common/utils/RandomDataGenerator.h"
-#include "ska/pst/common/utils/SineWaveGenerator.h"
-#include "ska/pst/common/utils/GaussianNoiseGenerator.h"
+#include <string>
+#include <vector>
+#include <memory>
 
-auto ska::pst::common::get_supported_data_generators() -> std::vector<std::string>
-{
-  std::vector<std::string> supported;
-  supported.emplace_back("Random");
-  supported.emplace_back("Sine");
-  supported.emplace_back("GaussianNoise");
-  return supported;
-}
+#include "ska/pst/common/utils/PacketGenerator.h"
 
-auto ska::pst::common::get_supported_data_generators_list() -> std::string
-{
-  std::vector<std::string> supported = ska::pst::common::get_supported_data_generators();
-  std::string delim = ", ";
-  return std::accumulate(supported.begin() + 1, supported.end(), supported[0],
-    [&delim](const std::string& x, const std::string& y) {
-      return x + delim + y;
-    }
-  );
-}
+#ifndef SKA_PST_COMMON_UTILS_PacketGeneratorFactory_h
+#define SKA_PST_COMMON_UTILS_PacketGeneratorFactory_h
 
-auto ska::pst::common::DataGeneratorFactory(const std::string &name, const std::shared_ptr<ska::pst::common::DataLayout>& layout) -> std::shared_ptr<ska::pst::common::DataGenerator>
-{
-  if (name == "Random") {
-    return std::shared_ptr<ska::pst::common::DataGenerator>(new ska::pst::common::RandomDataGenerator(layout));
-  }
-  if (name == "Sine") {
-    return std::shared_ptr<ska::pst::common::DataGenerator>(new ska::pst::common::SineWaveGenerator(layout));
-  }
-  if (name == "GaussianNoise") {
-    return std::shared_ptr<ska::pst::common::DataGenerator>(new ska::pst::common::GaussianNoiseGenerator(layout));
-  }
+namespace ska::pst::common {
 
-  throw std::runtime_error("ska::pst::common::DataGeneratorFactory unrecognized name");
-}
+  /**
+   * @brief Construct a PacketGenerator from the name
+   *
+   * @param name string representation of the PacketGenerator
+   * @param layout data layout that describes the data, weights and scale sizes
+   * @return PacketGenerator* new PacketGenerator object
+   */
+  auto PacketGeneratorFactory(const std::string &name, const std::shared_ptr<PacketLayout>& layout) -> std::shared_ptr<PacketGenerator>;
+
+  /**
+   * @brief Return a vector of the supported data generator names
+   *
+   * @return std::vector<std::string> names of supported data generators
+   */
+  auto get_supported_data_generators() -> std::vector<std::string>;
+
+  /**
+   * @brief Return a comma delimited string of supported data generator names
+   *
+   * @return std::string supported data generator names
+   */
+  auto get_supported_data_generators_list() -> std::string;
+
+} // namespace ska::pst::common
+
+#endif // SKA_PST_COMMON_UTILS_PacketGeneratorFactory_h

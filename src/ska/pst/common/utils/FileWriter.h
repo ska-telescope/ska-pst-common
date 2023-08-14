@@ -28,12 +28,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <cstddef>
+#include "ska/pst/common/utils/AsciiHeader.h"
+
 #include <filesystem>
+#include <cstddef>
 #include <mutex>
 #include <inttypes.h>
-
-#include "ska/pst/common/utils/AsciiHeader.h"
 
 #ifndef SKA_PST_COMMON_UTILS_FileWriter_h
 #define SKA_PST_COMMON_UTILS_FileWriter_h
@@ -95,7 +95,14 @@ namespace ska::pst::common {
        * @brief Return the (assumed) logical block size of the filesystem
        *
        */
-      uint32_t block_alignment () const { return o_direct_alignment; }
+      uint32_t block_alignment() const { return o_direct_alignment; }
+
+      /**
+       * @brief Throw an exception if the block size is not a multiple of the (assumed) logical block size of the filesystem
+       *
+       * @param block_size the block size to be tested, in bytes
+       */
+      void check_block_size(uint64_t block_size) const;
 
       /**
        * @brief Write the header to the currently opened file
@@ -161,6 +168,9 @@ namespace ska::pst::common {
 
       //! file descriptor of the currently opened file
       int fd{-1};
+
+      //! flags passed to std C open function
+      int flags{0};
 
       //! local buffer of page-aligned memory used to write the AsciiHeader to O_DIRECT opened file handles
       char* header_buffer{nullptr};

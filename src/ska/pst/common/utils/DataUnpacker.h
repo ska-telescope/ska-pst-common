@@ -28,10 +28,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <complex>
-
 #include "ska/pst/common/utils/AsciiHeader.h"
-#include "ska/pst/common/utils/DataLayout.h"
+#include "ska/pst/common/utils/HeapLayout.h"
+
+#include <spdlog/spdlog.h>
+#include <complex>
 
 #ifndef SKA_PST_COMMON_UTILS_DataUnpacker_h
 #define SKA_PST_COMMON_UTILS_DataUnpacker_h
@@ -121,6 +122,10 @@ namespace ska::pst::common
       template <typename T>
       void unpack_samples(const T* in, char * weights, uint32_t nheaps)
       {
+        const uint32_t packets_per_heap = layout.get_packets_per_heap();
+        const uint32_t nsamp_per_packet = layout.get_packet_layout().get_samples_per_packet();
+        const uint32_t nchan_per_packet = layout.get_packet_layout().get_nchan_per_packet();
+
         const uint32_t nsamp = nheaps * nsamp_per_packet;
         if (unpacked.size() != nsamp)
         {
@@ -187,6 +192,10 @@ namespace ska::pst::common
       template <typename T>
       void integrate_samples(const T* in, char * weights, uint32_t nheaps)
       {
+        const uint32_t packets_per_heap = layout.get_packets_per_heap();
+        const uint32_t nsamp_per_packet = layout.get_packet_layout().get_samples_per_packet();
+        const uint32_t nchan_per_packet = layout.get_packet_layout().get_nchan_per_packet();
+        
         if (bandpass.size() != nchan)
         {
           SPDLOG_ERROR("ska::pst::common::DataUnpacker::integrate_samples bandpass.size() [{}] did not match the number of channels to unpack [{}]", bandpass.size(), nchan);
@@ -251,6 +260,9 @@ namespace ska::pst::common
       //! Return the scale factor packed into the weights array, corresponding to the provided packet number
       auto get_scale_factor(char * weights, uint32_t packet_number) -> float;
 
+      //! The layout of data, weights and scales in each heap
+      HeapLayout layout;
+
       //! Number of polarisations in the data stream
       uint32_t npol{0};
 
@@ -262,30 +274,6 @@ namespace ska::pst::common
 
       //! Number of bits per sample in the data stream
       uint32_t nbit{0};
-
-      //! Number of bits per sample in the weights stream
-      uint32_t weights_nbit{0};
-
-      //! Number of samples per UDP packet in the data stream
-      uint32_t nsamp_per_packet{0};
-
-      //! Number of channels per UDP packet in the data stream
-      uint32_t nchan_per_packet{0};
-
-      //! Number of samples per relative weight in the weights stream
-      uint32_t nsamp_per_weight{0};
-
-      //! Number of bytes per packet in the weights stream
-      uint32_t weights_packet_stride{0};
-
-      //! Size of a complete heap of data in the data stream, in btyes
-      uint32_t heap_resolution{0};
-
-      //! Size of the complex packet od adat ain the data stream, in bytes
-      uint32_t packet_resolution{0};
-
-      //! Number of UDP packets per heap in the data stream
-      uint32_t packets_per_heap{0};
 
       //! Number of dropped packets (scale factor = NaN) encountered
       uint64_t invalid_packets{0};

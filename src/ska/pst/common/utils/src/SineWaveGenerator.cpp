@@ -35,8 +35,8 @@
 
 #include "ska/pst/common/utils/SineWaveGenerator.h"
 
-ska::pst::common::SineWaveGenerator::SineWaveGenerator(std::shared_ptr<ska::pst::common::DataLayout> _layout) :
-  DataGenerator(std::move(_layout)), wts_sequence(unity_weight), scl_sequence(unity_scale)
+ska::pst::common::SineWaveGenerator::SineWaveGenerator(std::shared_ptr<ska::pst::common::PacketLayout> _layout) :
+  PacketGenerator(std::move(_layout)), wts_sequence(unity_weight), scl_sequence(unity_scale)
 {
 }
 
@@ -44,7 +44,7 @@ void ska::pst::common::SineWaveGenerator::configure(const ska::pst::common::Asci
 {
   SPDLOG_DEBUG("ska::pst::common::SineWaveGenerator::configure");
 
-  ska::pst::common::DataGenerator::configure(config);
+  ska::pst::common::PacketGenerator::configure(config);
 
   // determine the amplitude when nbit == ?
   //  8 -> -127 to  127

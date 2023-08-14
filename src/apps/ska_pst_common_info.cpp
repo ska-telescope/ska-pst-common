@@ -28,50 +28,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "ska/pst/common/utils/FileBlockLoader.h"
+#include <iostream>
+#include <string>
 
-#include <gtest/gtest.h>
+#include "ska/pst/common/version.h"
 
-#ifndef SKA_PST_COMMON_UTILS_TESTS_FileBlockLoaderTest_h
-#define SKA_PST_COMMON_UTILS_TESTS_FileBlockLoaderTest_h
-
-namespace ska::pst::common::test {
-
-  /**
-   * @brief Test the FileBlockLoader class
-   * 
-   * @details
-   * 
-   */
-  class FileBlockLoaderTest : public ::testing::Test
-  {
-    protected:
-      void SetUp() override;
-
-      void TearDown() override;
-
-    public:
-      FileBlockLoaderTest();
-
-      ~FileBlockLoaderTest();
-
-      ska::pst::common::AsciiHeader header;
-
-      std::vector<char> file_header;
-
-      std::vector<char> file_data;
-
-      std::string file_name{"/tmp/FileBlockLoaderTest.dada"};
-
-      uint32_t header_size{0};
-
-      uint32_t data_size{1048576};
-
-    private:
-
-  };
-
-} // namespace ska::pst::common::test
-
-#endif // SKA_PST_COMMON_UTILS_TESTS_FileBlockLoaderTest_h
-
+auto main() -> int
+{
+  std::cout << "ska-pst-common version: " << ska::pst::common::get_version_string() << std::endl;
+  return 0;
+}

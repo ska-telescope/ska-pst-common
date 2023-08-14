@@ -235,7 +235,7 @@ namespace ska::pst::common {
        *
        * @return std::vector<std::string> keys in the header
        */
-       auto header_get_keys() const -> std::vector<std::string>;
+      auto header_get_keys() const -> std::vector<std::string>;
 
       /**
        * @brief Get the HDR_SIZE attribute of the ascii header in filename
@@ -367,7 +367,21 @@ namespace ska::pst::common {
 
       //! size of the space padding to insert between the key/value pair when generating a raw string view of the parameters
       uint32_t key_padding{default_key_padding};
+
+      /**
+       * @brief Test two AsciiHeader instances for equality
+       *
+       */
+      friend bool operator == (const AsciiHeader& A, const AsciiHeader& B);
+
   };
+
+  /**
+   * @brief Test two AsciiHeader instances for equality
+   *
+   * @return bool true if A is equal to B
+   */
+  bool operator == (const AsciiHeader& A, const AsciiHeader& B);
 
 } // namespace ska::pst::common
 

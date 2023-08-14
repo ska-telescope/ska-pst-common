@@ -3,18 +3,18 @@
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice,
  * this list of conditions and the following disclaimer.
- * 
+ *
  * 2. Redistributions in binary form must reproduce the above copyright
  * notice, this list of conditions and the following disclaimer in the
  * documentation and/or other materials provided with the distribution.
- * 
+ *
  * 3. Neither the name of the copyright holder nor the names of its
  * contributors may be used to endorse or promote products derived from this
  * software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -28,52 +28,40 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "ska/pst/common/utils/DataWeightsFileBlockLoader.h"
+#include <string>
 
-#include <gtest/gtest.h>
+#include "ska/pst/common/utils/BlockSegmentProducer.h"
 
-#ifndef SKA_PST_COMMON_UTILS_TESTS_DataWeightsFileBlockLoaderTest_h
-#define SKA_PST_COMMON_UTILS_TESTS_DataWeightsFileBlockLoaderTest_h
+#ifndef __SKA_PST_COMMON_UTILS_FileSegmentProducer_h
+#define __SKA_PST_COMMON_UTILS_FileSegmentProducer_h
 
-namespace ska::pst::common::test {
+namespace ska::pst::common {
 
   /**
-   * @brief Test the DataWeightsFileBlockLoader class
-   * 
-   * @details
-   * 
+   * @brief Class used for reading voltage data and weights from file.
+   *
    */
-  class DataWeightsFileBlockLoaderTest : public ::testing::Test
+  class FileSegmentProducer : public BlockSegmentProducer
   {
-    protected:
-      void SetUp() override;
-
-      void TearDown() override;
-
     public:
-      DataWeightsFileBlockLoaderTest();
+      /**
+       * @brief Create instance of a FileSegmentProducer object.
+       *
+       * @param data_file_path path to the data file to process.
+       * @param weights_file_path the path to the weights file for the data file.
+       */
+      FileSegmentProducer(
+        const std::string& data_file_path,
+        const std::string& weights_file_path
+      );
 
-      ~DataWeightsFileBlockLoaderTest();
-
-      ska::pst::common::AsciiHeader header;
-
-      std::vector<char> file_header;
-
-      std::vector<char> data_file_data;
-      std::vector<char> weights_file_data;
-
-      std::string data_file_name{"/tmp/DataFileBlockLoaderTest.dada"};
-      std::string weights_file_name{"/tmp/WeightsFileBlockLoaderTest.dada"};
-
-      uint32_t header_size{0};
-
-      uint32_t data_size{1048576};
-
-    private:
-
+      /**
+       * @brief Destroy the FileSegmentProducer object.
+       *
+       */
+      ~FileSegmentProducer();
   };
 
-} // namespace ska::pst::common::test
+} // namespace ska::pst::common
 
-#endif // SKA_PST_COMMON_UTILS_TESTS_DataWeightsFileBlockLoaderTest_h
-
+#endif // __SKA_PST_COMMON_UTILS_FileSegmentProducer_h

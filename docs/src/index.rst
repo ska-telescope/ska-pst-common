@@ -21,6 +21,20 @@ components.
 ..
 
 .. toctree::
+  :maxdepth: 2
+  :caption: Architecture
+  :hidden:
+
+  architecture/index
+
+.. toctree::
+  :maxdepth: 2
+  :caption: Applications
+  :hidden:
+
+  apps/index
+
+.. toctree::
   :maxdepth: 3
   :caption: API
   :hidden:

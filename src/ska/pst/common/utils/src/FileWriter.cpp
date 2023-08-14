@@ -53,7 +53,7 @@ auto safe_signed_cast (const T& arg) -> std::make_signed_t<T>
 }
 
 ska::pst::common::FileWriter::FileWriter(bool use_o_direct) :
-  o_direct(use_o_direct)
+  o_direct(use_o_direct), flags(O_WRONLY | O_CREAT | O_TRUNC)
 {
   SPDLOG_TRACE("ska::pst::common::FileWriter::FileWriter");
 }
@@ -64,23 +64,34 @@ ska::pst::common::FileWriter::~FileWriter()
   deconfigure();
 }
 
+void ska::pst::common::FileWriter::check_block_size(uint64_t block_size) const
+{
+  if (block_size == 0)
+  {
+    SPDLOG_ERROR("ska::pst::common::FileWriter::check_block_size block_size is zero");
+    throw std::runtime_error("ska::pst::common::FileWriter::check_block_size block_size is zero");
+  }
+
+  if (o_direct && (block_size % o_direct_alignment != 0))
+  {
+    SPDLOG_ERROR("ska::pst::common::FileWriter::check_block_size block_size={} must be a multiple of {} bytes when O_DIRECT is enabled", block_size, o_direct_alignment);
+    throw std::runtime_error("ska::pst::common::FileWriter::check_block_size block_size is not a multiple of logical block size");
+  }
+}
+
 void ska::pst::common::FileWriter::configure(uint64_t _header_bufsz)
 {
+  check_block_size (_header_bufsz);
+
   if (header_bufsz > 0 && _header_bufsz > header_bufsz)
   {
     // the currently allocated buffer is not large enough
     deconfigure();
   }
 
-  if (o_direct && (_header_bufsz % o_direct_alignment != 0))
-  {
-    SPDLOG_ERROR("ska::pst::common::FileWriter::validate_o_direct header_bufsz={} must be a multiple of {} bytes if O_DIRECT enabled", _header_bufsz, o_direct_alignment);
-    throw std::runtime_error("ska::pst::common::FileWriter::validate_o_direct bad header_bufsz");
-  }
-
   if (!header_buffer)
   {
-    SPDLOG_DEBUG("ska::pst::common::FileWriter::validate_o_direct posix_memalign(header_buffer, {}, {})", o_direct_alignment, _header_bufsz);
+    SPDLOG_DEBUG("ska::pst::common::FileWriter::configure posix_memalign(header_buffer, {}, {})", o_direct_alignment, _header_bufsz);
     posix_memalign(reinterpret_cast<void **>(&header_buffer), o_direct_alignment, _header_bufsz);
     memset(header_buffer, 0, _header_bufsz);
     header_bufsz = _header_bufsz;
@@ -119,7 +130,6 @@ void ska::pst::common::FileWriter::open_file(const std::filesystem::path& new_fi
     throw std::runtime_error("ska::pst::common::FileWriter::open_file already open");
   }
 
-  int flags = O_WRONLY | O_CREAT | O_TRUNC;
   int perms = S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH;
   if (o_direct)
   {
@@ -150,19 +160,25 @@ void ska::pst::common::FileWriter::reopen_file()
   SPDLOG_DEBUG("ska::pst::common::FileWriter::reopen_file close_file()");
   close_file();
 
-  bool prev_o_direct = o_direct;
-  o_direct = false;
+  SPDLOG_DEBUG("ska::pst::common::FileWriter::reopen_file open_file without O_TRUNC");
 
-  SPDLOG_DEBUG("ska::pst::common::FileWriter::reopen_file open_file()");
+  flags = O_WRONLY | O_CREAT;
   open_file(opened_file);
 
-  o_direct = prev_o_direct;
+  // restore the usual O_TRUNC behaviour
+  flags = O_WRONLY | O_CREAT | O_TRUNC;
 
   data_bytes_written = current_data_bytes_written;
   header_bytes_written = current_header_bytes_written;
 
   SPDLOG_DEBUG("ska::pst::common::FileWriter::reopen_file lseek({}, 0, SEEK_END)", fd);
-  lseek(fd, 0, SEEK_END);
+  auto offset = lseek(fd, 0, SEEK_END);
+
+  if (offset != data_bytes_written + header_bytes_written)
+  {
+    SPDLOG_ERROR("ska::pst::common::FileWriter::reopen_file lseek returns offset={} != bytes_written={}", offset, data_bytes_written + header_bytes_written);
+    throw std::runtime_error("ska::pst::common::FileWriter::reopen_file lseek returns offset != bytes_written");
+  }
 }
 
 void ska::pst::common::FileWriter::close_file()
@@ -239,6 +255,9 @@ auto ska::pst::common::FileWriter::write_data(char * data_ptr, uint64_t bytes_to
   if (o_direct && (bytes_to_write % o_direct_alignment != 0))
   {
     SPDLOG_WARN("ska::pst::common::FileWriter::write_data bytes_to_write={} not a multiple of {} bytes", bytes_to_write, o_direct_alignment);
+
+    // disable o_direct flag and re-open the file
+    o_direct = false;
     reopen_file();
   }
 

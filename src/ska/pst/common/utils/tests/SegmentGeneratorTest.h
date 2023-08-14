@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Square Kilometre Array Observatory
+ * Copyright 2023 Square Kilometre Array Observatory
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -28,40 +28,40 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <string>
+#include "ska/pst/common/utils/SegmentGenerator.h"
+
+#include <gtest/gtest.h>
 #include <vector>
-#include <memory>
 
-#include "ska/pst/common/utils/DataGenerator.h"
+#ifndef SKA_PST_COMMON_UTILS_TESTS_SegmentGeneratorTest_h
+#define SKA_PST_COMMON_UTILS_TESTS_SegmentGeneratorTest_h
 
-#ifndef SKA_PST_COMMON_UTILS_DataGeneratorFactory_h
-#define SKA_PST_COMMON_UTILS_DataGeneratorFactory_h
-
-namespace ska::pst::common {
+namespace ska::pst::common::test {
 
   /**
-   * @brief Construct a DataGenerator from the name
+   * @brief Test the SegmentGenerator class
    *
-   * @param name string representation of the DataGenerator
-   * @param layout data layout that describes the data, weights and scale sizes
-   * @return DataGenerator* new DataGenerator object
-   */
-  auto DataGeneratorFactory(const std::string &name, const std::shared_ptr<DataLayout>& layout) -> std::shared_ptr<DataGenerator>;
-
-  /**
-   * @brief Return a vector of the supported data generator names
+   * @details
    *
-   * @return std::vector<std::string> names of supported data generators
    */
-  auto get_supported_data_generators() -> std::vector<std::string>;
+  class SegmentGeneratorTest : public ::testing::TestWithParam<const char*>
+  {
+    protected:
+      void SetUp() override;
 
-  /**
-   * @brief Return a comma delimited string of supported data generator names
-   *
-   * @return std::string supported data generator names
-   */
-  auto get_supported_data_generators_list() -> std::string;
+      void TearDown() override;
 
-} // namespace ska::pst::common
+    public:
+      SegmentGeneratorTest() = default;
 
-#endif // SKA_PST_COMMON_UTILS_DataGeneratorFactory_h
+      ~SegmentGeneratorTest() = default;
+
+      ska::pst::common::AsciiHeader data_header;
+      ska::pst::common::AsciiHeader weights_header;
+
+      uint32_t default_nheap{4};
+  };
+
+} // namespace ska::pst::common::test
+
+#endif // SKA_PST_COMMON_UTILS_TESTS_SegmentGeneratorTest_h

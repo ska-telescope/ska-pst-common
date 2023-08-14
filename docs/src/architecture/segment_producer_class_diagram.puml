@@ -1,0 +1,144 @@
+@startuml PST Data Segment class diagram
+
+interface SegmentProducer 
+{
+    + num_heaps_per_segment: int
+    + next_segment() : Segment
+}
+
+' A segment is contiguous sequence of heaps and in general the source of data is
+' a source of multiple contiguous sequences of heaps.
+' Such as the ringbuffers have a size of N * resolution, where
+' resolution is the size of a heap.
+class Segment
+{
+    + data: Block
+    + data_header: AsciiHeader
+    + weights: Block
+    + weights_header: AsciiHeader
+    + number_of_heaps() : uint32_t
+    + get_heap(heap_number: uint32_t): Heap
+}
+
+SegmentProducer .. "produces" Segment
+
+' In PST a Heap is a specific term that ensures that all channels
+' for a subband have been seen. A packet may only have a subset of
+' of channels but a heap will have all channels.
+class Heap
+{
+    + data: Block
+    + weights: Block
+    + number_of_packets(): uint32_t
+    + get_packet(packet_num: uint32_t): Packet
+}
+
+Segment o-- "1..*" Heap
+
+' a packet is the smallest chunk of data we get from CBF
+' and what we can write to a file.
+class Packet
+{
+    + data: Block
+    + weights: Block
+}
+
+Heap o-- "1..*" Packet
+
+interface BlockProducer 
+{
+    + next_block(): Block
+}
+
+' A block could be any size it, it could be a chunck of data
+' for a whole slice, heap, packet, etc or chunck of weights.
+' The only thing is it is not a combination of data+weights it
+' is one or the other.
+class Block 
+{
+    + data: char*
+    + size: size_t
+}
+
+' A source of heaps that have been divided into blocks
+class BlockSegmentProducer 
+{
+    - data: BlockProducer
+    - weights: BlockProducer
+    + next_segment(): Segment
+}
+
+SegmentProducer <|-- BlockSegmentProducer
+
+class FileBlockProducer 
+{
+    - reader : FileReader
+    + get_header(): AsciiHeader
+    + next_block(): Block
+}
+
+package ska::pst::smrb {
+  class RingBufferBlockProducer
+}
+
+class RingBufferBlockProducer 
+{
+    - reader: DataBlockReader
+    + get_header(): AsciiHeader
+    + next_block(): Block
+}
+
+BlockSegmentProducer *-- "2" BlockProducer
+BlockProducer <|-- FileBlockProducer
+BlockProducer <|-- RingBufferBlockProducer
+
+BlockProducer .. "produces" Block
+
+class SegmentGenerator 
+{
+    - generator: PacketGenerator
+    - layout: HeapLayout
+    + next_segment(): Segment
+}
+
+SegmentProducer <|-- SegmentGenerator
+SegmentGenerator *-- HeapLayout
+SegmentGenerator *-- PacketGenerator
+
+class PacketGenerator 
+{
+    - layout: PacketLayout
+}
+
+class HeapLayout
+{
+  packet_layout : PacketLayout*
+
+  packets_per_heap : unsigned
+  data_packet_stride : unsigned
+  weights_packet_stride : unsigned
+  data_heap_stride : unsigned
+  weights_heap_stride : unsigned 
+}
+
+class PacketLayout
+{
+  packet_size : unsigned
+  packet_header_size : unsigned
+  packet_data_size : unsigned
+  packet_weights_size : unsigned
+  packet_scales_size : unsigned
+  packet_data_offset : unsigned
+  packet_weights_offset : unsigned
+  packet_scales_offset : unsigned
+  nsamp_per_packet : unsigned
+  nchan_per_packet : unsigned
+  nsamp_per_weight : unsigned
+}
+
+
+HeapLayout o-- PacketLayout
+
+PacketGenerator o-- PacketLayout
+
+@enduml

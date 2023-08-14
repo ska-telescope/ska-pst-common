@@ -28,7 +28,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "ska/pst/common/utils/DataGenerator.h"
+#include "ska/pst/common/utils/PacketGenerator.h"
 #include "ska/pst/common/utils/RandomSequence.h"
 #include "ska/pst/common/utils/UniformSequence.h"
 
@@ -41,7 +41,7 @@ namespace ska::pst::common {
    * @brief Generates and validates data + weights using a RandomSequence for each
    *
    */
-  class RandomDataGenerator : public DataGenerator
+  class RandomDataGenerator : public PacketGenerator
   {
     public:
 
@@ -49,7 +49,7 @@ namespace ska::pst::common {
        * @brief Construct a new RandomDataGenerator object
        *
        */
-      explicit RandomDataGenerator(std::shared_ptr<DataLayout> layout);
+      explicit RandomDataGenerator(std::shared_ptr<PacketLayout> layout);
 
       /**
        * @brief Destroy the RandomDataGenerator object
