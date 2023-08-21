@@ -76,7 +76,7 @@ void ska::pst::common::RandomSequence::generate_block(uint8_t * buffer, uint64_t
 {
   SPDLOG_DEBUG("ska::pst::common::RandomSequence::generate_block generate {} bytes of data with block offset={}, size={} stride={}", bufsz, block_offset, block_size, block_stride);
   uint64_t offset = block_offset;
-  while (offset + block_size < bufsz)
+  while (offset + block_size <= bufsz)
   {
     generate(buffer + offset, block_size); // NOLINT
     offset += block_stride;
@@ -99,7 +99,7 @@ auto ska::pst::common::RandomSequence::validate_block(uint8_t * buffer, uint64_t
   SPDLOG_DEBUG("ska::pst::common::RandomSequence::validate_block validate {} bytes of data with block offset={}, size={} and stride={}", bufsz, block_offset, block_size, block_stride);
   uint64_t offset = block_offset;
   bool valid = true;
-  while (offset + block_size < bufsz)
+  while (offset + block_size <= bufsz)
   {
     valid &= validate(buffer + offset, block_size); // NOLINT
     offset += block_stride;
