@@ -31,7 +31,6 @@
 #include "ska/pst/common/utils/PacketGenerator.h"
 #include "ska/pst/common/utils/NormalSequence.h"
 #include "ska/pst/common/utils/UniformSequence.h"
-#include "ska/pst/common/utils/RandomSequence.h"
 
 #ifndef SKA_PST_COMMON_UTILS_GaussianNoiseGenerator_h
 #define SKA_PST_COMMON_UTILS_GaussianNoiseGenerator_h
@@ -39,7 +38,8 @@
 namespace ska::pst::common {
 
   /**
-   * @brief Generates and validates data + weights using a RandomSequence for each
+   * @brief Generates and validates data + weights using a NormalSequence for the data
+   * and UniforSequence (unity values) for the weights and scales.
    *
    */
   class GaussianNoiseGenerator : public PacketGenerator
@@ -135,7 +135,7 @@ namespace ska::pst::common {
       UniformSequence<char> wts_sequence;
 
       //! sequence of randomly distributed values for the scales
-      RandomSequence scl_sequence;
+      UniformSequence<float> scl_sequence;
 
   };
 
