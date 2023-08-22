@@ -134,7 +134,7 @@ namespace ska::pst::common {
       UniformSequence<char> wts_sequence;
 
       //! sequence of randomly distributed values for the scales
-      RandomSequence scl_sequence;
+      UniformSequence<float> scl_sequence;
 
   };
 

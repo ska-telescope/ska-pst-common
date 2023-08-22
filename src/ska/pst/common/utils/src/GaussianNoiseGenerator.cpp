@@ -35,7 +35,7 @@
 #include "ska/pst/common/utils/GaussianNoiseGenerator.h"
 
 ska::pst::common::GaussianNoiseGenerator::GaussianNoiseGenerator(std::shared_ptr<ska::pst::common::PacketLayout> _layout) :
-  PacketGenerator(std::move(_layout)), wts_sequence(unity_weight)
+  PacketGenerator(std::move(_layout)), wts_sequence(unity_weight), scl_sequence(unity_scale)
 {
 }
 
@@ -64,7 +64,7 @@ void ska::pst::common::GaussianNoiseGenerator::fill_weights(char * buf, uint64_t
 void ska::pst::common::GaussianNoiseGenerator::fill_scales(char * buf, uint64_t size)
 {
   SPDLOG_TRACE("ska::pst::common::GaussianNoiseGenerator::fill_scales buf={} size={}", reinterpret_cast<void*>(buf), size);
-  scl_sequence.generate_block(reinterpret_cast<uint8_t *>(buf), size, scl_block_offset, scl_block_size, block_stride);
+  scl_sequence.generate_block(buf, size, scl_block_offset, scl_block_size, block_stride);
 }
 
 auto ska::pst::common::GaussianNoiseGenerator::test_data(char * buf, uint64_t size) -> bool
@@ -82,7 +82,7 @@ auto ska::pst::common::GaussianNoiseGenerator::test_weights(char * buf, uint64_t
 auto ska::pst::common::GaussianNoiseGenerator::test_scales(char * buf, uint64_t size) -> bool
 {
   SPDLOG_TRACE("ska::pst::common::GaussianNoiseGenerator::test_scales buf={} size={}", reinterpret_cast<void*>(buf), size);
-  return scl_sequence.validate_block(reinterpret_cast<uint8_t *>(buf), size, scl_block_offset, scl_block_size, block_stride);
+  return scl_sequence.validate_block(buf, size, scl_block_offset, scl_block_size, block_stride);
 }
 
 void ska::pst::common::GaussianNoiseGenerator::reset()
