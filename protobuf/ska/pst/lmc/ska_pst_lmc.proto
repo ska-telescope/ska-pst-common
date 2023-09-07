@@ -423,7 +423,7 @@ message ReceiveScanConfiguration {
     // Unique indentifer for observation
     string observation_id       = 2;
     // 64-bit scan ID (Deprecated - now part of the Start Scan request)
-    uint64 scan_id              = 3 [deprecated = true];
+    string scan_id              = 3 [deprecated = true];
     // The person in charge of the observation
     string observer             = 4;
     // Project the observations are for
@@ -559,7 +559,7 @@ message DeconfigureScanResponse {}
 // start.  This is an open issue at the moment.
 message StartScanRequest {
     // The unique ID for the scan.
-    int64 scan_id       = 1;
+    string scan_id       = 1;
 }
 
 // Response for the scan request.
