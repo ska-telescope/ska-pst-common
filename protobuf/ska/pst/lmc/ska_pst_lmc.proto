@@ -300,6 +300,14 @@ message DspDiskBeamConfiguration {
     string  weights_key = 2;
 }
 
+// Message to represent configuration for the STAT.CORE of PST
+message StatBeamConfiguration {
+    // The key for the data buffer to read from
+    string  data_key    = 1;
+    // The key for the weights buffer to read from
+    string  weights_key = 2;
+}
+
 // Message used in unit testing to stub
 // out the need for ska-pst-common to
 // know about the structure of the core
@@ -333,6 +341,10 @@ message BeamConfiguration {
         // It is invalid to send DSP.DISK configuration to
         // any other system.
         DspDiskBeamConfiguration dsp_disk = 3;
+        // The beam configuration for STAT.CORE
+        // It is invalid to send STAT.CORE configuration to
+        // any other system.
+        StatBeamConfiguration stat = 4;
         // The beam configuration used within testing. This
         // field should only be used with unit testing
         // in the ska-pst-common project.
@@ -474,6 +486,9 @@ message DspDiskScanConfiguration {
     string execution_block_id        = 3;
 }
 
+// Message used for the STAT.CORE scan configuration.
+message StatScanConfiguration {}
+
 // Message used in unit testing to stub
 // out the need for ska-pst-common to
 // know about the structure of the core
@@ -507,6 +522,10 @@ message ScanConfiguration {
         // can only be used for sending to/from the DSP
         // services.
         DspDiskScanConfiguration dsp_disk = 3;
+        // The scan configuration for STAT.CORE. This message
+        // can only be used for sending to/from the STAT
+        // services.
+        StatScanConfiguration stat = 4;
 
         // The scan configuration used within testing. This
         // field should only be used with unit testing
@@ -704,6 +723,68 @@ message DspDiskMonitorData {
     double write_rate = 4;
 }
 
+// Message for the STAT.CORE monitoring results of a subband. https://developer.skao.int/projects/ska-pst-stat/en/latest/architecture/index.html#hdf5-data-structure
+message StatMonitorData {
+    // The mean of the data for each polarisation and dimension, averaged over all channels.
+    repeated float mean_frequency_avg = 1;
+
+    // The mean of the data for each polarisation and dimension, averaged over all channels, except those flagged for RFI.
+    repeated float mean_frequency_avg_masked = 2;
+
+    // The variance of the data for each polarisation and dimension, averaged over all channels.
+    repeated float variance_frequency_avg = 3;
+
+    // The variance of the data for each polarisation and dimension, averaged over all channels, except those flagged for RFI.
+    repeated float variance_frequency_avg_masked = 4;
+
+    // The mean of the data for each polarisation, dimension, and channel.
+    repeated float mean_spectrum = 5;
+
+    // The variance of the data for each polarisation, dimension, and channel.
+    repeated float variance_spectrum = 6;
+
+    // Mean power of the data for each polarisation and channel.
+    repeated float mean_spectral_power = 7;
+
+    // Maximum power of the data for each polarisation and channel.
+    repeated float max_spectral_power = 8;
+
+    // Histogram of the input data integer states for each polarisation and dimension, averaged over all channels.
+    repeated uint32 histogram_1d_freq_avg = 9;
+
+    // Histogram of the input data integer states for each polarisation and dimension, averaged over all channels, except those flagged for RFI.
+    repeated uint32 histogram_1d_freq_avg_masked = 10;
+
+    // Rebinned 2D histogram of the input data integer states for each polarisation, averaged over all channels.
+    repeated uint32 histogram_rebinned_2d_freq_avg = 11;
+
+    // Rebinned 2D histogram of the input data integer states for each polarisation, averaged over all channels, except those flagged for RFI.
+    repeated uint32 histogram_rebinned_2d_freq_avg_masked = 12;
+
+    // Rebinned histogram of the input data integer states for each polarisation and dimension, averaged over all channels.
+    repeated uint32 histogram_rebinned_1d_freq_avg = 13;
+
+    // Rebinned histogram of the input data integer states for each polarisation and dimension, averaged over all channels, except those flagged for RFI.
+    repeated uint32 histogram_rebinned_1d_freq_avg_masked = 14;
+
+    // Number of clipped input samples (maximum level) for each polarisation, dimension, and channel.
+    repeated uint32 num_clipped_samples_spectrum = 15;
+
+    // Number of clipped input samples (maximum level) for each polarisation and dimension.
+    repeated uint32 num_clipped_samples = 16;
+
+    // Spectrogram of the data for each polarisation, rebinned in frequency to NCHAN_DS bins and in time to NDAT_DS bins.
+    repeated float spectrogram = 17;
+
+    // Time series of the data for each polarisation, rebinned in time to NDAT_DS bins, averaged over all frequency channels.
+    // This includes max, min, and mean of the power in each bin.
+    repeated float timeseries = 18;
+
+    // Time series of the data for each polarisation, rebinned in time to NDAT_DS bins, averaged over all frequency channels,
+    // except those flagged by RFI. This includes max, min, and mean of the power in each bin.
+    repeated float timeseries_masked = 19;
+}
+
 // Message used in unit testing to stub
 // out the need for ska-pst-common for
 // monitoring.
@@ -741,6 +822,8 @@ message MonitorData {
         ReceiveMonitorData receive = 2;
         // The monitoring data for DSP.CORE.
         DspDiskMonitorData dsp_disk = 3;
+        // The monitoring data for STAT.CORE.
+        StatMonitorData stat = 4;
         // Only used for testing
         TestMonitorData test = 99;
     }
