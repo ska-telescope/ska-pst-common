@@ -724,71 +724,64 @@ message DspDiskMonitorData {
 }
 
 // Message for the STAT.CORE monitoring results of a subband. https://developer.skao.int/projects/ska-pst-stat/en/latest/architecture/index.html#hdf5-data-structure
-message StatMonitorData {
-    // The mean of the data for each polarisation and dimension, averaged over all channels.
-    double mean_frequency_avg = 1;
+message StatMonitorData {// The mean of the data for each polarisation and dimension, averaged over all channels.
+    repeated double mean_frequency_avg = 1;
 
     // The mean of the data for each polarisation and dimension, averaged over all channels, except those flagged for RFI.
-    double mean_frequency_avg_masked = 2;
+    repeated double mean_frequency_avg_masked = 2;
 
     // The variance of the data for each polarisation and dimension, averaged over all channels.
-    double variance_frequency_avg = 3;
+    repeated double variance_frequency_avg = 3;
 
     // The variance of the data for each polarisation and dimension, averaged over all channels, except those flagged for RFI.
-    double variance_frequency_avg_masked = 4;
+    repeated double variance_frequency_avg_masked = 4;
+
+    // The mean of the data for each polarisation, dimension, and channel.
+    repeated double mean_spectrum = 5;
+
+    // The variance of the data for each polarisation, dimension, and channel.
+    repeated double variance_spectrum = 6;
+
+    // Mean power of the data for each polarisation and channel.
+    repeated double mean_spectral_power = 7;
+
+    // Maximum power of the data for each polarisation and channel.
+    repeated double max_spectral_power = 8;
+
+    // Histogram of the input data integer states for each polarisation and dimension, averaged over all channels.
+    repeated double histogram_1d_freq_avg = 9;
+
+    // Histogram of the input data integer states for each polarisation and dimension, averaged over all channels, except those flagged for RFI.
+    repeated double histogram_1d_freq_avg_masked = 10;
+
+    // Rebinned 2D histogram of the input data integer states for each polarisation, averaged over all channels.
+    repeated double histogram_rebinned_2d_freq_avg = 11;
+
+    // Rebinned 2D histogram of the input data integer states for each polarisation, averaged over all channels, except those flagged for RFI.
+    repeated double histogram_rebinned_2d_freq_avg_masked = 12;
+
+    // Rebinned histogram of the input data integer states for each polarisation and dimension, averaged over all channels.
+    repeated double histogram_rebinned_1d_freq_avg = 13;
+
+    // Rebinned histogram of the input data integer states for each polarisation and dimension, averaged over all channels, except those flagged for RFI.
+    repeated double histogram_rebinned_1d_freq_avg_masked = 14;
+
+    // Number of clipped input samples (maximum level) for each polarisation, dimension, and channel.
+    repeated double num_clipped_samples_spectrum = 15;
 
     // Number of clipped input samples (maximum level) for each polarisation and dimension.
-    double num_clipped_samples = 5;
-
-    // Number of clipped input samples (maximum level) for each polarisation and dimension, except those flagged for RFI.
-    double num_clipped_samples_masked = 6;
-
-    /*
-    TODO: delete the following as needed
-    // Number of clipped input samples (maximum level) for each polarisation, dimension, and channel.
-    double num_clipped_samples_spectrum = 0;
+    repeated double num_clipped_samples = 16;
 
     // Spectrogram of the data for each polarisation, rebinned in frequency to NCHAN_DS bins and in time to NDAT_DS bins.
-    double spectrogram = 0;
+    repeated double spectrogram = 17;
 
     // Time series of the data for each polarisation, rebinned in time to NDAT_DS bins, averaged over all frequency channels.
     // This includes max, min, and mean of the power in each bin.
-    double timeseries = 0;
+    repeated double timeseries = 18;
 
     // Time series of the data for each polarisation, rebinned in time to NDAT_DS bins, averaged over all frequency channels,
     // except those flagged by RFI. This includes max, min, and mean of the power in each bin.
-    double timeseries_masked = 0;
-
-    // The mean of the data for each polarisation, dimension, and channel.
-    double mean_spectrum = 0;
-
-    // The variance of the data for each polarisation, dimension, and channel.
-    double variance_spectrum = 0;
-
-    // Mean power of the data for each polarisation and channel.
-    double mean_spectral_power = 0;
-
-    // Maximum power of the data for each polarisation and channel.
-    double max_spectral_power = 0;
-
-    // Histogram of the input data integer states for each polarisation and dimension, averaged over all channels.
-    double histogram_1d_freq_avg = 0;
-
-    // Histogram of the input data integer states for each polarisation and dimension, averaged over all channels, except those flagged for RFI.
-    double histogram_1d_freq_avg_masked = 0;
-
-    // Rebinned 2D histogram of the input data integer states for each polarisation, averaged over all channels.
-    double histogram_rebinned_2d_freq_avg = 0;
-
-    // Rebinned 2D histogram of the input data integer states for each polarisation, averaged over all channels, except those flagged for RFI.
-    double histogram_rebinned_2d_freq_avg_masked = 0;
-
-    // Rebinned histogram of the input data integer states for each polarisation and dimension, averaged over all channels.
-    double histogram_rebinned_1d_freq_avg = 0;
-
-    // Rebinned histogram of the input data integer states for each polarisation and dimension, averaged over all channels, except those flagged for RFI.
-    double histogram_rebinned_1d_freq_avg_masked = 0;
-    */
+    repeated double timeseries_masked = 19;
 }
 
 // Message used in unit testing to stub
