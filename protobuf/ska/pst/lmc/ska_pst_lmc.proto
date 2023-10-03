@@ -724,7 +724,8 @@ message DspDiskMonitorData {
 }
 
 // Message for the STAT.CORE monitoring results of a subband. https://developer.skao.int/projects/ska-pst-stat/en/latest/architecture/index.html#hdf5-data-structure
-message StatMonitorData {// The mean of the data for each polarisation and dimension, averaged over all channels.
+message StatMonitorData {
+    // The mean of the data for each polarisation and dimension, averaged over all channels.
     repeated float mean_frequency_avg = 1;
 
     // The mean of the data for each polarisation and dimension, averaged over all channels, except those flagged for RFI.
