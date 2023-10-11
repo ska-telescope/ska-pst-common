@@ -57,14 +57,31 @@ void ska::pst::common::SquareWaveGenerator::configure(const ska::pst::common::As
     on_stddev = sqrt(config.get_double("CAL_ON_INTENSITY")/terms);
   }
 
+  if (on_stddev <= off_stddev)
+  {
+    SPDLOG_WARN("ska::pst::common::SquareWaveGenerator::configure CAL_ON_INTENSITY <= CAL_OFF_INTENSITY");
+  }
+
   if (config.has("CAL_DUTY_CYCLE"))
   {
     duty_cycle = config.get_double("CAL_DUTY_CYCLE");
   }
 
+  if (duty_cycle <= 0.0 || duty_cycle >= 1.0)
+  {
+    SPDLOG_ERROR("ska::pst::common::SquareWaveGenerator::configure invalid CAL_DUTY_CYCLE={}", duty_cycle);
+    throw std::runtime_error("ska::pst::common::SquareWaveGenerator::configure invalid CAL_DUTY_CYCLE");
+  }
+
   if (config.has("CALFREQ"))
   {
     frequency = config.get_double("CALFREQ");
+  }
+
+  if (frequency <= 0.0)
+  {
+    SPDLOG_ERROR("ska::pst::common::SquareWaveGenerator::configure invalid CALFREQ={}", frequency);
+    throw std::runtime_error("ska::pst::common::SquareWaveGenerator::configure invalid CALFREQ");
   }
 
   sampling_interval = config.get_double("TSAMP") / ska::pst::common::microseconds_per_second;
@@ -78,17 +95,19 @@ void ska::pst::common::SquareWaveGenerator::fill_data(char * buf, uint64_t size)
   const uint32_t nsamp_per_packet = layout->get_samples_per_packet();
   const uint32_t nchan_per_packet = layout->get_nchan_per_packet();
   const uint32_t nbyte_per_sample = ndim * nbit / nbits_per_byte;
+  const uint32_t nbyte_stride = nsamp_per_packet * nbyte_per_sample;;
   const uint32_t narray = nchan_per_packet * npol;
-  const uint32_t resolution = narray * nsamp_per_packet * nbyte_per_sample;
+  const uint32_t resolution = narray * nbyte_stride;
   const uint32_t nblocks = size / resolution;
 
   assert(size % resolution == 0);
 
-  SPDLOG_DEBUG("ska::pst::common::SquareWaveGenerator::fill_data nsamp_per_packet={} nchan_per_packet={} size={} resolution={} nblocks={}", nsamp_per_packet, nchan_per_packet, size, resolution, nblocks);
+  SPDLOG_DEBUG("ska::pst::common::SquareWaveGenerator::fill_data nsamp_per_packet={} nchan_per_packet={} size={} resolution={} nblocks={}",
+               nsamp_per_packet, nchan_per_packet, size, resolution, nblocks);
 
   double phase_per_sample = sampling_interval * frequency;
 
-  SPDLOG_TRACE("ska::pst::common::SquareWaveGenerator::fill_data sampling_interval={} calfreq={} phase_per_sample={}",
+  SPDLOG_DEBUG("ska::pst::common::SquareWaveGenerator::fill_data sampling_interval={} calfreq={} phase_per_sample={}",
                sampling_interval, frequency, phase_per_sample);
 
   uint64_t i = 0;
@@ -107,16 +126,16 @@ void ska::pst::common::SquareWaveGenerator::fill_data(char * buf, uint64_t size)
       if (fractional_phase < duty_cycle)
       {
         dat_sequence.set_stddev(on_stddev);
-        // number of samples until end of on-pulse region
-        nsamp = (duty_cycle - fractional_phase) / phase_per_sample;
+        // number of samples until start of off-pulse region
+        nsamp = (duty_cycle - fractional_phase) / phase_per_sample + 1;
 
         SPDLOG_TRACE("ska::pst::common::SquareWaveGenerator::fill_data with {} on-pulse samples", nsamp);
       }
       else
       {
         dat_sequence.set_stddev(off_stddev);
-        // number of samples until end of off-pulse region
-        nsamp = (1.0 - fractional_phase) / phase_per_sample;
+        // number of samples until start of on-pulse region
+        nsamp = (1.0 - fractional_phase) / phase_per_sample + 1;
 
         SPDLOG_TRACE("ska::pst::common::SquareWaveGenerator::fill_data with {} off-pulse samples", nsamp);
       }
@@ -127,11 +146,14 @@ void ska::pst::common::SquareWaveGenerator::fill_data(char * buf, uint64_t size)
         SPDLOG_TRACE("ska::pst::common::SquareWaveGenerator::fill_data truncate to {} samples", nsamp);
       }
 
+      assert (nsamp > 0);
+
       for (uint32_t ipol=0; ipol<npol; ipol++)
       {
         for (uint32_t ichan=0; ichan<nchan_per_packet; ichan++)
         {
-          dat_sequence.generate(buf + isamp * nbyte_per_sample, nsamp * nbyte_per_sample);
+          uint32_t offset = (ipol*nchan_per_packet + ichan)*nbyte_stride + isamp*nbyte_per_sample;
+          dat_sequence.generate(buf + offset, nsamp * nbyte_per_sample);
         }
       }
 
