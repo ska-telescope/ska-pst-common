@@ -73,6 +73,13 @@ namespace ska::pst::common {
       void configure(const ska::pst::common::AsciiHeader& header);
 
       /**
+       * @brief Set the standard deviation of the generated data
+       *
+       * @param stddev the standard deviation of the normal distribution
+       */
+      void set_stddev (float _stddev) { stddev = _stddev; }
+
+      /**
        * @brief Reset the internal state of the Normal Sequence.
        * The next call to generate or validate will behave as per the first call to these functions.
        *
@@ -80,7 +87,7 @@ namespace ska::pst::common {
       void reset();
 
       /**
-       * @brief Generate a random sequence of normally distributed unsigned 8-bit integers.
+       * @brief Generate a random sequence of normally distributed unsigned 8-bit or 16-bit integers.
        * Each random number generated advances the sequence of random numbers.
        *
        * @param buffer pointer to memory to which the random sequence should be written

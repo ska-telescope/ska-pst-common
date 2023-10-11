@@ -32,6 +32,7 @@
 #include "ska/pst/common/utils/RandomDataGenerator.h"
 #include "ska/pst/common/utils/SineWaveGenerator.h"
 #include "ska/pst/common/utils/GaussianNoiseGenerator.h"
+#include "ska/pst/common/utils/SquareWaveGenerator.h"
 
 auto ska::pst::common::get_supported_data_generators() -> std::vector<std::string>
 {
@@ -39,6 +40,7 @@ auto ska::pst::common::get_supported_data_generators() -> std::vector<std::strin
   supported.emplace_back("Random");
   supported.emplace_back("Sine");
   supported.emplace_back("GaussianNoise");
+  supported.emplace_back("SquareWave");
   return supported;
 }
 
@@ -64,6 +66,8 @@ auto ska::pst::common::PacketGeneratorFactory(const std::string &name, const std
   if (name == "GaussianNoise") {
     return std::shared_ptr<ska::pst::common::PacketGenerator>(new ska::pst::common::GaussianNoiseGenerator(layout));
   }
-
+  if (name == "SquareWave") {
+    return std::shared_ptr<ska::pst::common::PacketGenerator>(new ska::pst::common::SquareWaveGenerator(layout));
+  }
   throw std::runtime_error("ska::pst::common::PacketGeneratorFactory unrecognized name");
 }

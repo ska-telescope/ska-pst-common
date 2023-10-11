@@ -35,31 +35,134 @@
 #include "ska/pst/common/utils/SquareWaveGenerator.h"
 
 ska::pst::common::SquareWaveGenerator::SquareWaveGenerator(std::shared_ptr<ska::pst::common::PacketLayout> _layout) :
-  ska::pst::common::ScaleWeightGenerator(std::move(_layout))
+  ska::pst::common::GaussianNoiseGenerator(std::move(_layout))
 {
 }
 
 void ska::pst::common::SquareWaveGenerator::configure(const ska::pst::common::AsciiHeader& config)
 {
   SPDLOG_DEBUG("ska::pst::common::SquareWaveGenerator::configure");
-  ska::pst::common::ScaleWeightGenerator::configure(config);
-  dat_sequence.configure(config);
+  ska::pst::common::GaussianNoiseGenerator::configure(config);
+
+  // number of terms that contribute to total intensity: re,im + polA,polB
+  const unsigned terms = 4;
+
+  if (config.has("CAL_OFF_INTENSITY"))
+  {
+    off_stddev = sqrt(config.get_double("CAL_OFF_INTENSITY")/terms);
+  }
+
+  if (config.has("CAL_ON_INTENSITY"))
+  {
+    on_stddev = sqrt(config.get_double("CAL_ON_INTENSITY")/terms);
+  }
+
+  if (config.has("CAL_DUTY_CYCLE"))
+  {
+    duty_cycle = config.get_double("CAL_DUTY_CYCLE");
+  }
+
+  if (config.has("CALFREQ"))
+  {
+    frequency = config.get_double("CALFREQ");
+  }
+
+  sampling_interval = config.get_double("TSAMP") / ska::pst::common::microseconds_per_second;
 }
 
 void ska::pst::common::SquareWaveGenerator::fill_data(char * buf, uint64_t size)
 {
   SPDLOG_TRACE("ska::pst::common::SquareWaveGenerator::fill_data buf={} size={}", reinterpret_cast<void*>(buf), size);
-  dat_sequence.generate(buf, size);
+
+  static constexpr uint32_t nbits_per_byte = 8;
+  const uint32_t nsamp_per_packet = layout->get_samples_per_packet();
+  const uint32_t nchan_per_packet = layout->get_nchan_per_packet();
+  const uint32_t nbyte_per_sample = ndim * nbit / nbits_per_byte;
+  const uint32_t narray = nchan_per_packet * npol;
+  const uint32_t resolution = narray * nsamp_per_packet * nbyte_per_sample;
+  const uint32_t nblocks = size / resolution;
+
+  assert(size % resolution == 0);
+
+  SPDLOG_DEBUG("ska::pst::common::SquareWaveGenerator::fill_data nsamp_per_packet={} nchan_per_packet={} size={} resolution={} nblocks={}", nsamp_per_packet, nchan_per_packet, size, resolution, nblocks);
+
+  double phase_per_sample = sampling_interval * frequency;
+
+  SPDLOG_TRACE("ska::pst::common::SquareWaveGenerator::fill_data sampling_interval={} calfreq={} phase_per_sample={}",
+               sampling_interval, frequency, phase_per_sample);
+
+  uint64_t i = 0;
+  for (uint32_t iblock=0; iblock<nblocks; iblock++)
+  {
+    SPDLOG_TRACE("ska::pst::common::SquareWaveGenerator::fill_data iblock={}", iblock);
+
+    uint32_t isamp = 0;
+    while (isamp < nsamp_per_packet)
+    {
+      double fractional_phase = fmod( (current_sample+isamp) * phase_per_sample, 1.0);
+      uint32_t nsamp = 0;
+
+      SPDLOG_TRACE("ska::pst::common::SquareWaveGenerator::fill_data with fractional_phase={}", fractional_phase);
+
+      if (fractional_phase < duty_cycle)
+      {
+        dat_sequence.set_stddev(on_stddev);
+        // number of samples until end of on-pulse region
+        nsamp = (duty_cycle - fractional_phase) / phase_per_sample;
+
+        SPDLOG_TRACE("ska::pst::common::SquareWaveGenerator::fill_data with {} on-pulse samples", nsamp);
+      }
+      else
+      {
+        dat_sequence.set_stddev(off_stddev);
+        // number of samples until end of off-pulse region
+        nsamp = (1.0 - fractional_phase) / phase_per_sample;
+
+        SPDLOG_TRACE("ska::pst::common::SquareWaveGenerator::fill_data with {} off-pulse samples", nsamp);
+      }
+
+      if (isamp + nsamp > nsamp_per_packet)
+      {
+        nsamp = nsamp_per_packet - isamp;
+        SPDLOG_TRACE("ska::pst::common::SquareWaveGenerator::fill_data truncate to {} samples", nsamp);
+      }
+
+      for (uint32_t ipol=0; ipol<npol; ipol++)
+      {
+        for (uint32_t ichan=0; ichan<nchan_per_packet; ichan++)
+        {
+          dat_sequence.generate(buf + isamp * nbyte_per_sample, nsamp * nbyte_per_sample);
+        }
+      }
+
+      isamp += nsamp;
+    }
+
+    buf += resolution;
+
+    current_channel += nchan_per_packet;
+    if (current_channel >= nchan)
+    {
+      current_channel = 0;
+      current_sample += nsamp_per_packet;
+    }    
+  }
 }
 
 auto ska::pst::common::SquareWaveGenerator::test_data(char * buf, uint64_t size) -> bool
 {
   SPDLOG_TRACE("ska::pst::common::SquareWaveGenerator::test_data buf={} size={}", reinterpret_cast<void*>(buf), size);
-  return dat_sequence.validate(buf, size);
-}
 
-void ska::pst::common::SquareWaveGenerator::reset()
-{
-  ska::pst::common::ScaleWeightGenerator::reset();
-  dat_sequence.reset();
+  temp_data.resize(size);
+  fill_data(temp_data.data(), size);
+
+  for (uint64_t i=0; i < size; i++)
+  {
+    if (temp_data[i] != buf[i])
+    {
+      return false;
+    }
+  }
+
+  return true;
 }

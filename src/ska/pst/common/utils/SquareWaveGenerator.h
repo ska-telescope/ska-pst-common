@@ -28,8 +28,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "ska/pst/common/utils/ScaleWeightGenerator.h"
-#include "ska/pst/common/utils/NormalSequence.h"
+#include "ska/pst/common/utils/GaussianNoiseGenerator.h"
 
 #ifndef SKA_PST_COMMON_UTILS_SquareWaveGenerator_h
 #define SKA_PST_COMMON_UTILS_SquareWaveGenerator_h
@@ -40,7 +39,7 @@ namespace ska::pst::common {
    * @brief Generates and validates data using a NormalSequence
    *
    */
-  class SquareWaveGenerator : public ScaleWeightGenerator
+  class SquareWaveGenerator : public GaussianNoiseGenerator
   {
     public:
 
@@ -81,17 +80,31 @@ namespace ska::pst::common {
        */
       auto test_data(char * buf, uint64_t size) -> bool override;
 
-      /**
-       * @brief Reset all sequences (data, weights, and scales)
-       * The next call to fill_block or test_block will behave as per the first call to these functions.
-       *
-       */
-      void reset() override;
-
     private:
 
-      //! sequence of normally distributed values for the data samples
-      NormalSequence dat_sequence;
+      //! Frequency of square wave (inverse of period) in Hz
+      double frequency{1.0};
+
+      //! Sampling interval in seconds
+      double sampling_interval{0.0};
+
+      //! Fraction of period in the on-pulse state
+      double duty_cycle{0.5};
+
+      //! Standard deviation of off-pulse noise
+      double off_stddev{10.0};
+
+      //! Standard deviation of on-pulse noise
+      double on_stddev{11.0};
+
+      //! Current sample in the sequence
+      uint64_t current_sample{0};   
+
+      //! Current channel in the heap
+      uint32_t current_channel{0};
+
+      //! Temporary buffer used by test_data
+      std::vector<char> temp_data;
   };
 
 } // namespace ska::pst::common

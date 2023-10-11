@@ -88,7 +88,7 @@ namespace ska::pst::common {
        */
       void reset() override;
 
-    private:
+    protected:
 
       //! sequence of normally distributed values for the data samples
       NormalSequence dat_sequence;
