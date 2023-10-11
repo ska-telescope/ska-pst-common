@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Square Kilometre Array Observatory
+ * Copyright 2023 Square Kilometre Array Observatory
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -29,32 +29,32 @@
  */
 
 #include "ska/pst/common/utils/ScaleWeightGenerator.h"
-#include "ska/pst/common/utils/RandomSequence.h"
+#include "ska/pst/common/utils/NormalSequence.h"
 
-#ifndef SKA_PST_COMMON_UTILS_RandomDataGenerator_h
-#define SKA_PST_COMMON_UTILS_RandomDataGenerator_h
+#ifndef SKA_PST_COMMON_UTILS_SquareWaveGenerator_h
+#define SKA_PST_COMMON_UTILS_SquareWaveGenerator_h
 
 namespace ska::pst::common {
 
   /**
-   * @brief Generates and validates data + weights using a RandomSequence for each
+   * @brief Generates and validates data using a NormalSequence
    *
    */
-  class RandomDataGenerator : public ScaleWeightGenerator
+  class SquareWaveGenerator : public ScaleWeightGenerator
   {
     public:
 
       /**
-       * @brief Construct a new RandomDataGenerator object
+       * @brief Construct a new SquareWaveGenerator object
        *
        */
-      explicit RandomDataGenerator(std::shared_ptr<PacketLayout> layout);
+      explicit SquareWaveGenerator(std::shared_ptr<PacketLayout> layout);
 
       /**
-       * @brief Destroy the RandomDataGenerator object
+       * @brief Destroy the SquareWaveGenerator object
        *
        */
-      ~RandomDataGenerator() override = default;
+      ~SquareWaveGenerator() override = default;
 
       /**
        * @brief Configure the streams written to data + weights
@@ -90,10 +90,11 @@ namespace ska::pst::common {
 
     private:
 
-      //! sequence of randomly distributed values for the data samples
-      RandomSequence dat_sequence;
+      //! sequence of normally distributed values for the data samples
+      NormalSequence dat_sequence;
   };
 
 } // namespace ska::pst::common
 
-#endif // SKA_PST_COMMON_UTILS_RandomDataGenerator_h
+#endif // SKA_PST_COMMON_UTILS_SquareWaveGenerator_h
+

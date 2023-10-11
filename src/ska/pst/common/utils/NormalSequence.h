@@ -80,7 +80,7 @@ namespace ska::pst::common {
       void reset();
 
       /**
-       * @brief Generate a random sequence of uniformly distributed unsigned 8-bit integers.
+       * @brief Generate a random sequence of normally distributed unsigned 8-bit integers.
        * Each random number generated advances the sequence of random numbers.
        *
        * @param buffer pointer to memory to which the random sequence should be written

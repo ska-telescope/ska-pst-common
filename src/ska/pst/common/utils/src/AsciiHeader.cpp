@@ -388,7 +388,6 @@ bool ska::pst::common::operator==(const AsciiHeader& A, const AsciiHeader& B)
   return true;
 }
 
-template void ska::pst::common::AsciiHeader::get<int32_t>(const std::string &key, int32_t * val);
 template void ska::pst::common::AsciiHeader::get<int32_t>(const std::string &key, int32_t * val) const;
 template void ska::pst::common::AsciiHeader::get<uint32_t>(const std::string &key, uint32_t * val) const;
 template void ska::pst::common::AsciiHeader::get<int64_t>(const std::string &key, int64_t * val) const;

@@ -32,33 +32,33 @@
 
 #include <utility>
 
-#include "ska/pst/common/utils/GaussianNoiseGenerator.h"
+#include "ska/pst/common/utils/SquareWaveGenerator.h"
 
-ska::pst::common::GaussianNoiseGenerator::GaussianNoiseGenerator(std::shared_ptr<ska::pst::common::PacketLayout> _layout) :
+ska::pst::common::SquareWaveGenerator::SquareWaveGenerator(std::shared_ptr<ska::pst::common::PacketLayout> _layout) :
   ska::pst::common::ScaleWeightGenerator(std::move(_layout))
 {
 }
 
-void ska::pst::common::GaussianNoiseGenerator::configure(const ska::pst::common::AsciiHeader& config)
+void ska::pst::common::SquareWaveGenerator::configure(const ska::pst::common::AsciiHeader& config)
 {
-  SPDLOG_DEBUG("ska::pst::common::GaussianNoiseGenerator::configure");
+  SPDLOG_DEBUG("ska::pst::common::SquareWaveGenerator::configure");
   ska::pst::common::ScaleWeightGenerator::configure(config);
   dat_sequence.configure(config);
 }
 
-void ska::pst::common::GaussianNoiseGenerator::fill_data(char * buf, uint64_t size)
+void ska::pst::common::SquareWaveGenerator::fill_data(char * buf, uint64_t size)
 {
-  SPDLOG_TRACE("ska::pst::common::GaussianNoiseGenerator::fill_data buf={} size={}", reinterpret_cast<void*>(buf), size);
+  SPDLOG_TRACE("ska::pst::common::SquareWaveGenerator::fill_data buf={} size={}", reinterpret_cast<void*>(buf), size);
   dat_sequence.generate(buf, size);
 }
 
-auto ska::pst::common::GaussianNoiseGenerator::test_data(char * buf, uint64_t size) -> bool
+auto ska::pst::common::SquareWaveGenerator::test_data(char * buf, uint64_t size) -> bool
 {
-  SPDLOG_TRACE("ska::pst::common::GaussianNoiseGenerator::test_data buf={} size={}", reinterpret_cast<void*>(buf), size);
+  SPDLOG_TRACE("ska::pst::common::SquareWaveGenerator::test_data buf={} size={}", reinterpret_cast<void*>(buf), size);
   return dat_sequence.validate(buf, size);
 }
 
-void ska::pst::common::GaussianNoiseGenerator::reset()
+void ska::pst::common::SquareWaveGenerator::reset()
 {
   ska::pst::common::ScaleWeightGenerator::reset();
   dat_sequence.reset();

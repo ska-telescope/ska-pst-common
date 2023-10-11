@@ -4,7 +4,7 @@ NDIM          2
 NCHAN         20736
 NBIT          16
 
-START_CHAN    0
+START_CHANNEL 0
 
 RESOLUTION              5308416
 

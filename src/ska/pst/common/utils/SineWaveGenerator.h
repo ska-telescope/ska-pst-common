@@ -31,8 +31,7 @@
 #include <complex>
 #include <spdlog/spdlog.h>
 
-#include "ska/pst/common/utils/PacketGenerator.h"
-#include "ska/pst/common/utils/UniformSequence.h"
+#include "ska/pst/common/utils/ScaleWeightGenerator.h"
 
 #ifndef SKA_PST_COMMON_UTILS_SineWaveGenerator_h
 #define SKA_PST_COMMON_UTILS_SineWaveGenerator_h
@@ -40,10 +39,10 @@
 namespace ska::pst::common {
 
   /**
-   * @brief Generates and validates data + weights using a sine wave for each
+   * @brief Generates and validates data using a sine wave
    *
    */
-  class SineWaveGenerator : public PacketGenerator
+  class SineWaveGenerator : public ScaleWeightGenerator
   {
     public:
 
@@ -75,22 +74,6 @@ namespace ska::pst::common {
       void fill_data(char * buf, uint64_t size) override;
 
       /**
-       * @brief Fill the buffer with a sequence of weights
-       *
-       * @param buf base memory address of the buffer to be filled
-       * @param size number of bytes to be written to buffer
-       */
-      void fill_weights(char * buf, uint64_t size) override;
-
-      /**
-       * @brief Fill the buffer with a sequence of scale factors
-       *
-       * @param buf base memory address of the buffer to be filled
-       * @param size number of bytes to be written to buffer
-       */
-      void fill_scales(char * buf, uint64_t size) override;
-
-      /**
        * @brief Verify the data stream in the provided buffer
        *
        * @param buf pointer to buffer containing sequence of data to be verified
@@ -99,26 +82,6 @@ namespace ska::pst::common {
        * @return true if data match expectations
        */
       auto test_data(char * buf, uint64_t size) -> bool override;
-
-      /**
-       * @brief Verify the weights stream in the provided buffer
-       *
-       * @param buf pointer to buffer containing sequence of weights to be verified
-       * @param size number of bytes in buffer to be tested
-       *
-       * @return true if weights match expectations
-       */
-      auto test_weights(char * buf, uint64_t size) -> bool override;
-
-      /**
-       * @brief Verify the scales stream in the provided buffer
-       *
-       * @param buf pointer to buffer containing sequence of scale factors to be verified
-       * @param size number of bytes in buffer to be tested
-       *
-       * @return true if scales match expectations
-       */
-      auto test_scales(char * buf, uint64_t size) -> bool override;
 
       /**
        * @brief Reset all sequences (data, weights, and scales)
@@ -228,13 +191,6 @@ namespace ska::pst::common {
       double amplitude{0};
 
       uint32_t current_channel{0};
-
-      //! sequence of uniform values for the weights
-      UniformSequence<char> wts_sequence;
-
-      //! sequence of uniform values for the scales
-      UniformSequence<float> scl_sequence;
-
   };
 
 }  // namespace ska::pst::common
