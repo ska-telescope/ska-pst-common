@@ -80,6 +80,40 @@ namespace ska::pst::common {
        */
       auto test_data(char * buf, uint64_t size) -> bool override;
 
+      /**
+       * @brief Set the on-pulse intensity for all polarizations and frequency channels
+       *
+       * @param intensity the intensity for all polarizations and frequency channels
+       *
+       */
+      void set_on_intensity (double intensity);
+
+      /**
+       * @brief Set the on-pulse intensity for all polarizations with a slope in frequency channel
+       *
+       * @param intensity0 the intensity for all polarizations at frequency channel zero
+       * @param intensityN the intensity for all polarizations at frequency channel N-1
+       *
+       */
+      void set_on_intensity (double intensity0, double intensityN);
+
+      /**
+       * @brief Set the on-pulse intensity for the specified polarization and all frequency channels
+       *
+       * @param intensity the intensity for the specified polarization and all frequency channels
+       *
+       */
+      void set_on_intensity_pol (unsigned ipol, double intensity);
+
+      /**
+       * @brief Set the on-pulse intensity for the specified polarization with a slope in frequency channel
+       *
+       * @param intensity0 the intensity for the specified polarization at frequency channel zero
+       * @param intensityN the intensity for the specified polarization at frequency channel N-1
+       *
+       */
+      void set_on_intensity_pol (unsigned ipol, double intensity0, double intensityN);
+
     private:
 
       //! Frequency of square wave (inverse of period) in Hz
@@ -95,7 +129,19 @@ namespace ska::pst::common {
       double off_stddev{10.0};
 
       //! Standard deviation of on-pulse noise
-      double on_stddev{11.0};
+      double default_on_stddev{11.0};
+
+      //! Standard deviations of on-pulse noise as a function of polarization and frequency
+      std::vector<std::vector<double>> on_stddev;
+
+      //! Resize the on_stddevlitudes array
+      void resize_on_stddev (double set_stddev = 0.0);
+
+      //! Set all values in the on_stddevlitudes array to a single value
+      void set_on_stddev (double stddev);
+
+      //! Set all values in the on_stddevlitudes array for the specified polarization to a single value
+      void set_on_stddev_pol (unsigned ipol, double stddev);
 
       //! Current sample in the sequence
       uint64_t current_sample{0};   

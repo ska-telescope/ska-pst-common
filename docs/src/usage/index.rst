@@ -112,3 +112,25 @@ like the following
   :width: 800
   :alt: Intensity of simulated square wave as a function of modulation phase and radio frequency
 
+It is also possible to put spectral gradient on the intensity of the square wave for each polarization; e.g. ::
+
+    CAL_ON_POL_0_CHAN_0_INTENSITY 6.0
+    CAL_ON_POL_0_CHAN_N_INTENSITY 12.0
+
+    CAL_ON_POL_1_CHAN_0_INTENSITY 16.0
+    CAL_ON_POL_1_CHAN_N_INTENSITY 8.0
+
+yields in pol 0:
+
+.. image:: square_wave_pol0.png
+  :width: 800
+  :alt: Intensity of simulated square wave as a function of modulation phase and radio frequency
+
+and in pol 1:
+
+.. image:: square_wave_pol1.png
+  :width: 800
+  :alt: Intensity of simulated square wave as a function of modulation phase and radio frequency
+
+
+
