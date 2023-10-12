@@ -86,7 +86,7 @@ namespace ska::pst::common {
        * @param intensity the intensity for all polarizations and frequency channels
        *
        */
-      void set_on_intensity (double intensity);
+      void set_on_intensity(float intensity);
 
       /**
        * @brief Set the on-pulse intensity for all polarizations with a slope in frequency channel
@@ -95,7 +95,7 @@ namespace ska::pst::common {
        * @param intensityN the intensity for all polarizations at frequency channel N-1
        *
        */
-      void set_on_intensity (double intensity0, double intensityN);
+      void set_on_intensity(float intensity0, float intensityN);
 
       /**
        * @brief Set the on-pulse intensity for the specified polarization and all frequency channels
@@ -103,7 +103,7 @@ namespace ska::pst::common {
        * @param intensity the intensity for the specified polarization and all frequency channels
        *
        */
-      void set_on_intensity_pol (unsigned ipol, double intensity);
+      void set_on_intensity_pol(unsigned ipol, float intensity);
 
       /**
        * @brief Set the on-pulse intensity for the specified polarization with a slope in frequency channel
@@ -112,7 +112,7 @@ namespace ska::pst::common {
        * @param intensityN the intensity for the specified polarization at frequency channel N-1
        *
        */
-      void set_on_intensity_pol (unsigned ipol, double intensity0, double intensityN);
+      void set_on_intensity_pol(unsigned ipol, float intensity0, float intensityN);
 
     private:
 
@@ -126,22 +126,25 @@ namespace ska::pst::common {
       double duty_cycle{0.5};
 
       //! Standard deviation of off-pulse noise
-      double off_stddev{10.0};
+      float off_stddev{10.0};
 
       //! Standard deviation of on-pulse noise
-      double default_on_stddev{11.0};
+      float default_on_stddev{11.0};
 
       //! Standard deviations of on-pulse noise as a function of polarization and frequency
-      std::vector<std::vector<double>> on_stddev;
+      std::vector<std::vector<float>> on_stddev;
 
       //! Resize the on_stddevlitudes array
-      void resize_on_stddev (double set_stddev = 0.0);
+      void resize_on_stddev(float set_stddev = 0.0);
 
       //! Set all values in the on_stddevlitudes array to a single value
-      void set_on_stddev (double stddev);
+      void set_on_stddev(float stddev);
 
       //! Set all values in the on_stddevlitudes array for the specified polarization to a single value
-      void set_on_stddev_pol (unsigned ipol, double stddev);
+      void set_on_stddev_pol(unsigned ipol, float stddev);
+
+      //! Convert intensity to standard deviation
+      float intensity_to_stddev(float intensity);
 
       //! Current sample in the sequence
       uint64_t current_sample{0};   

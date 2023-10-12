@@ -38,7 +38,7 @@ ska::pst::common::SquareWaveGenerator::SquareWaveGenerator(std::shared_ptr<ska::
 {
 }
 
-void ska::pst::common::SquareWaveGenerator::resize_on_stddev(double set_stddev)
+void ska::pst::common::SquareWaveGenerator::resize_on_stddev(float set_stddev)
 {
   on_stddev.resize(npol);
   for (unsigned ipol=0; ipol < npol; ipol++)
@@ -54,7 +54,12 @@ void ska::pst::common::SquareWaveGenerator::resize_on_stddev(double set_stddev)
   }
 }
 
-void ska::pst::common::SquareWaveGenerator::set_on_intensity (double intensity)
+auto ska::pst::common::SquareWaveGenerator::intensity_to_stddev(float intensity) -> float
+{
+  return std::sqrt(intensity/static_cast<float>(ndim));
+}
+
+void ska::pst::common::SquareWaveGenerator::set_on_intensity(float intensity)
 {
   resize_on_stddev();
 
@@ -62,49 +67,49 @@ void ska::pst::common::SquareWaveGenerator::set_on_intensity (double intensity)
   {
     for (unsigned ichan=0; ichan < nchan; ichan++)
     {
-      on_stddev[ipol][ichan] = sqrt(intensity/ndim);
+      on_stddev[ipol][ichan] = intensity_to_stddev(intensity);
     }
   }
 }
 
-void ska::pst::common::SquareWaveGenerator::set_on_intensity (double intensity0, double intensityN)
+void ska::pst::common::SquareWaveGenerator::set_on_intensity(float intensity0, float intensityN)
 {
   resize_on_stddev();
 
-  double slope = (intensityN - intensity0) / nchan;
+  float slope = (intensityN - intensity0) / nchan; // NOLINT
 
   for (unsigned ipol=0; ipol < npol; ipol++)
   {
     for (unsigned ichan=0; ichan < nchan; ichan++)
     {
-      double intensity = intensity0 + ichan * slope;
-      on_stddev[ipol][ichan] = sqrt(intensity/ndim);
+      float intensity = intensity0 + ichan * slope; // NOLINT
+      on_stddev[ipol][ichan] = intensity_to_stddev(intensity);
     }
   }
 }
 
-void ska::pst::common::SquareWaveGenerator::set_on_intensity_pol (unsigned ipol, double intensity)
+void ska::pst::common::SquareWaveGenerator::set_on_intensity_pol(unsigned ipol, float intensity)
 {
   resize_on_stddev();
 
   for (unsigned ichan=0; ichan < nchan; ichan++)
   {
-    on_stddev[ipol][ichan] = sqrt(intensity/ndim);
+    on_stddev[ipol][ichan] = intensity_to_stddev(intensity);
   }
 }
 
-void ska::pst::common::SquareWaveGenerator::set_on_intensity_pol (unsigned ipol, double intensity0, double intensityN)
+void ska::pst::common::SquareWaveGenerator::set_on_intensity_pol(unsigned ipol, float intensity0, float intensityN)
 {
   resize_on_stddev();
 
-  double slope = (intensityN - intensity0) / nchan;
+  float slope = (intensityN - intensity0) / nchan; // NOLINT
   SPDLOG_DEBUG("ska::pst::common::SquareWaveGenerator::set_on_intensity_pol ipol={} slope={}", ipol, slope);
 
   for (unsigned ichan=0; ichan < nchan; ichan++)
   {
-    double intensity = intensity0 + ichan * slope;
+    float intensity = intensity0 + ichan * slope; // NOLINT
     SPDLOG_TRACE("ska::pst::common::SquareWaveGenerator::set_on_intensity_pol ipol={} ichan={} intensity={}", ipol, ichan, intensity);
-    on_stddev[ipol][ichan] = sqrt(intensity/ndim);
+    on_stddev[ipol][ichan] = intensity_to_stddev(intensity);
   }
 }
 
@@ -118,32 +123,32 @@ void ska::pst::common::SquareWaveGenerator::configure(const ska::pst::common::As
   if (config.has("CAL_OFF_INTENSITY"))
   {
     SPDLOG_DEBUG("ska::pst::common::SquareWaveGenerator::configure CAL_OFF_INTENSITY");
-    off_stddev = sqrt(config.get_double("CAL_OFF_INTENSITY")/ndim);
+    off_stddev = intensity_to_stddev(config.get_float("CAL_OFF_INTENSITY"));
   }
 
   if (config.has("CAL_ON_INTENSITY"))
   {
     SPDLOG_DEBUG("ska::pst::common::SquareWaveGenerator::configure CAL_ON_INTENSITY");
-    set_on_intensity(config.get_double("CAL_ON_INTENSITY"));
+    set_on_intensity(config.get_float("CAL_ON_INTENSITY"));
   }
 
   if (config.has("CAL_ON_POL_0_INTENSITY"))
   {
     SPDLOG_DEBUG("ska::pst::common::SquareWaveGenerator::configure CAL_ON_POL_0_INTENSITY");
-    set_on_intensity_pol(0, config.get_double("CAL_ON_POL_0_INTENSITY"));
+    set_on_intensity_pol(0, config.get_float("CAL_ON_POL_0_INTENSITY"));
   }
 
   if (config.has("CAL_ON_POL_1_INTENSITY"))
   {
     SPDLOG_DEBUG("ska::pst::common::SquareWaveGenerator::configure CAL_ON_POL_1_INTENSITY");
-    set_on_intensity_pol(1, config.get_double("CAL_ON_POL_1_INTENSITY"));
+    set_on_intensity_pol(1, config.get_float("CAL_ON_POL_1_INTENSITY"));
   }
 
   if (config.has("CAL_ON_CHAN_0_INTENSITY"))
   {
     SPDLOG_DEBUG("ska::pst::common::SquareWaveGenerator::configure CAL_ON_CHAN_0_INTENSITY (expecting CAL_ON_CHAN_N_INTENSITY)");
-    double chan0_intensity = config.get_double("CAL_ON_CHAN_0_INTENSITY");
-    double chanN_intensity = config.get_double("CAL_ON_CHAN_N_INTENSITY");
+    float chan0_intensity = config.get_float("CAL_ON_CHAN_0_INTENSITY");
+    float chanN_intensity = config.get_float("CAL_ON_CHAN_N_INTENSITY");
 
     set_on_intensity(chan0_intensity, chanN_intensity);
   }
@@ -151,16 +156,16 @@ void ska::pst::common::SquareWaveGenerator::configure(const ska::pst::common::As
   if (config.has("CAL_ON_POL_0_CHAN_0_INTENSITY"))
   {
     SPDLOG_DEBUG("ska::pst::common::SquareWaveGenerator::configure CAL_ON_POL_0_CHAN_0_INTENSITY (expecting CAL_ON_POL_0_CHAN_N_INTENSITY)");
-    double chan0_intensity = config.get_double("CAL_ON_POL_0_CHAN_0_INTENSITY");
-    double chanN_intensity = config.get_double("CAL_ON_POL_0_CHAN_N_INTENSITY");
+    float chan0_intensity = config.get_float("CAL_ON_POL_0_CHAN_0_INTENSITY");
+    float chanN_intensity = config.get_float("CAL_ON_POL_0_CHAN_N_INTENSITY");
     set_on_intensity_pol(0, chan0_intensity, chanN_intensity);
   }
 
   if (config.has("CAL_ON_POL_1_CHAN_N_INTENSITY"))
   {
     SPDLOG_DEBUG("ska::pst::common::SquareWaveGenerator::configure CAL_ON_POL_1_CHAN_0_INTENSITY (expecting CAL_ON_POL_1_CHAN_N_INTENSITY)");
-    double chan0_intensity = config.get_double("CAL_ON_POL_1_CHAN_0_INTENSITY");
-    double chanN_intensity = config.get_double("CAL_ON_POL_1_CHAN_N_INTENSITY");
+    float chan0_intensity = config.get_float("CAL_ON_POL_1_CHAN_0_INTENSITY");
+    float chanN_intensity = config.get_float("CAL_ON_POL_1_CHAN_N_INTENSITY");
     set_on_intensity_pol(1, chan0_intensity, chanN_intensity);
   }
 
@@ -220,7 +225,7 @@ void ska::pst::common::SquareWaveGenerator::fill_data(char * buf, uint64_t size)
     uint32_t isamp = 0;
     while (isamp < nsamp_per_packet)
     {
-      double fractional_phase = fmod( (current_sample+isamp) * phase_per_sample, 1.0);
+      double fractional_phase = fmod( static_cast<double>(current_sample+isamp) * phase_per_sample, 1.0);
       uint32_t nsamp = 0;
 
       SPDLOG_TRACE("ska::pst::common::SquareWaveGenerator::fill_data with fractional_phase={}", fractional_phase);
@@ -232,7 +237,7 @@ void ska::pst::common::SquareWaveGenerator::fill_data(char * buf, uint64_t size)
         on_pulse = true;
 
         // number of samples until start of off-pulse region
-        nsamp = (duty_cycle - fractional_phase) / phase_per_sample + 1;
+        nsamp = static_cast<uint32_t>((duty_cycle - fractional_phase) / phase_per_sample) + 1;
 
         SPDLOG_TRACE("ska::pst::common::SquareWaveGenerator::fill_data with {} on-pulse samples", nsamp);
       }
@@ -240,7 +245,7 @@ void ska::pst::common::SquareWaveGenerator::fill_data(char * buf, uint64_t size)
       {
         dat_sequence.set_stddev(off_stddev);
         // number of samples until start of on-pulse region
-        nsamp = (1.0 - fractional_phase) / phase_per_sample + 1;
+        nsamp = static_cast<uint32_t>((1.0 - fractional_phase) / phase_per_sample) + 1;
 
         SPDLOG_TRACE("ska::pst::common::SquareWaveGenerator::fill_data with {} off-pulse samples", nsamp);
       }
@@ -251,7 +256,7 @@ void ska::pst::common::SquareWaveGenerator::fill_data(char * buf, uint64_t size)
         SPDLOG_TRACE("ska::pst::common::SquareWaveGenerator::fill_data truncate to {} samples", nsamp);
       }
 
-      assert (nsamp > 0);
+      assert(nsamp > 0);
 
       for (uint32_t ipol=0; ipol<npol; ipol++)
       {
@@ -263,14 +268,14 @@ void ska::pst::common::SquareWaveGenerator::fill_data(char * buf, uint64_t size)
           }
 
           uint32_t offset = (ipol*nchan_per_packet + ichan)*nbyte_stride + isamp*nbyte_per_sample;
-          dat_sequence.generate(buf + offset, nsamp * nbyte_per_sample);
+          dat_sequence.generate(buf + offset, nsamp * nbyte_per_sample); // NOLINT
         }
       }
 
       isamp += nsamp;
     }
 
-    buf += resolution;
+    buf += resolution; // NOLINT
 
     current_channel += nchan_per_packet;
     if (current_channel >= nchan)
@@ -290,7 +295,7 @@ auto ska::pst::common::SquareWaveGenerator::test_data(char * buf, uint64_t size)
 
   for (uint64_t i=0; i < size; i++)
   {
-    if (temp_data[i] != buf[i])
+    if (temp_data[i] != buf[i]) // NOLINT
     {
       return false;
     }

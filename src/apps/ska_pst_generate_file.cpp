@@ -207,7 +207,7 @@ auto main(int argc, char *argv[]) -> int
 
     for (unsigned iheap=0; iheap < num_heaps; iheap++)
     {
-      SPDLOG_INFO("ska_pst_generate_file generating {} of {} heaps", iheap, num_heaps);
+      SPDLOG_DEBUG("ska_pst_generate_file generating {} of {} heaps", iheap, num_heaps);
       ska::pst::common::SegmentProducer::Segment segment = generator.next_segment();
 
       ssize_t data_written = data_file_writer.write_data(segment.data.block, segment.data.size);
