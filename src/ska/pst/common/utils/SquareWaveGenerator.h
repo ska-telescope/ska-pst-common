@@ -36,7 +36,9 @@
 namespace ska::pst::common {
 
   /**
-   * @brief Generates and validates data using a NormalSequence
+   * @brief Generates and validates normally-distributed noise that is amplitude-modulated using a square wave
+   * with configurable modulation period, duty cycle, and on-pulse amplitude that may vary linearly
+   * as a function of frequency channel independently in each polarisation
    *
    */
   class SquareWaveGenerator : public GaussianNoiseGenerator
@@ -58,7 +60,30 @@ namespace ska::pst::common {
       /**
        * @brief Configure the streams written to data + weights
        *
-       * @param config contains the UTC_START and OFFSET keyword/value pairs required to configure the data+weights streams
+       * @param config contains the following parameters
+       * 
+       * - UTC_START used to seed the random number generator (mandatory)
+       * - CAL_DUTY_CYCLE the fraction of the square wave period in the on-pulse state (optional; must be greater than 0 and less than 1)
+       * - CALFREQ the frequency (inverse of the period) of the square wave (optional; must be greater than zero)
+       * 
+       * The following intensity configuration parameters are all optional and must be greater than zero:
+       * 
+       * - CAL_OFF_INTENSITY off-pulse intensity for all polarizations and frequency channels
+       * - CAL_ON_INTENSITY on-pulse intensity for all polarizations and frequency channels
+       * - CAL_ON_POL_0_INTENSITY on-pulse intensity for polarization 0 and all frequency channels
+       * - CAL_ON_POL_1_INTENSITY on-pulse intensity for polarization 1 and all frequency channels
+       * - CAL_ON_CHAN_0_INTENSITY on-pulse intensity for all polarizations at frequency channel zero
+       * - CAL_ON_CHAN_N_INTENSITY on-pulse intensity for all polarizations at the number of frequency channels
+       * - CAL_ON_POL_0_CHAN_0_INTENSITY on-pulse intensity for polarization 0 at frequency channel zero
+       * - CAL_ON_POL_0_CHAN_N_INTENSITY on-pulse intensity for polarization 0 at the number of frequency channels
+       * - CAL_ON_POL_1_CHAN_0_INTENSITY on-pulse intensity for polarization 1 at frequency channel zero
+       * - CAL_ON_POL_1_CHAN_N_INTENSITY on-pulse intensity for polarization 1 at the number of frequency channels
+       * 
+       * If any one of the above CHAN_0 intensities is specified, then the matching CHAN_N intensity must also be specified.
+       * Each CHAN_0,CHAN_N pair defines an intensity gradient that will be applied to all frequency channels.
+       * If any intensity (in any polarization or frequency channel) is multiply defined, then the intensity 
+       * configuration parameters included later in the above list will override any configuration set by parameters
+       * included earlier in the list.
        */
       void configure(const ska::pst::common::AsciiHeader& config) override;
 
@@ -134,13 +159,13 @@ namespace ska::pst::common {
       //! Standard deviations of on-pulse noise as a function of polarization and frequency
       std::vector<std::vector<float>> on_stddev;
 
-      //! Resize the on_stddevlitudes array
+      //! Resize the on_stddev array
       void resize_on_stddev(float set_stddev = 0.0);
 
-      //! Set all values in the on_stddevlitudes array to a single value
+      //! Set all values in the on_stddev array to a single value
       void set_on_stddev(float stddev);
 
-      //! Set all values in the on_stddevlitudes array for the specified polarization to a single value
+      //! Set all values in the on_stddev array for the specified polarization to a single value
       void set_on_stddev_pol(unsigned ipol, float stddev);
 
       //! Convert intensity to standard deviation

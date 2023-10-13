@@ -29,6 +29,7 @@
  */
 
 #include "ska/pst/common/utils/SquareWaveGenerator.h"
+#include "ska/pst/common/definitions.h"
 
 #include <spdlog/spdlog.h>
 #include <utility>
@@ -198,11 +199,10 @@ void ska::pst::common::SquareWaveGenerator::fill_data(char * buf, uint64_t size)
 {
   SPDLOG_TRACE("ska::pst::common::SquareWaveGenerator::fill_data buf={} size={}", reinterpret_cast<void*>(buf), size);
 
-  static constexpr uint32_t nbits_per_byte = 8;
   const uint32_t nsamp_per_packet = layout->get_samples_per_packet();
   const uint32_t nchan_per_packet = layout->get_nchan_per_packet();
-  const uint32_t nbyte_per_sample = ndim * nbit / nbits_per_byte;
-  const uint32_t nbyte_stride = nsamp_per_packet * nbyte_per_sample;;
+  const uint32_t nbyte_per_sample = ndim * nbit / ska::pst::common::bits_per_byte;
+  const uint32_t nbyte_stride = nsamp_per_packet * nbyte_per_sample;
   const uint32_t narray = nchan_per_packet * npol;
   const uint32_t resolution = narray * nbyte_stride;
   const uint32_t nblocks = size / resolution;
