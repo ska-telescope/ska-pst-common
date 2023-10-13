@@ -59,8 +59,8 @@ namespace ska::pst::common {
 
       /**
        * @brief Configure the streams written to data + weights
-       *
-       * @param config contains the following parameters
+       * 
+       * Parameters that configure this class include the following:
        * 
        * - UTC_START used to seed the random number generator (mandatory)
        * - CAL_DUTY_CYCLE the fraction of the square wave period in the on-pulse state (optional; must be greater than 0 and less than 1)
@@ -81,9 +81,10 @@ namespace ska::pst::common {
        * 
        * If any one of the above CHAN_0 intensities is specified, then the matching CHAN_N intensity must also be specified.
        * Each CHAN_0,CHAN_N pair defines an intensity gradient that will be applied to all frequency channels.
-       * If any intensity (in any polarization or frequency channel) is multiply defined, then the intensity 
-       * configuration parameters included later in the above list will override any configuration set by parameters
-       * included earlier in the list.
+       * If any intensity (in any polarization or frequency channel) is multiply defined, then the intensity configuration 
+       * parameters that appear later in the above list will override any configuration set by parameters listed earlier.
+       * 
+       * @param config configuration including any of the parameters specified in the above list
        */
       void configure(const ska::pst::common::AsciiHeader& config) override;
 
@@ -117,7 +118,7 @@ namespace ska::pst::common {
        * @brief Set the on-pulse intensity for all polarizations with a slope in frequency channel
        *
        * @param intensity0 the intensity for all polarizations at frequency channel zero
-       * @param intensityN the intensity for all polarizations at frequency channel N-1
+       * @param intensityN the intensity for all polarizations at frequency channel N
        *
        */
       void set_on_intensity(float intensity0, float intensityN);
@@ -134,7 +135,7 @@ namespace ska::pst::common {
        * @brief Set the on-pulse intensity for the specified polarization with a slope in frequency channel
        *
        * @param intensity0 the intensity for the specified polarization at frequency channel zero
-       * @param intensityN the intensity for the specified polarization at frequency channel N-1
+       * @param intensityN the intensity for the specified polarization at frequency channel N
        *
        */
       void set_on_intensity_pol(unsigned ipol, float intensity0, float intensityN);
