@@ -36,7 +36,7 @@
 #include "ska/pst/common/utils/SineWaveGenerator.h"
 
 ska::pst::common::SineWaveGenerator::SineWaveGenerator(std::shared_ptr<ska::pst::common::PacketLayout> _layout) :
-  PacketGenerator(std::move(_layout)), wts_sequence(unity_weight), scl_sequence(unity_scale)
+  ska::pst::common::ScaleWeightGenerator(std::move(_layout))
 {
 }
 
@@ -44,7 +44,7 @@ void ska::pst::common::SineWaveGenerator::configure(const ska::pst::common::Asci
 {
   SPDLOG_DEBUG("ska::pst::common::SineWaveGenerator::configure");
 
-  ska::pst::common::PacketGenerator::configure(config);
+  ska::pst::common::ScaleWeightGenerator::configure(config);
 
   // determine the amplitude when nbit == ?
   //  8 -> -127 to  127
@@ -94,16 +94,6 @@ void ska::pst::common::SineWaveGenerator::fill_data(char * buf, uint64_t size)
   }
 }
 
-void ska::pst::common::SineWaveGenerator::fill_weights(char * buf, uint64_t size)
-{
-  wts_sequence.generate_block(buf, size, wts_block_offset, wts_block_size, block_stride);
-}
-
-void ska::pst::common::SineWaveGenerator::fill_scales(char * buf, uint64_t size)
-{
-  scl_sequence.generate_block(buf, size, scl_block_offset, scl_block_size, block_stride);
-}
-
 auto ska::pst::common::SineWaveGenerator::test_data(char * buf, uint64_t size) -> bool
 {
   SPDLOG_DEBUG("ska::pst::common::SineWaveGenerator::test_data nbit={} buf={} size={}", nbit, reinterpret_cast<void *>(buf), size);
@@ -123,20 +113,9 @@ auto ska::pst::common::SineWaveGenerator::test_data(char * buf, uint64_t size) -
   }
 }
 
-auto ska::pst::common::SineWaveGenerator::test_weights(char * buf, uint64_t size) -> bool
-{
-  return wts_sequence.validate_block(buf, size, wts_block_offset, wts_block_size, block_stride);
-}
-
-auto ska::pst::common::SineWaveGenerator::test_scales(char * buf, uint64_t size) -> bool
-{
-  return scl_sequence.validate_block(buf, size, scl_block_offset, scl_block_size, block_stride);
-}
-
 void ska::pst::common::SineWaveGenerator::reset()
 {
+  ska::pst::common::ScaleWeightGenerator::reset();
   current_sample = 0;
   current_channel = 0;
-  wts_sequence.reset();
-  scl_sequence.reset();
 }

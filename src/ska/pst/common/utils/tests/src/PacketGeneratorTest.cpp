@@ -53,11 +53,12 @@ void PacketGeneratorTest::TearDown()
 
 TEST_F(PacketGeneratorTest, test_factory) // NOLINT
 {
-  EXPECT_EQ(ska::pst::common::get_supported_data_generators_list(), "Random, Sine, GaussianNoise");
+  EXPECT_EQ(ska::pst::common::get_supported_data_generators_list(), "Random, Sine, GaussianNoise, SquareWave");
   std::vector<std::string> data_generators = ska::pst::common::get_supported_data_generators();
   EXPECT_EQ(data_generators[0], "Random");
   EXPECT_EQ(data_generators[1], "Sine");
   EXPECT_EQ(data_generators[2], "GaussianNoise");
+  EXPECT_EQ(data_generators[3], "SquareWave");
 
   std::shared_ptr<TestPacketLayout> layout = std::make_shared<TestPacketLayout>();
   EXPECT_THROW(PacketGeneratorFactory("Garbage", layout), std::runtime_error); // NOLINT);
@@ -137,6 +138,6 @@ TEST_P(PacketGeneratorTest, test_generate_validate_blocks) // NOLINT
   EXPECT_TRUE(dg->test_scales(buffer_ptr, weights_scales_size));
 }
 
-INSTANTIATE_TEST_SUITE_P(SignalGenerators, PacketGeneratorTest, testing::Values("Random", "Sine", "GaussianNoise")); // NOLINT
+INSTANTIATE_TEST_SUITE_P(SignalGenerators, PacketGeneratorTest, testing::Values("Random", "Sine", "GaussianNoise", "SquareWave")); // NOLINT
 
 } // namespace ska::pst::common::test

@@ -169,23 +169,7 @@ namespace ska::pst::common {
       /**
        * @brief Return the value of a parameter
        *
-       * @tparam T type of the parameter to return [uint32_t, int32_t, uint64_t, int64_t, float, double]
-       * @param search_key keyword for the parameter
-       * @param val pointer to variable in which to return the value
-       */
-      template <typename T>
-      void get(const std::string &search_key, T * val)
-      {
-        std::string str_val = get_val(search_key);
-        std::istringstream iss(str_val);
-        iss.exceptions(std::ios::failbit);
-        iss >> *val;
-      }
-
-      /**
-       * @brief Return the value of a parameter with const
-       *
-       * @tparam T type of the parameter to return [uint32_t, int32_t, uint64_t, int64_t, float, double]
+       * @tparam T type of the parameter to return [any type with an extraction operator]
        * @param search_key keyword for the parameter
        * @param val pointer to variable in which to return the value
        */

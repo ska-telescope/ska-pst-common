@@ -173,7 +173,7 @@ html_context = {
     'logo': 'img/logo.png',
     'theme_logo_only' : True,
     'display_github': True, # Integrate GitHub
-    'github_repo': 'ska-pst-recv', #Repository name
+    'github_repo': 'ska-pst-common', #Repository name
     'github_version': 'master',  #Version
     'conf_py_path': '/docs/src/', # Path in the checkout to the docs root
 }

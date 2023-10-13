@@ -96,7 +96,7 @@ auto ska::pst::common::NormalSequence::get_val(std::normal_distribution<float>& 
 
 void ska::pst::common::NormalSequence::generate(char * buffer, uint64_t bufsz)
 {
-  SPDLOG_DEBUG("ska::pst::common::NormalSequence::generate generating {} bytes of normal data", bufsz);
+  SPDLOG_TRACE("ska::pst::common::NormalSequence::generate generating {} bytes of normal data", bufsz);
 
   if (red_stddev > 0)
   {

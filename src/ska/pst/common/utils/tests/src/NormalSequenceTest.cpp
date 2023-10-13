@@ -59,9 +59,9 @@ void NormalSequenceTest::TearDown()
 void NormalSequenceTest::compute_mean_stddev(const std::vector<float>& values, float * mean, float *stddev)
 {
   double sum = std::accumulate(values.begin(), values.end(), 0.0);
-  *mean = sum / values.size();
+  *mean = sum / values.size(); // NOLINT
   double sq_sum = std::inner_product(values.begin(), values.end(), values.begin(), 0.0);
-  *stddev = std::sqrt(sq_sum / values.size() - *mean * *mean);
+  *stddev = std::sqrt(sq_sum / values.size() - *mean * *mean); // NOLINT
 }
 
 void NormalSequenceTest::assert_mean_stddev(const std::vector<float>& values, float expected_mean, float expected_stddev)
@@ -115,7 +115,7 @@ TEST_F(NormalSequenceTest, test_generate_8bit) // NOLINT
   const unsigned buffer_nval = (buffer.size() * ska::pst::common::bits_per_byte) / nbit;
   for (unsigned i=0; i<buffer_nval; i++)
   {
-    unpacked[i] = static_cast<float>(buffer_int8[i]);
+    unpacked[i] = static_cast<float>(buffer_int8[i]); // NOLINT
   }
   assert_mean_stddev(unpacked, expected_mean, expected_stddev);
 }
@@ -140,7 +140,7 @@ TEST_F(NormalSequenceTest, test_generate_16bit) // NOLINT
   std::vector<float> unpacked(buffer_nval);
   for (unsigned i=0; i<buffer_nval; i++)
   {
-    unpacked[i] = static_cast<float>(buffer_int16[i]);
+    unpacked[i] = static_cast<float>(buffer_int16[i]); // NOLINT
   }
 
   // measure the mean and standard deviation of the generated timeseries
@@ -173,7 +173,7 @@ TEST_F(NormalSequenceTest, test_generate_red_noise) // NOLINT
   std::vector<float> unpacked(buffer_nval);
   for (unsigned i=0; i<buffer_nval; i++)
   {
-    unpacked[i] = static_cast<float>(buffer_int16[i]);
+    unpacked[i] = static_cast<float>(buffer_int16[i]); // NOLINT
   }
 
   float mean{0}, stddev{0};

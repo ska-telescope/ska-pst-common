@@ -18,9 +18,11 @@ set(public_headers
     PacketLayout.h
     RandomDataGenerator.h
     RandomSequence.h
+    ScaleWeightGenerator.h
     SegmentGenerator.h
     SegmentProducer.h
     SineWaveGenerator.h
+    SquareWaveGenerator.h
     Time.h
     Timer.h
     UniformSequence.h
@@ -43,8 +45,10 @@ set(sources
     src/PacketGeneratorFactory.cpp
     src/RandomDataGenerator.cpp
     src/RandomSequence.cpp
+    src/ScaleWeightGenerator.cpp
     src/SegmentGenerator.cpp
     src/SineWaveGenerator.cpp
+    src/SquareWaveGenerator.cpp
     src/Time.cpp
     src/Timer.cpp
     src/UniformSequence.cpp

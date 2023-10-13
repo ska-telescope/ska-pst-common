@@ -35,6 +35,13 @@ components.
   apps/index
 
 .. toctree::
+  :maxdepth: 2
+  :caption: Usage
+  :hidden:
+
+  usage/index
+
+.. toctree::
   :maxdepth: 3
   :caption: API
   :hidden:
