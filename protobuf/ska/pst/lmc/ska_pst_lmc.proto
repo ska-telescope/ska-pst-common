@@ -490,13 +490,13 @@ message DspDiskScanConfiguration {
 message StatScanConfiguration {
     // Execution block id. Used to group multiple scans together with an overall context.
     string execution_block_id   = 1;
-    // delay to wait between processing segements of statistics in milliseconds
+    // delay to wait between processing segements of statistics in milliseconds.
     uint32 processing_delay_ms  = 2;
-    // the requested number of temporal bins in integrated spectrograms
+    // the requested number of temporal bins in integrated spectrograms and timeseries.
     uint32 req_time_bins = 3;
-    // the requested number of spectral bins in integrated spectrograms
+    // the requested number of spectral bins in integrated spectrograms.
     uint32 req_freq_bins = 4;
-    // the requested number of bins in integrated histograms
+    // the requested number of bins in integrated histograms.
     uint32 num_rebin = 5;
 }
 
