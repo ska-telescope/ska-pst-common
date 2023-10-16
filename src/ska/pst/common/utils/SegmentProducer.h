@@ -39,7 +39,7 @@ namespace ska::pst::common {
    * @brief Interface for reading blocks of voltage data and weights
    *
    * This pure virtual base class implements an interface to data+weights that can be from any source,
-   * including file (see FileSegmentProducer), artificial signal generator (see SegmentGenerator) or ring buffer (in principal) 
+   * including file (see FileSegmentProducer), artificial signal generator (see SegmentGenerator) or ring buffer (in principal)
    */
   class SegmentProducer
   {
@@ -57,6 +57,10 @@ namespace ska::pst::common {
 
           //! Weights block
           BlockProducer::Block weights;
+
+          //! The offset, in bytes, of the data block, from the start of the stream
+          size_t get_obs_offset() const { return data.obs_offset; }
+
       };
 
       /**

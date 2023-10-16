@@ -53,13 +53,16 @@ namespace ska::pst::common {
       {
         public:
 
-          Block (char* _block=nullptr, size_t _size=0) : block(_block), size(_size) {}
+          Block (char* _block=nullptr, size_t _size=0, size_t _obs_offset=0) : block(_block), size(_size), obs_offset(_obs_offset) {}
 
           //! pointer to the block
           char* block;
 
           //! the size, in bytes, of the block
           size_t size;
+
+          //! the offset, in bytes from the first byte of data in this stream
+          size_t obs_offset;
       };
 
       /**
