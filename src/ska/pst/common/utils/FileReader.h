@@ -106,6 +106,13 @@ namespace ska::pst::common {
       std::uintmax_t get_file_size() { return file_size; };
 
       /**
+       * @brief Get the obs offset of the current file, 0 if it is not specified in the header.
+       *
+       * @return std::size_t the offset, in bytes, from the start of the data stream
+       */
+      std::size_t get_obs_offset() { return obs_offset; };
+
+      /**
        * @brief Set the file descriptor to the specified value
        *
        * @param _fd file descriptor to use to over-write the actual fd
@@ -129,6 +136,9 @@ namespace ska::pst::common {
 
       //! total size of the file
       std::uintmax_t file_size{0};
+
+      //! the offset, in bytes, from the start of the data stream
+      size_t obs_offset{0};
 
       //! total number of bytes read from file
       uint64_t bytes_read_from_file{0};
