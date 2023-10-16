@@ -487,7 +487,18 @@ message DspDiskScanConfiguration {
 }
 
 // Message used for the STAT.CORE scan configuration.
-message StatScanConfiguration {}
+message StatScanConfiguration {
+    // Execution block id. Used to group multiple scans together with an overall context.
+    string execution_block_id   = 1;
+    // delay to wait between processing segements of statistics in milliseconds
+    uint32 processing_delay_ms  = 2;
+    // the requested number of temporal bins in integrated spectrograms
+    uint32 req_time_bins = 3;
+    // the requested number of spectral bins in integrated spectrograms
+    uint32 req_freq_bins = 4;
+    // the requested number of bins in integrated histograms
+    uint32 num_rebin = 5;
+}
 
 // Message used in unit testing to stub
 // out the need for ska-pst-common to
@@ -770,19 +781,22 @@ message StatMonitorData {
     // Number of clipped input samples (maximum level) for each polarisation, dimension, and channel.
     repeated uint32 num_clipped_samples_spectrum = 15;
 
-    // Number of clipped input samples (maximum level) for each polarisation and dimension.
+    // Number of clipped input samples (maximum level) for each polarisation and dimension, averaged over all channels.
     repeated uint32 num_clipped_samples = 16;
 
+    // Number of clipped input samples (maximum level) for each polarisation and dimension, averaged over all channels, except those flagged for RFI.
+    repeated uint32 num_clipped_samples_masked = 17;
+
     // Spectrogram of the data for each polarisation, rebinned in frequency to NCHAN_DS bins and in time to NDAT_DS bins.
-    repeated float spectrogram = 17;
+    repeated float spectrogram = 18;
 
     // Time series of the data for each polarisation, rebinned in time to NDAT_DS bins, averaged over all frequency channels.
     // This includes max, min, and mean of the power in each bin.
-    repeated float timeseries = 18;
+    repeated float timeseries = 19;
 
     // Time series of the data for each polarisation, rebinned in time to NDAT_DS bins, averaged over all frequency channels,
     // except those flagged by RFI. This includes max, min, and mean of the power in each bin.
-    repeated float timeseries_masked = 19;
+    repeated float timeseries_masked = 20;
 }
 
 // Message used in unit testing to stub
