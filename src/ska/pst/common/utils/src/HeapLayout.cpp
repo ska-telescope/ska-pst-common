@@ -248,4 +248,9 @@ void ska::pst::common::HeapLayout::initialise(ska::pst::common::AsciiHeader& dat
 
   weights_config.set("PACKET_WEIGHTS_SIZE",packet_layout->get_packet_weights_size());
   weights_config.set("PACKET_SCALES_SIZE",packet_layout->get_packet_scales_size());
+
+  // these parameters help dspsr to compute the number of bytes per number of samples
+  weights_config.set("BLOCK_HEADER_BYTES",packet_layout->get_packet_scales_size()*packets_per_heap);
+  weights_config.set("BLOCK_DATA_BYTES",packet_layout->get_packet_weights_size()*packets_per_heap);
 }
+
