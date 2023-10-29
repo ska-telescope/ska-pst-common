@@ -78,8 +78,8 @@ TEST_P(SegmentGeneratorTest, test_configure) // NOLINT
     }
   }
 
-  // delete additional parameters initialised by the SegmentGenerator if not in the input weights_header
-  for (auto param: {"RESOLUTION", "PACKET_WEIGHTS_SIZE", "PACKET_SCALES_SIZE"})
+  // delete additional parameters initialised by the SegmentGenerator, which are not in the input weights_header
+  for (auto param: {"RESOLUTION", "PACKET_WEIGHTS_SIZE", "PACKET_SCALES_SIZE", "BLOCK_HEADER_BYTES", "BLOCK_DATA_BYTES"})
   {
     if (!weights_header.has(param))
     {
