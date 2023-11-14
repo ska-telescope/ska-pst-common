@@ -354,7 +354,7 @@ void report_extra(const T& more, const T& less)
   }
 }
 
-bool ska::pst::common::operator==(const AsciiHeader& A, const AsciiHeader& B)
+auto ska::pst::common::operator==(const AsciiHeader& A, const AsciiHeader& B) -> bool
 {
   SPDLOG_TRACE("ska::pst::common::operator==(AsciiHeader A.size={} B.size={})", A.params.size(), B.params.size());
 

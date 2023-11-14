@@ -34,5 +34,5 @@ auto ska::pst::common::LmcServiceException::as_grpc_status() -> grpc::Status {
     ska::pst::lmc::Status status;
     status.set_code(_error_code);
     status.set_message(_msg);
-    return grpc::Status(_status_code, status.message(), status.SerializeAsString());
+    return { _status_code, status.message(), status.SerializeAsString() };
 }
