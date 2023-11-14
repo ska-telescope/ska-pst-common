@@ -74,11 +74,11 @@ class TestApplicationManager : public ska::pst::common::ApplicationManager
           }
         });
       ON_CALL(*this, perform_scan).WillByDefault([this]() {
-          if(force_error)
+          if(force_scan_error)
           {
             // Mock RuntimeError state
             set_state(RuntimeError);
-            throw std::runtime_error("ska::pst::common::test::TestApplicationManager::perform_scan force_error=true");
+            throw std::runtime_error("ska::pst::common::test::TestApplicationManager::perform_scan force_scan_error=true");
           }
         });
       ON_CALL(*this, perform_start_scan).WillByDefault([this]() {
@@ -115,6 +115,7 @@ class TestApplicationManager : public ska::pst::common::ApplicationManager
         });
       ON_CALL(*this, perform_reset).WillByDefault([this]() {
           force_error=false;
+          force_scan_error=false;
         });
     }
     ~TestApplicationManager() = default;
@@ -138,6 +139,7 @@ class TestApplicationManager : public ska::pst::common::ApplicationManager
     void validate_start_scan(const ska::pst::common::AsciiHeader& config) override;
 
     bool force_error=false;
+    bool force_scan_error=false;
   private:
 };
 

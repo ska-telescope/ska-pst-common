@@ -127,7 +127,7 @@ void ska::pst::common::ApplicationManager::main()
           SPDLOG_TRACE("{} {} {} perform_start_scan done", method_name, entity, get_name(cmd));
           SPDLOG_TRACE("{} {} {} set_state(Scanning)", method_name, entity, get_name(cmd));
           set_state(Scanning);
-          scan_thread = std::make_unique<std::thread>(std::thread(&ska::pst::common::ApplicationManager::perform_scan, this));
+          scan_thread = std::make_unique<std::thread>(std::thread(&ska::pst::common::ApplicationManager::perform_scan_safely, this));
           SPDLOG_TRACE("{} {} [{}] state={}", method_name, entity, get_name(cmd), state_names[get_state()]);
           break;
 
@@ -165,10 +165,16 @@ void ska::pst::common::ApplicationManager::main()
           break;
 
         case Reset:
-          SPDLOG_TRACE("{} {} {} perform_configure_beam", method_name, entity, get_name(cmd));
+          SPDLOG_TRACE("{} {} {} perform_reset", method_name, entity, get_name(cmd));
           perform_reset();
-          SPDLOG_TRACE("{} {} {} perform_configure_beam done", method_name, entity, get_name(cmd));
-          SPDLOG_TRACE("{} {} {} set_state(BeamConfigured)", method_name, entity, get_name(cmd));
+          SPDLOG_TRACE("{} {} {} perform_reset done", method_name, entity, get_name(cmd));
+          if (scan_thread)
+          {
+            SPDLOG_TRACE("{} {} {} joining scan_thread", method_name, entity, get_name(cmd));
+            scan_thread->join();
+            scan_thread = nullptr;
+          }
+          SPDLOG_TRACE("{} {} {} set_state(Idle)", method_name, entity, get_name(cmd));
           set_state(Idle);
           SPDLOG_TRACE("{} {} [{}] state={}", method_name, entity, get_name(cmd), state_names[get_state()]);
           break;
@@ -177,6 +183,12 @@ void ska::pst::common::ApplicationManager::main()
           SPDLOG_TRACE("{} {} {} perform_terminate", method_name, entity, get_name(cmd));
           perform_terminate();
           SPDLOG_TRACE("{} {} {} perform_terminate done", method_name, entity, get_name(cmd));
+          if (scan_thread)
+          {
+            SPDLOG_TRACE("{} {} {} joining scan_thread", method_name, entity, get_name(cmd));
+            scan_thread->join();
+            scan_thread = nullptr;
+          }
           SPDLOG_TRACE("{} {} {} set_state(Unknown)", method_name, entity, get_name(cmd));
           set_state(Unknown);
           SPDLOG_TRACE("{} {} [{}] state={}", method_name, entity, get_name(cmd), state_names[get_state()]);
@@ -204,6 +216,14 @@ void ska::pst::common::ApplicationManager::main()
       go_to_runtime_error(std::current_exception());
       SPDLOG_DEBUG("{} {} [{}] state={}", method_name, entity, get_name(cmd), state_names[get_state()]);
     }
+  }
+
+  // ensure the scan_thread is joined on main thread exit
+  if (scan_thread)
+  {
+    SPDLOG_WARN("{} {} unexpectedly joining scan_thread on main thread exit", method_name, entity);
+    scan_thread->join();
+    scan_thread = nullptr;
   }
 }
 
@@ -361,4 +381,20 @@ auto ska::pst::common::ApplicationManager::is_scan_configured() const -> bool
 auto ska::pst::common::ApplicationManager::is_scanning() const -> bool
 {
   return get_state() == Scanning;
+}
+
+void ska::pst::common::ApplicationManager::perform_scan_safely()
+{
+  SPDLOG_DEBUG("ska::pst::common::ApplicationManager::perform_scan_safely executing perform_scan with try/catch protection");
+  try
+  {
+    perform_scan();
+    SPDLOG_DEBUG("ska::pst::common::ApplicationManager::perform_scan_safely perform_scan returned naturally");
+  }
+  catch (std::exception& exc)
+  {
+    SPDLOG_WARN("ska::pst::common::ApplicationManager::perform_scan_safely exception during perform_scan: {}", exc.what());
+    go_to_runtime_error(std::current_exception());
+    SPDLOG_DEBUG("ska::pst::common::ApplicationManager::perform_scan_safely transitioned to runtime_error");
+  }
 }
