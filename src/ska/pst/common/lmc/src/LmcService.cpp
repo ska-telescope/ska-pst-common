@@ -148,7 +148,7 @@ auto ska::pst::common::LmcService::configure_beam(
             ska::pst::lmc::Status status;
             status.set_code(ska::pst::lmc::ErrorCode::CONFIGURED_FOR_BEAM_ALREADY);
             status.set_message(_service_name + " beam configured already. Beam configuation needs to be deconfigured before reconfiguring.");
-            return grpc::Status(grpc::StatusCode::FAILED_PRECONDITION, status.message(), status.SerializeAsString());
+            return { grpc::StatusCode::FAILED_PRECONDITION, status.message(), status.SerializeAsString() };
         }
 
         if (_state != ska::pst::lmc::ObsState::EMPTY) {
@@ -162,7 +162,7 @@ auto ska::pst::common::LmcService::configure_beam(
             ss << _service_name << " is not in EMPTY state. Currently in " << curr_state_name << " state.";
 
             status.set_message(ss.str());
-            return grpc::Status(grpc::StatusCode::FAILED_PRECONDITION, status.message(), status.SerializeAsString());
+            return { grpc::StatusCode::FAILED_PRECONDITION, status.message(), status.SerializeAsString() };
         }
     }
 
@@ -183,7 +183,7 @@ auto ska::pst::common::LmcService::configure_beam(
         ska::pst::lmc::Status status;
         status.set_code(ska::pst::lmc::ErrorCode::INVALID_REQUEST);
         status.set_message(error_message);
-        return grpc::Status(grpc::StatusCode::FAILED_PRECONDITION, status.message(), status.SerializeAsString());
+        return { grpc::StatusCode::FAILED_PRECONDITION, status.message(), status.SerializeAsString() };
     } catch (std::exception& exc) {
         // handle exception
         std::string error_message = "Error in configuring beam: " + std::string(exc.what());
@@ -192,7 +192,7 @@ auto ska::pst::common::LmcService::configure_beam(
         status.set_code(ska::pst::lmc::ErrorCode::INTERNAL_ERROR);
         status.set_message(error_message);
         set_state(ska::pst::lmc::ObsState::FAULT);
-        return grpc::Status(grpc::StatusCode::INTERNAL, status.message(), status.SerializeAsString());
+        return { grpc::StatusCode::INTERNAL, status.message(), status.SerializeAsString() };
     }
 }
 
@@ -211,7 +211,7 @@ auto ska::pst::common::LmcService::deconfigure_beam(
         ska::pst::lmc::Status status;
         status.set_code(ska::pst::lmc::ErrorCode::NOT_CONFIGURED_FOR_BEAM);
         status.set_message("No " + _service_name + " beam configured.");
-        return grpc::Status(grpc::StatusCode::FAILED_PRECONDITION, status.message(), status.SerializeAsString());
+        return { grpc::StatusCode::FAILED_PRECONDITION, status.message(), status.SerializeAsString() };
     }
 
 
@@ -229,7 +229,7 @@ auto ska::pst::common::LmcService::deconfigure_beam(
         status.set_code(ska::pst::lmc::ErrorCode::INTERNAL_ERROR);
         status.set_message(error_message);
         set_state(ska::pst::lmc::ObsState::FAULT);
-        return grpc::Status(grpc::StatusCode::INTERNAL, status.message(), status.SerializeAsString());
+        return { grpc::StatusCode::INTERNAL, status.message(), status.SerializeAsString() };
     }
 }
 
@@ -246,7 +246,7 @@ auto ska::pst::common::LmcService::get_beam_configuration(
         ska::pst::lmc::Status status;
         status.set_code(ska::pst::lmc::ErrorCode::NOT_CONFIGURED_FOR_BEAM);
         status.set_message("No " + _service_name + " beam configured.");
-        return grpc::Status(grpc::StatusCode::FAILED_PRECONDITION, status.message(), status.SerializeAsString());
+        return { grpc::StatusCode::FAILED_PRECONDITION, status.message(), status.SerializeAsString() };
     }
 
     try {
@@ -259,7 +259,7 @@ auto ska::pst::common::LmcService::get_beam_configuration(
         ska::pst::lmc::Status status;
         status.set_code(ska::pst::lmc::ErrorCode::INTERNAL_ERROR);
         status.set_message("Error in getting beam configuration.");
-        return grpc::Status(grpc::StatusCode::INTERNAL, status.message(), status.SerializeAsString());
+        return { grpc::StatusCode::INTERNAL, status.message(), status.SerializeAsString() };
     }
 }
 
@@ -276,7 +276,7 @@ auto ska::pst::common::LmcService::configure_scan(
             ska::pst::lmc::Status status;
             status.set_code(ska::pst::lmc::ErrorCode::CONFIGURED_FOR_SCAN_ALREADY);
             status.set_message(_service_name + " already configured for scan. Scan needs to be deconfigured before reconfiguring.");
-            return grpc::Status(grpc::StatusCode::FAILED_PRECONDITION, status.message(), status.SerializeAsString());
+            return { grpc::StatusCode::FAILED_PRECONDITION, status.message(), status.SerializeAsString() };
         }
 
         // ensure in IDLE state
@@ -290,7 +290,7 @@ auto ska::pst::common::LmcService::configure_scan(
             ss << _service_name << " is not in IDLE state. Currently in " << curr_state_name << " state.";
 
             status.set_message(ss.str());
-            return grpc::Status(grpc::StatusCode::FAILED_PRECONDITION, status.message(), status.SerializeAsString());
+            return { grpc::StatusCode::FAILED_PRECONDITION, status.message(), status.SerializeAsString() };
         }
     }
 
@@ -309,7 +309,7 @@ auto ska::pst::common::LmcService::configure_scan(
         ska::pst::lmc::Status status;
         status.set_code(ska::pst::lmc::ErrorCode::INVALID_REQUEST);
         status.set_message(error_message);
-        return grpc::Status(grpc::StatusCode::FAILED_PRECONDITION, status.message(), status.SerializeAsString());
+        return { grpc::StatusCode::FAILED_PRECONDITION, status.message(), status.SerializeAsString() };
     } catch (std::exception& exc) {
         // handle exception
         std::string error_message = "Error in configuring scan: " + std::string(exc.what());
@@ -318,7 +318,7 @@ auto ska::pst::common::LmcService::configure_scan(
         status.set_code(ska::pst::lmc::ErrorCode::INTERNAL_ERROR);
         status.set_message(error_message);
         set_state(ska::pst::lmc::ObsState::FAULT);
-        return grpc::Status(grpc::StatusCode::INTERNAL, status.message(), status.SerializeAsString());
+        return { grpc::StatusCode::INTERNAL, status.message(), status.SerializeAsString() };
     }
     return grpc::Status::OK;
 }
@@ -340,7 +340,7 @@ auto ska::pst::common::LmcService::deconfigure_scan(
         ss << _service_name << " is not in READY state. Currently in " << curr_state_name << " state.";
 
         status.set_message(ss.str());
-        return grpc::Status(grpc::StatusCode::FAILED_PRECONDITION, status.message(), status.SerializeAsString());
+        return { grpc::StatusCode::FAILED_PRECONDITION, status.message(), status.SerializeAsString() };
     }
 
     base_error_message = "Error in deconfiguring scan";
@@ -357,7 +357,7 @@ auto ska::pst::common::LmcService::deconfigure_scan(
         status.set_code(ska::pst::lmc::ErrorCode::INTERNAL_ERROR);
         status.set_message(error_message);
         set_state(ska::pst::lmc::ObsState::FAULT);
-        return grpc::Status(grpc::StatusCode::INTERNAL, status.message(), status.SerializeAsString());
+        return { grpc::StatusCode::INTERNAL, status.message(), status.SerializeAsString() };
     }
 }
 
@@ -380,7 +380,7 @@ auto ska::pst::common::LmcService::get_scan_configuration(
         ss << _service_name << " is not in a configured state. Currently in " << curr_state_name << " state.";
 
         status.set_message(ss.str());
-        return grpc::Status(grpc::StatusCode::FAILED_PRECONDITION, status.message(), status.SerializeAsString());
+        return { grpc::StatusCode::FAILED_PRECONDITION, status.message(), status.SerializeAsString() };
     }
 
     try {
@@ -390,7 +390,7 @@ auto ska::pst::common::LmcService::get_scan_configuration(
         ska::pst::lmc::Status status;
         status.set_code(ska::pst::lmc::ErrorCode::INTERNAL_ERROR);
         status.set_message("Error in configuring beam.");
-        return grpc::Status(grpc::StatusCode::INTERNAL, status.message(), status.SerializeAsString());
+        return { grpc::StatusCode::INTERNAL, status.message(), status.SerializeAsString() };
     }
 
     return grpc::Status::OK;
@@ -408,7 +408,7 @@ auto ska::pst::common::LmcService::start_scan(
         ska::pst::lmc::Status status;
         status.set_code(ska::pst::lmc::ErrorCode::ALREADY_SCANNING);
         status.set_message(_service_name + " is already scanning.");
-        return grpc::Status(grpc::StatusCode::FAILED_PRECONDITION, status.message(), status.SerializeAsString());
+        return { grpc::StatusCode::FAILED_PRECONDITION, status.message(), status.SerializeAsString() };
     }
     if (_state != ska::pst::lmc::ObsState::READY)
     {
@@ -421,7 +421,7 @@ auto ska::pst::common::LmcService::start_scan(
         ss << _service_name << " is not in READY state. Currently in " << curr_state_name << " state.";
 
         status.set_message(ss.str());
-        return grpc::Status(grpc::StatusCode::FAILED_PRECONDITION, status.message(), status.SerializeAsString());
+        return { grpc::StatusCode::FAILED_PRECONDITION, status.message(), status.SerializeAsString() };
     }
 
     base_error_message = "Error in starting scan";
@@ -437,7 +437,7 @@ auto ska::pst::common::LmcService::start_scan(
         ska::pst::lmc::Status status;
         status.set_code(ska::pst::lmc::ErrorCode::INVALID_REQUEST);
         status.set_message(error_message);
-        return grpc::Status(grpc::StatusCode::FAILED_PRECONDITION, status.message(), status.SerializeAsString());
+        return { grpc::StatusCode::FAILED_PRECONDITION, status.message(), status.SerializeAsString() };
     } catch (std::exception& exc) {
         // handle exception
         std::string error_message = base_error_message + ": " + std::string(exc.what());
@@ -446,7 +446,7 @@ auto ska::pst::common::LmcService::start_scan(
         status.set_code(ska::pst::lmc::ErrorCode::INTERNAL_ERROR);
         status.set_message(error_message);
         set_state(ska::pst::lmc::ObsState::FAULT);
-        return grpc::Status(grpc::StatusCode::INTERNAL, status.message(), status.SerializeAsString());
+        return { grpc::StatusCode::INTERNAL, status.message(), status.SerializeAsString() };
     }
 }
 
@@ -467,7 +467,7 @@ auto ska::pst::common::LmcService::stop_scan(
         ss << _service_name << " is not in SCANNING state. Currently in " << curr_state_name << " state.";
         status.set_message(ss.str());
 
-        return grpc::Status(grpc::StatusCode::FAILED_PRECONDITION, status.message(), status.SerializeAsString());
+        return { grpc::StatusCode::FAILED_PRECONDITION, status.message(), status.SerializeAsString() };
     }
 
     base_error_message = "Error in stopping scan";
@@ -484,7 +484,7 @@ auto ska::pst::common::LmcService::stop_scan(
         status.set_code(ska::pst::lmc::ErrorCode::INTERNAL_ERROR);
         status.set_message("Error in stopping scan request. Error: " + e);
         set_state(ska::pst::lmc::ObsState::FAULT);
-        return grpc::Status(grpc::StatusCode::INTERNAL, status.message(), status.SerializeAsString());
+        return { grpc::StatusCode::INTERNAL, status.message(), status.SerializeAsString() };
     }
 }
 
@@ -515,7 +515,7 @@ auto ska::pst::common::LmcService::monitor(
         ss << _service_name << " is not in SCANNING state. Currently in " << curr_state_name << " state.";
 
         status.set_message(ss.str());
-        return grpc::Status(grpc::StatusCode::FAILED_PRECONDITION, status.message(), status.SerializeAsString());
+        return { grpc::StatusCode::FAILED_PRECONDITION, status.message(), status.SerializeAsString() };
     }
 
     const auto &delay = std::chrono::milliseconds(request->polling_rate());
@@ -581,7 +581,7 @@ auto ska::pst::common::LmcService::abort(
         ss << _service_name << " is not in an abortable state. Currently in " << curr_state_name << " state.";
 
         status.set_message(ss.str());
-        return grpc::Status(grpc::StatusCode::FAILED_PRECONDITION, status.message(), status.SerializeAsString());
+        return { grpc::StatusCode::FAILED_PRECONDITION, status.message(), status.SerializeAsString() };
     }
 
     try {
@@ -596,7 +596,7 @@ auto ska::pst::common::LmcService::abort(
         ska::pst::lmc::Status status;
         status.set_code(ska::pst::lmc::ErrorCode::INTERNAL_ERROR);
         status.set_message("Error in aborting.");
-        return grpc::Status(grpc::StatusCode::INTERNAL, status.message(), status.SerializeAsString());
+        return { grpc::StatusCode::INTERNAL, status.message(), status.SerializeAsString() };
     }
 }
 
@@ -623,7 +623,7 @@ auto ska::pst::common::LmcService::reset(
         ska::pst::lmc::Status status;
         status.set_code(ska::pst::lmc::ErrorCode::INTERNAL_ERROR);
         status.set_message("Error in resetting.");
-        return grpc::Status(grpc::StatusCode::INTERNAL, status.message(), status.SerializeAsString());
+        return { grpc::StatusCode::INTERNAL, status.message(), status.SerializeAsString() };
     }
 }
 
@@ -649,7 +649,7 @@ auto ska::pst::common::LmcService::restart(
         ss << _service_name << " is not in ABORTED or FAULT state. Currently in " << curr_state_name << " state.";
 
         status.set_message(ss.str());
-        return grpc::Status(grpc::StatusCode::FAILED_PRECONDITION, status.message(), status.SerializeAsString());
+        return { grpc::StatusCode::FAILED_PRECONDITION, status.message(), status.SerializeAsString() };
     }
 
     try {
@@ -668,7 +668,7 @@ auto ska::pst::common::LmcService::restart(
         ska::pst::lmc::Status status;
         status.set_code(ska::pst::lmc::ErrorCode::INTERNAL_ERROR);
         status.set_message("Error in resetting.");
-        return grpc::Status(grpc::StatusCode::INTERNAL, status.message(), status.SerializeAsString());
+        return { grpc::StatusCode::INTERNAL, status.message(), status.SerializeAsString() };
     }
 }
 
@@ -735,7 +735,7 @@ auto ska::pst::common::LmcService::get_log_level(
         ska::pst::lmc::Status status;
         status.set_code(ska::pst::lmc::ErrorCode::INTERNAL_ERROR);
         status.set_message("Error getting the log level");
-        return grpc::Status(grpc::StatusCode::INTERNAL, status.message(), status.SerializeAsString());
+        return { grpc::StatusCode::INTERNAL, status.message(), status.SerializeAsString() };
     }
 
     return grpc::Status::OK;
@@ -764,7 +764,7 @@ auto ska::pst::common::LmcService::set_log_level(
         ska::pst::lmc::Status status;
         status.set_code(ska::pst::lmc::ErrorCode::INTERNAL_ERROR);
         status.set_message("Error setting the log level");
-        return grpc::Status(grpc::StatusCode::INTERNAL, status.message(), status.SerializeAsString());
+        return { grpc::StatusCode::INTERNAL, status.message(), status.SerializeAsString() };
     }
 
     return grpc::Status::OK;

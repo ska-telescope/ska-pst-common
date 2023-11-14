@@ -171,6 +171,16 @@ namespace ska::pst::common
       virtual void perform_scan() = 0;
 
       /**
+       * @brief Calls the perform_scan method wrapped in a try/catch statement for a std::exception.
+       * This method is run by the \ref main in a std::thread, and so the try/catch wrapper ensures
+       * that any std::exception thrown by the child class' perform_scan method is caught and used to transition
+       * to the RuntimeError state. Note that the child class can additionally wrap its' perform_scan method
+       * in a try/catch statement, allowing it to perform any necessary releasing of resources.
+       *
+       */
+      void perform_scan_safely();
+
+      /**
        * @brief Scan callback that is called by \ref main to transition the state from StartingScan to Scanning.
        * This method is expected to block until the scan is complete.
        *

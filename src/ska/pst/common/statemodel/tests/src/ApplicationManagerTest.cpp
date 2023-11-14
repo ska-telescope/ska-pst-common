@@ -35,6 +35,7 @@
 
 #include "ska/pst/common/utils/AsciiHeader.h"
 #include "ska/pst/common/utils/Timer.h"
+#include "ska/pst/common/definitions.h"
 #include "ska/pst/common/testutils/GtestMain.h"
 #include "ska/pst/common/statemodel/tests/ApplicationManagerTest.h"
 
@@ -397,6 +398,50 @@ namespace ska::pst::common::test
     new_startscan_config = _applicationmanager->get_startscan_configuration();
     ASSERT_EQ(startscan_config.get_val("startscan_config-FOO"), new_startscan_config.get_val("startscan_config-FOO"));
 
+  }
+
+  TEST_F(ApplicationManagerTest, test_exception_during_perform_scan) // NOLINT
+  {
+    std::string test_f;
+    test_f="ska::pst::common::test::ApplicationManagerTest::test_reset";
+
+    SPDLOG_TRACE(test_f);
+    beam_config.set_val("beam_config-FOO", "BAR");
+    scan_config.set_val("scan_config-FOO", "BAR");
+    startscan_config.set_val("startscan_config-FOO", "BAR");
+
+    log_state_and_command(_applicationmanager, test_f +" configure_beam"); // NOLINT
+    EXPECT_CALL(*_applicationmanager, perform_configure_beam());
+    _applicationmanager->configure_beam(beam_config);
+
+
+    log_state_and_command(_applicationmanager, test_f +" configure_scan"); // NOLINT
+    EXPECT_CALL(*_applicationmanager, perform_configure_scan());
+    _applicationmanager->configure_scan(scan_config);
+
+    // Trigger error in perform_scan
+    _applicationmanager->force_scan_error=true;
+
+    log_state_and_command(_applicationmanager, test_f +" start_scan"); // NOLINT
+    EXPECT_CALL(*_applicationmanager, perform_start_scan());
+    EXPECT_CALL(*_applicationmanager, perform_scan());
+    _applicationmanager->start_scan(startscan_config);
+
+    usleep(ska::pst::common::microseconds_per_decisecond);
+
+    // ensure that state has been set to RuntimeError
+    ASSERT_EQ(RuntimeError, _applicationmanager->get_state());
+
+    // additionally assert that perform_scan does throw a runtime_error
+    EXPECT_CALL(*_applicationmanager, perform_scan());
+    ASSERT_THROW(_applicationmanager->perform_scan(),std::runtime_error); // NOLINT
+
+    EXPECT_CALL(*_applicationmanager, perform_reset());
+    _applicationmanager->reset();
+    ASSERT_EQ(Idle, _applicationmanager->get_state());
+    ASSERT_FALSE(_applicationmanager->is_beam_configured());
+    ASSERT_FALSE(_applicationmanager->is_scan_configured());
+    ASSERT_FALSE(_applicationmanager->is_scanning());
   }
 
 } // namespace ska::pst::common::test
