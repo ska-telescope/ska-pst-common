@@ -48,7 +48,7 @@ Example data_config.txt ::
     BW            3.7037 # MHz
     TSAMP         25.92  # microseconds
 
-Example data_config.txt ::
+Example weights_config.txt ::
 
     HDR_VERSION   1.0
 
